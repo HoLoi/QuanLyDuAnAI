@@ -12,7 +12,7 @@ using QuanLyDuAn.Data;
 namespace QuanLyDuAn.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260326183144_Init")]
+    [Migration("20260327062237_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -231,33 +231,52 @@ namespace QuanLyDuAn.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaData"));
 
-                    b.Property<decimal?>("ChiPhiThucTe")
+                    b.Property<decimal?>("ChiPhiDuKien")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("DoPhucTap")
-                        .HasColumnType("int");
+                    b.Property<decimal?>("ChiPhiThucTe")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("MaCongViec")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SoCongViecPhuThuoc")
+                    b.Property<int>("MaDuAn")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SoNgayTre")
+                    b.Property<string>("NguyenNhanChinh")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("SoLanDelay")
                         .HasColumnType("int");
 
-                    b.Property<int?>("SoNhanVien")
+                    b.Property<int?>("SoLanThayDoiNhanSu")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoNgayDuKienCV")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoNgayThucTeCV")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoNgayTreTienDo")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoNhanVienDuAn")
                         .HasColumnType("int");
 
                     b.Property<double?>("TongGioLam")
                         .HasColumnType("float");
 
                     b.Property<string>("TrangThaiCuoi")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("MaData");
 
                     b.HasIndex("MaCongViec");
+
+                    b.HasIndex("MaDuAn");
 
                     b.ToTable("AI_DATASET", (string)null);
                 });
@@ -661,16 +680,16 @@ namespace QuanLyDuAn.Migrations
                     b.Property<int>("MaDuAn")
                         .HasColumnType("int");
 
+                    b.Property<int>("MaNguoiDanhGia")
+                        .HasColumnType("int")
+                        .HasColumnName("MaNguoiDanhGia");
+
                     b.Property<int>("MaNhanVien")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("NgayDanhGiaNv")
                         .HasColumnType("datetime2")
                         .HasColumnName("NgayDanhGiaNV");
-
-                    b.Property<int>("NhaMaNhanVien")
-                        .HasColumnType("int")
-                        .HasColumnName("NHA_MaNhanVien");
 
                     b.Property<string>("XepLoai")
                         .HasColumnType("nvarchar(max)");
@@ -679,9 +698,9 @@ namespace QuanLyDuAn.Migrations
 
                     b.HasIndex("MaDuAn");
 
-                    b.HasIndex("MaNhanVien");
+                    b.HasIndex("MaNguoiDanhGia");
 
-                    b.HasIndex("NhaMaNhanVien");
+                    b.HasIndex("MaNhanVien");
 
                     b.ToTable("DANH_GIA_NHAN_VIEN", (string)null);
                 });
@@ -1373,6 +1392,12 @@ namespace QuanLyDuAn.Migrations
                         .HasForeignKey("MaCongViec")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("QuanLyDuAn.Models.DuAn", null)
+                        .WithMany()
+                        .HasForeignKey("MaDuAn")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.AiKetQua", b =>
@@ -1532,13 +1557,13 @@ namespace QuanLyDuAn.Migrations
 
                     b.HasOne("QuanLyDuAn.Models.NhanVien", null)
                         .WithMany()
-                        .HasForeignKey("MaNhanVien")
+                        .HasForeignKey("MaNguoiDanhGia")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("QuanLyDuAn.Models.NhanVien", null)
                         .WithMany()
-                        .HasForeignKey("NhaMaNhanVien")
+                        .HasForeignKey("MaNhanVien")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

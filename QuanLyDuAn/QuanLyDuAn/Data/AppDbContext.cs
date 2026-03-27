@@ -240,11 +240,11 @@ namespace QuanLyDuAn.Data
             {
                 entity.ToTable("DANH_GIA_NHAN_VIEN");
                 entity.HasKey(x => x.MaDanhGiaNhanVien);
-                entity.Property(x => x.NhaMaNhanVien).HasColumnName("NHA_MaNhanVien");
+                entity.Property(x => x.MaNguoiDanhGia).HasColumnName("MaNguoiDanhGia");
                 entity.Property(x => x.DiemTongDanhGiaNv).HasColumnName("DiemTongDanhGiaNV");
                 entity.Property(x => x.NgayDanhGiaNv).HasColumnName("NgayDanhGiaNV");
                 entity.HasOne<NhanVien>().WithMany().HasForeignKey(x => x.MaNhanVien).OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne<NhanVien>().WithMany().HasForeignKey(x => x.NhaMaNhanVien).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<NhanVien>().WithMany().HasForeignKey(x => x.MaNguoiDanhGia).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<DuAn>().WithMany().HasForeignKey(x => x.MaDuAn).OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -334,6 +334,10 @@ namespace QuanLyDuAn.Data
                 entity.ToTable("AI_DATASET");
                 entity.HasKey(x => x.MaData);
                 entity.Property(x => x.ChiPhiThucTe).HasColumnType("decimal(18,2)");
+                entity.Property(x => x.ChiPhiDuKien).HasColumnType("decimal(18,2)");
+                entity.Property(x => x.TrangThaiCuoi).HasMaxLength(50);
+                entity.Property(x => x.NguyenNhanChinh).HasMaxLength(100);
+                entity.HasOne<DuAn>().WithMany().HasForeignKey(x => x.MaDuAn).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<CongViec>().WithMany().HasForeignKey(x => x.MaCongViec).OnDelete(DeleteBehavior.Restrict);
             });
 

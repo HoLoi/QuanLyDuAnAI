@@ -491,7 +491,7 @@ namespace QuanLyDuAn.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MaNhanVien = table.Column<int>(type: "int", nullable: false),
                     MaDuAn = table.Column<int>(type: "int", nullable: false),
-                    NHA_MaNhanVien = table.Column<int>(type: "int", nullable: false),
+                    MaNguoiDanhGia = table.Column<int>(type: "int", nullable: false),
                     DiemTongDanhGiaNV = table.Column<int>(type: "int", nullable: true),
                     NgayDanhGiaNV = table.Column<DateTime>(type: "datetime2", nullable: true),
                     XepLoai = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -506,14 +506,14 @@ namespace QuanLyDuAn.Migrations
                         principalColumn: "MaDuAn",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_DANH_GIA_NHAN_VIEN_NHAN_VIEN_MaNhanVien",
-                        column: x => x.MaNhanVien,
+                        name: "FK_DANH_GIA_NHAN_VIEN_NHAN_VIEN_MaNguoiDanhGia",
+                        column: x => x.MaNguoiDanhGia,
                         principalTable: "NHAN_VIEN",
                         principalColumn: "MaNhanVien",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_DANH_GIA_NHAN_VIEN_NHAN_VIEN_NHA_MaNhanVien",
-                        column: x => x.NHA_MaNhanVien,
+                        name: "FK_DANH_GIA_NHAN_VIEN_NHAN_VIEN_MaNhanVien",
+                        column: x => x.MaNhanVien,
                         principalTable: "NHAN_VIEN",
                         principalColumn: "MaNhanVien",
                         onDelete: ReferentialAction.Restrict);
@@ -728,14 +728,19 @@ namespace QuanLyDuAn.Migrations
                 {
                     MaData = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    MaDuAn = table.Column<int>(type: "int", nullable: false),
                     MaCongViec = table.Column<int>(type: "int", nullable: false),
-                    SoNgayTre = table.Column<int>(type: "int", nullable: true),
-                    SoNhanVien = table.Column<int>(type: "int", nullable: true),
+                    SoNhanVienDuAn = table.Column<int>(type: "int", nullable: true),
                     ChiPhiThucTe = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    DoPhucTap = table.Column<int>(type: "int", nullable: true),
-                    SoCongViecPhuThuoc = table.Column<int>(type: "int", nullable: true),
+                    ChiPhiDuKien = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     TongGioLam = table.Column<double>(type: "float", nullable: true),
-                    TrangThaiCuoi = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    SoNgayTreTienDo = table.Column<int>(type: "int", nullable: true),
+                    SoLanThayDoiNhanSu = table.Column<int>(type: "int", nullable: true),
+                    SoNgayDuKienCV = table.Column<int>(type: "int", nullable: true),
+                    SoNgayThucTeCV = table.Column<int>(type: "int", nullable: true),
+                    SoLanDelay = table.Column<int>(type: "int", nullable: true),
+                    TrangThaiCuoi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    NguyenNhanChinh = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -745,6 +750,12 @@ namespace QuanLyDuAn.Migrations
                         column: x => x.MaCongViec,
                         principalTable: "CONG_VIEC",
                         principalColumn: "MaCongViec",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AI_DATASET_DU_AN_MaDuAn",
+                        column: x => x.MaDuAn,
+                        principalTable: "DU_AN",
+                        principalColumn: "MaDuAn",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -1097,6 +1108,11 @@ namespace QuanLyDuAn.Migrations
                 column: "MaCongViec");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AI_DATASET_MaDuAn",
+                table: "AI_DATASET",
+                column: "MaDuAn");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AI_KET_QUA_MaDuAn",
                 table: "AI_KET_QUA",
                 column: "MaDuAn");
@@ -1236,14 +1252,14 @@ namespace QuanLyDuAn.Migrations
                 column: "MaDuAn");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DANH_GIA_NHAN_VIEN_MaNguoiDanhGia",
+                table: "DANH_GIA_NHAN_VIEN",
+                column: "MaNguoiDanhGia");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DANH_GIA_NHAN_VIEN_MaNhanVien",
                 table: "DANH_GIA_NHAN_VIEN",
                 column: "MaNhanVien");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DANH_GIA_NHAN_VIEN_NHA_MaNhanVien",
-                table: "DANH_GIA_NHAN_VIEN",
-                column: "NHA_MaNhanVien");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DANH_MUC_CHUC_NANG_MaManHinh",
