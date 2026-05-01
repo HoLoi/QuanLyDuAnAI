@@ -1,0 +1,65 @@
+@model QuanLyDuAn.ViewModels.DuAn.DuAnCreateUpdateViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    ViewData["Title"] = "Chi tiết dự án";
+    string? tenLoaiDuAn = ViewBag.TenLoaiDuAn as string;
+}
+
+<div class="card p-3 card-soft">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h5 class="mb-0">Chi tiết dự án</h5>
+        <a asp-action="Index"
+           asp-route-tuKhoa="@ViewBag.TuKhoa"
+           asp-route-locMaLoaiDuAn="@ViewBag.LocMaLoaiDuAn"
+           asp-route-locTrangThaiDuAn="@ViewBag.LocTrangThaiDuAn"
+           class="btn btn-outline-secondary btn-sm">Quay lại danh sách</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label class="form-label text-muted mb-1">Mã dự án</label>
+            <div class="fw-semibold">@Model.MaDuAn</div>
+        </div>
+
+        <div class="col-md-9">
+            <label class="form-label text-muted mb-1">Tên dự án</label>
+            <div class="fw-semibold">@Model.TenDuAn</div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label text-muted mb-1">Loại dự án</label>
+            <div>@(string.IsNullOrWhiteSpace(tenLoaiDuAn) ? "-" : tenLoaiDuAn)</div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label text-muted mb-1">Ngày bắt đầu</label>
+            <div>@Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy")</div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label text-muted mb-1">Ngày kết thúc</label>
+            <div>@Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy")</div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label text-muted mb-1">Trạng thái</label>
+            <div>@TrangThai.ToDisplay(Model.TrangThaiDuAn)</div>
+        </div>
+
+        <div class="col-md-8">
+            <label class="form-label text-muted mb-1">Người quản lý</label>
+            <div>@(string.IsNullOrWhiteSpace(Model.TenNguoiQuanLy) ? "-" : Model.TenNguoiQuanLy)</div>
+        </div>
+
+        <div class="col-12">
+            <label class="form-label text-muted mb-1">Mô tả dự án</label>
+            <div>@(string.IsNullOrWhiteSpace(Model.MoTaDuAn) ? "-" : Model.MoTaDuAn)</div>
+        </div>
+
+        <div class="col-12">
+            <label class="form-label text-muted mb-1">Ghi chú</label>
+            <div>@(string.IsNullOrWhiteSpace(Model.GhiChuDuAn) ? "-" : Model.GhiChuDuAn)</div>
+        </div>
+    </div>
+</div>

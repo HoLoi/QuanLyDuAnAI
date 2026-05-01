@@ -1,0 +1,45 @@
+@model QuanLyDuAn.ViewModels.Team.TeamCreateUpdateViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+}
+
+<form asp-action="LuuTeam" method="post">
+    <input asp-for="MaTeam" type="hidden" />
+    <input type="hidden" name="TuKhoa" value="@ViewBag.TuKhoa" />
+    <input type="hidden" name="LocTrangThaiTeam" value="@ViewBag.LocTrangThaiTeam" />
+
+    <div class="row">
+        <div class="col-md-8 mb-2">
+            <label>Tên team</label>
+            <input asp-for="TenTeam" class="form-control" required />
+            <span asp-validation-for="TenTeam" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4 mb-2">
+            <label>Trạng thái</label>
+            <select asp-for="TrangThaiTeam" class="form-select">
+                <option value="@TrangThai.HoatDong">@TrangThai.HoatDongHienThi</option>
+                <option value="@TrangThai.NgungHoatDong">@TrangThai.NgungHoatDongHienThi</option>
+            </select>
+            <span asp-validation-for="TrangThaiTeam" class="text-danger"></span>
+        </div>
+
+        <div class="col-12 mb-3">
+            <label>Mô tả</label>
+            <textarea asp-for="MoTaTeam" class="form-control" required></textarea>
+            <span asp-validation-for="MoTaTeam" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        @if (CanAccess(Permissions.Nhom.Them) || CanAccess(Permissions.Nhom.Sua))
+        {
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        }
+
+        <a asp-action="Index" class="btn btn-secondary">Làm mới</a>
+    </div>
+</form>

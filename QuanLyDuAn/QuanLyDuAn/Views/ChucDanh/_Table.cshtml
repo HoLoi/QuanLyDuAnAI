@@ -1,0 +1,42 @@
+@model List<QuanLyDuAn.ViewModels.ChucDanh.ChucDanhViewModel>
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+}
+
+<table class="table table-bordered mt-3 app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã</th>
+            <th>Tên</th>
+            <th>Mô tả</th>
+            <th class="col-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cd in Model)
+        {
+            <tr>
+                <td class="col-id">@cd.MaChucDanh</td>
+                <td>@cd.TenChucDanh</td>
+                <td>@cd.MoTaChucDanh</td>
+                <td class="col-actions table-actions">
+                    @if (CanAccess(Permissions.ChucDanh.Sua))
+                    {
+                        <a asp-action="Sua" asp-route-id="@cd.MaChucDanh" class="btn btn-outline-warning btn-sm">Sửa</a>
+                    }
+
+                    @if (CanAccess(Permissions.ChucDanh.Xoa))
+                    {
+                        <form asp-action="XoaChucDanh" method="post">
+                            <input type="hidden" name="maChucDanh" value="@cd.MaChucDanh" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

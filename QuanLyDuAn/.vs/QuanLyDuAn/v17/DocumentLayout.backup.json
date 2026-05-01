@@ -1,14 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\D\\Luan Van\\QuanLyDuAnAI\\QuanLyDuAn\\",
+  "WorkspaceRootPath": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E5985491-D684-4E40-8A85-4D07BFC40179}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\quanlyduanai\\quanlyduan\\quanlyduan\\migrations\\20260327062237_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5985491-D684-4E40-8A85-4D07BFC40179}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\migrations\\20260327062237_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl2\\quanlyduanai\\quanlyduan\\quanlyduan\\data\\khoitaotaikhoanmacdinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\data\\khoitaotaikhoanmacdinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5985491-D684-4E40-8A85-4D07BFC40179}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\quanlyduanai\\quanlyduan\\quanlyduan\\models\\aidataset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5985491-D684-4E40-8A85-4D07BFC40179}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\models\\aidataset.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl2\\quanlyduanai\\quanlyduan\\quanlyduan\\constants\\permissions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\constants\\permissions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -46,28 +46,27 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "20260327062237_Init.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260327062237_Init.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Migrations\\20260327062237_Init.cs",
-              "ToolTip": "E:\\D\\Luan Van\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260327062237_Init.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Migrations\\20260327062237_Init.cs",
-              "ViewState": "AgIAAMkCAAAAAAAAAAAmwNUCAAAiAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "Permissions.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\Permissions.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Constants\\Permissions.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\Permissions.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Constants\\Permissions.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAAAqwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T06:22:56.034Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-30T05:12:00.661Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "AiDataset.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Models\\AiDataset.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Models\\AiDataset.cs",
-              "ToolTip": "E:\\D\\Luan Van\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Models\\AiDataset.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Models\\AiDataset.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "KhoiTaoTaiKhoanMacDinh.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
+              "ViewState": "AgIAADACAAAAAAAAAAAAAI4CAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T02:42:36.772Z",
+              "WhenOpened": "2026-04-30T05:11:34.962Z",
               "EditorCaption": ""
             }
           ]

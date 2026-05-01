@@ -1,0 +1,99 @@
+@model QuanLyDuAn.ViewModels.ThanhVienTeam.ThanhVienTeamCreateUpdateViewModel
+
+@{
+    var danhSachTeam = ViewBag.DanhSachTeam as List<QuanLyDuAn.ViewModels.ThanhVienTeam.TeamOptionViewModel>
+                      ?? new List<QuanLyDuAn.ViewModels.ThanhVienTeam.TeamOptionViewModel>();
+    var danhSachNhanSu = ViewBag.DanhSachNhanSu as List<QuanLyDuAn.ViewModels.ThanhVienTeam.NhanSuOptionViewModel>
+                        ?? new List<QuanLyDuAn.ViewModels.ThanhVienTeam.NhanSuOptionViewModel>();
+
+    var isEditMode = Model.MaTeam.HasValue && Model.MaNguoiDung.HasValue;
+}
+
+<form asp-action="LuuThanhVienTeam" method="post">
+    <input type="hidden" name="TuKhoa" value="@ViewBag.TuKhoa" />
+    <input type="hidden" name="LocMaTeam" value="@ViewBag.LocMaTeam" />
+    <input type="hidden" name="LocVaiTroLanhDao" value="@ViewBag.LocVaiTroLanhDao" />
+    <input type="hidden" name="CheDoGanTruongNhom" value="@(ViewBag.CheDoGanTruongNhom is bool value && value ? "true" : "false")" />
+
+    <div class="row">
+        <div class="col-md-4 mb-2">
+            <label>Team</label>
+            @if (isEditMode)
+            {
+                <select asp-for="MaTeam" class="form-select" disabled>
+                    <option value="">-- Chọn team --</option>
+                    @foreach (var team in danhSachTeam)
+                    {
+                        <option value="@team.MaTeam">@team.TenTeam</option>
+                    }
+                </select>
+                <input type="hidden" asp-for="MaTeam" />
+            }
+            else
+            {
+                <select asp-for="MaTeam" class="form-select">
+                    <option value="">-- Chọn team --</option>
+                    @foreach (var team in danhSachTeam)
+                    {
+                        <option value="@team.MaTeam">@team.TenTeam</option>
+                    }
+                </select>
+            }
+            <span asp-validation-for="MaTeam" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4 mb-2">
+            <label>Nhân sự</label>
+            @if (isEditMode)
+            {
+                <select asp-for="MaNguoiDung" id="selectNhanSu" class="form-select" disabled>
+                    <option value="">-- Chọn nhân sự --</option>
+                    @foreach (var nhanSu in danhSachNhanSu)
+                    {
+                        <option value="@nhanSu.MaNguoiDung" data-team-count="@nhanSu.SoTeamDaThamGia">
+                            @nhanSu.HoTenNguoiDung (@nhanSu.SoTeamDaThamGia nhóm)
+                        </option>
+                    }
+                </select>
+                <input type="hidden" asp-for="MaNguoiDung" />
+            }
+            else
+            {
+                <select asp-for="MaNguoiDung" id="selectNhanSu" class="form-select">
+                    <option value="">-- Chọn nhân sự --</option>
+                    @foreach (var nhanSu in danhSachNhanSu)
+                    {
+                        <option value="@nhanSu.MaNguoiDung" data-team-count="@nhanSu.SoTeamDaThamGia">
+                            @nhanSu.HoTenNguoiDung (@nhanSu.SoTeamDaThamGia nhóm)
+                        </option>
+                    }
+                </select>
+            }
+            <span asp-validation-for="MaNguoiDung" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4 mb-2">
+            <label>Vai trò trong team</label>
+            <input asp-for="VaiTroTrongTeam" class="form-control" />
+            <span asp-validation-for="VaiTroTrongTeam" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label>Nhóm đã tham gia</label>
+            <input id="soTeamDaThamGia" type="text" class="form-control" value="0" readonly />
+        </div>
+
+        <div class="col-md-4 mb-3 d-flex align-items-end">
+            <div class="form-check mb-2">
+                <input asp-for="IsLeader" class="form-check-input" />
+                <label asp-for="IsLeader" class="form-check-label">Là trưởng nhóm</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a asp-action="Index" asp-route-locMaTeam="@ViewBag.LocMaTeam" class="btn btn-secondary">Làm mới</a>
+        <a asp-controller="Team" asp-action="Index" class="btn btn-outline-dark">Về Team</a>
+    </div>
+</form>

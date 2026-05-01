@@ -1,0 +1,27 @@
+@model QuanLyDuAn.ViewModels.NganSach.NganSachPageViewModel
+@using QuanLyDuAn.Constants
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-6">
+        <select name="locMaDuAn" class="form-select">
+            <option value="">-- Tất cả dự án --</option>
+            @foreach (var item in Model.DanhSachDuAn)
+            {
+                <option value="@item.MaDuAn" selected="@(Model.LocMaDuAn == item.MaDuAn)">@item.TenDuAn</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-6">
+        <select name="locTrangThai" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
+            <option value="@TrangThai.DaThayThe" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaThayThe))">@TrangThai.DaThayTheHienThi</option>
+            <option value="@TrangThai.GiuNguyen" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.GiuNguyen))">@TrangThai.GiuNguyenHienThi</option>
+        </select>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary w-100">Bỏ lọc</a>
+    </div>
+</form>

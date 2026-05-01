@@ -1,0 +1,85 @@
+@model List<QuanLyDuAn.ViewModels.ThanhVienTeam.ThanhVienTeamViewModel>
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+
+    string? tuKhoa = ViewBag.TuKhoa as string;
+    string? locVaiTroLanhDao = ViewBag.LocVaiTroLanhDao as string;
+    int? locMaTeam = ViewBag.LocMaTeam as int?;
+    bool cheDoGanTruongNhom = ViewBag.CheDoGanTruongNhom is bool value && value;
+}
+
+<table class="table table-bordered mt-3 app-data-table">
+    <thead>
+        <tr>
+            <th>Team</th>
+            <th>Nhân sự</th>
+            <th class="col-role">Vai trò</th>
+            <th class="col-date">Ngày tham gia</th>
+            <th class="col-status">Trưởng nhóm</th>
+            <th class="col-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.TenTeam</td>
+                <td>@item.HoTenNguoiDung</td>
+                <td class="col-role">@item.VaiTroTrongTeam</td>
+                <td class="col-date">@item.NgayThamGiaTeam?.ToString("dd/MM/yyyy")</td>
+                <td class="col-status">
+                    @if (item.IsLeader)
+                    {
+                        <span class="badge bg-success">Có</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Không</span>
+                    }
+                </td>
+                <td class="col-actions table-actions">
+                    @if (CanAccess(Permissions.ThanhVienNhom.Them))
+                    {
+                        <a asp-action="Sua"
+                           asp-route-maTeam="@item.MaTeam"
+                           asp-route-maNguoiDung="@item.MaNguoiDung"
+                           asp-route-tuKhoa="@tuKhoa"
+                           asp-route-locMaTeam="@locMaTeam"
+                           asp-route-locVaiTroLanhDao="@locVaiTroLanhDao"
+                           asp-route-cheDoGanTruongNhom="@cheDoGanTruongNhom"
+                           class="btn btn-outline-warning btn-sm">Sửa</a>
+                    }
+
+                    @if (CanAccess(Permissions.ThanhVienNhom.Them) && !item.IsLeader && !item.TeamDaCoTruongNhom)
+                    {
+                        <form asp-action="GanTruongNhom" method="post">
+                            <input type="hidden" name="maTeam" value="@item.MaTeam" />
+                            <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <input type="hidden" name="locMaTeam" value="@locMaTeam" />
+                            <input type="hidden" name="locVaiTroLanhDao" value="@locVaiTroLanhDao" />
+                            <input type="hidden" name="cheDoGanTruongNhom" value="@cheDoGanTruongNhom" />
+                            <button type="submit" class="btn btn-outline-primary btn-sm">Gán trưởng nhóm</button>
+                        </form>
+                    }
+
+                    @if (CanAccess(Permissions.ThanhVienNhom.Xoa))
+                    {
+                        <form asp-action="XoaThanhVienTeam" method="post">
+                            <input type="hidden" name="maTeam" value="@item.MaTeam" />
+                            <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <input type="hidden" name="locMaTeam" value="@locMaTeam" />
+                            <input type="hidden" name="locVaiTroLanhDao" value="@locVaiTroLanhDao" />
+                            <input type="hidden" name="cheDoGanTruongNhom" value="@cheDoGanTruongNhom" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

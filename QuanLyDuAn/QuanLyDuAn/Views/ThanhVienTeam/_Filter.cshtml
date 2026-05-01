@@ -1,0 +1,39 @@
+@model QuanLyDuAn.ViewModels.ThanhVienTeam.ThanhVienTeamPageViewModel
+
+@{
+    var locVaiTroLanhDao = (Model.LocVaiTroLanhDao ?? string.Empty).ToLowerInvariant();
+}
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
+               placeholder="Tìm theo team, nhân sự, vai trò..." />
+    </div>
+    <div class="col-md-3">
+        <select name="locMaTeam" class="form-select">
+            <option value="">-- Tất cả team --</option>
+            @foreach (var team in Model.DanhSachTeam)
+            {
+                if (Model.LocMaTeam == team.MaTeam)
+                {
+                    <option value="@team.MaTeam" selected>@team.TenTeam</option>
+                }
+                else
+                {
+                    <option value="@team.MaTeam">@team.TenTeam</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="locVaiTroLanhDao" class="form-select">
+            <option value="">-- Tất cả vai trò --</option>
+            <option value="truongnhom" selected="@(locVaiTroLanhDao == "truongnhom" ? "selected" : null)">Trưởng nhóm</option>
+            <option value="thanhvien" selected="@(locVaiTroLanhDao == "thanhvien" ? "selected" : null)">Thành viên</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+</form>

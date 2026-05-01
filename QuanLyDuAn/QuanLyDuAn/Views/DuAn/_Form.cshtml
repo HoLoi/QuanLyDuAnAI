@@ -1,0 +1,237 @@
+@model QuanLyDuAn.ViewModels.DuAn.DuAnCreateUpdateViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+
+    var danhSachLoaiDuAn = ViewBag.DanhSachLoaiDuAn as List<QuanLyDuAn.ViewModels.DuAn.LoaiDuAnOptionViewModel>
+                          ?? new List<QuanLyDuAn.ViewModels.DuAn.LoaiDuAnOptionViewModel>();
+}
+
+<form asp-action="LuuDuAn" method="post">
+    <input asp-for="MaDuAn" type="hidden" />
+    <input type="hidden" name="TuKhoa" value="@ViewBag.TuKhoa" />
+    <input type="hidden" name="LocMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
+    <input type="hidden" name="LocTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
+
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <label>Tên dự án</label>
+            <input asp-for="TenDuAn" class="form-control" required />
+            <span asp-validation-for="TenDuAn" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label>Loại dự án</label>
+            <select asp-for="MaLoaiDuAn" class="form-select" required>
+                <option value="">-- Chọn loại dự án --</option>
+                @foreach (var loai in danhSachLoaiDuAn)
+                {
+                    <option value="@loai.MaLoaiDuAn">@loai.TenLoai</option>
+                }
+            </select>
+            <span asp-validation-for="MaLoaiDuAn" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label>Ngày bắt đầu</label>
+            <input asp-for="NgayBatDauDuAn" type="date" class="form-control" required />
+            <span asp-validation-for="NgayBatDauDuAn" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <label>Ngày kết thúc</label>
+            <input asp-for="NgayKetThucDuAn" type="date" class="form-control" required />
+            <span asp-validation-for="NgayKetThucDuAn" class="text-danger"></span>
+        </div>
+
+        @if (Model.MaDuAn.HasValue)
+        {
+            <div class="col-md-3 mb-2">
+                <label>Trạng thái</label>
+                @{
+                    var isCompleted = Model.StatusCheck?.IsCompleted ?? false;
+                }
+                <select asp-for="TrangThaiDuAn" id="trangThaiDuAnSelect" class="form-select" disabled="@isCompleted">
+                    <option value="@TrangThai.KhoiTao">@TrangThai.KhoiTaoHienThi</option>
+                    <option value="@TrangThai.DangThucHien">@TrangThai.DangThucHienHienThi</option>
+                    <option value="@TrangThai.ChoXacNhanHoanThanh">@TrangThai.ChoXacNhanHoanThanhHienThi</option>
+                    <option value="@TrangThai.HoanThanh">@TrangThai.HoanThanhHienThi</option>
+                    <option value="@TrangThai.TamDung">@TrangThai.TamDungHienThi</option>
+                    <option value="@TrangThai.LuuTru">@TrangThai.LuuTruHienThi</option>
+                </select>
+                <span asp-validation-for="TrangThaiDuAn" class="text-danger"></span>
+            </div>
+        }
+        else
+        {
+            <div class="col-md-3 mb-2">
+                <label>Trạng thái</label>
+                <input class="form-control" value="@TrangThai.KhoiTaoHienThi" readonly />
+            </div>
+        }
+
+        <div class="col-12 mb-3">
+            <label>Mô tả dự án</label>
+            <textarea asp-for="MoTaDuAn" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="MoTaDuAn" class="text-danger"></span>
+        </div>
+
+        <div class="col-12 mb-3" id="ghiChuTamDungContainer" style="display:none;">
+            <label>Ghi chú lý do tạm dừng</label>
+            <textarea asp-for="GhiChuDuAn" id="ghiChuTamDungInput" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="GhiChuDuAn" class="text-danger"></span>
+        </div>
+
+        @if (Model.MaDuAn.HasValue)
+        {
+            <script>
+                (function () {
+                    const statusSelect = document.getElementById('trangThaiDuAnSelect');
+                    const noteContainer = document.getElementById('ghiChuTamDungContainer');
+                    const noteInput = document.getElementById('ghiChuTamDungInput');
+
+                    if (!statusSelect || !noteContainer || !noteInput) return;
+
+                    const pauseValue = '@TrangThai.TamDung';
+
+                    const isPauseStatus = (value) => {
+                        if (!value) return false;
+                        return value === pauseValue;
+                    };
+
+                    const togglePauseNote = () => {
+                        const shouldShow = isPauseStatus(statusSelect.value);
+                        noteContainer.style.display = shouldShow ? 'block' : 'none';
+                        noteInput.required = shouldShow;
+                    };
+
+                    togglePauseNote();
+                    statusSelect.addEventListener('change', togglePauseNote);
+                })();
+            </script>
+        }
+    </div>
+
+    <div class="d-flex gap-2">
+        @if (CanAccess(Permissions.DuAn.Them) || CanAccess(Permissions.DuAn.Sua))
+        {
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        }
+
+        <a asp-action="Index" class="btn btn-secondary">Làm mới</a>
+    </div>
+</form>
+
+@if (Model.MaDuAn.HasValue && Model.StatusCheck != null)
+{
+    <!-- Status Transition Buttons -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <strong>Trạng thái hiện tại:</strong> @TrangThai.ToDisplay(Model.TrangThaiDuAn)
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <!-- Button Bắt đầu dự án -->
+                @if (Model.StatusCheck.CanTransitionToDangThucHien && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.KhoiTao))
+                {
+                    <form asp-action="BatDauDuAn" method="post" style="display:inline;">
+                        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                        <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
+                        <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
+                        <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
+                        <button type="submit" class="btn btn-success">Bắt đầu dự án</button>
+                    </form>
+                }
+
+                <!-- Button Yêu cầu hoàn thành -->
+                @if (Model.StatusCheck.CanRequestCompletion && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.DangThucHien))
+                {
+                    <form asp-action="YeuCauHoanThanh" method="post" style="display:inline;">
+                        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                        <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
+                        <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
+                        <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
+                        <button type="submit" class="btn btn-warning">Yêu cầu hoàn thành</button>
+                    </form>
+                }
+
+                <!-- Button Xác nhận hoàn thành -->
+                @if (Model.StatusCheck.CanConfirmCompletion && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh))
+                {
+                    <form asp-action="XacNhanHoanThanh" method="post" style="display:inline;">
+                        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                        <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
+                        <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
+                        <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
+                        <button type="submit" class="btn btn-success">Xác nhận hoàn thành</button>
+                    </form>
+                }
+
+                <!-- Button Tạm dừng -->
+                @if (Model.StatusCheck.CanPause && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.DangThucHien))
+                {
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#pauseModal">Tạm dừng dự án</button>
+                }
+            </div>
+
+            <!-- Conditions for transitions -->
+            @if (TrangThai.EqualsValue(Model.StatusCheck.TrangThaiDuAn, TrangThai.KhoiTao))
+            {
+                <div class="alert alert-secondary mt-2" role="alert">
+                    <strong>Điều kiện để bắt đầu dự án:</strong>
+                    <ul class="mb-0">
+                        <li>✓ Có thành viên: @(Model.StatusCheck.HasMembers ? "✅" : "❌")</li>
+                        <li>✓ Có danh mục công việc: @(Model.StatusCheck.HasCategories ? "✅" : "❌")</li>
+                        <li>✓ Có công việc: @(Model.StatusCheck.HasWorkItems ? "✅" : "❌")</li>
+                    </ul>
+                </div>
+            }
+
+            @if (TrangThai.EqualsValue(Model.StatusCheck.TrangThaiDuAn, TrangThai.DangThucHien))
+            {
+                <div class="alert alert-secondary mt-2" role="alert">
+                    <strong>Điều kiện để hoàn thành dự án:</strong>
+                    <ul class="mb-0">
+                        <li>✓ Tất cả công việc hoàn thành: @(Model.StatusCheck.AllTasksDone ? "✅" : "❌")</li>
+                        <li>✓ Không có công việc đang thực hiện: @(!Model.StatusCheck.HasOngoingTasks ? "✅" : "❌")</li>
+                        <li>✓ Không có công việc bị cản: @(!Model.StatusCheck.HasBlockedTasks ? "✅" : "❌")</li>
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Modal Tạm dừng -->
+<div class="modal fade" id="pauseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạm dừng dự án</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="TamDungDuAn" method="post">
+                <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
+                <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
+                <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
+                
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="pauseReason" class="form-label">Lý do tạm dừng</label>
+                        <textarea name="ghiChuDuAn" id="pauseReason" class="form-control" rows="4" required></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">Tạm dừng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,56 @@
+@model List<QuanLyDuAn.ViewModels.NganSach.NganSachItemViewModel>
+@using QuanLyDuAn.Constants
+
+<table class="table table-bordered table-sm app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã</th>
+            <th>Dự án</th>
+            <th>Ngân sách</th>
+            <th class="col-count">Phiên bản</th>
+            <th>Trạng thái</th>
+            <th>Hiệu lực</th>
+            <th>Người đề xuất</th>
+            <th>Người duyệt</th>
+            <th class="col-date">Ngày duyệt</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Count == 0)
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">Chưa có ngân sách.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="col-id">@item.MaNganSach</td>
+                    <td>@item.TenDuAn</td>
+                    <td>@item.SoTienNganSach?.ToString("N0")</td>
+                    <td class="col-count">@item.Version</td>
+                    <td>@TrangThai.ToDisplay(item.TrangThaiNganSach)</td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <span class="badge bg-success">Đang sử dụng</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Không còn hiệu lực</span>
+                        }
+                    </td>
+                    <td>@item.NguoiDungDeXuat</td>
+                    <td>@item.NguoiDungDuyet</td>
+                    <td class="col-date">@item.NgayDuyetNganSach?.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td colspan="8" class="text-muted">@item.MoTaNganSach</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

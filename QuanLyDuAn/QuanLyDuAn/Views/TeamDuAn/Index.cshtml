@@ -1,0 +1,240 @@
+﻿@model QuanLyDuAn.ViewModels.TeamDuAn.TeamDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canCreateOrEdit = permissions.Contains(Permissions.TeamDuAn.Them);
+    bool canDelete = permissions.Contains(Permissions.TeamDuAn.Xoa);
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Team phụ trách dự án</h5>
+        <a asp-controller="DuAn"
+           asp-action="Index"
+           asp-route-tuKhoa="@Model.TuKhoa"
+           asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
+           asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
+           class="btn btn-outline-secondary btn-sm">Quay lại dự án</a>
+    </div>
+
+    <div class="alert alert-light border mb-3">
+        <div><strong>Dự án:</strong> @Model.TenDuAn (Mã: @Model.MaDuAn)</div>
+        <div><strong>Trạng thái:</strong> @TrangThai.ToDisplay(Model.TrangThaiDuAn)</div>
+    </div>
+
+    @if (!Model.CoTheChinhSua)
+    {
+        <div class="alert alert-warning">@Model.LyDoKhongTheChinhSua</div>
+    }
+
+    @if (canCreateOrEdit)
+    {
+        <form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+            <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+            <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+            <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+            <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+
+            <div class="col-md-6">
+                <label class="form-label">Chọn team phụ trách</label>
+                <select name="maTeamDangChon" class="form-select" required>
+                    <option value="">-- Chọn team --</option>
+                    @foreach (var team in Model.DanhSachTeamCoTheGan)
+                    {
+                        <option value="@team.MaTeam" selected="@(Model.MaTeamDangChon == team.MaTeam ? "selected" : null)">
+                            @team.TenTeam (@TrangThai.ToDisplay(team.TrangThaiTeam))
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-primary">Tải thành viên</button>
+            </div>
+        </form>
+
+        @if (Model.MaTeamDangChon.HasValue)
+        {
+            <form asp-action="LuuTeamPhuTrach" method="post">
+                <input type="hidden" asp-for="MaDuAn" />
+                <input type="hidden" asp-for="MaTeamDangChon" />
+                <input type="hidden" asp-for="TuKhoa" />
+                <input type="hidden" asp-for="LocMaLoaiDuAn" />
+                <input type="hidden" asp-for="LocTrangThaiDuAn" />
+
+                <div class="border rounded p-3 mb-3">
+                    <div class="fw-semibold mb-2">Chọn thành viên trong team</div>
+
+                    @if (Model.DanhSachThanhVienTeam.Count == 0)
+                    {
+                        <div class="text-muted">Team chưa có thành viên.</div>
+                    }
+                    else
+                    {
+                        <div class="row g-2">
+                            @foreach (var item in Model.DanhSachThanhVienTeam)
+                            {
+                                <div class="col-md-6">
+                                    <label class="form-check-label d-flex align-items-center gap-2">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="SelectedMaNguoiDung"
+                                               value="@item.MaNguoiDung"
+                                               checked="@item.IsSelected"
+                                               disabled="@(item.IsLeader ? "disabled" : null)" />
+                                        @if (item.IsLeader)
+                                        {
+                                            <input type="hidden" name="SelectedMaNguoiDung" value="@item.MaNguoiDung" />
+                                        }
+                                        <span>
+                                            @item.HoTenNguoiDung
+                                            <span class="text-muted">(@item.VaiTroTrongTeam)</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <button type="submit" class="btn btn-primary"
+                        disabled="@((Model.CoTheChinhSua && Model.DanhSachThanhVienTeam.Count > 0) ? null : "disabled")">
+                    Lưu team phụ trách
+                </button>
+            </form>
+        }
+    }
+
+    <hr />
+
+    <h6>Danh sách team đang phụ trách</h6>
+    <table class="table table-bordered mt-2">
+        <thead>
+            <tr>
+                <th>Mã team</th>
+                <th>Tên team</th>
+                <th>Ngày tham gia</th>
+                <th>Số thành viên phụ trách</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.DanhSachTeamPhuTrach.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Chưa có team phụ trách.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.DanhSachTeamPhuTrach)
+                {
+                    <tr>
+                        <td>@item.MaTeam</td>
+                        <td>@item.TenTeam</td>
+                        <td>@item.NgayTeamThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@item.SoThanhVienPhuTrach</td>
+                        <td class="d-flex gap-1">
+                            @if (canCreateOrEdit)
+                            {
+                                <a asp-action="Index"
+                                   asp-route-maDuAn="@Model.MaDuAn"
+                                   asp-route-maTeamDangChon="@item.MaTeam"
+                                   asp-route-tuKhoa="@Model.TuKhoa"
+                                   asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
+                                   asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
+                                   class="btn btn-warning btn-sm">Sửa thành viên</a>
+                            }
+
+                            @if (canDelete)
+                            {
+                                <button type="button"
+                                        class="btn btn-danger btn-sm btn-mo-modal-xoa-team"
+                                        data-ma-team="@item.MaTeam"
+                                        data-ten-team="@item.TenTeam"
+                                        data-so-nhan-vien="@item.SoThanhVienPhuTrach"
+                                        disabled="@(Model.CoTheChinhSua ? null : "disabled")">
+                                    Gỡ team
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (canDelete)
+{
+    <div class="modal fade" id="xoaTeamModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gỡ team phụ trách khỏi dự án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="XoaTeamKhoiDuAn" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                        <input type="hidden" name="maTeam" id="xoaTeam_maTeam" value="" />
+                        <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                        <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                        <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+
+                        <p class="mb-2">
+                            Team <strong id="xoaTeam_tenTeam"></strong> hiện có
+                            <strong id="xoaTeam_soNhanVien"></strong> nhân viên trong dự án.
+                        </p>
+                        <p class="mb-2">Bạn muốn:</p>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="luaChonXuLyNhanVien" id="giuNguyenNhanVien" value="1" checked>
+                            <label class="form-check-label" for="giuNguyenNhanVien">
+                                [1] Giữ nguyên nhân viên phụ trách dự án thuộc team này
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="luaChonXuLyNhanVien" id="goNhanVienThuocTeam" value="2">
+                            <label class="form-check-label" for="goNhanVienThuocTeam">
+                                [2] Gỡ luôn nhân viên đang phụ trách dự án thuộc team này (có kiểm tra phân công công việc)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận gỡ team</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const modalElement = document.getElementById('xoaTeamModal');
+            if (!modalElement || typeof bootstrap === 'undefined') return;
+
+            const modal = new bootstrap.Modal(modalElement);
+            const inputMaTeam = document.getElementById('xoaTeam_maTeam');
+            const textTenTeam = document.getElementById('xoaTeam_tenTeam');
+            const textSoNhanVien = document.getElementById('xoaTeam_soNhanVien');
+            const luaChonGiu = document.getElementById('giuNguyenNhanVien');
+            const buttons = document.querySelectorAll('.btn-mo-modal-xoa-team');
+
+            buttons.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    if (inputMaTeam) inputMaTeam.value = btn.getAttribute('data-ma-team') || '';
+                    if (textTenTeam) textTenTeam.textContent = btn.getAttribute('data-ten-team') || '';
+                    if (textSoNhanVien) textSoNhanVien.textContent = btn.getAttribute('data-so-nhan-vien') || '0';
+                    if (luaChonGiu) luaChonGiu.checked = true;
+                    modal.show();
+                });
+            });
+        })();
+    </script>
+}

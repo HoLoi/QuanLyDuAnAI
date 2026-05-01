@@ -1,0 +1,24 @@
+@model QuanLyDuAn.ViewModels.Team.TeamPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var locTrangThai = Model.LocTrangThaiTeam;
+}
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-5">
+        <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
+               placeholder="Tìm theo tên team, mô tả..." />
+    </div>
+    <div class="col-md-3">
+        <select name="locTrangThaiTeam" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="@TrangThai.HoatDong" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.HoatDong) ? "selected" : null)">@TrangThai.HoatDongHienThi</option>
+            <option value="@TrangThai.NgungHoatDong" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.NgungHoatDong) ? "selected" : null)">@TrangThai.NgungHoatDongHienThi</option>
+        </select>
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+</form>

@@ -1,0 +1,41 @@
+@model QuanLyDuAn.ViewModels.DuAn.DuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var danhSachLoaiDuAn = ViewBag.DanhSachLoaiDuAn as List<QuanLyDuAn.ViewModels.DuAn.LoaiDuAnOptionViewModel>
+                          ?? new List<QuanLyDuAn.ViewModels.DuAn.LoaiDuAnOptionViewModel>();
+
+    var locTrangThai = Model.LocTrangThaiDuAn;
+}
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
+               placeholder="Tìm theo tên dự án, loại, quản lý..." />
+    </div>
+
+    <div class="col-md-3">
+        <select name="locMaLoaiDuAn" class="form-select">
+            <option value="">-- Tất cả loại dự án --</option>
+            @foreach (var loai in danhSachLoaiDuAn)
+            {
+                <option value="@loai.MaLoaiDuAn" selected="@(Model.LocMaLoaiDuAn == loai.MaLoaiDuAn ? "selected" : null)">@loai.TenLoai</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select name="locTrangThaiDuAn" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="@TrangThai.KhoiTao" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.KhoiTao) ? "selected" : null)">@TrangThai.KhoiTaoHienThi</option>
+            <option value="@TrangThai.DangThucHien" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.DangThucHien) ? "selected" : null)">@TrangThai.DangThucHienHienThi</option>
+            <option value="@TrangThai.HoanThanh" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.HoanThanh) ? "selected" : null)">@TrangThai.HoanThanhHienThi</option>
+            <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.TamDung) ? "selected" : null)">@TrangThai.TamDungHienThi</option>
+        </select>
+    </div>
+
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+</form>

@@ -1,0 +1,36 @@
+﻿@model QuanLyDuAn.ViewModels.DanhMucCongViec.DanhMucCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canShowForm = permissions.Contains(Permissions.DanhMucCongViec.Them)
+        || permissions.Contains(Permissions.DanhMucCongViec.Sua);
+
+    ViewBag.Permissions = permissions;
+    ViewBag.DanhSachDuAn = Model.DanhSachDuAn;
+    ViewBag.TenDuAn = Model.TenDuAn;
+    ViewBag.TuKhoa = Model.TuKhoa;
+    ViewBag.LocMaDuAn = Model.LocMaDuAn;
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Quản lý danh mục công việc</h5>
+        <a asp-controller="DuAn" asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại dự án</a>
+    </div>
+
+    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+    @if (canShowForm)
+    {
+        <partial name="_Form" for="Form" />
+        <hr />
+    }
+
+    <partial name="_Filter" model="Model" />
+    <partial name="_Table" model="Model.DanhSach" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

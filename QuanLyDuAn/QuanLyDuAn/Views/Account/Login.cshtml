@@ -1,0 +1,65 @@
+﻿@model QuanLyDuAn.ViewModels.Auth.DangNhapViewModel
+@{
+    Layout = null;
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập - QuanLyDuAnAI</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="layout-guest">
+    <main class="authentication-wrapper">
+        <div class="authentication-inner">
+            <div class="card auth-card card-soft p-4">
+                <a class="auth-brand mb-3" href="@Url.Action("Index", "Dashboard")">
+                    <span class="brand-logo"><i class="bi bi-rocket-takeoff-fill"></i></span>
+                    <div>
+                        <div class="fw-bold">QuanLyDuAnAI</div>
+                        <div class="text-muted small">Project Intelligence</div>
+                    </div>
+                </a>
+
+                <h4 class="mb-1">Đăng nhập hệ thống</h4>
+                <p class="text-muted mb-3">Nhập tài khoản để truy cập dashboard và workflow dự án.</p>
+
+                <form asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label"></label>
+                        <input asp-for="TenDangNhap" class="form-control" autocomplete="username" placeholder="Ví dụ: admin" />
+                        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MatKhau" class="form-label"></label>
+                        <input asp-for="MatKhau" class="form-control" autocomplete="current-password" placeholder="Nhập mật khẩu" />
+                        <span asp-validation-for="MatKhau" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input asp-for="GhiNhoDangNhap" class="form-check-input" />
+                        <label asp-for="GhiNhoDangNhap" class="form-check-label"></label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

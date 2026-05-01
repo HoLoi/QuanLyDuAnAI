@@ -1,0 +1,147 @@
+﻿@model QuanLyDuAn.ViewModels.NhanVienDuAn.NhanVienDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canCreateOrEdit = permissions.Contains(Permissions.ThanhVienDuAn.Them);
+    bool canDelete = permissions.Contains(Permissions.ThanhVienDuAn.Xoa);
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Nhân viên phụ trách dự án</h5>
+        <a asp-controller="DuAn"
+           asp-action="Index"
+           asp-route-tuKhoa="@Model.TuKhoa"
+           asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
+           asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
+           class="btn btn-outline-secondary btn-sm">Quay lại dự án</a>
+    </div>
+
+    <div class="alert alert-light border mb-3">
+        <div><strong>Dự án:</strong> @Model.TenDuAn (Mã: @Model.MaDuAn)</div>
+        <div><strong>Trạng thái:</strong> @TrangThai.ToDisplay(Model.TrangThaiDuAn)</div>
+    </div>
+
+    @if (!Model.CoTheChinhSua)
+    {
+        <div class="alert alert-warning">@Model.LyDoKhongTheChinhSua</div>
+    }
+
+    @if (canCreateOrEdit)
+    {
+        <form asp-action="ThemNhanVien" method="post">
+            <input type="hidden" asp-for="MaDuAn" />
+            <input type="hidden" asp-for="TuKhoa" />
+            <input type="hidden" asp-for="LocMaLoaiDuAn" />
+            <input type="hidden" asp-for="LocTrangThaiDuAn" />
+
+            <div class="border rounded p-3 mb-3">
+                <div class="fw-semibold mb-2">Thêm nhân viên phụ trách</div>
+
+                @if (Model.DanhSachNhanVienCoTheThem.Count == 0)
+                {
+                    <div class="text-muted">Không còn nhân viên hợp lệ để thêm.</div>
+                }
+                else
+                {
+                    <div class="row g-2">
+                        @foreach (var item in Model.DanhSachNhanVienCoTheThem)
+                        {
+                            <div class="col-md-6">
+                                <label class="form-check-label d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="checkbox" name="SelectedMaNguoiDung" value="@item.MaNguoiDung" />
+                                    <span>
+                                        @item.HoTenNguoiDung
+                                        <span class="text-muted">(Team: @item.TatCaTenTeamDangThamGia)</span>
+                                    </span>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <button type="submit" class="btn btn-primary"
+                    disabled="@(!Model.CoTheChinhSua || Model.DanhSachNhanVienCoTheThem.Count == 0)">
+                Thêm nhân viên
+            </button>
+        </form>
+    }
+
+    <hr />
+
+    <h6>Danh sách nhân viên đang phụ trách</h6>
+    <table class="table table-bordered mt-2">
+        <thead>
+            <tr>
+                <th>Mã NV</th>
+                <th>Họ tên</th>
+                <th>Vai trò trong dự án</th>
+                <th>Ngày tham gia</th>
+                <th>Thuộc team phụ trách</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.DanhSachNhanVienPhuTrach.Count == 0)
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Chưa có nhân viên phụ trách.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.DanhSachNhanVienPhuTrach)
+                {
+                    <tr>
+                        <td>@item.MaNguoiDung</td>
+                        <td>@item.HoTenNguoiDung</td>
+                        <td>
+                            @if (canCreateOrEdit)
+                            {
+                                <form asp-action="CapNhatVaiTro" method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                                    <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                                    <input type="text" name="vaiTroTrongDuAn" value="@item.VaiTroTrongDuAn" class="form-control form-control-sm" />
+                                    <button type="submit" class="btn btn-warning btn-sm" disabled="@(!Model.CoTheChinhSua)">Lưu</button>
+                                </form>
+                            }
+                            else
+                            {
+                                @item.VaiTroTrongDuAn
+                            }
+                        </td>
+                        <td>@item.NgayThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            @if (item.ThuocTeamPhuTrach)
+                            {
+                                <span class="text-success">Có (@item.TenTeamPhuTrach)</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không</span>
+                            }
+                        </td>
+                        <td>
+                            @if (canDelete)
+                            {
+                                <form asp-action="XoaNhanVien" method="post">
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                                    <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                                    <button type="submit" class="btn btn-danger btn-sm" disabled="@(!Model.CoTheChinhSua)">Xóa</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

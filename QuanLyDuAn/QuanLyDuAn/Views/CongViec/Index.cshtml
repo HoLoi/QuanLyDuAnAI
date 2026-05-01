@@ -1,0 +1,26 @@
+@model QuanLyDuAn.ViewModels.CongViec.CongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    var canApprove = permissions.Contains(Permissions.DuyetDeXuatCongViec.Xem);
+
+    ViewBag.Permissions = permissions;
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Công việc</h5>
+        <div class="d-flex gap-2">
+            @if (canApprove)
+            {
+                <a asp-controller="DuyetDeXuatCongViec"
+                   asp-action="Index"
+                   class="btn btn-outline-primary btn-sm">Duyệt đề xuất công việc</a>
+            }
+        </div>
+    </div>
+
+    <partial name="_Filter" model="Model" />
+    <partial name="_Table" model="Model.DanhSach" />
+</div>

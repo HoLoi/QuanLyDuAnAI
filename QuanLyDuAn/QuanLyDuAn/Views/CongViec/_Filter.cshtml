@@ -1,0 +1,37 @@
+@model QuanLyDuAn.ViewModels.CongViec.CongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text"
+               name="tuKhoa"
+               value="@Model.TuKhoa"
+               class="form-control"
+               placeholder="Tìm theo tên công việc, danh mục..." />
+    </div>
+    <div class="col-md-4">
+        <select name="locMaDuAn" class="form-select">
+            <option value="">-- Tất cả dự án --</option>
+            @foreach (var item in Model.DanhSachDuAn)
+            {
+                <option value="@item.MaDuAn" selected="@(Model.LocMaDuAn == item.MaDuAn)">@item.TenDuAn</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <select name="locTrangThai" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="@TrangThai.ChuaBatDau" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChuaBatDau))">@TrangThai.ChuaBatDauHienThi</option>
+            <option value="@TrangThai.DangThucHien" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DangThucHien))">@TrangThai.DangThucHienHienThi</option>
+            <option value="@TrangThai.ChoXacNhanHoanThanh" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoXacNhanHoanThanh))">@TrangThai.ChoXacNhanHoanThanhHienThi</option>
+            <option value="@TrangThai.HoanThanh" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.HoanThanh))">@TrangThai.HoanThanhHienThi</option>
+            <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TamDung))">@TrangThai.TamDungHienThi</option>
+            <option value="@TrangThai.BiCanCan" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.BiCanCan))">@TrangThai.BiCanCanHienThi</option>
+        </select>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary w-100">Bỏ lọc</a>
+    </div>
+</form>

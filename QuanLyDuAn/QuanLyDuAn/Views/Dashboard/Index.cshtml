@@ -1,0 +1,229 @@
+﻿@using QuanLyDuAn.ViewModels.Dashboard
+@using QuanLyDuAn.ViewModels.Ai
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var ai = ViewBag.AiDashboard as AiDashboardViewModel;
+}
+
+<div class="row g-3 mb-3">
+    <div class="col-md-3">
+        <div class="card card-soft p-3">
+            <div class="metric-title">Tổng dự án</div>
+            <div class="metric-value">@Model.TongDuAn</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-soft p-3">
+            <div class="metric-title">Tổng công việc</div>
+            <div class="metric-value">@Model.TongCongViec</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-soft p-3">
+            <div class="metric-title">Tổng nhân sự</div>
+            <div class="metric-value">@Model.TongNhanVien</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-soft p-3">
+            <div class="metric-title">Tổng ngân sách</div>
+            <div class="metric-value">@Model.TongNganSach.ToString("N0")</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-3">
+        <div class="card card-soft p-3 border-start border-danger border-4">
+            <div class="metric-title">Công việc trễ</div>
+            <div class="metric-value text-danger">@Model.CongViecTreHan</div>
+            <a class="btn btn-sm btn-outline-danger mt-2" href="@Url.Action("Index", "CongViec", new { treHan = true })">Xử lý ngay</a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-soft p-3 border-start border-warning border-4">
+            <div class="metric-title">Nhân sự quá tải</div>
+            <div class="metric-value text-warning">@Model.NhanSuQuaTai</div>
+            <a class="btn btn-sm btn-outline-warning mt-2" href="@Url.Action("Index", "DieuPhoiNhanSu", new { quaTai = true })">Điều phối</a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-soft p-3 border-start border-danger border-4">
+            <div class="metric-title">Dự án vượt ngân sách</div>
+            <div class="metric-value text-danger">@Model.DuAnVuotNganSach</div>
+            <a class="btn btn-sm btn-outline-danger mt-2" href="@Url.Action("Index", "ChiPhi", new { vuotNganSach = true })">Xem chi phí</a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-soft p-3 border-start border-info border-4">
+            <div class="metric-title">Thiếu dataset AI</div>
+            <div class="metric-value text-info">@Model.DuAnThieuDatasetAi</div>
+            <a class="btn btn-sm btn-outline-info mt-2" href="@Url.Action("Index", "AiDataset", new { thieuDataset = true })">Đồng bộ</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-lg-8">
+        <div class="card card-soft p-3">
+            <h5 class="mb-3">Tiến độ dự án</h5>
+            <canvas id="progressChart" height="110"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card card-soft p-3 h-100">
+            <h5 class="mb-3">Trạng thái tiến độ</h5>
+            <p class="mb-2">Đúng tiến độ: <strong>@Model.DuAnDungTienDo</strong></p>
+            <p class="mb-2">Trễ tiến độ: <strong class="text-danger">@Model.DuAnTreTienDo</strong></p>
+            <hr />
+            <h6>Cảnh báo AI</h6>
+            <p class="mb-0">Số cảnh báo mức cao: <strong class="text-danger">@(ai?.SoCanhBaoDo ?? 0)</strong></p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card card-soft p-3">
+            <h5 class="mb-3">Ngân sách theo dự án</h5>
+            <canvas id="costChart" height="110"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card card-soft p-3">
+            <h5 class="mb-3">Top nguyên nhân trễ</h5>
+            @if (ai?.NguyenNhanThongKe.Any() == true)
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in ai.NguyenNhanThongKe.Take(5))
+                    {
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span>@item.NguyenNhan</span>
+                            <strong>@item.TyLePhanTram%</strong>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted mb-0">Chưa có dữ liệu AI.</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-7">
+        <div class="card card-soft p-3">
+            <h5 class="mb-3">Workflow Health toàn hệ thống</h5>
+            @if (!Model.WorkflowHealthItems.Any())
+            {
+                <p class="text-muted mb-0">Không có dự án nào đang bị kẹt workflow.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Bước</th>
+                                <th>Số dự án kẹt</th>
+                                <th>Mức độ</th>
+                                <th class="text-end">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.WorkflowHealthItems)
+                            {
+                                <tr>
+                                    <td>@item.StepLabel</td>
+                                    <td><strong>@item.SoDuAnBiKet</strong></td>
+                                    <td>
+                                        <span class="badge @(item.MucDoNghiemTrong == "Cao" ? "bg-danger" : item.MucDoNghiemTrong == "Trung bình" ? "bg-warning text-dark" : "bg-secondary")">
+                                            @item.MucDoNghiemTrong
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        @if (!string.IsNullOrWhiteSpace(item.ActionUrl) && !string.IsNullOrWhiteSpace(item.ActionText))
+                                        {
+                                            <a href="@item.ActionUrl" class="btn btn-sm btn-outline-primary">@item.ActionText</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card card-soft p-3">
+            <h5 class="mb-3">System Suggestions</h5>
+            @if (!Model.Suggestions.Any())
+            {
+                <p class="text-muted mb-0">Chưa có gợi ý ưu tiên.</p>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var s in Model.Suggestions.Take(5))
+                    {
+                        <div class="border rounded p-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>@s.Title</strong>
+                                <span class="badge @(s.Priority == "Cao" ? "bg-danger" : s.Priority == "Trung bình" ? "bg-warning text-dark" : "bg-secondary")">@s.Priority</span>
+                            </div>
+                            <small class="text-muted d-block mt-1">@s.Description</small>
+                            @if (!string.IsNullOrWhiteSpace(s.ActionText) && !string.IsNullOrWhiteSpace(s.ActionUrl))
+                            {
+                                <a href="@s.ActionUrl" class="btn btn-sm btn-outline-primary mt-2">@s.ActionText</a>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TenDuAn));
+        const progressData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PhanTramTienDo));
+        const costData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChiPhiTheoDuAn));
+
+        new Chart(document.getElementById("progressChart"), {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "% hoàn thành",
+                    data: progressData,
+                    backgroundColor: "#4fb7e8"
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+
+        new Chart(document.getElementById("costChart"), {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Ngân sách",
+                    data: costData,
+                    borderColor: "#1e8bbf",
+                    backgroundColor: "rgba(30, 139, 191, 0.15)",
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: { responsive: true }
+        });
+    </script>
+}
+

@@ -1,0 +1,46 @@
+@model List<QuanLyDuAn.ViewModels.CongViec.CongViecItemViewModel>
+@using QuanLyDuAn.Constants
+
+<table class="table table-bordered table-sm app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã</th>
+            <th>Dự án</th>
+            <th>Danh mục</th>
+            <th>Công việc</th>
+            <th>Mức độ</th>
+            <th>Chi phí</th>
+            <th class="col-date">Bắt đầu</th>
+            <th class="col-date">Kết thúc</th>
+            <th class="col-status">Trạng thái</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Count == 0)
+        {
+            <tr>
+                <td colspan="9" class="text-center text-muted">Chưa có công việc.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="col-id">@item.MaCongViec</td>
+                    <td>@item.TenDuAn</td>
+                    <td>@item.TenDanhMucCV</td>
+                    <td>
+                        <div class="fw-semibold">@item.TenCongViec</div>
+                        <div class="text-muted">@item.MoTaCongViec</div>
+                    </td>
+                    <td>@item.TenMucDo</td>
+                    <td>@item.ChiPhiDaChi.ToString("N0")</td>
+                    <td class="col-date">@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</td>
+                    <td class="col-date">@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</td>
+                    <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiCongViec)</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

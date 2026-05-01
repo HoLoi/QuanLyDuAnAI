@@ -1,0 +1,40 @@
+@model QuanLyDuAn.ViewModels.DeXuatNganSach.DeXuatNganSachPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    var canCreate = permissions.Contains(Permissions.DeXuatNganSach.Them);
+}
+
+@if (canCreate)
+{
+    <form asp-action="TaoDeXuat" method="post" class="border rounded p-3 mb-3">
+        <input type="hidden" asp-for="LocMaDuAn" />
+        <input type="hidden" asp-for="LocTrangThai" />
+        <input type="hidden" asp-for="Form.MaDuAn" />
+
+        <div class="row g-2">
+            <div class="col-md-4">
+                <label class="form-label">Dự án</label>
+                <input class="form-control" value="@Model.TenDuAn" readonly />
+                <span asp-validation-for="Form.MaDuAn" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Form.NganSachDeXuat" class="form-label">Ngân sách đề xuất</label>
+                @* <input asp-for="Form.NganSachDeXuat" class="form-control" /> *@
+                <input asp-for="Form.NganSachDeXuat"
+                       class="form-control"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                <span asp-validation-for="Form.NganSachDeXuat" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Gửi đề xuất</button>
+            </div>
+            <div class="col-12">
+                <label asp-for="Form.LyDoDeXuat" class="form-label">Lý do đề xuất</label>
+                <textarea asp-for="Form.LyDoDeXuat" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Form.LyDoDeXuat" class="text-danger"></span>
+            </div>
+        </div>
+    </form>
+}

@@ -1,0 +1,26 @@
+﻿@model QuanLyDuAn.ViewModels.ChucDanh.ChucDanhPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canShowForm = permissions.Contains(Permissions.ChucDanh.Them) || permissions.Contains(Permissions.ChucDanh.Sua);
+    ViewBag.Permissions = permissions;
+}
+
+<div class="card p-3">
+    <h5>Quản lý chức danh</h5>
+
+    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+    @if (canShowForm)
+    {
+        <partial name="_Form" for="Form" />
+        <hr />
+    }
+
+    <partial name="_Table" model="Model.DanhSach" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

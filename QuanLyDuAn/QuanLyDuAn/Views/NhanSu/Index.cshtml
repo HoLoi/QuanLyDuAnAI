@@ -1,0 +1,32 @@
+﻿@model QuanLyDuAn.ViewModels.NhanSu.NhanSuPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canShowForm = permissions.Contains(Permissions.NhanSu.Them) || permissions.Contains(Permissions.NhanSu.Sua);
+    ViewBag.Permissions = permissions;
+    ViewBag.DanhSachChucDanh = Model.DanhSachChucDanh;
+    ViewBag.DanhSachVaiTroHeThong = Model.DanhSachVaiTroHeThong;
+    ViewBag.TuKhoa = Model.TuKhoa;
+    ViewBag.LocMaChucDanh = Model.LocMaChucDanh;
+    ViewBag.LocTrangThaiTaiKhoan = Model.LocTrangThaiTaiKhoan;
+}
+
+<div class="card p-3">
+
+    <h5>Quản lý nhân sự</h5>
+
+    @if (canShowForm)
+    {
+        <partial name="_Form" for="Form" />
+
+        <hr />
+    }
+
+    <partial name="_Filter" model="Model" />
+    <partial name="_Table" model="Model.DanhSach" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

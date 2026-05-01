@@ -1,0 +1,17 @@
+@model QuanLyDuAn.ViewModels.DanhMucCongViec.DanhMucCongViecPageViewModel
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
+    <div class="col-md-5">
+        <input type="text"
+               name="tuKhoa"
+               value="@Model.TuKhoa"
+               class="form-control"
+               placeholder="Tìm theo tên danh mục, mô tả..." />
+    </div>
+
+    <div class="col-md-7 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
+        <a asp-action="Index" asp-route-locMaDuAn="@Model.LocMaDuAn" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+</form>

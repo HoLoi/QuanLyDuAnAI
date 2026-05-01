@@ -1,0 +1,60 @@
+@model List<QuanLyDuAn.ViewModels.DeXuatNganSach.DeXuatNganSachItemViewModel>
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    var canCreate = permissions.Contains(Permissions.DeXuatNganSach.Them);
+    int? locMaDuAn = ViewBag.LocMaDuAn as int?;
+    string? locTrangThai = ViewBag.LocTrangThai as string;
+}
+
+<table class="table table-bordered table-sm app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã</th>
+            <th>Ngân sách cũ</th>
+            <th>Ngân sách đề xuất</th>
+            <th>Người đề xuất</th>
+            <th class="col-date">Ngày đề xuất</th>
+            <th class="col-status">Trạng thái</th>
+            <th class="col-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Count == 0)
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">Chưa có đề xuất ngân sách.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="col-id">@item.MaDeXuatNS</td>
+                    <td>@item.NganSachCu?.ToString("N0")</td>
+                    <td>@item.NganSachDeXuat?.ToString("N0")</td>
+                    <td>@item.NguoiDungDeXuat</td>
+                    <td class="col-date">@item.NgayDeXuat?.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiDeXuat)</td>
+                    <td class="col-actions table-actions">
+                        @if (canCreate && TrangThai.EqualsValue(item.TrangThaiDeXuat, TrangThai.ChoDuyet))
+                        {
+                            <form asp-action="HuyDeXuat" method="post">
+                                <input type="hidden" name="maDeXuatNs" value="@item.MaDeXuatNS" />
+                                <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                                <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td colspan="6" class="text-muted">Lý do: @item.LyDoDeXuat</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

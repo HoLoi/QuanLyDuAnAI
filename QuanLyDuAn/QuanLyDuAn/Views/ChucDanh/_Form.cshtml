@@ -1,0 +1,32 @@
+@model QuanLyDuAn.ViewModels.ChucDanh.ChucDanhCreateUpdateViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+}
+
+<form asp-action="LuuChucDanh" method="post">
+    <input asp-for="MaChucDanh" type="hidden" />
+
+    <div class="mb-2">
+        <label>Tên chức danh</label>
+        <input asp-for="TenChucDanh" class="form-control" required />
+        <span asp-validation-for="TenChucDanh" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Mô tả</label>
+        <textarea asp-for="MoTaChucDanh" class="form-control" required></textarea>
+        <span asp-validation-for="MoTaChucDanh" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex gap-2">
+        @if (CanAccess(Permissions.ChucDanh.Them) || CanAccess(Permissions.ChucDanh.Sua))
+        {
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        }
+
+        <a asp-action="Index" class="btn btn-secondary">Làm mới</a>
+    </div>
+</form>

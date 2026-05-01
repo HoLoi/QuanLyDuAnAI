@@ -1,0 +1,118 @@
+@model QuanLyDuAn.ViewModels.NhanSu.NhanSuCreateUpdateViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+
+    var danhSachChucDanh = ViewBag.DanhSachChucDanh as List<QuanLyDuAn.ViewModels.NhanSu.ChucDanhOptionViewModel>
+                           ?? new List<QuanLyDuAn.ViewModels.NhanSu.ChucDanhOptionViewModel>();
+    var danhSachVaiTroHeThong = ViewBag.DanhSachVaiTroHeThong as List<QuanLyDuAn.ViewModels.NhanSu.VaiTroHeThongOptionViewModel>
+                                ?? new List<QuanLyDuAn.ViewModels.NhanSu.VaiTroHeThongOptionViewModel>();
+}
+
+<form asp-action="LuuNhanSu" method="post">
+    <input asp-for="MaNguoiDung" type="hidden" />
+
+    <div class="row">
+        <div class="col-md-6 mb-2">
+            <label>Họ tên</label>
+            <input asp-for="HoTenNguoiDung" class="form-control" />
+            <span asp-validation-for="HoTenNguoiDung" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label>Chức danh</label>
+            <select asp-for="MaChucDanh" class="form-select">
+                <option value="">-- Chọn chức danh --</option>
+                @foreach (var item in danhSachChucDanh)
+                {
+                    <option value="@item.MaChucDanh">@item.TenChucDanh</option>
+                }
+            </select>
+            <span asp-validation-for="MaChucDanh" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label>Số điện thoại</label>
+            <input asp-for="SdtNguoiDung" class="form-control" />
+            <span asp-validation-for="SdtNguoiDung" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label>Ngày sinh</label>
+            <input asp-for="NgaySinh" type="date" class="form-control" />
+            <span asp-validation-for="NgaySinh" class="text-danger"></span>
+        </div>
+
+        <div class="col-12 mb-3">
+            <label>Địa chỉ</label>
+            <textarea asp-for="DiaChiNguoiDung" class="form-control"></textarea>
+            <span asp-validation-for="DiaChiNguoiDung" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label>Tên đăng nhập</label>
+            @if (Model.MaNguoiDung == null)
+            {
+                <input asp-for="UserName" class="form-control" autocomplete="username" />
+            }
+            else
+            {
+                <input asp-for="UserName" class="form-control" readonly />
+            }
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label>Email</label>
+            @if (Model.MaNguoiDung == null)
+            {
+                <input asp-for="Email" class="form-control" />
+            }
+            else
+            {
+                <input asp-for="Email" class="form-control" readonly />
+            }
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label>Vai trò hệ thống</label>
+            <select asp-for="RoleId" class="form-select">
+                <option value="">-- Chọn vai trò hệ thống --</option>
+                @foreach (var role in danhSachVaiTroHeThong)
+                {
+                    <option value="@role.RoleId">@role.RoleName</option>
+                }
+            </select>
+            <span asp-validation-for="RoleId" class="text-danger"></span>
+        </div>
+
+        @if (Model.MaNguoiDung == null)
+        {
+            <div class="col-md-6 mb-2">
+                <label>Mật khẩu</label>
+                <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" required />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+        }
+        else
+        {
+            <div class="col-md-6 mb-2">
+                <label>Reset mật khẩu (để trống nếu không đổi)</label>
+                <input asp-for="ResetPassword" type="password" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="ResetPassword" class="text-danger"></span>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex gap-2">
+        @if (CanAccess(Permissions.NhanSu.Them) || CanAccess(Permissions.NhanSu.Sua))
+        {
+            <button type="submit" class="btn btn-primary">Lưu</button>
+        }
+
+        <a asp-action="Index" class="btn btn-secondary">Làm mới</a>
+    </div>
+</form>

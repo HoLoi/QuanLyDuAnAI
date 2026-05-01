@@ -1,0 +1,77 @@
+@model List<QuanLyDuAn.ViewModels.NhanSu.NhanSuViewModel>
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+}
+
+<table class="table table-bordered mt-3 app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã</th>
+            <th>Họ tên</th>
+            <th>Chức danh</th>
+            <th>SĐT</th>
+            <th>Email</th>
+            <th class="col-status">Tài khoản</th>
+            <th class="col-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ns in Model)
+        {
+            <tr>
+                <td class="col-id">@ns.MaNguoiDung</td>
+                <td>@ns.HoTenNguoiDung</td>
+                <td>@ns.TenChucDanh</td>
+                <td>@ns.SdtNguoiDung</td>
+                <td>@ns.Email</td>
+                <td class="col-status">
+                    @if (!ns.CoTaiKhoan)
+                    {
+                        <span class="badge bg-secondary">Chưa có</span>
+                    }
+                    else if (ns.TaiKhoanBiKhoa)
+                    {
+                        <span class="badge bg-danger">@TrangThai.TaiKhoanKhoaHienThi</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">@TrangThai.TaiKhoanHoatDongHienThi</span>
+                    }
+                </td>
+                <td class="col-actions table-actions">
+                    @if (CanAccess(Permissions.NhanSu.Sua))
+                    {
+                        <a asp-action="Sua" asp-route-id="@ns.MaNguoiDung" class="btn btn-outline-warning btn-sm">Sửa</a>
+                    }
+
+                    @if (CanAccess(Permissions.NhanSu.Xoa))
+                    {
+                        <form asp-action="XoaNhanSu" method="post">
+                            <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                        </form>
+                    }
+
+                    @if (ns.CoTaiKhoan && CanAccess(Permissions.NhanSu.Khoa) && !ns.TaiKhoanBiKhoa)
+                    {
+                        <form asp-action="KhoaTaiKhoan" method="post">
+                            <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Khóa</button>
+                        </form>
+                    }
+
+                    @if (ns.CoTaiKhoan && CanAccess(Permissions.NhanSu.MoKhoa) && ns.TaiKhoanBiKhoa)
+                    {
+                        <form asp-action="MoKhoaTaiKhoan" method="post">
+                            <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
+                            <button type="submit" class="btn btn-outline-success btn-sm">Mở khóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

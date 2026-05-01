@@ -1,0 +1,55 @@
+﻿@model QuanLyDuAn.ViewModels.ThanhVienTeam.ThanhVienTeamPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canShowForm = permissions.Contains(Permissions.ThanhVienNhom.Them);
+    ViewBag.Permissions = permissions;
+    ViewBag.DanhSachTeam = Model.DanhSachTeam;
+    ViewBag.DanhSachNhanSu = Model.DanhSachNhanSu;
+    ViewBag.TuKhoa = Model.TuKhoa;
+    ViewBag.LocMaTeam = Model.LocMaTeam;
+    ViewBag.LocVaiTroLanhDao = Model.LocVaiTroLanhDao;
+    ViewBag.CheDoGanTruongNhom = Model.CheDoGanTruongNhom == true;
+}
+
+<div class="card p-3">
+    <h5>Quản lý thành viên team</h5>
+
+    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+    @if (canShowForm)
+    {
+        <partial name="_Form" for="Form" />
+
+        <hr />
+    }
+
+    <partial name="_Filter" model="Model" />
+    <partial name="_Table" model="Model.DanhSach" />
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const nhanSuSelect = document.getElementById("selectNhanSu");
+            const soTeamInput = document.getElementById("soTeamDaThamGia");
+
+            function updateSoTeamDaThamGia() {
+                if (!nhanSuSelect || !soTeamInput) {
+                    return;
+                }
+
+                const option = nhanSuSelect.options[nhanSuSelect.selectedIndex];
+                const count = option ? (option.getAttribute("data-team-count") || "0") : "0";
+                soTeamInput.value = count;
+            }
+
+            if (nhanSuSelect) {
+                nhanSuSelect.addEventListener("change", updateSoTeamDaThamGia);
+                updateSoTeamDaThamGia();
+            }
+        })();
+    </script>
+}

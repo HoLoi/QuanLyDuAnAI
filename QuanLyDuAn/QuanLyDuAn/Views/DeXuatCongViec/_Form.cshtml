@@ -1,0 +1,76 @@
+@model QuanLyDuAn.ViewModels.DeXuatCongViec.DeXuatCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    var canCreate = permissions.Contains(Permissions.DeXuatCongViec.Them);
+}
+
+@if (canCreate)
+{
+    <form asp-action="TaoDeXuat" method="post" class="border rounded p-3 mb-3">
+        <input type="hidden" asp-for="LocMaDuAn" />
+        <input type="hidden" asp-for="LocTrangThai" />
+        <input type="hidden" asp-for="Form.MaDuAn" />
+
+        <div class="row g-2">
+            <div class="col-md-4">
+                <label class="form-label">Dự án</label>
+                <input class="form-control" value="@Model.TenDuAn" readonly />
+                <span asp-validation-for="Form.MaDuAn" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Form.ChiPhiDeXuat" class="form-label">Chi phí đề xuất</label>
+                @*<input asp-for="Form.ChiPhiDeXuat" class="form-control" />*@
+                <input asp-for="Form.ChiPhiDeXuat"
+                       class="form-control"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                <span asp-validation-for="Form.ChiPhiDeXuat" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Form.TenCongViecDeXuat" class="form-label">Tên công việc</label>
+                <input asp-for="Form.TenCongViecDeXuat" class="form-control" />
+                <span asp-validation-for="Form.TenCongViecDeXuat" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Form.MaDanhMucCV" class="form-label">Danh mục công việc</label>
+                <select asp-for="Form.MaDanhMucCV" class="form-select">
+                    <option value="">-- Chọn danh mục --</option>
+                    @foreach (var item in Model.DanhSachDanhMuc)
+                    {
+                        <option value="@item.MaDanhMucCV">@item.TenDanhMucCV</option>
+                    }
+                </select>
+                <span asp-validation-for="Form.MaDanhMucCV" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Form.MaMucDo" class="form-label">Mức độ ưu tiên</label>
+                <select asp-for="Form.MaMucDo" class="form-select">
+                    <option value="">-- Chọn mức độ --</option>
+                    @foreach (var item in Model.DanhSachMucDo)
+                    {
+                        <option value="@item.MaMucDo">@item.TenMucDo</option>
+                    }
+                </select>
+                <span asp-validation-for="Form.MaMucDo" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Form.NgayBatDauCongViecDeXuat" class="form-label">Ngày bắt đầu dự kiến</label>
+                <input asp-for="Form.NgayBatDauCongViecDeXuat" type="date" class="form-control" />
+                <span asp-validation-for="Form.NgayBatDauCongViecDeXuat" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Form.NgayKetThucCVDeXuatDuKien" class="form-label">Ngày kết thúc dự kiến</label>
+                <input asp-for="Form.NgayKetThucCVDeXuatDuKien" type="date" class="form-control" />
+                <span asp-validation-for="Form.NgayKetThucCVDeXuatDuKien" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Form.MoTaCongViecDeXuat" class="form-label">Mô tả</label>
+                <textarea asp-for="Form.MoTaCongViecDeXuat" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Form.MoTaCongViecDeXuat" class="text-danger"></span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Gửi đề xuất</button>
+    </form>
+}

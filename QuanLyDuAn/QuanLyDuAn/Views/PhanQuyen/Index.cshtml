@@ -1,0 +1,128 @@
+﻿@model QuanLyDuAn.ViewModels.PhanQuyen.PhanQuyenPageViewModel
+@using QuanLyDuAn.Constants
+@{
+    ViewData["Title"] = "Phân quyền";
+}
+@{
+    bool CanAccess(params string[] keys)
+        => keys.Any(x => Model.Permissions.Contains(x));
+}
+
+<div class="card card-soft p-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <h5 class="mb-0">Ma trận phân quyền theo role hệ thống</h5>
+        <small class="text-muted">Tích chọn quyền cho từng vai trò rồi bấm Lưu.</small>
+    </div>
+
+    @if (!Model.Roles.Any())
+    {
+        <partial name="_EmptyState" />
+    }
+    else
+    {
+        <form asp-action="Save" method="post" id="permission-form">
+            @Html.AntiForgeryToken()
+            <div class="row g-3 mb-3">
+                <div class="col-lg-5">
+                    <label asp-for="SelectedRoleId" class="form-label fw-semibold">Vai trò hệ thống</label>
+                    <select asp-for="SelectedRoleId"
+                            class="form-select"
+                            onchange="window.location='@Url.Action("Index", "PhanQuyen")?roleId=' + encodeURIComponent(this.value)">
+                        <option value="">-- Chọn vai trò --</option>
+                        @foreach (var role in Model.Roles)
+                        {
+                            <option value="@role.RoleId">@role.RoleName</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-lg-7 d-flex align-items-end justify-content-lg-end gap-2">
+                    @if (CanAccess(Permissions.PhanQuyen.Luu))
+                    {
+                        <button type="button" class="btn btn-outline-secondary" id="select-all">Chọn tất cả</button>
+                        <button type="button" class="btn btn-outline-secondary" id="clear-all">Bỏ chọn tất cả</button>
+                        <button type="submit" class="btn btn-primary">Lưu quyền</button>
+                    }
+                </div>
+            </div>
+
+            @if (string.IsNullOrWhiteSpace(Model.SelectedRoleId))
+            {
+                <div class="alert alert-warning mb-0">Vui lòng chọn vai trò để phân quyền.</div>
+            }
+            else if (!Model.PermissionGroups.Any())
+            {
+                <div class="alert alert-warning mb-0">Chưa có danh mục quyền để cấu hình.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 28%;">Màn hình</th>
+                                <th>Danh sách quyền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var group in Model.PermissionGroups)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@group.TenManHinh</td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-3">
+                                            @foreach (var permission in group.DanhSachQuyen)
+                                            {
+                                                <div class="form-check">
+                                                    <input class="form-check-input permission-checkbox"
+                                                           type="checkbox"
+                                                           name="SelectedPermissionIds"
+                                                           value="@permission.MaDanhMucQuyen"
+                                                           disabled="@(!CanAccess(Permissions.PhanQuyen.Luu))"
+                                                           checked="@(permission.IsSelected ? "checked" : null)" />
+                                                    <label class="form-check-label" for="perm-@permission.MaDanhMucQuyen" title="@permission.MoTaDanhMucQuyen">
+                                                        @permission.TenDanhMucQuyen
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
+            const selectAllButton = document.getElementById('select-all');
+            const clearAllButton = document.getElementById('clear-all');
+
+            if (selectAllButton) {
+                selectAllButton.addEventListener('click', function () {
+                    permissionCheckboxes.forEach(function (checkbox) {
+                        if (!checkbox.disabled) {
+                            checkbox.checked = true;
+                        }
+                    });
+                });
+            }
+
+            if (clearAllButton) {
+                clearAllButton.addEventListener('click', function () {
+                    permissionCheckboxes.forEach(function (checkbox) {
+                        if (!checkbox.disabled) {
+                            checkbox.checked = false;
+                        }
+                    });
+                });
+            }
+        })();
+    </script>
+}
+

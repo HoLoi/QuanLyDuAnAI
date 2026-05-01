@@ -1,0 +1,54 @@
+@model List<QuanLyDuAn.ViewModels.DanhMucCongViec.DanhMucCongViecViewModel>
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+    string? tuKhoa = ViewBag.TuKhoa as string;
+    int? locMaDuAn = ViewBag.LocMaDuAn as int?;
+}
+
+<table class="table table-bordered mt-3 app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã</th>
+            <th>Tên danh mục</th>
+            <th>Mô tả</th>
+            <th class="col-date">Ngày tạo</th>
+            <th class="col-count">Số công việc</th>
+            <th class="col-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="col-id">@item.MaDanhMucCV</td>
+                <td>@item.TenDanhMucCV</td>
+                <td>@item.MoTaDanhMucCV</td>
+                <td class="col-date">@item.NgayTaoDMCV?.ToString("dd/MM/yyyy")</td>
+                <td class="col-count">@item.SoLuongCongViec</td>
+                <td class="col-actions table-actions">
+                    @if (CanAccess(Permissions.DanhMucCongViec.Sua))
+                    {
+                        <a asp-action="Sua"
+                           asp-route-id="@item.MaDanhMucCV"
+                           asp-route-tuKhoa="@tuKhoa"
+                           asp-route-locMaDuAn="@locMaDuAn"
+                           class="btn btn-outline-warning btn-sm">Sửa</a>
+                    }
+
+                    @if (CanAccess(Permissions.DanhMucCongViec.Xoa))
+                    {
+                        <form asp-action="XoaDanhMucCongViec" method="post">
+                            <input type="hidden" name="maDanhMucCV" value="@item.MaDanhMucCV" />
+                            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

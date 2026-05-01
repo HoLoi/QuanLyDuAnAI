@@ -1,0 +1,92 @@
+﻿@model QuanLyDuAn.ViewModels.DuyetDeXuatNganSach.DuyetDeXuatNganSachPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    var canApprove = permissions.Contains(Permissions.DuyetNganSach.Duyet);
+}
+
+<div class="card p-3">
+    <h5>Duyệt đề xuất ngân sách</h5>
+
+    <form asp-action="Index" method="get" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input type="number" name="locMaDuAn" value="@Model.LocMaDuAn" class="form-control" placeholder="Mã dự án" />
+        </div>
+        <div class="col-md-4">
+            <select name="locTrangThai" class="form-select">
+                <option value="">-- Tất cả trạng thái --</option>
+                <option value="@TrangThai.ChoDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoDuyet))">@TrangThai.ChoDuyetHienThi</option>
+                <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
+                <option value="@TrangThai.TuChoi" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TuChoi))">@TrangThai.TuChoiHienThi</option>
+                <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button class="btn btn-outline-primary" type="submit">Lọc</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Bỏ lọc</a>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Mã</th>
+                <th>Dự án</th>
+                <th>Người đề xuất</th>
+                <th>Ngân sách cũ</th>
+                <th>Ngân sách đề xuất</th>
+                <th>Ngày đề xuất</th>
+                <th>Trạng thái</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.DanhSach.Count == 0)
+            {
+                <tr>
+                    <td colspan="8" class="text-center text-muted">Không có đề xuất ngân sách.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.DanhSach)
+                {
+                    <tr>
+                        <td>@item.MaDeXuatNS</td>
+                        <td>@item.TenDuAn</td>
+                        <td>@item.NguoiDungDeXuat</td>
+                        <td>@item.NganSachCu?.ToString("N0")</td>
+                        <td>@item.NganSachDeXuat?.ToString("N0")</td>
+                        <td>@item.NgayDeXuat?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@TrangThai.ToDisplay(item.TrangThaiDeXuat)</td>
+                        <td>
+                            @if (canApprove && TrangThai.EqualsValue(item.TrangThaiDeXuat, TrangThai.ChoDuyet))
+                            {
+                                <div class="d-flex gap-1">
+                                    <form asp-action="Duyet" method="post">
+                                        <input type="hidden" name="maDeXuatNs" value="@item.MaDeXuatNS" />
+                                        <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
+                                        <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
+                                        <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
+                                    </form>
+                                    <form asp-action="TuChoi" method="post" class="d-flex gap-1">
+                                        <input type="hidden" name="maDeXuatNs" value="@item.MaDeXuatNS" />
+                                        <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
+                                        <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
+                                        <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Từ chối</button>
+                                    </form>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td colspan="7" class="text-muted">Lý do: @item.LyDoDeXuat</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,119 @@
+@model List<QuanLyDuAn.ViewModels.DuAn.DuAnViewModel>
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+    string? tuKhoa = ViewBag.TuKhoa as string;
+    int? locMaLoaiDuAn = ViewBag.LocMaLoaiDuAn as int?;
+    string? locTrangThaiDuAn = ViewBag.LocTrangThaiDuAn as string;
+}
+
+<table class="table table-bordered mt-3 app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã</th>
+            <th>Tên dự án</th>
+            <th>Loại</th>
+            <th class="col-date">Ngày tạo</th>
+            <th class="col-date">Thời gian</th>
+            <th class="col-status">Trạng thái</th>
+            <th class="col-count">Team/Thành viên</th>
+            <th class="col-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var duAn in Model)
+        {
+            <tr>
+                <td class="col-id">@duAn.MaDuAn</td>
+                <td>
+                    <div class="fw-semibold">@duAn.TenDuAn</div>
+                </td>
+                <td>@duAn.TenLoaiDuAn</td>
+                <td class="col-date">@duAn.NgayTaoDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
+                <td class="col-date">@duAn.NgayBatDauDuAn?.ToString("dd/MM/yyyy") - @duAn.NgayKetThucDuAn?.ToString("dd/MM/yyyy")</td>
+                <td class="col-status">@TrangThai.ToDisplay(duAn.TrangThaiDuAn)</td>
+                <td class="col-count">@duAn.SoLuongTeam / @duAn.SoLuongThanhVien</td>
+                <td class="col-actions table-actions">
+                    @if (CanAccess(Permissions.DuAn.Xem))
+                    {
+                        <a asp-action="ChiTiet"
+                           asp-route-id="@duAn.MaDuAn"
+                           asp-route-tuKhoa="@tuKhoa"
+                           asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
+                           asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
+                           class="btn btn-outline-secondary btn-sm">Chi tiết</a>
+                    }
+
+                    @if (CanAccess(Permissions.TeamDuAn.Xem))
+                    {
+                        <a asp-controller="TeamDuAn"
+                           asp-action="Index"
+                           asp-route-maDuAn="@duAn.MaDuAn"
+                           asp-route-tuKhoa="@tuKhoa"
+                           asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
+                           asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
+                              class="btn btn-outline-info btn-sm">Team phụ trách</a>
+                    }
+
+                          @if (CanAccess(Permissions.DanhMucCongViec.Xem))
+                          {
+                                <a asp-controller="DanhMucCongViec"
+                                    asp-action="Index"
+                                    asp-route-locMaDuAn="@duAn.MaDuAn"
+                                    class="btn btn-outline-primary btn-sm">Danh mục công việc</a>
+                          }
+
+                    @if (CanAccess(Permissions.ThanhVienDuAn.Xem))
+                    {
+                        <a asp-controller="NhanVienDuAn"
+                           asp-action="Index"
+                           asp-route-maDuAn="@duAn.MaDuAn"
+                           asp-route-tuKhoa="@tuKhoa"
+                           asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
+                           asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
+                           class="btn btn-outline-info btn-sm">Nhân viên</a>
+                    }
+
+                    @if (CanAccess(Permissions.DeXuatCongViec.Xem))
+                    {
+                        <a asp-controller="DeXuatCongViec"
+                           asp-action="Index"
+                           asp-route-locMaDuAn="@duAn.MaDuAn"
+                           class="btn btn-outline-primary btn-sm">Đề xuất công việc</a>
+                    }
+
+                    @if (CanAccess(Permissions.DeXuatNganSach.Xem))
+                    {
+                        <a asp-controller="DeXuatNganSach"
+                           asp-action="Index"
+                           asp-route-locMaDuAn="@duAn.MaDuAn"
+                           class="btn btn-outline-primary btn-sm">Đề xuất ngân sách</a>
+                    }
+
+                    @if (CanAccess(Permissions.DuAn.Sua))
+                    {
+                        <a asp-action="Sua"
+                           asp-route-id="@duAn.MaDuAn"
+                           asp-route-tuKhoa="@tuKhoa"
+                           asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
+                           asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
+                              class="btn btn-outline-warning btn-sm">Sửa</a>
+                    }
+
+                    @if (CanAccess(Permissions.DuAn.Xoa))
+                    {
+                        <form asp-action="XoaDuAn" method="post">
+                            <input type="hidden" name="maDuAn" value="@duAn.MaDuAn" />
+                            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <input type="hidden" name="locMaLoaiDuAn" value="@locMaLoaiDuAn" />
+                            <input type="hidden" name="locTrangThaiDuAn" value="@locTrangThaiDuAn" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
