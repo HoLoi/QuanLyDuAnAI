@@ -1,0 +1,167 @@
+﻿@model QuanLyDuAn.ViewModels.ChiTietCongViec.ChiTietCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canThem = permissions.Contains(Permissions.ChiTietCongViec.Them) && Model.CoTheCapNhat;
+    bool canSua = permissions.Contains(Permissions.ChiTietCongViec.Sua) && Model.CoTheCapNhat;
+    bool canXoa = permissions.Contains(Permissions.ChiTietCongViec.Xoa) && Model.CoTheCapNhat;
+    bool coQuyenClaimCapNhat = permissions.Contains(Permissions.ChiTietCongViec.Them)
+        || permissions.Contains(Permissions.ChiTietCongViec.Sua)
+        || permissions.Contains(Permissions.ChiTietCongViec.Xoa);
+    var trangThaiOptions = new[]
+    {
+        TrangThai.ChuaBatDau,
+        TrangThai.DangThucHien,
+        TrangThai.BiCanCan,
+        TrangThai.TamDung,
+        TrangThai.HoanThanh
+    };
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Chi tiết công việc</h5>
+        <a asp-controller="CongViec" asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại công việc</a>
+    </div>
+
+    <div class="alert alert-light border mb-3">
+        <div><strong>Công việc:</strong> @Model.CongViec.TenCongViec (Mã: @Model.CongViec.MaCongViec)</div>
+        <div><strong>Trạng thái hiện tại:</strong> @Model.CongViec.TenTrangThai | <strong>Hoàn thành:</strong> @Model.CongViec.PhanTramHoanThanh%</div>
+    </div>
+
+    @if (coQuyenClaimCapNhat && !Model.CoTheCapNhat)
+    {
+        <div class="alert alert-warning">
+            Bạn có quyền chức năng nhưng không thuộc vai trò được phép cập nhật (leader/manager/admin hoặc theo phân công hiện hành).
+        </div>
+    }
+
+    @if (canThem)
+    {
+        <h6>Thêm chi tiết công việc</h6>
+        <form asp-action="Them" method="post" class="mb-3">
+            <input type="hidden" name="MaCongViec" value="@Model.CongViec.MaCongViec" />
+
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <label class="form-label">Nội dung</label>
+                    <input type="text" class="form-control" name="NoiDungChiTietCV" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Ngày báo cáo</label>
+                    <input type="date" class="form-control" name="NgayBaoCaoCTCV" value="@Model.Form.NgayBaoCaoCTCV?.ToString("yyyy-MM-dd")" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">% hoàn thành</label>
+                    <input type="number" class="form-control" name="PhanTramHoanThanhCTCV" min="0" max="100" step="0.01" value="@Model.Form.PhanTramHoanThanhCTCV" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select class="form-select" name="TrangThaiCTCV" required>
+                        @foreach (var item in trangThaiOptions)
+                        {
+                            <option value="@item">@TrangThai.ToDisplay(item)</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary">Thêm chi tiết</button>
+                <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="btn btn-secondary">Làm mới</a>
+            </div>
+        </form>
+        <hr />
+    }
+
+    <h6>Danh sách chi tiết công việc</h6>
+    <table class="table table-bordered table-sm app-data-table">
+        <thead>
+            <tr>
+                <th class="col-id">Mã</th>
+                <th>Nội dung</th>
+                <th class="col-date">Ngày báo cáo</th>
+                <th class="col-date">Ngày tạo</th>
+                <th class="col-count">% HT</th>
+                <th class="col-status">Trạng thái</th>
+                <th class="col-action">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.DanhSach.Any())
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted">Chưa có chi tiết công việc.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model.DanhSach)
+                {
+                    var collapseId = $"edit-{item.MaChiTietCV}";
+                    <tr>
+                        <td class="col-id">@item.MaChiTietCV</td>
+                        <td>@item.NoiDungChiTietCV</td>
+                        <td class="col-date">@item.NgayBaoCaoCTCV?.ToString("dd/MM/yyyy")</td>
+                        <td class="col-date">@item.NgayTaoCTCV?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="col-count">@item.PhanTramHoanThanhCTCV?.ToString("0.##")%</td>
+                        <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiCTCV)</td>
+                        <td class="col-action table-actions">
+                            @if (canSua)
+                            {
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#@collapseId">
+                                    Sửa
+                                </button>
+                            }
+                            @if (canXoa)
+                            {
+                                <form asp-action="Xoa" method="post">
+                                    <input type="hidden" name="maCongViec" value="@Model.CongViec.MaCongViec" />
+                                    <input type="hidden" name="maChiTietCv" value="@item.MaChiTietCV" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                    @if (canSua)
+                    {
+                        <tr class="collapse" id="@collapseId">
+                            <td colspan="7">
+                                <form asp-action="Sua" method="post" class="row g-2">
+                                    <input type="hidden" name="MaChiTietCV" value="@item.MaChiTietCV" />
+                                    <input type="hidden" name="MaCongViec" value="@Model.CongViec.MaCongViec" />
+
+                                    <div class="col-md-5">
+                                        <label class="form-label">Nội dung</label>
+                                        <input type="text" class="form-control" name="NoiDungChiTietCV" value="@item.NoiDungChiTietCV" required />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Ngày báo cáo</label>
+                                        <input type="date" class="form-control" name="NgayBaoCaoCTCV" value="@item.NgayBaoCaoCTCV?.ToString("yyyy-MM-dd")" required />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">% hoàn thành</label>
+                                        <input type="number" class="form-control" name="PhanTramHoanThanhCTCV" min="0" max="100" step="0.01" value="@item.PhanTramHoanThanhCTCV" required />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Trạng thái</label>
+                                        <select class="form-select" name="TrangThaiCTCV" required>
+                                            @foreach (var status in trangThaiOptions)
+                                            {
+                                                <option value="@status" selected="@(TrangThai.EqualsValue(item.TrangThaiCTCV, status))">@TrangThai.ToDisplay(status)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary btn-sm">Lưu cập nhật</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

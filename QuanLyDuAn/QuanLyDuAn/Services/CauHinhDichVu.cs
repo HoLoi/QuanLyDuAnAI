@@ -1,4 +1,4 @@
-﻿using QuanLyDuAn.Services.Implementations;
+using QuanLyDuAn.Services.Implementations;
 using QuanLyDuAn.Services.Interfaces;
 
 namespace QuanLyDuAn.Services
@@ -18,6 +18,8 @@ namespace QuanLyDuAn.Services
             dichVu.AddScoped<INhanVienDuAnService, NhanVienDuAnService>();
             dichVu.AddScoped<IDanhMucCongViecService, DanhMucCongViecService>();
             dichVu.AddScoped<ICongViecService, CongViecService>();
+            dichVu.AddScoped<IChiTietCongViecService, ChiTietCongViecService>();
+            dichVu.AddScoped<IPhanCongCongViecService, PhanCongCongViecService>();
             dichVu.AddScoped<IDeXuatCongViecService, DeXuatCongViecService>();
             dichVu.AddScoped<IDuyetDeXuatCongViecService, DyetDeXuatCongViecService>();
             dichVu.AddScoped<INganSachService, NganSachService>();

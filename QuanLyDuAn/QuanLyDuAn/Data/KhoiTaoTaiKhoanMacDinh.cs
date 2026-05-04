@@ -144,6 +144,9 @@ public static class KhoiTaoTaiKhoanMacDinh
             // Công việc
             Permissions.CongViec.Xem,
 
+            // Chi tiết công việc
+            Permissions.ChiTietCongViec.Xem,
+
             // Phân công
             Permissions.PhanCong.Xem,
             Permissions.PhanCong.ThucHien,
@@ -200,6 +203,12 @@ public static class KhoiTaoTaiKhoanMacDinh
             // Đề xuất công việc
             Permissions.DeXuatCongViec.Xem,
             Permissions.DeXuatCongViec.Them,
+
+            // Chi tiết công việc
+            Permissions.ChiTietCongViec.Xem,
+            Permissions.ChiTietCongViec.Them,
+            Permissions.ChiTietCongViec.Sua,
+            Permissions.ChiTietCongViec.Xoa,
 
             // Tiến độ
             Permissions.TienDo.CapNhat,
@@ -570,7 +579,10 @@ public static class KhoiTaoTaiKhoanMacDinh
 
             ["ChiTietCongViec"] = new[]
             {
-                Permissions.ChiTietCongViec.Xem
+                Permissions.ChiTietCongViec.Xem,
+                Permissions.ChiTietCongViec.Them,
+                Permissions.ChiTietCongViec.Sua,
+                Permissions.ChiTietCongViec.Xoa
             },
 
             ["PhanCong"] = new[]

@@ -1,0 +1,73 @@
+@model QuanLyDuAn.ViewModels.PhanCongCongViec.PhanCongCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var coTheQuanLyCongViec = Model.CoTheQuanLyCongViec;
+    var coUngVienPhanCong = Model.ThanhVienCoThePhanCong.Any();
+    var duocGoiPhanCong = coTheQuanLyCongViec && coUngVienPhanCong;
+}
+
+@if (!coTheQuanLyCongViec)
+{
+    <div class="alert alert-danger d-flex align-items-center gap-3">
+        <i class="bi bi-shield-lock fs-3"></i>
+        <div>
+            <h6 class="mb-1">Không đủ quyền phân công</h6>
+            <p class="mb-0 text-muted">Bạn không phải Leader hoặc không có quyền phù hợp để phân công công việc này.</p>
+        </div>
+    </div>
+}
+
+@if (!coUngVienPhanCong)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-3">
+        <i class="bi bi-signpost-split fs-3"></i>
+        <div>
+            <h6 class="mb-1">Chưa đủ điều kiện quy trình</h6>
+            <p class="mb-0 text-muted">Dự án chưa có team hoặc chưa có thành viên dự án phù hợp để nhận việc.</p>
+        </div>
+    </div>
+}
+
+<form asp-action="ThemPhanCong" method="post">
+    <input type="hidden" name="maCongViec" value="@Model.CongViec.MaCongViec" />
+
+    <div class="row g-2">
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Nhân viên</label>
+            <select class="form-select" name="maNhanVien" required
+                    disabled="@(!duocGoiPhanCong)"
+                    title="@(!coTheQuanLyCongViec ? "Không đủ quyền" : !coUngVienPhanCong ? "Thiếu team hoặc thành viên dự án" : string.Empty)">
+                <option value="">-- Chọn nhân viên thuộc dự án --</option>
+                @foreach (var nv in Model.ThanhVienCoThePhanCong)
+                {
+                    <option value="@nv.MaNguoiDung">@nv.HoTenNguoiDung - @nv.VaiTroTrongDuAn</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Vai trò phân công</label>
+            <input type="text" class="form-control" value="@TrangThai.VaiTroThucHien" readonly disabled="@(!duocGoiPhanCong)" tabindex="-1" />
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Từ ngày</label>
+            <input type="date" class="form-control" name="tuNgay" disabled="@(!duocGoiPhanCong)" />
+        </div>
+
+        <div class="col-md-6 mb-2">
+            <label class="form-label">Đến ngày</label>
+            <input type="date" class="form-control" name="denNgay" disabled="@(!duocGoiPhanCong)" />
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-2">
+        <button type="submit" class="btn btn-primary"
+                disabled="@(!duocGoiPhanCong)"
+                title="@(!coTheQuanLyCongViec ? "Không đủ quyền" : !coUngVienPhanCong ? "Thiếu team hoặc thành viên dự án" : string.Empty)">
+            Lưu phân công
+        </button>
+        <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="btn btn-secondary">Làm mới</a>
+    </div>
+</form>

@@ -36,6 +36,7 @@
                 <th>Người đề xuất</th>
                 <th>Ngân sách cũ</th>
                 <th>Ngân sách đề xuất</th>
+                <th>Lý do</th>
                 <th>Ngày đề xuất</th>
                 <th>Trạng thái</th>
                 <th></th>
@@ -45,7 +46,7 @@
             @if (Model.DanhSach.Count == 0)
             {
                 <tr>
-                    <td colspan="8" class="text-center text-muted">Không có đề xuất ngân sách.</td>
+                    <td colspan="9" class="text-center text-muted">Không có đề xuất ngân sách.</td>
                 </tr>
             }
             else
@@ -58,6 +59,7 @@
                         <td>@item.NguoiDungDeXuat</td>
                         <td>@item.NganSachCu?.ToString("N0")</td>
                         <td>@item.NganSachDeXuat?.ToString("N0")</td>
+                        <td>@item.LyDoDeXuat</td>
                         <td>@item.NgayDeXuat?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@TrangThai.ToDisplay(item.TrangThaiDeXuat)</td>
                         <td>
@@ -80,10 +82,6 @@
                                 </div>
                             }
                         </td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td colspan="7" class="text-muted">Lý do: @item.LyDoDeXuat</td>
                     </tr>
                 }
             }

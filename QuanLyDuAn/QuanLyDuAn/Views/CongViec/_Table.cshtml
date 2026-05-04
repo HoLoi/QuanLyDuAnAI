@@ -8,18 +8,20 @@
             <th>Dự án</th>
             <th>Danh mục</th>
             <th>Công việc</th>
+            <th>Mô tả</th>
             <th>Mức độ</th>
             <th>Chi phí</th>
             <th class="col-date">Bắt đầu</th>
             <th class="col-date">Kết thúc</th>
             <th class="col-status">Trạng thái</th>
+            <th class="col-action">Thao tác</th>
         </tr>
     </thead>
     <tbody>
         @if (Model.Count == 0)
         {
             <tr>
-                <td colspan="9" class="text-center text-muted">Chưa có công việc.</td>
+                <td colspan="11" class="text-center text-muted">Chưa có công việc.</td>
             </tr>
         }
         else
@@ -30,15 +32,22 @@
                     <td class="col-id">@item.MaCongViec</td>
                     <td>@item.TenDuAn</td>
                     <td>@item.TenDanhMucCV</td>
-                    <td>
-                        <div class="fw-semibold">@item.TenCongViec</div>
-                        <div class="text-muted">@item.MoTaCongViec</div>
-                    </td>
+                    <td>@item.TenCongViec</td>
+                    <td>@item.MoTaCongViec</td>
                     <td>@item.TenMucDo</td>
                     <td>@item.ChiPhiDaChi.ToString("N0")</td>
                     <td class="col-date">@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</td>
                     <td class="col-date">@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</td>
                     <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiCongViec)</td>
+                    <td>
+                        <!-- Nút phân công công việc -->
+                        <a asp-controller="PhanCongCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-sm btn-outline-primary mb-1">
+                            <i class="bi bi-person-plus"></i> Phân công
+                        </a>
+                        <a asp-controller="ChiTietCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-sm btn-outline-secondary mb-1">
+                            <i class="bi bi-card-text"></i> Chi tiết
+                        </a>
+                    </td>
                 </tr>
             }
         }

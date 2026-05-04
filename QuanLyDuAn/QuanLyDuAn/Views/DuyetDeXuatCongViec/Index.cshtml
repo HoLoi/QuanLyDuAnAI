@@ -35,6 +35,7 @@
                 <th>Dự án</th>
                 <th>Người đề xuất</th>
                 <th>Công việc</th>
+                <th>Mô tả</th>
                 <th>Chi phí</th>
                 <th>Ngày đề xuất</th>
                 <th>Trạng thái</th>
@@ -45,7 +46,7 @@
             @if (Model.DanhSach.Count == 0)
             {
                 <tr>
-                    <td colspan="8" class="text-center text-muted">Không có đề xuất công việc.</td>
+                    <td colspan="9" class="text-center text-muted">Không có đề xuất công việc.</td>
                 </tr>
             }
             else
@@ -56,10 +57,8 @@
                         <td>@item.MaDeXuatCV</td>
                         <td>@item.TenDuAn</td>
                         <td>@item.NguoiDungDeXuat</td>
-                        <td>
-                            <div class="fw-semibold">@item.TenCongViecDeXuat</div>
-                            <div class="text-muted">@item.MoTaCongViecDeXuat</div>
-                        </td>
+                        <td>@item.TenCongViecDeXuat</td>
+                        <td>@item.MoTaCongViecDeXuat</td>
                         <td>@item.ChiPhiDeXuat?.ToString("N0")</td>
                         <td>@item.NgayDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)</td>

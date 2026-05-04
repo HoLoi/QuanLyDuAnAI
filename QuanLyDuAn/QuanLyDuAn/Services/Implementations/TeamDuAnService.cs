@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
@@ -193,15 +193,26 @@ namespace QuanLyDuAn.Services.Implementations
 
             var removeIds = removeCandidates.Except(protectedByOtherTeams).ToList();
 
-            foreach (var id in addIds)
+            if (addIds.Count > 0)
             {
-                _context.NhanVienDuAn.Add(new NhanVienDuAn
+                var leaderIds = (await _context.NhanVienTeam
+                    .Where(x => x.MaTeam == maTeam.Value && addIds.Contains(x.MaNguoiDung) && x.IsLeader == true)
+                    .Select(x => x.MaNguoiDung)
+                    .ToListAsync())
+                    .ToHashSet();
+
+                foreach (var id in addIds)
                 {
-                    MaDuAn = maDuAn,
-                    MaNguoiDung = id,
-                    NgayThamGiaDuAn = DateTime.Now,
-                    VaiTroTrongDuAn = $"Thành viên ({team.TenTeam ?? "Team"})"
-                });
+                    _context.NhanVienDuAn.Add(new NhanVienDuAn
+                    {
+                        MaDuAn = maDuAn,
+                        MaNguoiDung = id,
+                        NgayThamGiaDuAn = DateTime.Now,
+                        VaiTroTrongDuAn = leaderIds.Contains(id)
+                            ? TrangThai.VaiTroLeader
+                            : TrangThai.VaiTroMember
+                    });
+                }
             }
 
             if (removeIds.Count > 0)

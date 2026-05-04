@@ -59,12 +59,16 @@ public class DashboardService : IDashboardService
                 && x.NgayKetThucCVDuKien.HasValue
                 && x.NgayKetThucCVDuKien.Value < DateTime.Now
                 && x.TrangThaiCongViec != TrangThai.HoanThanh
-                && x.TrangThaiCongViec != TrangThai.HoanThanhHienThi),
+                && x.TrangThaiCongViec != TrangThai.HoanThanhHienThi
+                && x.TrangThaiCongViec != TrangThai.Done
+                && x.TrangThaiCongViec != TrangThai.Completed),
             NhanSuQuaTai = await (from pc in _db.PhanCongCongViec
                                   join cv in _db.CongViec on pc.MaCongViec equals cv.MaCongViec
                                   where cv.IsDeleted != true
                                         && cv.TrangThaiCongViec != TrangThai.HoanThanh
                                         && cv.TrangThaiCongViec != TrangThai.HoanThanhHienThi
+                                        && cv.TrangThaiCongViec != TrangThai.Done
+                                        && cv.TrangThaiCongViec != TrangThai.Completed
                                   group pc by pc.MaNguoiDung into g
                                   where g.Count() > 5
                                   select g.Key).CountAsync(),

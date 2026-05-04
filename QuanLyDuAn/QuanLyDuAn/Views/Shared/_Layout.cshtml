@@ -28,7 +28,6 @@
     // ===== CÔNG VIỆC =====
     var canDanhMuc = CanAccess(Permissions.DanhMucCongViec.Xem);
     var canCongViec = CanAccess(Permissions.CongViec.Xem);
-    var canPhanCong = CanAccess(Permissions.PhanCong.Xem);
     var canTienDo = CanAccess(Permissions.TienDo.Xem);
     var canDeXuat = CanAccess(Permissions.DeXuatCongViec.Xem);
     var canDuyetDeXuat = CanAccess(Permissions.DuyetDeXuatCongViec.Xem);
@@ -127,7 +126,7 @@
                         }
                     }
 
-                    @if (canCongViec || canDeXuat || canDuyetDeXuat || canPhanCong || canTienDo)
+                    @if (canCongViec || canDeXuat || canDuyetDeXuat || canTienDo)
                     {
                         <div class="text-uppercase text-muted small fw-bold mt-3 mb-1">Công việc</div>
 
@@ -142,13 +141,6 @@
                         {
                             <a asp-controller="CongViec" asp-action="Index" class="side-link">
                                 <i class="bi bi-list-task"></i> Công việc
-                            </a>
-                        }
-
-                        @if (canPhanCong)
-                        {
-                            <a asp-controller="PhanCong" asp-action="Index" class="side-link">
-                                <i class="bi bi-person-check"></i> Phân công
                             </a>
                         }
 

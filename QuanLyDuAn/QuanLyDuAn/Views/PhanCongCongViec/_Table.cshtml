@@ -1,0 +1,89 @@
+@model QuanLyDuAn.ViewModels.PhanCongCongViec.PhanCongCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool canPhanCong = permissions.Contains(Permissions.PhanCong.ThucHien);
+    var maCongViec = Model.CongViec.MaCongViec;
+}
+
+@* Bảng danh sách đã phân công *@
+<h6>Danh sách đã phân công</h6>
+
+<table class="table table-bordered mt-2 app-data-table">
+    <thead>
+        <tr>
+            <th class="col-id">Mã NV</th>
+            <th>Nhân viên</th>
+            <th>Vai trò</th>
+            <th class="col-date">Ngày giao</th>
+            <th class="col-actions"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.DanhSachPhanCong.Any())
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">Chưa có phân công công việc.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model.DanhSachPhanCong)
+            {
+                <tr>
+                    <td class="col-id">@item.MaNguoiDung</td>
+                    <td>@item.TenNhanVien</td>
+                    <td>@item.VaiTro</td>
+                    <td class="col-date">@item.NgayGiaoViec?.ToString("dd/MM/yyyy")</td>
+                    <td class="col-actions table-actions">
+                        @if (canPhanCong && Model.CoTheQuanLyCongViec)
+                        {
+                            <form asp-action="XoaPhanCong" method="post">
+                                <input type="hidden" name="maCongViec" value="@maCongViec" />
+                                <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@* Bảng danh sách nhân viên có thể phân công *@
+<h6 class="mt-3">Nhân viên thuộc dự án (có thể phân công)</h6>
+
+@if (!Model.ThanhVienCoThePhanCong.Any())
+{
+    <div class="alert alert-warning d-flex align-items-center gap-3">
+        <i class="bi bi-diagram-3 fs-3"></i>
+        <div>
+            <h6 class="mb-1">Dự án chưa có nhân viên hợp lệ</h6>
+            <p class="mb-0 text-muted">Chỉ nhân viên thuộc dự án và chưa được phân công mới hiển thị ở đây.</p>
+        </div>
+    </div>
+}
+else
+{
+    <table class="table table-bordered mt-2 app-data-table">
+        <thead>
+            <tr>
+                <th class="col-id">Mã NV</th>
+                <th>Nhân viên</th>
+                <th>Vai trò trong dự án</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var nv in Model.ThanhVienCoThePhanCong)
+            {
+                <tr>
+                    <td class="col-id">@nv.MaNguoiDung</td>
+                    <td>@nv.HoTenNguoiDung</td>
+                    <td>@nv.VaiTroTrongDuAn</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

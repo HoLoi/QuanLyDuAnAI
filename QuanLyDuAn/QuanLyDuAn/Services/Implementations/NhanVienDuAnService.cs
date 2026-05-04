@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
@@ -54,7 +54,7 @@ namespace QuanLyDuAn.Services.Implementations
                 {
                     MaNguoiDung = nvda.MaNguoiDung,
                     HoTenNguoiDung = nd.HoTenNguoiDung ?? $"Nhân viên {nd.MaNguoiDung}",
-                    VaiTroTrongDuAn = nvda.VaiTroTrongDuAn ?? "Thành viên dự án",
+                    VaiTroTrongDuAn = nvda.VaiTroTrongDuAn ?? TrangThai.VaiTroMember,
                     NgayThamGiaDuAn = nvda.NgayThamGiaDuAn,
                     ThuocTeamPhuTrach = _context.NhanVienTeam.Any(nvt =>
                         assignedTeamIds.Contains(nvt.MaTeam) && nvt.MaNguoiDung == nvda.MaNguoiDung),
@@ -168,7 +168,7 @@ namespace QuanLyDuAn.Services.Implementations
                     MaDuAn = maDuAn,
                     MaNguoiDung = id,
                     NgayThamGiaDuAn = DateTime.Now,
-                    VaiTroTrongDuAn = "Thành viên dự án"
+                    VaiTroTrongDuAn = TrangThai.VaiTroMember
                 });
 
                 _context.NhatKyPhuTrachDuAn.Add(new NhatKyPhuTrachDuAn
@@ -194,6 +194,13 @@ namespace QuanLyDuAn.Services.Implementations
 
             if (vaiTro.Length > 50)
                 throw new Exception("Vai trò trong dự án tối đa 50 ký tự.");
+
+            if (TrangThai.EqualsValue(vaiTro, TrangThai.VaiTroThanhVienDuAn))
+                vaiTro = TrangThai.VaiTroMember;
+
+            if (!TrangThai.EqualsValue(vaiTro, TrangThai.VaiTroLeader)
+                && !TrangThai.EqualsValue(vaiTro, TrangThai.VaiTroMember))
+                throw new Exception("Vai trò trong dự án chỉ gồm Trưởng nhóm hoặc Thành viên.");
 
             var entity = await _context.NhanVienDuAn
                 .FirstOrDefaultAsync(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNguoiDung);

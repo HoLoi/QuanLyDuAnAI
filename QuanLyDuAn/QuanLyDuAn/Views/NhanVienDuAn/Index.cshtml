@@ -1,4 +1,4 @@
-﻿@model QuanLyDuAn.ViewModels.NhanVienDuAn.NhanVienDuAnPageViewModel
+@model QuanLyDuAn.ViewModels.NhanVienDuAn.NhanVienDuAnPageViewModel
 @using QuanLyDuAn.Constants
 
 @{
@@ -106,13 +106,22 @@
                                     <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                                     <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
                                     <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
-                                    <input type="text" name="vaiTroTrongDuAn" value="@item.VaiTroTrongDuAn" class="form-control form-control-sm" />
+                                    <select name="vaiTroTrongDuAn" class="form-select form-select-sm">
+                                        <option value="@TrangThai.VaiTroLeader"
+                                                selected="@(TrangThai.EqualsValue(item.VaiTroTrongDuAn, TrangThai.VaiTroLeader) ? "selected" : null)">
+                                            @TrangThai.VaiTroLeaderHienThi
+                                        </option>
+                                        <option value="@TrangThai.VaiTroMember"
+                                                selected="@(TrangThai.EqualsValue(item.VaiTroTrongDuAn, TrangThai.VaiTroMember) ? "selected" : null)">
+                                            @TrangThai.VaiTroMemberHienThi
+                                        </option>
+                                    </select>
                                     <button type="submit" class="btn btn-warning btn-sm" disabled="@(!Model.CoTheChinhSua)">Lưu</button>
                                 </form>
                             }
                             else
                             {
-                                @item.VaiTroTrongDuAn
+                                @TrangThai.ToDisplayVaiTroTrongDuAn(item.VaiTroTrongDuAn)
                             }
                         </td>
                         <td>@item.NgayThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>

@@ -110,6 +110,9 @@
         public static class ChiTietCongViec
         {
             public const string Xem = "ChiTietCongViec.Xem";
+            public const string Them = "ChiTietCongViec.Them";
+            public const string Sua = "ChiTietCongViec.Sua";
+            public const string Xoa = "ChiTietCongViec.Xoa";
         }
 
         public static class PhanCong

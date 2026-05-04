@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 
 namespace QuanLyDuAn.Constants
@@ -26,7 +26,7 @@ namespace QuanLyDuAn.Constants
         public const string HoanThanh = "HoanThanh";
         public const string HoanThanhHienThi = "Hoàn thành";
         public const string BiCanCan = "BiCanCan";
-        public const string BiCanCanHienThi = "Bị cản cản";
+        public const string BiCanCanHienThi = "Bị cản trở";
         public const string KhoiTao = "KhoiTao";
         public const string KhoiTaoHienThi = "Khởi tạo";
         public const string ChoXacNhanHoanThanh = "ChoXacNhanHoanThanh";
@@ -49,6 +49,18 @@ namespace QuanLyDuAn.Constants
         public const string TaiKhoanKhoaHienThi = "Tài khoản bị khóa";
         public const string Done = "Done";
         public const string Completed = "Completed";
+
+        // Vai trò trong dự án (giá trị lưu CSDL — hiển thị qua ToDisplayVaiTroTrongDuAn)
+        public const string VaiTroLeader = "Leader";
+        public const string VaiTroMember = "Member";
+        public const string VaiTroThucHien = "Thực hiện";
+        public const string VaiTroThanhVienDuAn = "Thành viên dự án";
+        public const string VaiTroLeaderHienThi = "Trưởng nhóm";
+        public const string VaiTroMemberHienThi = "Thành viên";
+
+        // Hành động ghi nhật ký phân công
+        public const string HanhDongThemPhanCong = "Thêm phân công công việc";
+        public const string HanhDongXoaPhanCong = "Xóa phân công công việc";
 
         public static string Normalize(string? value)
         {
@@ -74,6 +86,32 @@ namespace QuanLyDuAn.Constants
         public static bool EqualsValue(string? value, string expected)
         {
             return Normalize(value) == Normalize(expected);
+        }
+
+        public static bool LaHoanThanhCongViec(string? value)
+        {
+            var n = Normalize(value);
+            return n == Normalize(HoanThanh)
+                || n == Normalize(HoanThanhHienThi)
+                || n == Normalize(Done)
+                || n == Normalize(Completed);
+        }
+
+        public static string ToDisplayVaiTroTrongDuAn(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "(Chưa khai báo)";
+
+            if (EqualsValue(value, VaiTroLeader))
+                return VaiTroLeaderHienThi;
+
+            if (EqualsValue(value, VaiTroMember))
+                return VaiTroMemberHienThi;
+
+            if (EqualsValue(value, VaiTroThanhVienDuAn))
+                return VaiTroMemberHienThi;
+
+            return value.Trim();
         }
 
         public static string[] GetCommonStatusVariants(string? status)
@@ -105,7 +143,13 @@ namespace QuanLyDuAn.Constants
                 return new[] { DangThucHien, DangThucHienHienThi };
 
             if (normalized == Normalize(HoanThanh))
-                return new[] { HoanThanh, HoanThanhHienThi };
+                return new[] { HoanThanh, HoanThanhHienThi, Done, Completed };
+
+            if (normalized == Normalize(Done))
+                return new[] { HoanThanh, HoanThanhHienThi, Done, Completed };
+
+            if (normalized == Normalize(Completed))
+                return new[] { HoanThanh, HoanThanhHienThi, Done, Completed };
 
             if (normalized == Normalize(BiCanCan))
                 return new[] { BiCanCan, BiCanCanHienThi };
@@ -168,6 +212,12 @@ namespace QuanLyDuAn.Constants
             if (normalized == Normalize(HoanThanh))
                 return HoanThanh;
 
+            if (normalized == Normalize(Done))
+                return Done;
+
+            if (normalized == Normalize(Completed))
+                return Completed;
+
             if (normalized == Normalize(BiCanCan))
                 return BiCanCan;
 
@@ -200,12 +250,6 @@ namespace QuanLyDuAn.Constants
 
             if (normalized == Normalize(TaiKhoanKhoa))
                 return TaiKhoanKhoa;
-
-            if (normalized == Normalize(Done))
-                return Done;
-
-            if (normalized == Normalize(Completed))
-                return Completed;
 
             return value ?? string.Empty;
         }
@@ -241,6 +285,12 @@ namespace QuanLyDuAn.Constants
             if (normalized == Normalize(HoanThanh))
                 return HoanThanhHienThi;
 
+            if (normalized == Normalize(Done))
+                return HoanThanhHienThi;
+
+            if (normalized == Normalize(Completed))
+                return HoanThanhHienThi;
+
             if (normalized == Normalize(BiCanCan))
                 return BiCanCanHienThi;
 
@@ -258,6 +308,9 @@ namespace QuanLyDuAn.Constants
 
             if (normalized == Normalize(HoatDong))
                 return HoatDongHienThi;
+
+            if (normalized == Normalize(NgungHoatDong))
+                return NgungHoatDongHienThi;
 
             if (normalized == Normalize(DangSuDung))
                 return DangSuDungHienThi;

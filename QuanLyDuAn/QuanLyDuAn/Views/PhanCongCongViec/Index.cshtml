@@ -1,0 +1,30 @@
+@model QuanLyDuAn.ViewModels.PhanCongCongViec.PhanCongCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canPhanCong = permissions.Contains(Permissions.PhanCong.ThucHien);
+
+    ViewBag.Permissions = permissions;
+    ViewData["Title"] = "Phân công công việc";
+}
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Phân công công việc</h5>
+        <a asp-controller="CongViec" asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại công việc</a>
+    </div>
+
+    <div class="alert alert-light border mb-3">
+        <div><strong>Công việc:</strong> @Model.CongViec.TenCongViec (Mã: @Model.CongViec.MaCongViec)</div>
+        <div><strong>Trạng thái:</strong> @Model.CongViec.TenTrangThai | <strong>Tiến độ:</strong> @Model.CongViec.PhanTramTienDo%</div>
+    </div>
+
+    @if (canPhanCong)
+    {
+        <partial name="_Form" model="Model" />
+        <hr />
+    }
+
+    <partial name="_Table" model="Model" />
+</div>

@@ -4186,11 +4186,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\QuanLyDuAn.csproj",
+      "projectUniqueName": "E:\\D\\Luan Van\\dvl4\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\QuanLyDuAn.csproj",
       "projectName": "QuanLyDuAn",
-      "projectPath": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\QuanLyDuAn.csproj",
+      "projectPath": "E:\\D\\Luan Van\\dvl4\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\QuanLyDuAn.csproj",
       "packagesPath": "C:\\Users\\hophu\\.nuget\\packages\\",
-      "outputPath": "E:\\D\\Luan Van\\dvl2\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\",
+      "outputPath": "E:\\D\\Luan Van\\dvl4\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
