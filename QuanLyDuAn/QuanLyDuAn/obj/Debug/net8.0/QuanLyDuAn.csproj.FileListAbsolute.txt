@@ -305,7 +305,6 @@ E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\appsettin
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\appsettings.json
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\QuanLyDuAn.staticwebassets.endpoints.json
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\QuanLyDuAn.staticwebassets.runtime.json
-E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\QuanLyDuAn.exe
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\QuanLyDuAn.deps.json
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\QuanLyDuAn.runtimeconfig.json
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\QuanLyDuAn.dll
@@ -452,4 +451,5 @@ E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\refint\Qu
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\QuanLyDuAn.pdb
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\QuanLyDuAn.genruntimeconfig.cache
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\ref\QuanLyDuAn.dll
+E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\bin\Debug\net8.0\QuanLyDuAn.exe
 E:\D\Luan Van\dvl4\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

@@ -87,10 +87,30 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            var nganSachHienTai = await _context.NganSach
+                .Where(x => x.MaDuAn == locMaDuAn.Value && x.IsDeleted != true && x.IsActive == true
+                    && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi))
+                .OrderByDescending(x => x.Version)
+                .ThenByDescending(x => x.NgayCapNhatNganSach)
+                .Select(x => x.SoTienNganSach)
+                .FirstOrDefaultAsync();
+
+            var tongChiPhiDaDung = await (
+                from cp in _context.ChiPhi
+                join ns in _context.NganSach on cp.MaNganSach equals ns.MaNganSach
+                where cp.IsDeleted != true
+                      && ns.IsDeleted != true
+                      && ns.MaDuAn == locMaDuAn.Value
+                select cp.SoTienDaChi ?? 0
+            ).SumAsync();
+
             return new DeXuatCongViecPageViewModel
             {
                 MaDuAn = selectedProject.MaDuAn,
                 TenDuAn = selectedProject.TenDuAn,
+                NganSachDuAn = nganSachHienTai,
+                TongChiPhiDaDung = tongChiPhiDaDung,
+                HasApprovedBudget = nganSachHienTai.HasValue,
                 DanhSach = await query
                     .OrderByDescending(x => x.NgayDeXuatCongViec)
                     .ThenByDescending(x => x.MaDeXuatCV)

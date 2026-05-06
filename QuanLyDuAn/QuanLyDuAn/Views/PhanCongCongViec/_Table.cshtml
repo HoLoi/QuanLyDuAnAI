@@ -1,9 +1,9 @@
-@model QuanLyDuAn.ViewModels.PhanCongCongViec.PhanCongCongViecPageViewModel
+﻿@model QuanLyDuAn.ViewModels.PhanCongCongViec.PhanCongCongViecPageViewModel
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    bool canPhanCong = permissions.Contains(Permissions.PhanCong.ThucHien);
+    bool canDelete = permissions.Contains(Permissions.PhanCongCongViec.ThucHien) && Model.CoTheQuanLyCongViec;
     var maCongViec = Model.CongViec.MaCongViec;
 }
 
@@ -37,7 +37,7 @@
                     <td>@item.VaiTro</td>
                     <td class="col-date">@item.NgayGiaoViec?.ToString("dd/MM/yyyy")</td>
                     <td class="col-actions table-actions">
-                        @if (canPhanCong && Model.CoTheQuanLyCongViec)
+                        @if (canDelete)
                         {
                             <form asp-action="XoaPhanCong" method="post">
                                 <input type="hidden" name="maCongViec" value="@maCongViec" />

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
@@ -26,8 +26,11 @@ namespace QuanLyDuAn.Services.Implementations
             var coThePhanCong = await KiemTraQuyenPhanCongAsync(maDuAn, maNguoiDungHienTai);
 
             var tienDo = await _context.TienDoCongViec
-                .Where(x => x.MaCongViec == maCongViec)
-                .Select(x => x.PhanTram)
+                .Join(
+                    _context.CtCongViec.Where(ct => ct.MaCongViec == maCongViec && ct.IsDeleted != true),
+                    td => td.MaChiTietCV,
+                    ct => ct.MaChiTietCV,
+                    (td, ct) => td.PhanTram)
                 .MaxAsync(x => (int?)x) ?? 0;
 
             var vm = new PhanCongCongViecPageViewModel
@@ -39,6 +42,10 @@ namespace QuanLyDuAn.Services.Implementations
                     TenCongViec = congViec.TenCongViec ?? string.Empty,
                     TenTrangThai = TrangThai.ToDisplay(congViec.TrangThaiCongViec),
                     PhanTramTienDo = tienDo
+                },
+                Form = new PhanCongCongViecCreateViewModel
+                {
+                    MaCongViec = maCongViec
                 }
             };
 
@@ -73,8 +80,14 @@ namespace QuanLyDuAn.Services.Implementations
             return vm;
         }
 
-        public async Task AddAsync(int maCongViec, int maNhanVien, DateTime? tuNgay, DateTime? denNgay)
+        public async Task AddAsync(PhanCongCongViecCreateViewModel input)
         {
+            var maCongViec = input.MaCongViec;
+            var maNhanVien = input.MaNguoiDung ?? 0;
+
+            if (maNhanVien <= 0)
+                throw new Exception("Vui lòng chọn nhân viên để phân công.");
+
             var (congViec, maDuAn) = await GetCongViecVaDuAnAsync(maCongViec);
             var maNguoiDungHienTai = await GetCurrentUserIdAsync();
 
@@ -102,9 +115,6 @@ namespace QuanLyDuAn.Services.Implementations
                 MaNguoiDung = maNhanVien,
                 NgayGiaoViec = DateTime.Now
             });
-
-            if (tuNgay.HasValue) congViec.NgayBatDauCongViec = tuNgay.Value;
-            if (denNgay.HasValue) congViec.NgayKetThucCVDuKien = denNgay.Value;
 
             GhiNhatKy(maCongViec, maNhanVien, maNguoiDungHienTai, TrangThai.HanhDongThemPhanCong);
 

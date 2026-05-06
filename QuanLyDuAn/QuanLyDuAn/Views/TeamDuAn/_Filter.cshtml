@@ -1,0 +1,34 @@
+﻿@model QuanLyDuAn.ViewModels.TeamDuAn.TeamDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool canShowForm = permissions.Contains(Permissions.TeamDuAn.Them) && Model.CoTheChinhSua;
+}
+
+@if (canShowForm)
+{
+    <form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+        <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+        <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+        <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+
+        <div class="col-md-6">
+            <label class="form-label">Chọn team phụ trách</label>
+            <select name="maTeamDangChon" class="form-select" required>
+                <option value="">-- Chọn team --</option>
+                @foreach (var team in Model.DanhSachTeamCoTheGan)
+                {
+                    <option value="@team.MaTeam" selected="@(Model.MaTeamDangChon == team.MaTeam ? "selected" : null)">
+                        @team.TenTeam (@TrangThai.ToDisplay(team.TrangThaiTeam))
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-outline-primary">Tải thành viên</button>
+        </div>
+    </form>
+}

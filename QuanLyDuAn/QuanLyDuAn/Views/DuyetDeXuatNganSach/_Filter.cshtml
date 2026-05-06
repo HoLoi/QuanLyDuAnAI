@@ -1,0 +1,21 @@
+﻿@model QuanLyDuAn.ViewModels.DuyetDeXuatNganSach.DuyetDeXuatNganSachPageViewModel
+@using QuanLyDuAn.Constants
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="number" name="locMaDuAn" value="@Model.LocMaDuAn" class="form-control" placeholder="Mã dự án" />
+    </div>
+    <div class="col-md-4">
+        <select name="locTrangThai" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="@TrangThai.ChoDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoDuyet))">@TrangThai.ChoDuyetHienThi</option>
+            <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
+            <option value="@TrangThai.TuChoi" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TuChoi))">@TrangThai.TuChoiHienThi</option>
+            <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
+        </select>
+    </div>
+    <div class="col-md-4 d-flex gap-2">
+        <button class="btn btn-outline-primary" type="submit">Lọc</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Bỏ lọc</a>
+    </div>
+</form>

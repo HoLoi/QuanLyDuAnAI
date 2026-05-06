@@ -6,7 +6,7 @@ namespace QuanLyDuAn.Services.Interfaces
     {
         Task<PhanCongCongViecPageViewModel> GetPageAsync(int maCongViec);
 
-        Task AddAsync(int maCongViec, int maNhanVien, DateTime? tuNgay, DateTime? denNgay);
+        Task AddAsync(PhanCongCongViecCreateViewModel input);
 
         Task RemoveAsync(int maCongViec, int maNguoiDung);
     }

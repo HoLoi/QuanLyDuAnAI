@@ -1,0 +1,111 @@
+﻿@model QuanLyDuAn.ViewModels.TeamDuAn.TeamDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool canEdit = permissions.Contains(Permissions.TeamDuAn.Them);
+    bool canDelete = permissions.Contains(Permissions.TeamDuAn.Xoa);
+}
+
+<h6>Danh sách team đang phụ trách</h6>
+<table class="table table-bordered mt-2">
+    <thead>
+        <tr>
+            <th>Mã team</th>
+            <th>Tên team</th>
+            <th>Ngày tham gia</th>
+            <th>Số thành viên phụ trách</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.DanhSachTeamPhuTrach.Count == 0)
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">Chưa có team phụ trách.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model.DanhSachTeamPhuTrach)
+            {
+                <tr>
+                    <td>@item.MaTeam</td>
+                    <td>@item.TenTeam</td>
+                    <td>@item.NgayTeamThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@item.SoThanhVienPhuTrach</td>
+                    <td class="d-flex gap-1">
+                        @if (canEdit)
+                        {
+                            <a asp-action="Index"
+                               asp-route-maDuAn="@Model.MaDuAn"
+                               asp-route-maTeamDangChon="@item.MaTeam"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
+                               asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
+                               class="btn btn-warning btn-sm">Sửa thành viên</a>
+                        }
+
+                        @if (canDelete)
+                        {
+                            <button type="button"
+                                    class="btn btn-danger btn-sm btn-mo-modal-xoa-team"
+                                    data-ma-team="@item.MaTeam"
+                                    data-ten-team="@item.TenTeam"
+                                    data-so-nhan-vien="@item.SoThanhVienPhuTrach"
+                                    disabled="@(Model.CoTheChinhSua ? null : "disabled")">
+                                Gỡ team
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (canDelete)
+{
+    <div class="modal fade" id="xoaTeamModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Gỡ team phụ trách khỏi dự án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form asp-action="XoaTeamKhoiDuAn" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                        <input type="hidden" name="maTeam" id="xoaTeam_maTeam" value="" />
+                        <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                        <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                        <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+
+                        <p class="mb-2">
+                            Team <strong id="xoaTeam_tenTeam"></strong> hiện có
+                            <strong id="xoaTeam_soNhanVien"></strong> nhân viên trong dự án.
+                        </p>
+                        <p class="mb-2">Bạn muốn:</p>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="luaChonXuLyNhanVien" id="giuNguyenNhanVien" value="1" checked>
+                            <label class="form-check-label" for="giuNguyenNhanVien">
+                                [1] Giữ nguyên nhân viên phụ trách dự án thuộc team này
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="luaChonXuLyNhanVien" id="goNhanVienThuocTeam" value="2">
+                            <label class="form-check-label" for="goNhanVienThuocTeam">
+                                [2] Gỡ luôn nhân viên đang phụ trách dự án thuộc team này (có kiểm tra phân công công việc)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận gỡ team</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

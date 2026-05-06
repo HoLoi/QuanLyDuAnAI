@@ -115,10 +115,16 @@
             public const string Xoa = "ChiTietCongViec.Xoa";
         }
 
-        public static class PhanCong
+        public static class PhanCongCongViec
         {
-            public const string Xem = "PhanCong.Xem";
-            public const string ThucHien = "PhanCong.ThucHien";
+            public const string Xem = "PhanCongCongViec.Xem";
+            public const string ThucHien = "PhanCongCongViec.ThucHien";
+        }
+
+        public static class PhanCongChiTietCongViec
+        {
+            public const string Xem = "PhanCongChiTietCongViec.Xem";
+            public const string ThucHien = "PhanCongChiTietCongViec.ThucHien";
         }
 
         public static class TienDo

@@ -1,9 +1,9 @@
-@model QuanLyDuAn.ViewModels.PhanCongCongViec.PhanCongCongViecPageViewModel
+﻿@model QuanLyDuAn.ViewModels.PhanCongCongViec.PhanCongCongViecPageViewModel
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = Model.Permissions;
-    bool canPhanCong = permissions.Contains(Permissions.PhanCong.ThucHien);
+    bool canShowForm = permissions.Contains(Permissions.PhanCongCongViec.ThucHien);
 
     ViewBag.Permissions = permissions;
     ViewData["Title"] = "Phân công công việc";
@@ -20,7 +20,7 @@
         <div><strong>Trạng thái:</strong> @Model.CongViec.TenTrangThai | <strong>Tiến độ:</strong> @Model.CongViec.PhanTramTienDo%</div>
     </div>
 
-    @if (canPhanCong)
+    @if (canShowForm)
     {
         <partial name="_Form" model="Model" />
         <hr />

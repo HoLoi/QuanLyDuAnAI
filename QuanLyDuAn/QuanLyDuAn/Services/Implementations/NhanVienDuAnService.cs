@@ -243,6 +243,19 @@ namespace QuanLyDuAn.Services.Implementations
             if (isFromAssignedTeam)
                 throw new Exception("Nhân viên đang thuộc team phụ trách dự án. Vui lòng bỏ khỏi team phụ trách trước khi xóa trực tiếp.");
 
+            var dangDuocPhanCong = await (
+                from pccv in _context.PhanCongCongViec
+                join cv in _context.CongViec on pccv.MaCongViec equals cv.MaCongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                where pccv.MaNguoiDung == maNguoiDung
+                    && dm.MaDuAn == maDuAn
+                    && cv.IsDeleted != true
+                select pccv.MaCongViec
+            ).AnyAsync();
+
+            if (dangDuocPhanCong)
+                throw new Exception("Nhân viên đang có phân công công việc trong dự án. Vui lòng gỡ phân công trước khi xóa khỏi dự án.");
+
             _context.NhanVienDuAn.Remove(entity);
 
             _context.NhatKyPhuTrachDuAn.Add(new NhatKyPhuTrachDuAn

@@ -1,9 +1,9 @@
-@model List<QuanLyDuAn.ViewModels.NhanSu.NhanSuViewModel>
+﻿@model List<QuanLyDuAn.ViewModels.NhanSu.NhanSuViewModel>
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+    
 }
 
 <table class="table table-bordered mt-3 app-data-table">
@@ -42,12 +42,12 @@
                     }
                 </td>
                 <td class="col-actions table-actions">
-                    @if (CanAccess(Permissions.NhanSu.Sua))
+                    @if (permissions.Contains(Permissions.NhanSu.Sua))
                     {
                         <a asp-action="Sua" asp-route-id="@ns.MaNguoiDung" class="btn btn-outline-warning btn-sm">Sửa</a>
                     }
 
-                    @if (CanAccess(Permissions.NhanSu.Xoa))
+                    @if (permissions.Contains(Permissions.NhanSu.Xoa))
                     {
                         <form asp-action="XoaNhanSu" method="post">
                             <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
@@ -55,7 +55,7 @@
                         </form>
                     }
 
-                    @if (ns.CoTaiKhoan && CanAccess(Permissions.NhanSu.Khoa) && !ns.TaiKhoanBiKhoa)
+                    @if (ns.CoTaiKhoan && permissions.Contains(Permissions.NhanSu.Khoa) && !ns.TaiKhoanBiKhoa)
                     {
                         <form asp-action="KhoaTaiKhoan" method="post">
                             <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
@@ -63,7 +63,7 @@
                         </form>
                     }
 
-                    @if (ns.CoTaiKhoan && CanAccess(Permissions.NhanSu.MoKhoa) && ns.TaiKhoanBiKhoa)
+                    @if (ns.CoTaiKhoan && permissions.Contains(Permissions.NhanSu.MoKhoa) && ns.TaiKhoanBiKhoa)
                     {
                         <form asp-action="MoKhoaTaiKhoan" method="post">
                             <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />

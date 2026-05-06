@@ -48,17 +48,26 @@ namespace QuanLyDuAn.Controllers
             if (!await _permission.HasPermissionAsync(User, Permissions.ChiTietCongViec.Them))
                 return Forbid();
 
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = string.Join(" ", ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage)
+                    .Where(x => !string.IsNullOrWhiteSpace(x)));
+                return await RenderIndexWithFormAsync(form.MaCongViec, form);
+            }
+
             try
             {
                 await _service.AddAsync(form);
                 TempData["Success"] = "Đã thêm chi tiết công việc thành công.";
+                return RedirectToAction(nameof(Index), new { maCongViec = form.MaCongViec });
             }
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
+                return await RenderIndexWithFormAsync(form.MaCongViec, form);
             }
-
-            return RedirectToAction(nameof(Index), new { maCongViec = form.MaCongViec });
         }
 
         [HttpPost]
@@ -67,17 +76,26 @@ namespace QuanLyDuAn.Controllers
             if (!await _permission.HasPermissionAsync(User, Permissions.ChiTietCongViec.Sua))
                 return Forbid();
 
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = string.Join(" ", ModelState.Values
+                    .SelectMany(x => x.Errors)
+                    .Select(x => x.ErrorMessage)
+                    .Where(x => !string.IsNullOrWhiteSpace(x)));
+                return await RenderIndexWithFormAsync(form.MaCongViec, form);
+            }
+
             try
             {
                 await _service.UpdateAsync(form);
                 TempData["Success"] = "Đã cập nhật chi tiết công việc thành công.";
+                return RedirectToAction(nameof(Index), new { maCongViec = form.MaCongViec });
             }
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
+                return await RenderIndexWithFormAsync(form.MaCongViec, form);
             }
-
-            return RedirectToAction(nameof(Index), new { maCongViec = form.MaCongViec });
         }
 
         [HttpPost]
@@ -97,6 +115,22 @@ namespace QuanLyDuAn.Controllers
             }
 
             return RedirectToAction(nameof(Index), new { maCongViec });
+        }
+
+        private async Task<IActionResult> RenderIndexWithFormAsync(int maCongViec, ChiTietCongViecCreateUpdateViewModel form)
+        {
+            try
+            {
+                var vm = await _service.GetPageAsync(maCongViec);
+                vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+                vm.Form = form;
+                return View(nameof(Index), vm);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "CongViec");
+            }
         }
     }
 }

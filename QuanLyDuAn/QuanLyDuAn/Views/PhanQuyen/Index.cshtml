@@ -4,8 +4,7 @@
     ViewData["Title"] = "Phân quyền";
 }
 @{
-    bool CanAccess(params string[] keys)
-        => keys.Any(x => Model.Permissions.Contains(x));
+    
 }
 
 <div class="card card-soft p-3">
@@ -36,7 +35,7 @@
                     </select>
                 </div>
                 <div class="col-lg-7 d-flex align-items-end justify-content-lg-end gap-2">
-                    @if (CanAccess(Permissions.PhanQuyen.Luu))
+                    @if (Model.Permissions.Contains(Permissions.PhanQuyen.Luu))
                     {
                         <button type="button" class="btn btn-outline-secondary" id="select-all">Chọn tất cả</button>
                         <button type="button" class="btn btn-outline-secondary" id="clear-all">Bỏ chọn tất cả</button>
@@ -77,7 +76,7 @@
                                                            type="checkbox"
                                                            name="SelectedPermissionIds"
                                                            value="@permission.MaDanhMucQuyen"
-                                                           disabled="@(!CanAccess(Permissions.PhanQuyen.Luu))"
+                                                           disabled="@(!Model.Permissions.Contains(Permissions.PhanQuyen.Luu))"
                                                            checked="@(permission.IsSelected ? "checked" : null)" />
                                                     <label class="form-check-label" for="perm-@permission.MaDanhMucQuyen" title="@permission.MoTaDanhMucQuyen">
                                                         @permission.TenDanhMucQuyen

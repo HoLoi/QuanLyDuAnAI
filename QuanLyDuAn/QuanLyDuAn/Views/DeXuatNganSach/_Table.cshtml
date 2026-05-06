@@ -1,9 +1,9 @@
-@model List<QuanLyDuAn.ViewModels.DeXuatNganSach.DeXuatNganSachItemViewModel>
+﻿@model List<QuanLyDuAn.ViewModels.DeXuatNganSach.DeXuatNganSachItemViewModel>
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    var canCreate = permissions.Contains(Permissions.DeXuatNganSach.Them);
+    bool canCancel = permissions.Contains(Permissions.DeXuatNganSach.Them);
     int? locMaDuAn = ViewBag.LocMaDuAn as int?;
     string? locTrangThai = ViewBag.LocTrangThai as string;
 }
@@ -41,7 +41,7 @@
                     <td class="col-date">@item.NgayDeXuat?.ToString("dd/MM/yyyy HH:mm")</td>
                     <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiDeXuat)</td>
                     <td class="col-actions table-actions">
-                        @if (canCreate && TrangThai.EqualsValue(item.TrangThaiDeXuat, TrangThai.ChoDuyet))
+                        @if (canCancel && TrangThai.EqualsValue(item.TrangThaiDeXuat, TrangThai.ChoDuyet))
                         {
                             <form asp-action="HuyDeXuat" method="post">
                                 <input type="hidden" name="maDeXuatNs" value="@item.MaDeXuatNS" />

@@ -1,9 +1,9 @@
-@model List<QuanLyDuAn.ViewModels.Team.TeamViewModel>
+﻿@model List<QuanLyDuAn.ViewModels.Team.TeamViewModel>
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+    
     string? tuKhoa = ViewBag.TuKhoa as string;
     string? locTrangThaiTeam = ViewBag.LocTrangThaiTeam as string;
 }
@@ -36,7 +36,7 @@
                        asp-route-locMaTeam="@team.MaTeam"
                        class="btn btn-outline-info btn-sm">Thành viên</a>
 
-                    @if (team.SoLuongThanhVien > 0 && !team.CoTruongNhom && CanAccess(Permissions.ThanhVienNhom.Them))
+                    @if (team.SoLuongThanhVien > 0 && !team.CoTruongNhom && permissions.Contains(Permissions.ThanhVienNhom.Them))
                     {
                         <a asp-controller="ThanhVienTeam"
                            asp-action="Index"
@@ -45,7 +45,7 @@
                            class="btn btn-outline-primary btn-sm">Gán trưởng nhóm</a>
                     }
 
-                    @if (CanAccess(Permissions.Nhom.Sua))
+                    @if (permissions.Contains(Permissions.Nhom.Sua))
                     {
                         <a asp-action="Sua"
                            asp-route-id="@team.MaTeam"
@@ -54,7 +54,7 @@
                               class="btn btn-outline-warning btn-sm">Sửa</a>
                     }
 
-                    @if (CanAccess(Permissions.Nhom.Xoa))
+                    @if (permissions.Contains(Permissions.Nhom.Xoa))
                     {
                         <form asp-action="XoaTeam" method="post">
                             <input type="hidden" name="maTeam" value="@team.MaTeam" />

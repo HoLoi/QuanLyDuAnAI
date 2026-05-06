@@ -12,43 +12,43 @@
         grantedPermissions = await PhanQuyenService.GetGrantedPermissionNamesAsync(User!);
     }
 
-    bool CanAccess(params string[] keys) => keys.Any(x => grantedPermissions.Contains(x));
+    
 
     // ===== HỆ THỐNG =====
-    var canDashboard = CanAccess(Permissions.ThongKe.Xem);
-    var canChucDanh = CanAccess(Permissions.ChucDanh.Xem);
-    var canNhanSu = CanAccess(Permissions.NhanSu.Xem);
-    var canNhom = CanAccess(Permissions.Nhom.Xem);
-    var canPhanQuyen = CanAccess(Permissions.PhanQuyen.Xem);
-    var canDuyetDoiQuanLy = CanAccess(Permissions.DuyetYeuCauDoiQuanLy.Xem);
+    var canDashboard = grantedPermissions.Contains(Permissions.ThongKe.Xem);
+    var canChucDanh = grantedPermissions.Contains(Permissions.ChucDanh.Xem);
+    var canNhanSu = grantedPermissions.Contains(Permissions.NhanSu.Xem);
+    var canNhom = grantedPermissions.Contains(Permissions.Nhom.Xem);
+    var canPhanQuyen = grantedPermissions.Contains(Permissions.PhanQuyen.Xem);
+    var canDuyetDoiQuanLy = grantedPermissions.Contains(Permissions.DuyetYeuCauDoiQuanLy.Xem);
 
     // ===== DỰ ÁN =====
-    var canDuAn = CanAccess(Permissions.DuAn.Xem);
+    var canDuAn = grantedPermissions.Contains(Permissions.DuAn.Xem);
 
     // ===== CÔNG VIỆC =====
-    var canDanhMuc = CanAccess(Permissions.DanhMucCongViec.Xem);
-    var canCongViec = CanAccess(Permissions.CongViec.Xem);
-    var canTienDo = CanAccess(Permissions.TienDo.Xem);
-    var canDeXuat = CanAccess(Permissions.DeXuatCongViec.Xem);
-    var canDuyetDeXuat = CanAccess(Permissions.DuyetDeXuatCongViec.Xem);
+    var canDanhMuc = grantedPermissions.Contains(Permissions.DanhMucCongViec.Xem);
+    var canCongViec = grantedPermissions.Contains(Permissions.CongViec.Xem);
+    var canTienDo = grantedPermissions.Contains(Permissions.TienDo.Xem);
+    var canDeXuat = grantedPermissions.Contains(Permissions.DeXuatCongViec.Xem);
+    var canDuyetDeXuat = grantedPermissions.Contains(Permissions.DuyetDeXuatCongViec.Xem);
 
     // ===== TÀI CHÍNH =====
-    var canNganSach = CanAccess(Permissions.NganSach.Xem);
-    var canDeXuatNganSach = CanAccess(Permissions.DeXuatNganSach.Xem);
-    var canDuyetNganSach = CanAccess(Permissions.DuyetNganSach.Xem);
-    var canChiPhi = CanAccess(Permissions.ChiPhi.Xem);
+    var canNganSach = grantedPermissions.Contains(Permissions.NganSach.Xem);
+    var canDeXuatNganSach = grantedPermissions.Contains(Permissions.DeXuatNganSach.Xem);
+    var canDuyetNganSach = grantedPermissions.Contains(Permissions.DuyetNganSach.Xem);
+    var canChiPhi = grantedPermissions.Contains(Permissions.ChiPhi.Xem);
 
     // ===== AI =====
-    var canAiDataset = CanAccess(Permissions.AI.Dataset);
-    var canAiTrain = CanAccess(Permissions.AI.Train);
-    var canAiPredict = CanAccess(Permissions.AI.DuDoan);
-    var canAiDashboard = CanAccess(Permissions.AI.Dashboard);
+    var canAiDataset = grantedPermissions.Contains(Permissions.AI.Dataset);
+    var canAiTrain = grantedPermissions.Contains(Permissions.AI.Train);
+    var canAiPredict = grantedPermissions.Contains(Permissions.AI.DuDoan);
+    var canAiDashboard = grantedPermissions.Contains(Permissions.AI.Dashboard);
 
     // ===== KHÁC =====
-    var canDanhGiaDuAn = CanAccess(Permissions.DanhGiaDuAn.Xem);
-    var canDanhGiaNhanVien = CanAccess(Permissions.DanhGiaNhanVien.Xem);
-    var canChat = CanAccess(Permissions.Chat.Xem);
-    var canNhatKy = CanAccess(Permissions.NhatKy.Xem);
+    var canDanhGiaDuAn = grantedPermissions.Contains(Permissions.DanhGiaDuAn.Xem);
+    var canDanhGiaNhanVien = grantedPermissions.Contains(Permissions.DanhGiaNhanVien.Xem);
+    var canChat = grantedPermissions.Contains(Permissions.Chat.Xem);
+    var canNhatKy = grantedPermissions.Contains(Permissions.NhatKy.Xem);
 }
 
 <!DOCTYPE html>

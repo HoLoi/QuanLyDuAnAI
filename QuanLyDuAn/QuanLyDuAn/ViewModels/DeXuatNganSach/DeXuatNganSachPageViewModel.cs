@@ -7,6 +7,9 @@ namespace QuanLyDuAn.ViewModels.DeXuatNganSach
         public List<DeXuatNganSachItemViewModel> DanhSach { get; set; } = new();
         public DeXuatNganSachCreateViewModel Form { get; set; } = new();
         public List<DeXuatNganSachDuAnOptionViewModel> DanhSachDuAn { get; set; } = new();
+        public decimal? NganSachDuAn { get; set; }
+        public decimal TongChiPhiDaDung { get; set; }
+        public int TongCongViecDuAn { get; set; }
         public int? LocMaDuAn { get; set; }
         public string? LocTrangThai { get; set; }
         public HashSet<string> Permissions { get; set; } = new();

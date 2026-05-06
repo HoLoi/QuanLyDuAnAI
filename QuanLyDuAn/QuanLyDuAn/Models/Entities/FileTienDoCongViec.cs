@@ -6,6 +6,7 @@ public partial class FileTienDoCongViec
     public int MaTienDo { get; set; }
     public string? TenFileTDCV { get; set; }
     public string? DuongDanFileTDCV { get; set; }
+    public DateTime? NgayUploadFileTDCV { get; set; }
     public bool? IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
     public int? DeletedBy { get; set; }

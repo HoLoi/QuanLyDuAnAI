@@ -16,5 +16,6 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public string TrangThaiDuAn { get; set; } = string.Empty;
         public int SoLuongTeam { get; set; }
         public int SoLuongThanhVien { get; set; }
+        public bool HasApprovedBudget { get; set; }
     }
 }

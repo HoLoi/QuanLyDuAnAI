@@ -566,6 +566,7 @@ namespace QuanLyDuAn.Migrations
                     MaDuAn = table.Column<int>(type: "int", nullable: false),
                     TenFileDA = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     DuongDanFileDA = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    NgayUploadFileDA = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true)
@@ -1151,11 +1152,15 @@ namespace QuanLyDuAn.Migrations
                     MaChiTietCV = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MaCongViec = table.Column<int>(type: "int", nullable: false),
+                    TenCTCV = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NoiDungChiTietCV = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NgayTaoCTCV = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    NgayBaoCaoCTCV = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PhanTramHoanThanhCTCV = table.Column<double>(type: "float", nullable: true),
-                    TrangThaiCTCV = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                    NgayBatDauCTCV = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    NgayKetThucCTCV = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TrangThaiCTCV = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1205,6 +1210,7 @@ namespace QuanLyDuAn.Migrations
                     MaCongViec = table.Column<int>(type: "int", nullable: false),
                     TenFileCV = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     DuongDanFileCV = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    NgayUploadFileCV = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true)
@@ -1275,34 +1281,6 @@ namespace QuanLyDuAn.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TIEN_DO_CONG_VIEC",
-                columns: table => new
-                {
-                    MaTienDo = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MaCongViec = table.Column<int>(type: "int", nullable: false),
-                    MaNguoiDung = table.Column<int>(type: "int", nullable: false),
-                    PhanTram = table.Column<int>(type: "int", nullable: true),
-                    GhiChuTienDo = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    ThoiGianCapNhat = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TrangThaiTienDo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TIEN_DO_CONG_VIEC", x => x.MaTienDo);
-                    table.ForeignKey(
-                        name: "FK_TIEN_DO__BAO CAO_NGUOI_DU",
-                        column: x => x.MaNguoiDung,
-                        principalTable: "NGUOI_DUNG",
-                        principalColumn: "MaNguoiDung");
-                    table.ForeignKey(
-                        name: "FK_TIEN_DO__DUOC CAP _CONG_VIE",
-                        column: x => x.MaCongViec,
-                        principalTable: "CONG_VIEC",
-                        principalColumn: "MaCongViec");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "NHAT_KY_CHI_PHI",
                 columns: table => new
                 {
@@ -1332,6 +1310,114 @@ namespace QuanLyDuAn.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FILE_CT_CONG_VIEC",
+                columns: table => new
+                {
+                    MaFileCTCV = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MaChiTietCV = table.Column<int>(type: "int", nullable: false),
+                    TenFileCTCV = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    DuongDanFileCTCV = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    NgayUploadFileCTCV = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FILE_CT_CONG_VIEC", x => x.MaFileCTCV);
+                    table.ForeignKey(
+                        name: "FK_FILE_CT__CO_CT_CONG_VIE",
+                        column: x => x.MaChiTietCV,
+                        principalTable: "CT_CONG_VIEC",
+                        principalColumn: "MaChiTietCV");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "NHAT_KY_PHAN_CONG_CT_CONG_VIEC",
+                columns: table => new
+                {
+                    MaNhatKyPCCTCV = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MaNguoiDung = table.Column<int>(type: "int", nullable: false),
+                    MaChiTietCV = table.Column<int>(type: "int", nullable: false),
+                    MaNguoiDungGhi = table.Column<int>(type: "int", nullable: false),
+                    HanhDongPCCTCV = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    ThoiGianPCCTCV = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NHAT_KY_PHAN_CONG_CT_CONG_VIEC", x => x.MaNhatKyPCCTCV);
+                    table.ForeignKey(
+                        name: "FK_NHAT_KY__DUOC PHAN_NGUOI_DU1",
+                        column: x => x.MaNguoiDung,
+                        principalTable: "NGUOI_DUNG",
+                        principalColumn: "MaNguoiDung");
+                    table.ForeignKey(
+                        name: "FK_NKPCCTCV_CO_CT_CONG_VIE",
+                        column: x => x.MaChiTietCV,
+                        principalTable: "CT_CONG_VIEC",
+                        principalColumn: "MaChiTietCV");
+                    table.ForeignKey(
+                        name: "FK_NKPCCTCV_GHI_NGUOI_DU",
+                        column: x => x.MaNguoiDungGhi,
+                        principalTable: "NGUOI_DUNG",
+                        principalColumn: "MaNguoiDung");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PHAN_CONG_CT_CONG_VIEC",
+                columns: table => new
+                {
+                    MaNguoiDung = table.Column<int>(type: "int", nullable: false),
+                    MaChiTietCV = table.Column<int>(type: "int", nullable: false),
+                    NgayGiaoCTCV = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    VaiTroTrongCTCV = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PHAN_CONG_CT_CONG_VIEC", x => new { x.MaNguoiDung, x.MaChiTietCV });
+                    table.ForeignKey(
+                        name: "FK_PHAN_CON_PHAN_CONG_CT_CONG_VIE",
+                        column: x => x.MaChiTietCV,
+                        principalTable: "CT_CONG_VIEC",
+                        principalColumn: "MaChiTietCV");
+                    table.ForeignKey(
+                        name: "FK_PHAN_CON_PHAN_CONG_NGUOI_DU1",
+                        column: x => x.MaNguoiDung,
+                        principalTable: "NGUOI_DUNG",
+                        principalColumn: "MaNguoiDung");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TIEN_DO_CONG_VIEC",
+                columns: table => new
+                {
+                    MaTienDo = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MaChiTietCV = table.Column<int>(type: "int", nullable: false),
+                    MaNguoiDung = table.Column<int>(type: "int", nullable: false),
+                    PhanTram = table.Column<int>(type: "int", nullable: true),
+                    GhiChuTienDo = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    ThoiGianCapNhat = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TrangThaiTienDo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TIEN_DO_CONG_VIEC", x => x.MaTienDo);
+                    table.ForeignKey(
+                        name: "FK_TIEN_DO__BAO CAO_CONG_VIE",
+                        column: x => x.MaChiTietCV,
+                        principalTable: "CT_CONG_VIEC",
+                        principalColumn: "MaChiTietCV");
+                    table.ForeignKey(
+                        name: "FK_TIEN_DO__BAO CAO_NGUOI_DU",
+                        column: x => x.MaNguoiDung,
+                        principalTable: "NGUOI_DUNG",
+                        principalColumn: "MaNguoiDung");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FILE_TIEN_DO_CONG_VIEC",
                 columns: table => new
                 {
@@ -1340,6 +1426,7 @@ namespace QuanLyDuAn.Migrations
                     MaTienDo = table.Column<int>(type: "int", nullable: false),
                     TenFileTDCV = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     DuongDanFileTDCV = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    NgayUploadFileTDCV = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedBy = table.Column<int>(type: "int", nullable: true)
@@ -1600,6 +1687,11 @@ namespace QuanLyDuAn.Migrations
                 column: "MaCongViec");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FILE_CT_CONG_VIEC_MaChiTietCV",
+                table: "FILE_CT_CONG_VIEC",
+                column: "MaChiTietCV");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FILE_DU_AN_MaDuAn",
                 table: "FILE_DU_AN",
                 column: "MaDuAn");
@@ -1700,6 +1792,21 @@ namespace QuanLyDuAn.Migrations
                 column: "MaNguoiDungGhi");
 
             migrationBuilder.CreateIndex(
+                name: "IX_NHAT_KY_PHAN_CONG_CT_CONG_VIEC_MaChiTietCV",
+                table: "NHAT_KY_PHAN_CONG_CT_CONG_VIEC",
+                column: "MaChiTietCV");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NHAT_KY_PHAN_CONG_CT_CONG_VIEC_MaNguoiDung",
+                table: "NHAT_KY_PHAN_CONG_CT_CONG_VIEC",
+                column: "MaNguoiDung");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NHAT_KY_PHAN_CONG_CT_CONG_VIEC_MaNguoiDungGhi",
+                table: "NHAT_KY_PHAN_CONG_CT_CONG_VIEC",
+                column: "MaNguoiDungGhi");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_NHAT_KY_PHU_TRACH_DU_AN_MaDuAn",
                 table: "NHAT_KY_PHU_TRACH_DU_AN",
                 column: "MaDuAn");
@@ -1725,6 +1832,11 @@ namespace QuanLyDuAn.Migrations
                 column: "MaCongViec");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PHAN_CONG_CT_CONG_VIEC_MaChiTietCV",
+                table: "PHAN_CONG_CT_CONG_VIEC",
+                column: "MaChiTietCV");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PHONG_CHAT_MaDuAn",
                 table: "PHONG_CHAT",
                 column: "MaDuAn");
@@ -1745,9 +1857,9 @@ namespace QuanLyDuAn.Migrations
                 column: "MaNguoiDung");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TIEN_DO_CONG_VIEC_MaCongViec",
+                name: "IX_TIEN_DO_CONG_VIEC_MaChiTietCV",
                 table: "TIEN_DO_CONG_VIEC",
-                column: "MaCongViec");
+                column: "MaChiTietCV");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TIEN_DO_CONG_VIEC_MaNguoiDung",
@@ -1868,9 +1980,6 @@ namespace QuanLyDuAn.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CT_CONG_VIEC");
-
-            migrationBuilder.DropTable(
                 name: "CT_DANH_GIA_DU_AN");
 
             migrationBuilder.DropTable(
@@ -1881,6 +1990,9 @@ namespace QuanLyDuAn.Migrations
 
             migrationBuilder.DropTable(
                 name: "FILE_CONG_VIEC");
+
+            migrationBuilder.DropTable(
+                name: "FILE_CT_CONG_VIEC");
 
             migrationBuilder.DropTable(
                 name: "FILE_DU_AN");
@@ -1907,6 +2019,9 @@ namespace QuanLyDuAn.Migrations
                 name: "NHAT_KY_PHAN_CONG_CONG_VIEC");
 
             migrationBuilder.DropTable(
+                name: "NHAT_KY_PHAN_CONG_CT_CONG_VIEC");
+
+            migrationBuilder.DropTable(
                 name: "NHAT_KY_PHU_TRACH_DU_AN");
 
             migrationBuilder.DropTable(
@@ -1914,6 +2029,9 @@ namespace QuanLyDuAn.Migrations
 
             migrationBuilder.DropTable(
                 name: "PHAN_CONG_CONG_VIEC");
+
+            migrationBuilder.DropTable(
+                name: "PHAN_CONG_CT_CONG_VIEC");
 
             migrationBuilder.DropTable(
                 name: "TEAM_DU_AN");
@@ -1967,10 +2085,13 @@ namespace QuanLyDuAn.Migrations
                 name: "TIEU_CHI_DANH_GIA");
 
             migrationBuilder.DropTable(
-                name: "CONG_VIEC");
+                name: "CT_CONG_VIEC");
 
             migrationBuilder.DropTable(
                 name: "NGAN_SACH");
+
+            migrationBuilder.DropTable(
+                name: "CONG_VIEC");
 
             migrationBuilder.DropTable(
                 name: "DE_XUAT_CONG_VIEC");

@@ -67,10 +67,39 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            var nganSachHienTai = await _context.NganSach
+                .Where(x => x.MaDuAn == locMaDuAn.Value && x.IsDeleted != true && x.IsActive == true
+                    && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi))
+                .OrderByDescending(x => x.Version)
+                .ThenByDescending(x => x.NgayCapNhatNganSach)
+                .Select(x => x.SoTienNganSach)
+                .FirstOrDefaultAsync();
+
+            var tongChiPhiDaDung = await (
+                from cp in _context.ChiPhi
+                join ns in _context.NganSach on cp.MaNganSach equals ns.MaNganSach
+                where cp.IsDeleted != true
+                      && ns.IsDeleted != true
+                      && ns.MaDuAn == locMaDuAn.Value
+                select cp.SoTienDaChi ?? 0
+            ).SumAsync();
+
+            var tongCongViecDuAn = await (
+                from cv in _context.CongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                where cv.IsDeleted != true
+                      && dm.IsDeleted != true
+                      && dm.MaDuAn == locMaDuAn.Value
+                select cv.MaCongViec
+            ).CountAsync();
+
             return new DeXuatNganSachPageViewModel
             {
                 MaDuAn = selectedProject.MaDuAn,
                 TenDuAn = selectedProject.TenDuAn,
+                NganSachDuAn = nganSachHienTai,
+                TongChiPhiDaDung = tongChiPhiDaDung,
+                TongCongViecDuAn = tongCongViecDuAn,
                 DanhSach = await query
                     .OrderByDescending(x => x.NgayDeXuat)
                     .ThenByDescending(x => x.MaDeXuatNS)

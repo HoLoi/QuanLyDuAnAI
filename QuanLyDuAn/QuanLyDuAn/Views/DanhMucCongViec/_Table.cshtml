@@ -1,9 +1,9 @@
-@model List<QuanLyDuAn.ViewModels.DanhMucCongViec.DanhMucCongViecViewModel>
+﻿@model List<QuanLyDuAn.ViewModels.DanhMucCongViec.DanhMucCongViecViewModel>
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+    
     string? tuKhoa = ViewBag.TuKhoa as string;
     int? locMaDuAn = ViewBag.LocMaDuAn as int?;
 }
@@ -29,7 +29,7 @@
                 <td class="col-date">@item.NgayTaoDMCV?.ToString("dd/MM/yyyy")</td>
                 <td class="col-count">@item.SoLuongCongViec</td>
                 <td class="col-actions table-actions">
-                    @if (CanAccess(Permissions.DanhMucCongViec.Sua))
+                    @if (permissions.Contains(Permissions.DanhMucCongViec.Sua))
                     {
                         <a asp-action="Sua"
                            asp-route-id="@item.MaDanhMucCV"
@@ -38,7 +38,7 @@
                            class="btn btn-outline-warning btn-sm">Sửa</a>
                     }
 
-                    @if (CanAccess(Permissions.DanhMucCongViec.Xoa))
+                    @if (permissions.Contains(Permissions.DanhMucCongViec.Xoa))
                     {
                         <form asp-action="XoaDanhMucCongViec" method="post">
                             <input type="hidden" name="maDanhMucCV" value="@item.MaDanhMucCV" />

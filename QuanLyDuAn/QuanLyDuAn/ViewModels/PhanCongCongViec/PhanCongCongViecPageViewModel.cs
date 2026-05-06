@@ -6,6 +6,8 @@ namespace QuanLyDuAn.ViewModels.PhanCongCongViec
 
         public PhanCongCongViecSummaryViewModel CongViec { get; set; } = new();
 
+        public PhanCongCongViecCreateViewModel Form { get; set; } = new();
+
         public List<PhanCongCongViecItemViewModel> DanhSachPhanCong { get; set; } = new();
 
         public List<PhanCongCongViecOptionViewModel> ThanhVienCoThePhanCong { get; set; } = new();

@@ -148,8 +148,12 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.ChiTietCongViec.Xem,
 
             // Phân công
-            Permissions.PhanCong.Xem,
-            Permissions.PhanCong.ThucHien,
+            Permissions.PhanCongCongViec.Xem,
+            Permissions.PhanCongCongViec.ThucHien,
+
+            // Phân công chi tiết công việc
+            Permissions.PhanCongChiTietCongViec.Xem,
+            Permissions.PhanCongChiTietCongViec.ThucHien,
 
             // Duyệt đề xuất ngân sách
             Permissions.DuyetNganSach.Xem,
@@ -204,11 +208,19 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.DeXuatCongViec.Xem,
             Permissions.DeXuatCongViec.Them,
 
+            // Phân công công việc
+            Permissions.PhanCongCongViec.Xem,
+            Permissions.PhanCongCongViec.ThucHien,
+
             // Chi tiết công việc
             Permissions.ChiTietCongViec.Xem,
             Permissions.ChiTietCongViec.Them,
             Permissions.ChiTietCongViec.Sua,
             Permissions.ChiTietCongViec.Xoa,
+
+            // Phân công chi tiết công việc
+            Permissions.PhanCongChiTietCongViec.Xem,
+            Permissions.PhanCongChiTietCongViec.ThucHien,
 
             // Tiến độ
             Permissions.TienDo.CapNhat,
@@ -585,10 +597,16 @@ public static class KhoiTaoTaiKhoanMacDinh
                 Permissions.ChiTietCongViec.Xoa
             },
 
-            ["PhanCong"] = new[]
+            ["PhanCongCongViec"] = new[]
             {
-                Permissions.PhanCong.Xem,
-                Permissions.PhanCong.ThucHien
+                Permissions.PhanCongCongViec.Xem,
+                Permissions.PhanCongCongViec.ThucHien
+            },
+
+            ["PhanCongChiTietCongViec"] = new[]
+            {
+                Permissions.PhanCongChiTietCongViec.Xem,
+                Permissions.PhanCongChiTietCongViec.ThucHien
             },
 
             ["TienDo"] = new[]
@@ -771,7 +789,7 @@ public static class KhoiTaoTaiKhoanMacDinh
             LockoutEnabled = false,
             AccessFailedCount = 0
         };
-        user.PasswordHash = passwordHasher.HashPassword(user, "123456");
+        user.PasswordHash = passwordHasher.HashPassword(user, "111111");
 
         dbContext.Aspnetusers.Add(user);
 

@@ -106,5 +106,43 @@ namespace QuanLyDuAn.Controllers
                 locTrangThai
             });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> DieuHuong(int maDuAn, bool? deXuatNganSach)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.DeXuatCongViec.Xem))
+                return Forbid();
+
+            try
+            {
+                var pageVm = await _service.GetPageAsync(maDuAn, null);
+
+                if (pageVm.HasApprovedBudget)
+                {
+                    return RedirectToAction(nameof(Index), new { locMaDuAn = maDuAn });
+                }
+
+                if (deXuatNganSach.HasValue)
+                {
+                    if (deXuatNganSach.Value)
+                        return RedirectToAction("Index", "DeXuatNganSach", new { locMaDuAn = maDuAn });
+
+                    return RedirectToAction(nameof(Index), new { locMaDuAn = maDuAn });
+                }
+
+                var vm = new DeXuatCongViecDieuHuongViewModel
+                {
+                    MaDuAn = pageVm.MaDuAn,
+                    TenDuAn = pageVm.TenDuAn
+                };
+
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Index", "DuAn");
+            }
+        }
     }
 }

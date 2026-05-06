@@ -1,9 +1,9 @@
-@model QuanLyDuAn.ViewModels.NhanSu.NhanSuCreateUpdateViewModel
+﻿@model QuanLyDuAn.ViewModels.NhanSu.NhanSuCreateUpdateViewModel
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    bool CanAccess(params string[] keys) => keys.Any(x => permissions.Contains(x));
+    
 
     var danhSachChucDanh = ViewBag.DanhSachChucDanh as List<QuanLyDuAn.ViewModels.NhanSu.ChucDanhOptionViewModel>
                            ?? new List<QuanLyDuAn.ViewModels.NhanSu.ChucDanhOptionViewModel>();
@@ -108,7 +108,7 @@
     </div>
 
     <div class="d-flex gap-2">
-        @if (CanAccess(Permissions.NhanSu.Them) || CanAccess(Permissions.NhanSu.Sua))
+        @if (permissions.Contains(Permissions.NhanSu.Them) || permissions.Contains(Permissions.NhanSu.Sua))
         {
             <button type="submit" class="btn btn-primary">Lưu</button>
         }

@@ -1,12 +1,12 @@
-@model QuanLyDuAn.ViewModels.DeXuatNganSach.DeXuatNganSachPageViewModel
+﻿@model QuanLyDuAn.ViewModels.DeXuatNganSach.DeXuatNganSachPageViewModel
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    var canCreate = permissions.Contains(Permissions.DeXuatNganSach.Them);
+    bool canShowForm = permissions.Contains(Permissions.DeXuatNganSach.Them);
 }
 
-@if (canCreate)
+@if (canShowForm)
 {
     <form asp-action="TaoDeXuat" method="post" class="border rounded p-3 mb-3">
         <input type="hidden" asp-for="LocMaDuAn" />

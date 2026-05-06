@@ -1,0 +1,48 @@
+﻿@model QuanLyDuAn.ViewModels.NhanVienDuAn.NhanVienDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = ViewBag.Permissions as HashSet<string> ?? new();
+    bool canShowForm = permissions.Contains(Permissions.ThanhVienDuAn.Them) && Model.CoTheChinhSua;
+}
+
+@if (canShowForm)
+{
+    <form asp-action="ThemNhanVien" method="post">
+        <input type="hidden" asp-for="MaDuAn" />
+        <input type="hidden" asp-for="TuKhoa" />
+        <input type="hidden" asp-for="LocMaLoaiDuAn" />
+        <input type="hidden" asp-for="LocTrangThaiDuAn" />
+
+        <div class="border rounded p-3 mb-3">
+            <div class="fw-semibold mb-2">Thêm nhân viên phụ trách</div>
+
+            @if (Model.DanhSachNhanVienCoTheThem.Count == 0)
+            {
+                <div class="text-muted">Không còn nhân viên hợp lệ để thêm.</div>
+            }
+            else
+            {
+                <div class="row g-2">
+                    @foreach (var item in Model.DanhSachNhanVienCoTheThem)
+                    {
+                        <div class="col-md-6">
+                            <label class="form-check-label d-flex align-items-center gap-2">
+                                <input class="form-check-input" type="checkbox" name="SelectedMaNguoiDung" value="@item.MaNguoiDung" />
+                                <span>
+                                    @item.HoTenNguoiDung
+                                    <span class="text-muted">(Team: @item.TatCaTenTeamDangThamGia)</span>
+                                </span>
+                            </label>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary"
+                disabled="@(!Model.CoTheChinhSua || Model.DanhSachNhanVienCoTheThem.Count == 0)">
+            Thêm nhân viên
+        </button>
+    </form>
+}

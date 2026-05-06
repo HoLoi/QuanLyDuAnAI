@@ -1,10 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.DuyetDeXuatNganSach;
+using System;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace QuanLyDuAn.Services.Implementations
 {
@@ -21,11 +25,15 @@ namespace QuanLyDuAn.Services.Implementations
 
         public async Task<DuyetDeXuatNganSachPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai)
         {
+            var currentUserId = await GetCurrentUserIdAsync();
+
             var query =
                 from dx in _context.DeXuatNganSach
                 join da in _context.DuAn on dx.MaDuAn equals da.MaDuAn
                 join nd in _context.NguoiDung on dx.MaNguoiDungDeXuat equals nd.MaNguoiDung
-                where dx.IsDeleted != true && da.IsDeleted != true
+                where dx.IsDeleted != true
+                      && da.IsDeleted != true
+                      && da.MaNguoiDung == currentUserId
                 select new DuyetDeXuatNganSachItemViewModel
                 {
                     MaDeXuatNS = dx.MaDeXuatNS,
@@ -77,6 +85,8 @@ namespace QuanLyDuAn.Services.Implementations
 
             if (!IsPending(deXuat.TrangThaiDeXuat))
                 throw new Exception("Đề xuất ngân sách không còn ở trạng thái chờ duyệt.");
+
+            await EnsureIsProjectManagerAsync(currentUserId, deXuat.MaDuAn);
 
             NganSach? nganSachCu = null;
 
@@ -163,6 +173,8 @@ namespace QuanLyDuAn.Services.Implementations
             if (!IsPending(deXuat.TrangThaiDeXuat))
                 throw new Exception("Đề xuất ngân sách không còn ở trạng thái chờ duyệt.");
 
+            await EnsureIsProjectManagerAsync(currentUserId, deXuat.MaDuAn);
+
             deXuat.TrangThaiDeXuat = TrangThai.TuChoi;
             deXuat.MaNguoiDungDuyet = currentUserId;
             deXuat.NgayDuyet = DateTime.Now;
@@ -220,6 +232,17 @@ namespace QuanLyDuAn.Services.Implementations
         private static bool IsPending(string? status)
         {
             return TrangThai.EqualsValue(status, TrangThai.ChoDuyet);
+        }
+
+        private async Task EnsureIsProjectManagerAsync(int maNguoiDung, int maDuAn)
+        {
+            var isProjectManager = await _context.DuAn.AnyAsync(x =>
+                x.MaDuAn == maDuAn &&
+                x.IsDeleted != true &&
+                x.MaNguoiDung == maNguoiDung);
+
+            if (!isProjectManager)
+                throw new Exception("Bạn không có quyền duyệt đề xuất cho dự án này.");
         }
     }
 }

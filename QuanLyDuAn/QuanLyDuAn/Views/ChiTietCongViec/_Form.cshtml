@@ -1,0 +1,53 @@
+﻿@model QuanLyDuAn.ViewModels.ChiTietCongViec.ChiTietCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    bool canShowForm = permissions.Contains(Permissions.ChiTietCongViec.Them) && Model.CoTheCapNhat;
+    var trangThaiOptions = new[]
+    {
+        TrangThai.ChuaBatDau,
+        TrangThai.DangThucHien,
+        TrangThai.BiCanCan,
+        TrangThai.TamDung,
+        TrangThai.HoanThanh
+    };
+}
+
+@if (canShowForm)
+{
+    <h6>Thêm chi tiết công việc</h6>
+    <form asp-action="Them" method="post" class="mb-3">
+        <input type="hidden" name="MaCongViec" value="@Model.CongViec.MaCongViec" />
+
+        <div class="row g-2">
+            <div class="col-md-3">
+                <label class="form-label">Tên CTCV</label>
+                <input type="text" class="form-control" name="TenCTCV" value="@Model.Form.TenCTCV" maxlength="255" />
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Nội dung</label>
+                <input type="text" class="form-control" name="NoiDungChiTietCV" maxlength="255" required />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ngày bắt đầu CTCV</label>
+                <input type="date" class="form-control" name="NgayBatDauCTCV" value="@Model.Form.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Trạng thái</label>
+                <select class="form-select" name="TrangThaiCTCV" required>
+                    @foreach (var item in trangThaiOptions)
+                    {
+                        <option value="@item" selected="@(TrangThai.EqualsValue(Model.Form.TrangThaiCTCV, item))">@TrangThai.ToDisplay(item)</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">Thêm chi tiết</button>
+            <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="btn btn-secondary">Làm mới</a>
+        </div>
+    </form>
+    <hr />
+}

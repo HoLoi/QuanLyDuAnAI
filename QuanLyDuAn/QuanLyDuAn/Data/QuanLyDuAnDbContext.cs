@@ -37,6 +37,7 @@ public partial class QuanLyDuAnDbContext : DbContext
     public virtual DbSet<DmNguyenNhan> DmNguyenNhan { get; set; } = null!;
     public virtual DbSet<DuAn> DuAn { get; set; } = null!;
     public virtual DbSet<FileCongViec> FileCongViec { get; set; } = null!;
+    public virtual DbSet<FileCtCongViec> FileCtCongViec { get; set; } = null!;
     public virtual DbSet<FileDuAn> FileDuAn { get; set; } = null!;
     public virtual DbSet<FileTienDoCongViec> FileTienDoCongViec { get; set; } = null!;
     public virtual DbSet<LoaiDuAn> LoaiDuAn { get; set; } = null!;
@@ -49,9 +50,11 @@ public partial class QuanLyDuAnDbContext : DbContext
     public virtual DbSet<NhatKyDuAn> NhatKyDuAn { get; set; } = null!;
     public virtual DbSet<NhatKyNganSach> NhatKyNganSach { get; set; } = null!;
     public virtual DbSet<NhatKyPhanCongCongViec> NhatKyPhanCongCongViec { get; set; } = null!;
+    public virtual DbSet<NhatKyPhanCongCtCongViec> NhatKyPhanCongCtCongViec { get; set; } = null!;
     public virtual DbSet<NhatKyPhuTrachDuAn> NhatKyPhuTrachDuAn { get; set; } = null!;
     public virtual DbSet<NhatKyQuanLyDuAn> NhatKyQuanLyDuAn { get; set; } = null!;
     public virtual DbSet<PhanCongCongViec> PhanCongCongViec { get; set; } = null!;
+    public virtual DbSet<PhanCongCtCongViec> PhanCongCtCongViec { get; set; } = null!;
     public virtual DbSet<PhongChat> PhongChat { get; set; } = null!;
     public virtual DbSet<Team> Team { get; set; } = null!;
     public virtual DbSet<TeamDuAn> TeamDuAn { get; set; } = null!;
@@ -259,6 +262,10 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(d => d.MaCongViec)
                 .HasConstraintName("FK_CT_CONG__CO_CONG_VIE");
+            entity.HasOne<NguoiDung>()
+                .WithMany()
+                .HasForeignKey(d => d.DeletedBy)
+                .HasConstraintName("FK_CT_CONG_VIEC_DELETED_BY");
         });
         modelBuilder.Entity<CtDanhGiaDuAn>(entity =>
         {
@@ -453,6 +460,17 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .HasForeignKey(d => d.MaCongViec)
                 .HasConstraintName("FK_FILE_CON_CO_CONG_VIE");
         });
+        modelBuilder.Entity<FileCtCongViec>(entity =>
+        {
+            entity.ToTable("FILE_CT_CONG_VIEC");
+            entity.HasKey(e => e.MaFileCTCV);
+            entity.Property(e => e.TenFileCTCV).HasMaxLength(255);
+            entity.Property(e => e.DuongDanFileCTCV).HasMaxLength(500);
+            entity.HasOne<CtCongViec>()
+                .WithMany()
+                .HasForeignKey(d => d.MaChiTietCV)
+                .HasConstraintName("FK_FILE_CT__CO_CT_CONG_VIE");
+        });
         modelBuilder.Entity<FileDuAn>(entity =>
         {
             entity.ToTable("FILE_DU_AN");
@@ -629,6 +647,24 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .HasForeignKey(d => d.MaNguoiDungGhi)
                 .HasConstraintName("FK_NKPCCV_GHI_NGUOI_DU");
         });
+        modelBuilder.Entity<NhatKyPhanCongCtCongViec>(entity =>
+        {
+            entity.ToTable("NHAT_KY_PHAN_CONG_CT_CONG_VIEC");
+            entity.HasKey(e => e.MaNhatKyPCCTCV);
+            entity.Property(e => e.HanhDongPCCTCV).HasMaxLength(255);
+            entity.HasOne<CtCongViec>()
+                .WithMany()
+                .HasForeignKey(d => d.MaChiTietCV)
+                .HasConstraintName("FK_NKPCCTCV_CO_CT_CONG_VIE");
+            entity.HasOne<NguoiDung>()
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiDung)
+                .HasConstraintName("FK_NHAT_KY__DUOC PHAN_NGUOI_DU1");
+            entity.HasOne<NguoiDung>()
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiDungGhi)
+                .HasConstraintName("FK_NKPCCTCV_GHI_NGUOI_DU");
+        });
         modelBuilder.Entity<NhatKyPhuTrachDuAn>(entity =>
         {
             entity.ToTable("NHAT_KY_PHU_TRACH_DU_AN");
@@ -669,6 +705,19 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(d => d.MaNguoiDung)
                 .HasConstraintName("FK_PHAN_CON_PHAN_CONG_NGUOI_DU");
+        });
+        modelBuilder.Entity<PhanCongCtCongViec>(entity =>
+        {
+            entity.ToTable("PHAN_CONG_CT_CONG_VIEC");
+            entity.HasKey(e => new { e.MaNguoiDung, e.MaChiTietCV });
+            entity.HasOne<CtCongViec>()
+                .WithMany()
+                .HasForeignKey(d => d.MaChiTietCV)
+                .HasConstraintName("FK_PHAN_CON_PHAN_CONG_CT_CONG_VIE");
+            entity.HasOne<NguoiDung>()
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiDung)
+                .HasConstraintName("FK_PHAN_CON_PHAN_CONG_NGUOI_DU1");
         });
         modelBuilder.Entity<PhongChat>(entity =>
         {
@@ -729,10 +778,10 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(d => d.MaNguoiDung)
                 .HasConstraintName("FK_TIEN_DO__BAO CAO_NGUOI_DU");
-            entity.HasOne<CongViec>()
+            entity.HasOne<CtCongViec>()
                 .WithMany()
-                .HasForeignKey(d => d.MaCongViec)
-                .HasConstraintName("FK_TIEN_DO__DUOC CAP _CONG_VIE");
+                .HasForeignKey(d => d.MaChiTietCV)
+                .HasConstraintName("FK_TIEN_DO__BAO CAO_CONG_VIE");
         });
         modelBuilder.Entity<TieuChiDanhGia>(entity =>
         {

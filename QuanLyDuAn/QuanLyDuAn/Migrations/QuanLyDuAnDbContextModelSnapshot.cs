@@ -534,10 +534,22 @@ namespace QuanLyDuAn.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaChiTietCV"));
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MaCongViec")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("NgayBaoCaoCTCV")
+                    b.Property<DateTime?>("NgayBatDauCTCV")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayKetThucCTCV")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("NgayTaoCTCV")
@@ -546,8 +558,8 @@ namespace QuanLyDuAn.Migrations
                     b.Property<string>("NoiDungChiTietCV")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("PhanTramHoanThanhCTCV")
-                        .HasColumnType("float");
+                    b.Property<string>("TenCTCV")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TrangThaiCTCV")
                         .HasMaxLength(50)
@@ -1058,6 +1070,9 @@ namespace QuanLyDuAn.Migrations
                     b.Property<int>("MaCongViec")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("NgayUploadFileCV")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("TenFileCV")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -1067,6 +1082,44 @@ namespace QuanLyDuAn.Migrations
                     b.HasIndex("MaCongViec");
 
                     b.ToTable("FILE_CONG_VIEC", (string)null);
+                });
+
+            modelBuilder.Entity("QuanLyDuAn.Models.Entities.FileCtCongViec", b =>
+                {
+                    b.Property<int>("MaFileCTCV")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaFileCTCV"));
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DuongDanFileCTCV")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MaChiTietCV")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayUploadFileCTCV")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TenFileCTCV")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("MaFileCTCV");
+
+                    b.HasIndex("MaChiTietCV");
+
+                    b.ToTable("FILE_CT_CONG_VIEC", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.FileDuAn", b =>
@@ -1092,6 +1145,9 @@ namespace QuanLyDuAn.Migrations
 
                     b.Property<int>("MaDuAn")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayUploadFileDA")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TenFileDA")
                         .HasMaxLength(255)
@@ -1127,6 +1183,9 @@ namespace QuanLyDuAn.Migrations
 
                     b.Property<int>("MaTienDo")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayUploadFileTDCV")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TenFileTDCV")
                         .HasMaxLength(255)
@@ -1502,6 +1561,41 @@ namespace QuanLyDuAn.Migrations
                     b.ToTable("NHAT_KY_PHAN_CONG_CONG_VIEC", (string)null);
                 });
 
+            modelBuilder.Entity("QuanLyDuAn.Models.Entities.NhatKyPhanCongCtCongViec", b =>
+                {
+                    b.Property<int>("MaNhatKyPCCTCV")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaNhatKyPCCTCV"));
+
+                    b.Property<string>("HanhDongPCCTCV")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("MaChiTietCV")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaNguoiDung")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaNguoiDungGhi")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ThoiGianPCCTCV")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MaNhatKyPCCTCV");
+
+                    b.HasIndex("MaChiTietCV");
+
+                    b.HasIndex("MaNguoiDung");
+
+                    b.HasIndex("MaNguoiDungGhi");
+
+                    b.ToTable("NHAT_KY_PHAN_CONG_CT_CONG_VIEC", (string)null);
+                });
+
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.NhatKyPhuTrachDuAn", b =>
                 {
                     b.Property<int>("MaNhatKyPTDA")
@@ -1584,6 +1678,27 @@ namespace QuanLyDuAn.Migrations
                     b.HasIndex("MaCongViec");
 
                     b.ToTable("PHAN_CONG_CONG_VIEC", (string)null);
+                });
+
+            modelBuilder.Entity("QuanLyDuAn.Models.Entities.PhanCongCtCongViec", b =>
+                {
+                    b.Property<int>("MaNguoiDung")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaChiTietCV")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayGiaoCTCV")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VaiTroTrongCTCV")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MaNguoiDung", "MaChiTietCV");
+
+                    b.HasIndex("MaChiTietCV");
+
+                    b.ToTable("PHAN_CONG_CT_CONG_VIEC", (string)null);
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.PhongChat", b =>
@@ -1705,7 +1820,7 @@ namespace QuanLyDuAn.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("MaCongViec")
+                    b.Property<int>("MaChiTietCV")
                         .HasColumnType("int");
 
                     b.Property<int>("MaNguoiDung")
@@ -1723,7 +1838,7 @@ namespace QuanLyDuAn.Migrations
 
                     b.HasKey("MaTienDo");
 
-                    b.HasIndex("MaCongViec");
+                    b.HasIndex("MaChiTietCV");
 
                     b.HasIndex("MaNguoiDung");
 
@@ -2265,6 +2380,16 @@ namespace QuanLyDuAn.Migrations
                         .HasConstraintName("FK_FILE_CON_CO_CONG_VIE");
                 });
 
+            modelBuilder.Entity("QuanLyDuAn.Models.Entities.FileCtCongViec", b =>
+                {
+                    b.HasOne("QuanLyDuAn.Models.Entities.CtCongViec", null)
+                        .WithMany()
+                        .HasForeignKey("MaChiTietCV")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_FILE_CT__CO_CT_CONG_VIE");
+                });
+
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.FileDuAn", b =>
                 {
                     b.HasOne("QuanLyDuAn.Models.Entities.DuAn", null)
@@ -2446,6 +2571,30 @@ namespace QuanLyDuAn.Migrations
                         .HasConstraintName("FK_NKPCCV_GHI_NGUOI_DU");
                 });
 
+            modelBuilder.Entity("QuanLyDuAn.Models.Entities.NhatKyPhanCongCtCongViec", b =>
+                {
+                    b.HasOne("QuanLyDuAn.Models.Entities.CtCongViec", null)
+                        .WithMany()
+                        .HasForeignKey("MaChiTietCV")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NKPCCTCV_CO_CT_CONG_VIE");
+
+                    b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("MaNguoiDung")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NHAT_KY__DUOC PHAN_NGUOI_DU1");
+
+                    b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("MaNguoiDungGhi")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NKPCCTCV_GHI_NGUOI_DU");
+                });
+
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.NhatKyPhuTrachDuAn", b =>
                 {
                     b.HasOne("QuanLyDuAn.Models.Entities.DuAn", null)
@@ -2495,6 +2644,23 @@ namespace QuanLyDuAn.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_PHAN_CON_PHAN_CONG_NGUOI_DU");
+                });
+
+            modelBuilder.Entity("QuanLyDuAn.Models.Entities.PhanCongCtCongViec", b =>
+                {
+                    b.HasOne("QuanLyDuAn.Models.Entities.CtCongViec", null)
+                        .WithMany()
+                        .HasForeignKey("MaChiTietCV")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PHAN_CON_PHAN_CONG_CT_CONG_VIE");
+
+                    b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("MaNguoiDung")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PHAN_CON_PHAN_CONG_NGUOI_DU1");
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.PhongChat", b =>
@@ -2552,12 +2718,12 @@ namespace QuanLyDuAn.Migrations
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.TienDoCongViec", b =>
                 {
-                    b.HasOne("QuanLyDuAn.Models.Entities.CongViec", null)
+                    b.HasOne("QuanLyDuAn.Models.Entities.CtCongViec", null)
                         .WithMany()
-                        .HasForeignKey("MaCongViec")
+                        .HasForeignKey("MaChiTietCV")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_TIEN_DO__DUOC CAP _CONG_VIE");
+                        .HasConstraintName("FK_TIEN_DO__BAO CAO_CONG_VIE");
 
                     b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
                         .WithMany()

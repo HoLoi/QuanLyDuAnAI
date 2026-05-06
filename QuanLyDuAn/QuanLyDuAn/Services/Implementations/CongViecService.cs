@@ -20,6 +20,8 @@ namespace QuanLyDuAn.Services.Implementations
 
         public async Task<CongViecPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai, string? tuKhoa)
         {
+            var currentUserId = await GetCurrentUserIdAsync();
+            var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
             var allowedProjectIds = await GetAccessibleProjectIdsAsync();
             var projectOptions = await GetProjectOptionsAsync(allowedProjectIds);
 
@@ -78,17 +80,71 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            var danhSach = await query
+                .OrderByDescending(x => x.NgayTaoCongViec)
+                .ThenByDescending(x => x.MaCongViec)
+                .ToListAsync();
+
+            await GanCoThePhanCongCongViecAsync(danhSach, currentUserId, isManager, isEmployee);
+
             return new CongViecPageViewModel
             {
-                DanhSach = await query
-                    .OrderByDescending(x => x.NgayTaoCongViec)
-                    .ThenByDescending(x => x.MaCongViec)
-                    .ToListAsync(),
+                DanhSach = danhSach,
                 DanhSachDuAn = projectOptions,
                 LocMaDuAn = locMaDuAn,
                 LocTrangThai = locTrangThai,
                 TuKhoa = tuKhoa
             };
+        }
+
+        private async Task GanCoThePhanCongCongViecAsync(
+            List<CongViecItemViewModel> danhSach,
+            int currentUserId,
+            bool isManager,
+            bool isEmployee)
+        {
+            if (danhSach.Count == 0)
+            {
+                return;
+            }
+
+            // Manager/Admin: giữ nguyên luồng phân quyền hiện tại, không chặn theo vai trò dự án.
+            if (!isEmployee || isManager)
+            {
+                foreach (var item in danhSach)
+                {
+                    item.CoThePhanCongCongViec = true;
+                }
+                return;
+            }
+
+            var duAnIds = danhSach
+                .Select(x => x.MaDuAn)
+                .Distinct()
+                .ToList();
+
+            var vaiTroTheoDuAn = await _context.NhanVienDuAn
+                .Where(x => x.MaNguoiDung == currentUserId
+                            && duAnIds.Contains(x.MaDuAn))
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    x.VaiTroTrongDuAn
+                })
+                .ToListAsync();
+
+            var leaderDuAnIds = vaiTroTheoDuAn
+                .Where(x => TrangThai.EqualsValue(x.VaiTroTrongDuAn, TrangThai.VaiTroLeader))
+                .Select(x => x.MaDuAn)
+                .Distinct()
+                .ToList();
+
+            var leaderDuAnSet = leaderDuAnIds.ToHashSet();
+
+            foreach (var item in danhSach)
+            {
+                item.CoThePhanCongCongViec = leaderDuAnSet.Contains(item.MaDuAn);
+            }
         }
 
         private async Task<List<int>> GetAccessibleProjectIdsAsync()

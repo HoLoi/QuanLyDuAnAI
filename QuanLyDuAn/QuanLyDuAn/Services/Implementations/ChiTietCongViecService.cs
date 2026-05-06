@@ -21,65 +21,69 @@ namespace QuanLyDuAn.Services.Implementations
 
         public async Task<ChiTietCongViecPageViewModel> GetPageAsync(int maCongViec)
         {
-            var congViec = await GetCongViecAsync(maCongViec);
-            var chiTietMoiNhat = await GetChiTietMoiNhatAsync(maCongViec);
+            var congViec = await LayCongViecAsync(maCongViec);
+            var coTheCapNhat = await CoTheCapNhatAsync(congViec);
 
-            var vm = new ChiTietCongViecPageViewModel
-            {
-                CoTheCapNhat = await CoTheCapNhatAsync(congViec),
-                CongViec = new ChiTietCongViecSummaryViewModel
-                {
-                    MaCongViec = congViec.MaCongViec,
-                    TenCongViec = congViec.TenCongViec ?? string.Empty,
-                    TenTrangThai = TrangThai.ToDisplay(congViec.TrangThaiCongViec),
-                    PhanTramHoanThanh = chiTietMoiNhat?.PhanTramHoanThanhCTCV ?? 0
-                },
-                Form = new ChiTietCongViecCreateUpdateViewModel
-                {
-                    MaCongViec = maCongViec,
-                    NgayBaoCaoCTCV = DateTime.Today,
-                    PhanTramHoanThanhCTCV = chiTietMoiNhat?.PhanTramHoanThanhCTCV ?? 0,
-                    TrangThaiCTCV = chiTietMoiNhat?.TrangThaiCTCV ?? TrangThai.ChuaBatDau
-                }
-            };
-
-            vm.DanhSach = await _context.CtCongViec
-                .Where(x => x.MaCongViec == maCongViec)
-                .OrderByDescending(x => x.NgayBaoCaoCTCV)
+            var danhSach = await _context.CtCongViec
+                .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true)
+                .OrderByDescending(x => x.NgayTaoCTCV)
                 .ThenByDescending(x => x.MaChiTietCV)
                 .Select(x => new ChiTietCongViecItemViewModel
                 {
                     MaChiTietCV = x.MaChiTietCV,
                     MaCongViec = x.MaCongViec,
+                    TenCTCV = x.TenCTCV ?? string.Empty,
                     NoiDungChiTietCV = x.NoiDungChiTietCV ?? string.Empty,
                     NgayTaoCTCV = x.NgayTaoCTCV,
-                    NgayBaoCaoCTCV = x.NgayBaoCaoCTCV,
-                    PhanTramHoanThanhCTCV = x.PhanTramHoanThanhCTCV,
-                    TrangThaiCTCV = x.TrangThaiCTCV ?? string.Empty
+                    NgayBatDauCTCV = x.NgayBatDauCTCV,
+                    NgayKetThucCTCV = x.NgayKetThucCTCV,
+                    TrangThaiCTCV = x.TrangThaiCTCV ?? TrangThai.ChuaBatDau
                 })
                 .ToListAsync();
 
-            return vm;
+            return new ChiTietCongViecPageViewModel
+            {
+                CoTheCapNhat = coTheCapNhat,
+                CongViec = new ChiTietCongViecSummaryViewModel
+                {
+                    MaCongViec = congViec.MaCongViec,
+                    TenCongViec = congViec.TenCongViec ?? string.Empty,
+                    TenTrangThai = TrangThai.ToDisplay(congViec.TrangThaiCongViec)
+                },
+                Form = new ChiTietCongViecCreateUpdateViewModel
+                {
+                    MaCongViec = maCongViec,
+                    NgayBatDauCTCV = DateTime.Today,
+                    TrangThaiCTCV = TrangThai.ChuaBatDau
+                },
+                DanhSach = danhSach
+            };
         }
 
         public async Task AddAsync(ChiTietCongViecCreateUpdateViewModel form)
         {
-            ValidateForm(form);
-            var congViec = await GetCongViecAsync(form.MaCongViec);
+            var congViec = await LayCongViecAsync(form.MaCongViec);
+            KiemTraDuLieuDauVao(form, congViec);
             await KiemTraQuyenCapNhatAsync(congViec);
+
+            var trangThai = TrangThai.ToCode(form.TrangThaiCTCV);
 
             var entity = new CtCongViec
             {
                 MaCongViec = form.MaCongViec,
+                TenCTCV = string.IsNullOrWhiteSpace(form.TenCTCV) ? null : form.TenCTCV.Trim(),
                 NoiDungChiTietCV = form.NoiDungChiTietCV.Trim(),
                 NgayTaoCTCV = DateTime.Now,
-                NgayBaoCaoCTCV = form.NgayBaoCaoCTCV,
-                PhanTramHoanThanhCTCV = form.PhanTramHoanThanhCTCV,
-                TrangThaiCTCV = TrangThai.ToCode(form.TrangThaiCTCV)
+                NgayBatDauCTCV = form.NgayBatDauCTCV!.Value.Date,
+                NgayKetThucCTCV = TrangThai.LaHoanThanhCongViec(trangThai) ? DateTime.Now : null,
+                TrangThaiCTCV = trangThai,
+                IsDeleted = false
             };
 
             _context.CtCongViec.Add(entity);
-            DongBoTrangThaiCongViec(congViec, entity.NgayBaoCaoCTCV, entity.PhanTramHoanThanhCTCV, entity.TrangThaiCTCV);
+            await _context.SaveChangesAsync();
+
+            await DongBoTrangThaiCongViecTheoChiTietAsync(congViec.MaCongViec);
             await _context.SaveChangesAsync();
         }
 
@@ -88,58 +92,57 @@ namespace QuanLyDuAn.Services.Implementations
             if (form.MaChiTietCV <= 0)
                 throw new Exception("Không tìm thấy chi tiết công việc cần cập nhật.");
 
-            ValidateForm(form);
-            var congViec = await GetCongViecAsync(form.MaCongViec);
+            var congViec = await LayCongViecAsync(form.MaCongViec);
+            KiemTraDuLieuDauVao(form, congViec);
             await KiemTraQuyenCapNhatAsync(congViec);
 
             var entity = await _context.CtCongViec
-                .FirstOrDefaultAsync(x => x.MaChiTietCV == form.MaChiTietCV && x.MaCongViec == form.MaCongViec);
+                .FirstOrDefaultAsync(x =>
+                    x.MaChiTietCV == form.MaChiTietCV &&
+                    x.MaCongViec == form.MaCongViec &&
+                    x.IsDeleted != true);
 
             if (entity == null)
                 throw new Exception("Không tìm thấy chi tiết công việc cần cập nhật.");
 
-            entity.NoiDungChiTietCV = form.NoiDungChiTietCV.Trim();
-            entity.NgayBaoCaoCTCV = form.NgayBaoCaoCTCV;
-            entity.PhanTramHoanThanhCTCV = form.PhanTramHoanThanhCTCV;
-            entity.TrangThaiCTCV = TrangThai.ToCode(form.TrangThaiCTCV);
+            var trangThai = TrangThai.ToCode(form.TrangThaiCTCV);
 
-            await DongBoTrangThaiTuBanGhiMoiNhatAsync(congViec, entity);
+            entity.TenCTCV = string.IsNullOrWhiteSpace(form.TenCTCV) ? null : form.TenCTCV.Trim();
+            entity.NoiDungChiTietCV = form.NoiDungChiTietCV.Trim();
+            entity.NgayBatDauCTCV = form.NgayBatDauCTCV!.Value.Date;
+            entity.NgayKetThucCTCV = TrangThai.LaHoanThanhCongViec(trangThai) ? DateTime.Now : null;
+            entity.TrangThaiCTCV = trangThai;
+
+            await _context.SaveChangesAsync();
+
+            await DongBoTrangThaiCongViecTheoChiTietAsync(congViec.MaCongViec);
             await _context.SaveChangesAsync();
         }
 
         public async Task RemoveAsync(int maCongViec, int maChiTietCv)
         {
-            var congViec = await GetCongViecAsync(maCongViec);
+            var congViec = await LayCongViecAsync(maCongViec);
             await KiemTraQuyenCapNhatAsync(congViec);
 
             var entity = await _context.CtCongViec
-                .FirstOrDefaultAsync(x => x.MaChiTietCV == maChiTietCv && x.MaCongViec == maCongViec);
+                .FirstOrDefaultAsync(x =>
+                    x.MaChiTietCV == maChiTietCv &&
+                    x.MaCongViec == maCongViec &&
+                    x.IsDeleted != true);
 
             if (entity == null)
                 throw new Exception("Không tìm thấy chi tiết công việc cần xóa.");
 
-            _context.CtCongViec.Remove(entity);
+            entity.IsDeleted = true;
+            entity.DeletedAt = DateTime.Now;
+            entity.DeletedBy = await GetCurrentUserIdAsync();
             await _context.SaveChangesAsync();
 
-            var chiTietMoiNhat = await GetChiTietMoiNhatAsync(maCongViec);
-            if (chiTietMoiNhat == null)
-            {
-                congViec.TrangThaiCongViec = TrangThai.ChuaBatDau;
-                congViec.NgayKetThucCVThucTe = null;
-            }
-            else
-            {
-                DongBoTrangThaiCongViec(
-                    congViec,
-                    chiTietMoiNhat.NgayBaoCaoCTCV,
-                    chiTietMoiNhat.PhanTramHoanThanhCTCV,
-                    chiTietMoiNhat.TrangThaiCTCV);
-            }
-
+            await DongBoTrangThaiCongViecTheoChiTietAsync(congViec.MaCongViec);
             await _context.SaveChangesAsync();
         }
 
-        private static void ValidateForm(ChiTietCongViecCreateUpdateViewModel form)
+        private static void KiemTraDuLieuDauVao(ChiTietCongViecCreateUpdateViewModel form, CongViec congViec)
         {
             if (form.MaCongViec <= 0)
                 throw new Exception("Mã công việc không hợp lệ.");
@@ -147,20 +150,45 @@ namespace QuanLyDuAn.Services.Implementations
             if (string.IsNullOrWhiteSpace(form.NoiDungChiTietCV))
                 throw new Exception("Nội dung chi tiết công việc không được để trống.");
 
-            if (!form.NgayBaoCaoCTCV.HasValue)
-                throw new Exception("Vui lòng chọn ngày báo cáo.");
+            if (form.NoiDungChiTietCV.Trim().Length > 255)
+                throw new Exception("Nội dung chi tiết công việc tối đa 255 ký tự.");
 
-            if (!form.PhanTramHoanThanhCTCV.HasValue)
-                throw new Exception("Vui lòng nhập phần trăm hoàn thành.");
+            if (!string.IsNullOrWhiteSpace(form.TenCTCV) && form.TenCTCV.Trim().Length > 255)
+                throw new Exception("Tên chi tiết công việc tối đa 255 ký tự.");
 
-            if (form.PhanTramHoanThanhCTCV < 0 || form.PhanTramHoanThanhCTCV > 100)
-                throw new Exception("Phần trăm hoàn thành phải nằm trong khoảng từ 0 đến 100.");
+            if (!form.NgayBatDauCTCV.HasValue)
+                throw new Exception("Vui lòng chọn ngày bắt đầu.");
 
             if (string.IsNullOrWhiteSpace(form.TrangThaiCTCV))
                 throw new Exception("Vui lòng chọn trạng thái chi tiết công việc.");
+
+            if (congViec.NgayBatDauCongViec.HasValue
+                && form.NgayBatDauCTCV.Value.Date < congViec.NgayBatDauCongViec.Value.Date)
+            {
+                throw new Exception("Ngày bắt đầu chi tiết công việc không được trước ngày bắt đầu công việc.");
+            }
+
+            if (congViec.NgayKetThucCVDuKien.HasValue
+                && form.NgayBatDauCTCV.Value.Date > congViec.NgayKetThucCVDuKien.Value.Date)
+            {
+                throw new Exception("Ngày bắt đầu chi tiết công việc không được sau ngày kết thúc dự kiến của công việc.");
+            }
+
+            var trangThai = TrangThai.ToCode(form.TrangThaiCTCV);
+            var trangThaiHopLe = new[]
+            {
+                TrangThai.ChuaBatDau,
+                TrangThai.DangThucHien,
+                TrangThai.BiCanCan,
+                TrangThai.TamDung,
+                TrangThai.HoanThanh
+            };
+
+            if (!trangThaiHopLe.Any(x => TrangThai.EqualsValue(x, trangThai)))
+                throw new Exception("Trạng thái chi tiết công việc không hợp lệ.");
         }
 
-        private async Task<CongViec> GetCongViecAsync(int maCongViec)
+        private async Task<CongViec> LayCongViecAsync(int maCongViec)
         {
             var congViec = await _context.CongViec
                 .FirstOrDefaultAsync(x => x.MaCongViec == maCongViec && x.IsDeleted != true);
@@ -169,15 +197,6 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Không tìm thấy công việc.");
 
             return congViec;
-        }
-
-        private async Task<CtCongViec?> GetChiTietMoiNhatAsync(int maCongViec)
-        {
-            return await _context.CtCongViec
-                .Where(x => x.MaCongViec == maCongViec)
-                .OrderByDescending(x => x.NgayBaoCaoCTCV)
-                .ThenByDescending(x => x.MaChiTietCV)
-                .FirstOrDefaultAsync();
         }
 
         private async Task<int> GetCurrentUserIdAsync()
@@ -221,9 +240,8 @@ namespace QuanLyDuAn.Services.Implementations
             var isEmployee = httpUser?.IsInRole("Employee") == true;
 
             if (isEmployee)
-            {
                 throw new Exception("Nhân viên chỉ được cập nhật chi tiết công việc khi là trưởng team hoặc leader dự án.");
-            }
+
             throw new Exception("Bạn không có quyền cập nhật chi tiết công việc này.");
         }
 
@@ -238,9 +256,7 @@ namespace QuanLyDuAn.Services.Implementations
             var isEmployee = httpUser?.IsInRole("Employee") == true;
 
             if (isEmployee)
-            {
                 return await LaLeaderTeamHoacDuAnAsync(maDuAn, maNguoiDungHienTai);
-            }
 
             var laLeaderDuAn = await _context.NhanVienDuAn
                 .AnyAsync(x =>
@@ -281,50 +297,32 @@ namespace QuanLyDuAn.Services.Implementations
             return TrangThai.EqualsValue(vaiTroTrongDuAn, TrangThai.VaiTroLeader);
         }
 
-        private async Task DongBoTrangThaiTuBanGhiMoiNhatAsync(CongViec congViec, CtCongViec entityDangSua)
+        private async Task DongBoTrangThaiCongViecTheoChiTietAsync(int maCongViec)
         {
+            var congViec = await LayCongViecAsync(maCongViec);
             var chiTietMoiNhat = await _context.CtCongViec
-                .Where(x => x.MaCongViec == congViec.MaCongViec)
-                .OrderByDescending(x => x.NgayBaoCaoCTCV)
+                .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true)
+                .OrderByDescending(x => x.NgayBatDauCTCV)
+                .ThenByDescending(x => x.NgayTaoCTCV)
                 .ThenByDescending(x => x.MaChiTietCV)
                 .FirstOrDefaultAsync();
 
-            if (chiTietMoiNhat == null || chiTietMoiNhat.MaChiTietCV == entityDangSua.MaChiTietCV)
+            if (chiTietMoiNhat == null)
             {
-                DongBoTrangThaiCongViec(
-                    congViec,
-                    entityDangSua.NgayBaoCaoCTCV,
-                    entityDangSua.PhanTramHoanThanhCTCV,
-                    entityDangSua.TrangThaiCTCV);
+                congViec.TrangThaiCongViec = TrangThai.ChuaBatDau;
+                congViec.NgayKetThucCVThucTe = null;
                 return;
             }
 
-            DongBoTrangThaiCongViec(
-                congViec,
-                chiTietMoiNhat.NgayBaoCaoCTCV,
-                chiTietMoiNhat.PhanTramHoanThanhCTCV,
-                chiTietMoiNhat.TrangThaiCTCV);
-        }
+            var trangThaiChiTiet = TrangThai.ToCode(chiTietMoiNhat.TrangThaiCTCV);
+            congViec.TrangThaiCongViec = string.IsNullOrWhiteSpace(trangThaiChiTiet)
+                ? TrangThai.ChuaBatDau
+                : trangThaiChiTiet;
 
-        private static void DongBoTrangThaiCongViec(
-            CongViec congViec,
-            DateTime? ngayBaoCao,
-            double? phanTram,
-            string? trangThai)
-        {
-            var phanTramValue = phanTram ?? 0;
-            if (phanTramValue >= 100 || TrangThai.LaHoanThanhCongViec(trangThai))
-            {
-                congViec.TrangThaiCongViec = TrangThai.HoanThanh;
-                congViec.NgayKetThucCVThucTe = ngayBaoCao ?? DateTime.Now;
-                return;
-            }
-
-            congViec.TrangThaiCongViec = string.IsNullOrWhiteSpace(trangThai)
-                ? TrangThai.DangThucHien
-                : TrangThai.ToCode(trangThai);
-
-            congViec.NgayKetThucCVThucTe = null;
+            if (TrangThai.LaHoanThanhCongViec(trangThaiChiTiet))
+                congViec.NgayKetThucCVThucTe = chiTietMoiNhat.NgayKetThucCTCV ?? DateTime.Now;
+            else
+                congViec.NgayKetThucCVThucTe = null;
         }
     }
 }

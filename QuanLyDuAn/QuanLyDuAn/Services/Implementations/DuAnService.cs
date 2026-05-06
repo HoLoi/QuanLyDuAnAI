@@ -45,7 +45,12 @@ namespace QuanLyDuAn.Services.Implementations
                             PhanTramHoanThanh = da.PhanTramHoanThanh ?? 0,
                             TrangThaiDuAn = da.TrangThaiDuAn ?? string.Empty,
                             SoLuongTeam = _context.TeamDuAn.Count(x => x.MaDuAn == da.MaDuAn),
-                            SoLuongThanhVien = _context.NhanVienDuAn.Count(x => x.MaDuAn == da.MaDuAn)
+                            SoLuongThanhVien = _context.NhanVienDuAn.Count(x => x.MaDuAn == da.MaDuAn),
+                            HasApprovedBudget = _context.NganSach.Any(x =>
+                                x.MaDuAn == da.MaDuAn
+                                && x.IsDeleted != true
+                                && x.IsActive == true
+                                && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi))
                         };
 
             if (isManager)
