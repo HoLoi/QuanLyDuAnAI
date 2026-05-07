@@ -50,6 +50,12 @@
                     <td class="col-date">@item.NgayTaoCTCV?.ToString("dd/MM/yyyy HH:mm")</td>
                     <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiCTCV)</td>
                     <td class="col-action table-actions">
+                        @if (permissions.Contains(Permissions.PhanCongChiTietCongViec.Xem) && item.CoThePhanCongChiTietCongViec)
+                        {
+                            <a asp-controller="PhanCongChiTietCongViec" asp-action="Index" asp-route-maChiTietCv="@item.MaChiTietCV" class="btn btn-outline-secondary btn-sm">
+                                Phân công
+                            </a>
+                        }
                         @if (canEdit)
                         {
                             <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#@collapseId">

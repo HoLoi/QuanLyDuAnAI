@@ -1,5 +1,31 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model QuanLyDuAn.ViewModels.PhanCongChiTietCongViec.PhanCongChiTietCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
 @{
+    var permissions = Model.Permissions;
+    bool canShowForm = permissions.Contains(Permissions.PhanCongChiTietCongViec.ThucHien);
+
+    ViewBag.Permissions = permissions;
+    ViewData["Title"] = "Phân công chi tiết công việc";
 }
+
+<div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Phân công chi tiết công việc</h5>
+        <a asp-controller="ChiTietCongViec" asp-action="Index" asp-route-maCongViec="@Model.ChiTietCongViec.MaCongViec" class="btn btn-outline-secondary btn-sm">Quay lại chi tiết công việc</a>
+    </div>
+
+    <div class="alert alert-light border mb-3">
+        <div><strong>Công việc:</strong> @Model.ChiTietCongViec.TenCongViec (Mã: @Model.ChiTietCongViec.MaCongViec)</div>
+        <div><strong>Chi tiết công việc:</strong> @Model.ChiTietCongViec.TenChiTietCongViec (Mã: @Model.ChiTietCongViec.MaChiTietCV)</div>
+        <div><strong>Trạng thái:</strong> @Model.ChiTietCongViec.TenTrangThai</div>
+    </div>
+
+    @if (canShowForm)
+    {
+        <partial name="_Form" model="Model" />
+        <hr />
+    }
+
+    <partial name="_Table" model="Model" />
+</div>

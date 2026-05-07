@@ -5,6 +5,7 @@ namespace QuanLyDuAn.Services.Interfaces
     public interface IDuAnService
     {
         Task<List<DuAnViewModel>> GetAllAsync(string? tuKhoa, int? maLoaiDuAn, string? trangThaiDuAn);
+        Task<DuAnChiTietViewModel?> GetChiTietAsync(int id);
         Task<DuAnCreateUpdateViewModel?> GetByIdAsync(int id);
         Task<List<LoaiDuAnOptionViewModel>> GetLoaiDuAnOptionsAsync();
         Task SaveAsync(DuAnCreateUpdateViewModel model);

@@ -89,6 +89,73 @@ namespace QuanLyDuAn.Services.Implementations
             return await query.ToListAsync();
         }
 
+        public async Task<DuAnChiTietViewModel?> GetChiTietAsync(int id)
+        {
+            var duAn = await (from da in _context.DuAn
+                              join loai in _context.LoaiDuAn on da.MaLoaiDuAn equals loai.MaLoaiDuAn
+                              where da.MaDuAn == id && da.IsDeleted != true
+                              select new
+                              {
+                                  da.MaDuAn,
+                                  da.TenDuAn,
+                                  da.MoTaDuAn,
+                                  da.MaLoaiDuAn,
+                                  TenLoaiDuAn = loai.TenLoai,
+                                  da.NgayTaoDuAn,
+                                  da.NgayBatDauDuAn,
+                                  da.NgayKetThucDuAn,
+                                  da.TrangThaiDuAn,
+                                  da.PhanTramHoanThanh,
+                                  da.GhiChuDuAn,
+                                  da.MaNguoiDung
+                              }).FirstOrDefaultAsync();
+
+            if (duAn == null)
+                return null;
+
+            var tenNguoiQuanLy = await _context.NguoiDung
+                .Where(x => x.MaNguoiDung == duAn.MaNguoiDung && x.IsDeleted != true)
+                .Select(x => x.HoTenNguoiDung)
+                .FirstOrDefaultAsync();
+
+            var queryCongViec = _context.CongViec
+                .Join(_context.DanhMucCongViec, cv => cv.MaDanhMucCV, dm => dm.MaDanhMucCV, (cv, dm) => new { cv, dm })
+                .Where(x => x.dm.MaDuAn == id && x.dm.IsDeleted != true && x.cv.IsDeleted != true);
+
+            var soLuongCongViec = await queryCongViec.CountAsync();
+
+            var soLuongChiTietCongViec = await _context.CtCongViec
+                .Join(queryCongViec, ct => ct.MaCongViec, x => x.cv.MaCongViec, (ct, x) => new { ct })
+                .CountAsync(x => x.ct.IsDeleted != true);
+
+            var maCongViecDauTien = await queryCongViec
+                .OrderBy(x => x.cv.MaCongViec)
+                .Select(x => (int?)x.cv.MaCongViec)
+                .FirstOrDefaultAsync();
+
+            return new DuAnChiTietViewModel
+            {
+                MaDuAn = duAn.MaDuAn,
+                TenDuAn = duAn.TenDuAn ?? string.Empty,
+                MoTaDuAn = duAn.MoTaDuAn,
+                MaLoaiDuAn = duAn.MaLoaiDuAn,
+                TenLoaiDuAn = duAn.TenLoaiDuAn ?? string.Empty,
+                NgayTaoDuAn = duAn.NgayTaoDuAn,
+                NgayBatDauDuAn = duAn.NgayBatDauDuAn,
+                NgayKetThucDuAn = duAn.NgayKetThucDuAn,
+                TrangThaiDuAn = duAn.TrangThaiDuAn ?? string.Empty,
+                PhanTramHoanThanh = duAn.PhanTramHoanThanh ?? 0,
+                GhiChuDuAn = duAn.GhiChuDuAn,
+                MaNguoiDung = duAn.MaNguoiDung,
+                TenNguoiQuanLy = tenNguoiQuanLy ?? string.Empty,
+                SoLuongTeam = await _context.TeamDuAn.CountAsync(x => x.MaDuAn == id),
+                SoLuongThanhVien = await _context.NhanVienDuAn.CountAsync(x => x.MaDuAn == id),
+                SoLuongCongViec = soLuongCongViec,
+                SoLuongChiTietCongViec = soLuongChiTietCongViec,
+                MaCongViecDauTien = maCongViecDauTien
+            };
+        }
+
         public async Task<DuAnCreateUpdateViewModel?> GetByIdAsync(int id)
         {
             var entity = await _context.DuAn

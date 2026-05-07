@@ -23,6 +23,7 @@ namespace QuanLyDuAn.Services.Implementations
         {
             var congViec = await LayCongViecAsync(maCongViec);
             var coTheCapNhat = await CoTheCapNhatAsync(congViec);
+            var coThePhanCongChiTietCongViec = await CoThePhanCongChiTietCongViecAsync(congViec);
 
             var danhSach = await _context.CtCongViec
                 .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true)
@@ -37,7 +38,8 @@ namespace QuanLyDuAn.Services.Implementations
                     NgayTaoCTCV = x.NgayTaoCTCV,
                     NgayBatDauCTCV = x.NgayBatDauCTCV,
                     NgayKetThucCTCV = x.NgayKetThucCTCV,
-                    TrangThaiCTCV = x.TrangThaiCTCV ?? TrangThai.ChuaBatDau
+                    TrangThaiCTCV = x.TrangThaiCTCV ?? TrangThai.ChuaBatDau,
+                    CoThePhanCongChiTietCongViec = coThePhanCongChiTietCongViec
                 })
                 .ToListAsync();
 
@@ -291,6 +293,37 @@ namespace QuanLyDuAn.Services.Implementations
 
             var vaiTroTrongDuAn = await _context.NhanVienDuAn
                 .Where(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNguoiDung)
+                .Select(x => x.VaiTroTrongDuAn)
+                .FirstOrDefaultAsync();
+
+            return TrangThai.EqualsValue(vaiTroTrongDuAn, TrangThai.VaiTroLeader);
+        }
+
+        private async Task<bool> CoThePhanCongChiTietCongViecAsync(CongViec congViec)
+        {
+            var httpUser = _httpContextAccessor.HttpContext?.User;
+            if (httpUser?.IsInRole("Admin") == true || httpUser?.IsInRole("Manager") == true)
+                return true;
+
+            var maNguoiDungHienTai = await GetCurrentUserIdAsync();
+            var maDuAn = await GetMaDuAnAsync(congViec);
+
+            var teamDuAnIds = await _context.TeamDuAn
+                .Where(x => x.MaDuAn == maDuAn)
+                .Select(x => x.MaTeam)
+                .ToListAsync();
+
+            if (teamDuAnIds.Count > 0)
+            {
+                var laLeaderTeam = await _context.NhanVienTeam
+                    .AnyAsync(x => teamDuAnIds.Contains(x.MaTeam)
+                                && x.MaNguoiDung == maNguoiDungHienTai
+                                && x.IsLeader == true);
+                if (laLeaderTeam) return true;
+            }
+
+            var vaiTroTrongDuAn = await _context.NhanVienDuAn
+                .Where(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNguoiDungHienTai)
                 .Select(x => x.VaiTroTrongDuAn)
                 .FirstOrDefaultAsync();
 

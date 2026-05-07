@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
 namespace QuanLyDuAn.Constants
@@ -50,7 +50,7 @@ namespace QuanLyDuAn.Constants
         public const string Done = "Done";
         public const string Completed = "Completed";
 
-        // Vai trò trong dự án (giá trị lưu CSDL — hiển thị qua ToDisplayVaiTroTrongDuAn)
+        // Vai trò trong dự án (giá trị lưu CSDL - hiển thị qua ToDisplayVaiTroTrongDuAn)
         public const string VaiTroLeader = "Leader";
         public const string VaiTroMember = "Member";
         public const string VaiTroThucHien = "Thực hiện";
@@ -61,6 +61,8 @@ namespace QuanLyDuAn.Constants
         // Hành động ghi nhật ký phân công
         public const string HanhDongThemPhanCong = "Thêm phân công công việc";
         public const string HanhDongXoaPhanCong = "Xóa phân công công việc";
+        public const string HanhDongThemPhanCongChiTiet = "Thêm phân công chi tiết công việc";
+        public const string HanhDongXoaPhanCongChiTiet = "Xóa phân công chi tiết công việc";
 
         public static string Normalize(string? value)
         {
@@ -120,61 +122,38 @@ namespace QuanLyDuAn.Constants
 
             if (normalized == Normalize(ChoDuyet))
                 return new[] { ChoDuyet, ChoDuyetHienThi };
-
             if (normalized == Normalize(DaDuyet))
                 return new[] { DaDuyet, DaDuyetHienThi };
-
             if (normalized == Normalize(TuChoi))
                 return new[] { TuChoi, TuChoiHienThi };
-
             if (normalized == Normalize(DaHuy))
                 return new[] { DaHuy, DaHuyHienThi };
-
             if (normalized == Normalize(ChuaBatDau))
                 return new[] { ChuaBatDau, ChuaBatDauHienThi };
-
             if (normalized == Normalize(DaThayThe))
                 return new[] { DaThayThe, DaThayTheHienThi };
-
             if (normalized == Normalize(GiuNguyen))
                 return new[] { GiuNguyen, GiuNguyenHienThi };
-
             if (normalized == Normalize(DangThucHien))
                 return new[] { DangThucHien, DangThucHienHienThi };
-
-            if (normalized == Normalize(HoanThanh))
+            if (normalized == Normalize(HoanThanh) || normalized == Normalize(Done) || normalized == Normalize(Completed))
                 return new[] { HoanThanh, HoanThanhHienThi, Done, Completed };
-
-            if (normalized == Normalize(Done))
-                return new[] { HoanThanh, HoanThanhHienThi, Done, Completed };
-
-            if (normalized == Normalize(Completed))
-                return new[] { HoanThanh, HoanThanhHienThi, Done, Completed };
-
             if (normalized == Normalize(BiCanCan))
                 return new[] { BiCanCan, BiCanCanHienThi };
-
             if (normalized == Normalize(KhoiTao))
                 return new[] { KhoiTao, KhoiTaoHienThi };
-
             if (normalized == Normalize(ChoXacNhanHoanThanh))
                 return new[] { ChoXacNhanHoanThanh, ChoXacNhanHoanThanhHienThi };
-
             if (normalized == Normalize(TamDung))
                 return new[] { TamDung, TamDungHienThi };
-
             if (normalized == Normalize(LuuTru))
                 return new[] { LuuTru, LuuTruHienThi };
-
             if (normalized == Normalize(HoatDong))
                 return new[] { HoatDong, HoatDongHienThi };
-
             if (normalized == Normalize(NgungHoatDong))
                 return new[] { NgungHoatDong, NgungHoatDongHienThi };
-
             if (normalized == Normalize(DangSuDung))
                 return new[] { DangSuDung, DangSuDungHienThi };
-
             if (normalized == Normalize(TreTienDo))
                 return new[] { TreTienDo, TreTienDoHienThi };
 
@@ -185,71 +164,28 @@ namespace QuanLyDuAn.Constants
         {
             var normalized = Normalize(value);
 
-            if (normalized == Normalize(ChoDuyet))
-                return ChoDuyet;
-
-            if (normalized == Normalize(DaDuyet))
-                return DaDuyet;
-
-            if (normalized == Normalize(TuChoi))
-                return TuChoi;
-
-            if (normalized == Normalize(DaHuy))
-                return DaHuy;
-
-            if (normalized == Normalize(ChuaBatDau))
-                return ChuaBatDau;
-
-            if (normalized == Normalize(DaThayThe))
-                return DaThayThe;
-
-            if (normalized == Normalize(GiuNguyen))
-                return GiuNguyen;
-
-            if (normalized == Normalize(DangThucHien))
-                return DangThucHien;
-
-            if (normalized == Normalize(HoanThanh))
-                return HoanThanh;
-
-            if (normalized == Normalize(Done))
-                return Done;
-
-            if (normalized == Normalize(Completed))
-                return Completed;
-
-            if (normalized == Normalize(BiCanCan))
-                return BiCanCan;
-
-            if (normalized == Normalize(KhoiTao))
-                return KhoiTao;
-
-            if (normalized == Normalize(ChoXacNhanHoanThanh))
-                return ChoXacNhanHoanThanh;
-
-            if (normalized == Normalize(TamDung))
-                return TamDung;
-
-            if (normalized == Normalize(LuuTru))
-                return LuuTru;
-
-            if (normalized == Normalize(HoatDong))
-                return HoatDong;
-
-            if (normalized == Normalize(NgungHoatDong))
-                return NgungHoatDong;
-
-            if (normalized == Normalize(DangSuDung))
-                return DangSuDung;
-
-            if (normalized == Normalize(TreTienDo))
-                return TreTienDo;
-
-            if (normalized == Normalize(TaiKhoanHoatDong))
-                return TaiKhoanHoatDong;
-
-            if (normalized == Normalize(TaiKhoanKhoa))
-                return TaiKhoanKhoa;
+            if (normalized == Normalize(ChoDuyet)) return ChoDuyet;
+            if (normalized == Normalize(DaDuyet)) return DaDuyet;
+            if (normalized == Normalize(TuChoi)) return TuChoi;
+            if (normalized == Normalize(DaHuy)) return DaHuy;
+            if (normalized == Normalize(ChuaBatDau)) return ChuaBatDau;
+            if (normalized == Normalize(DaThayThe)) return DaThayThe;
+            if (normalized == Normalize(GiuNguyen)) return GiuNguyen;
+            if (normalized == Normalize(DangThucHien)) return DangThucHien;
+            if (normalized == Normalize(HoanThanh)) return HoanThanh;
+            if (normalized == Normalize(Done)) return Done;
+            if (normalized == Normalize(Completed)) return Completed;
+            if (normalized == Normalize(BiCanCan)) return BiCanCan;
+            if (normalized == Normalize(KhoiTao)) return KhoiTao;
+            if (normalized == Normalize(ChoXacNhanHoanThanh)) return ChoXacNhanHoanThanh;
+            if (normalized == Normalize(TamDung)) return TamDung;
+            if (normalized == Normalize(LuuTru)) return LuuTru;
+            if (normalized == Normalize(HoatDong)) return HoatDong;
+            if (normalized == Normalize(NgungHoatDong)) return NgungHoatDong;
+            if (normalized == Normalize(DangSuDung)) return DangSuDung;
+            if (normalized == Normalize(TreTienDo)) return TreTienDo;
+            if (normalized == Normalize(TaiKhoanHoatDong)) return TaiKhoanHoatDong;
+            if (normalized == Normalize(TaiKhoanKhoa)) return TaiKhoanKhoa;
 
             return value ?? string.Empty;
         }
@@ -258,65 +194,24 @@ namespace QuanLyDuAn.Constants
         {
             var normalized = Normalize(value);
 
-            if (normalized == Normalize(ChoDuyet))
-                return ChoDuyetHienThi;
-
-            if (normalized == Normalize(DaDuyet))
-                return DaDuyetHienThi;
-
-            if (normalized == Normalize(TuChoi))
-                return TuChoiHienThi;
-
-            if (normalized == Normalize(DaHuy))
-                return DaHuyHienThi;
-
-            if (normalized == Normalize(ChuaBatDau))
-                return ChuaBatDauHienThi;
-
-            if (normalized == Normalize(DaThayThe))
-                return DaThayTheHienThi;
-
-            if (normalized == Normalize(GiuNguyen))
-                return GiuNguyenHienThi;
-
-            if (normalized == Normalize(DangThucHien))
-                return DangThucHienHienThi;
-
-            if (normalized == Normalize(HoanThanh))
-                return HoanThanhHienThi;
-
-            if (normalized == Normalize(Done))
-                return HoanThanhHienThi;
-
-            if (normalized == Normalize(Completed))
-                return HoanThanhHienThi;
-
-            if (normalized == Normalize(BiCanCan))
-                return BiCanCanHienThi;
-
-            if (normalized == Normalize(KhoiTao))
-                return KhoiTaoHienThi;
-
-            if (normalized == Normalize(ChoXacNhanHoanThanh))
-                return ChoXacNhanHoanThanhHienThi;
-
-            if (normalized == Normalize(TamDung))
-                return TamDungHienThi;
-
-            if (normalized == Normalize(LuuTru))
-                return LuuTruHienThi;
-
-            if (normalized == Normalize(HoatDong))
-                return HoatDongHienThi;
-
-            if (normalized == Normalize(NgungHoatDong))
-                return NgungHoatDongHienThi;
-
-            if (normalized == Normalize(DangSuDung))
-                return DangSuDungHienThi;
-
-            if (normalized == Normalize(TreTienDo))
-                return TreTienDoHienThi;
+            if (normalized == Normalize(ChoDuyet)) return ChoDuyetHienThi;
+            if (normalized == Normalize(DaDuyet)) return DaDuyetHienThi;
+            if (normalized == Normalize(TuChoi)) return TuChoiHienThi;
+            if (normalized == Normalize(DaHuy)) return DaHuyHienThi;
+            if (normalized == Normalize(ChuaBatDau)) return ChuaBatDauHienThi;
+            if (normalized == Normalize(DaThayThe)) return DaThayTheHienThi;
+            if (normalized == Normalize(GiuNguyen)) return GiuNguyenHienThi;
+            if (normalized == Normalize(DangThucHien)) return DangThucHienHienThi;
+            if (normalized == Normalize(HoanThanh) || normalized == Normalize(Done) || normalized == Normalize(Completed)) return HoanThanhHienThi;
+            if (normalized == Normalize(BiCanCan)) return BiCanCanHienThi;
+            if (normalized == Normalize(KhoiTao)) return KhoiTaoHienThi;
+            if (normalized == Normalize(ChoXacNhanHoanThanh)) return ChoXacNhanHoanThanhHienThi;
+            if (normalized == Normalize(TamDung)) return TamDungHienThi;
+            if (normalized == Normalize(LuuTru)) return LuuTruHienThi;
+            if (normalized == Normalize(HoatDong)) return HoatDongHienThi;
+            if (normalized == Normalize(NgungHoatDong)) return NgungHoatDongHienThi;
+            if (normalized == Normalize(DangSuDung)) return DangSuDungHienThi;
+            if (normalized == Normalize(TreTienDo)) return TreTienDoHienThi;
 
             return value ?? string.Empty;
         }

@@ -80,6 +80,32 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            if (isEmployee && !isManager)
+            {
+                var duAnIds = await query
+                    .Select(x => x.MaDuAn)
+                    .Distinct()
+                    .ToListAsync();
+
+                var vaiTroTheoDuAn = await _context.NhanVienDuAn
+                    .Where(x => x.MaNguoiDung == currentUserId && duAnIds.Contains(x.MaDuAn))
+                    .Select(x => new
+                    {
+                        x.MaDuAn,
+                        x.VaiTroTrongDuAn
+                    })
+                    .ToListAsync();
+
+                var leaderDuAnSet = vaiTroTheoDuAn
+                    .Where(x => TrangThai.EqualsValue(x.VaiTroTrongDuAn, TrangThai.VaiTroLeader))
+                    .Select(x => x.MaDuAn)
+                    .ToHashSet();
+
+                query = query.Where(x =>
+                    leaderDuAnSet.Contains(x.MaDuAn)
+                    || _context.PhanCongCongViec.Any(pc => pc.MaCongViec == x.MaCongViec && pc.MaNguoiDung == currentUserId));
+            }
+
             var danhSach = await query
                 .OrderByDescending(x => x.NgayTaoCongViec)
                 .ThenByDescending(x => x.MaCongViec)

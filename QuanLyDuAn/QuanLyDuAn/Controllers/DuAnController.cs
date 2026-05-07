@@ -46,13 +46,12 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ChiTiet(int id, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> Details(int id, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
 
-            var form = await _service.GetByIdAsync(id);
-            if (form == null)
+            if (id <= 0)
             {
                 TempData["Error"] = "Không tìm thấy dự án.";
                 return RedirectToAction(nameof(Index), new
@@ -63,15 +62,30 @@ namespace QuanLyDuAn.Controllers
                 });
             }
 
-            var loaiDuAnOptions = await _service.GetLoaiDuAnOptionsAsync();
-            ViewBag.TenLoaiDuAn = loaiDuAnOptions
-                .FirstOrDefault(x => x.MaLoaiDuAn == form.MaLoaiDuAn)?.TenLoai;
+            var vm = await _service.GetChiTietAsync(id);
+            if (vm == null)
+            {
+                TempData["Error"] = "Không tìm thấy dự án.";
+                return RedirectToAction(nameof(Index), new
+                {
+                    tuKhoa,
+                    locMaLoaiDuAn,
+                    locTrangThaiDuAn
+                });
+            }
 
-            ViewBag.TuKhoa = tuKhoa;
-            ViewBag.LocMaLoaiDuAn = locMaLoaiDuAn;
-            ViewBag.LocTrangThaiDuAn = locTrangThaiDuAn;
+            vm.TuKhoa = tuKhoa;
+            vm.LocMaLoaiDuAn = locMaLoaiDuAn;
+            vm.LocTrangThaiDuAn = locTrangThaiDuAn;
+            vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
 
-            return View(form);
+            return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ChiTiet(int id, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        {
+            return await Details(id, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn);
         }
 
         [HttpGet]

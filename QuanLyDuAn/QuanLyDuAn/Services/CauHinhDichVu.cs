@@ -20,6 +20,7 @@ namespace QuanLyDuAn.Services
             dichVu.AddScoped<ICongViecService, CongViecService>();
             dichVu.AddScoped<IChiTietCongViecService, ChiTietCongViecService>();
             dichVu.AddScoped<IPhanCongCongViecService, PhanCongCongViecService>();
+            dichVu.AddScoped<IPhanCongChiTietCongViecService, PhanCongChiTietCongViecService>();
             dichVu.AddScoped<IDeXuatCongViecService, DeXuatCongViecService>();
             dichVu.AddScoped<IDuyetDeXuatCongViecService, DyetDeXuatCongViecService>();
             dichVu.AddScoped<INganSachService, NganSachService>();
