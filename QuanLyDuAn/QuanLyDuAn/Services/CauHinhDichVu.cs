@@ -14,6 +14,7 @@ namespace QuanLyDuAn.Services
             dichVu.AddScoped<ITeamService, TeamService>();
             dichVu.AddScoped<IThanhVienTeamService, ThanhVienTeamService>();
             dichVu.AddScoped<IDuAnService, DuAnService>();
+            dichVu.AddScoped<IFileDuAnService, FileDuAnService>();
             dichVu.AddScoped<ITeamDuAnService, TeamDuAnService>();
             dichVu.AddScoped<INhanVienDuAnService, NhanVienDuAnService>();
             dichVu.AddScoped<IDanhMucCongViecService, DanhMucCongViecService>();

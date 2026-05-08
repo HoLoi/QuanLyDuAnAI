@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap");
+
 :root {
     --bg-main: #f5f7fb;
     --bg-panel: #ffffff;
@@ -446,3 +448,4 @@ input, textarea, select, button, .btn, .form-control, .form-select, .table, .car
         min-width: 170px;
     }
 }
+

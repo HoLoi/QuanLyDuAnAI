@@ -605,3 +605,4 @@ E:\D\Luan Van\dvl5\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\QuanLyDuA
 E:\D\Luan Van\dvl5\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\QuanLyDuAn.genruntimeconfig.cache
 E:\D\Luan Van\dvl5\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\ref\QuanLyDuAn.dll
 E:\D\Luan Van\dvl5\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+E:\D\Luan Van\dvl5\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\scopedcss\Views\DuAn\Details.cshtml.rz.scp.css

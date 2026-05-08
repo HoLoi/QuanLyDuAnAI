@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "iMVfR4XTCM+w5a8Jkc4RHhIGSD3oSD6TrKArzsCfS3E=",
+  "Hash": "MBeKyD78d0c3Ufp9VsUcNSnNLvIUCH0eycPbwRVDzFY=",
   "Source": "QuanLyDuAn",
   "BasePath": "_content/QuanLyDuAn",
   "Mode": "Default",
@@ -31,8 +31,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ApplicationBundle",
-      "Fingerprint": "cldhodckc2",
-      "Integrity": "EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I=",
+      "Fingerprint": "uchsz1g8q6",
+      "Integrity": "3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\bundle\\QuanLyDuAn.styles.css"
@@ -52,8 +52,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ProjectBundle",
-      "Fingerprint": "cldhodckc2",
-      "Integrity": "EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I=",
+      "Fingerprint": "uchsz1g8q6",
+      "Integrity": "3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\QuanLyDuAn.bundle.scp.css"
@@ -73,8 +73,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "yk0hr2i9qd",
-      "Integrity": "zj+NuRurW/WPFIp8qNQK2yFtiYpB9WgB67kuJjc5etE=",
+      "Fingerprint": "od5eg3rn4d",
+      "Integrity": "RIH17RUb1rrdtjes0qdR1Hd4N9P6SQPHgzN0i9eVIz4=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\site.css"
@@ -1331,7 +1331,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "9263"
+          "Value": "9364"
         },
         {
           "Name": "Content-Type",
@@ -1339,11 +1339,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"zj+NuRurW/WPFIp8qNQK2yFtiYpB9WgB67kuJjc5etE=\""
+          "Value": "\"RIH17RUb1rrdtjes0qdR1Hd4N9P6SQPHgzN0i9eVIz4=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 27 Apr 2026 04:13:05 GMT"
+          "Value": "Fri, 08 May 2026 14:33:42 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1353,12 +1353,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-zj+NuRurW/WPFIp8qNQK2yFtiYpB9WgB67kuJjc5etE="
+          "Value": "sha256-RIH17RUb1rrdtjes0qdR1Hd4N9P6SQPHgzN0i9eVIz4="
         }
       ]
     },
     {
-      "Route": "css/site.yk0hr2i9qd.css",
+      "Route": "css/site.od5eg3rn4d.css",
       "AssetFile": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\site.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -1368,7 +1368,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "9263"
+          "Value": "9364"
         },
         {
           "Name": "Content-Type",
@@ -1376,11 +1376,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"zj+NuRurW/WPFIp8qNQK2yFtiYpB9WgB67kuJjc5etE=\""
+          "Value": "\"RIH17RUb1rrdtjes0qdR1Hd4N9P6SQPHgzN0i9eVIz4=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 27 Apr 2026 04:13:05 GMT"
+          "Value": "Fri, 08 May 2026 14:33:42 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1390,7 +1390,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "yk0hr2i9qd"
+          "Value": "od5eg3rn4d"
         },
         {
           "Name": "label",
@@ -1398,7 +1398,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-zj+NuRurW/WPFIp8qNQK2yFtiYpB9WgB67kuJjc5etE="
+          "Value": "sha256-RIH17RUb1rrdtjes0qdR1Hd4N9P6SQPHgzN0i9eVIz4="
         }
       ]
     },
@@ -6251,7 +6251,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1128"
+          "Value": "14476"
         },
         {
           "Name": "Content-Type",
@@ -6259,11 +6259,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I=\""
+          "Value": "\"3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 22 Apr 2026 12:28:55 GMT"
+          "Value": "Fri, 08 May 2026 14:46:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -6273,97 +6273,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I="
-        }
-      ]
-    },
-    {
-      "Route": "QuanLyDuAn.cldhodckc2.bundle.scp.css",
-      "AssetFile": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\QuanLyDuAn.bundle.scp.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "1128"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 22 Apr 2026 12:28:55 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "cldhodckc2"
-        },
-        {
-          "Name": "label",
-          "Value": "QuanLyDuAn.bundle.scp.css"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I="
-        }
-      ]
-    },
-    {
-      "Route": "QuanLyDuAn.cldhodckc2.styles.css",
-      "AssetFile": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\bundle\\QuanLyDuAn.styles.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "1128"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 22 Apr 2026 12:28:55 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "cldhodckc2"
-        },
-        {
-          "Name": "label",
-          "Value": "QuanLyDuAn.styles.css"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I="
+          "Value": "sha256-3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0="
         }
       ]
     },
@@ -6378,7 +6288,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "1128"
+          "Value": "14476"
         },
         {
           "Name": "Content-Type",
@@ -6386,11 +6296,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I=\""
+          "Value": "\"3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 22 Apr 2026 12:28:55 GMT"
+          "Value": "Fri, 08 May 2026 14:46:05 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -6400,7 +6310,97 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-EIujyKtWDMlrlxRQdLYp9WHAGIsx9s51k/dOwqvwI0I="
+          "Value": "sha256-3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0="
+        }
+      ]
+    },
+    {
+      "Route": "QuanLyDuAn.uchsz1g8q6.bundle.scp.css",
+      "AssetFile": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\QuanLyDuAn.bundle.scp.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "14476"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 08 May 2026 14:46:05 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "uchsz1g8q6"
+        },
+        {
+          "Name": "label",
+          "Value": "QuanLyDuAn.bundle.scp.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0="
+        }
+      ]
+    },
+    {
+      "Route": "QuanLyDuAn.uchsz1g8q6.styles.css",
+      "AssetFile": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\bundle\\QuanLyDuAn.styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "14476"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 08 May 2026 14:46:05 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "uchsz1g8q6"
+        },
+        {
+          "Name": "label",
+          "Value": "QuanLyDuAn.styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-3u3U29S1AwIyanqDx8bAG+VwDSFQWAOhgpfREG0qEi0="
         }
       ]
     }

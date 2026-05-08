@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.DuAn;
+using System.Security.Claims;
 
 namespace QuanLyDuAn.Controllers
 {
@@ -10,15 +12,18 @@ namespace QuanLyDuAn.Controllers
     public class DuAnController : Controller
     {
         private readonly IDuAnService _service;
+        private readonly IFileDuAnService _fileDuAnService;
         private readonly IPermissionHelper _permission;
         private readonly IPhanQuyenService _phanQuyenService;
 
         public DuAnController(
             IDuAnService service,
+            IFileDuAnService fileDuAnService,
             IPermissionHelper permission,
             IPhanQuyenService phanQuyenService)
         {
             _service = service;
+            _fileDuAnService = fileDuAnService;
             _permission = permission;
             _phanQuyenService = phanQuyenService;
         }
@@ -77,7 +82,13 @@ namespace QuanLyDuAn.Controllers
             vm.TuKhoa = tuKhoa;
             vm.LocMaLoaiDuAn = locMaLoaiDuAn;
             vm.LocTrangThaiDuAn = locTrangThaiDuAn;
-            vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+            var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+            vm.Permissions = permissions;
+
+            var currentUserId = TryGetCurrentUserId();
+            vm.CoTheQuanLyFile = currentUserId.HasValue
+                                 && currentUserId.Value == vm.MaNguoiDung
+                                 && permissions.Contains(Permissions.DuAn.Sua);
 
             return View(vm);
         }
@@ -86,6 +97,85 @@ namespace QuanLyDuAn.Controllers
         public async Task<IActionResult> ChiTiet(int id, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
         {
             return await Details(id, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ThemFileDuAn(int maDuAn, IFormFile file, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
+                return Forbid();
+
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                await _fileDuAnService.UploadAsync(maDuAn, file, currentUserId);
+                TempData["Success"] = "Đã tải lên tệp dự án.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Details), new
+            {
+                id = maDuAn,
+                tuKhoa,
+                locMaLoaiDuAn,
+                locTrangThaiDuAn
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> XoaFileDuAn(int maFileDa, int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
+                return Forbid();
+
+            try
+            {
+                var currentUserId = GetCurrentUserId();
+                await _fileDuAnService.DeleteAsync(maFileDa, currentUserId);
+                TempData["Success"] = "Đã xóa tệp dự án.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Details), new
+            {
+                id = maDuAn,
+                tuKhoa,
+                locMaLoaiDuAn,
+                locTrangThaiDuAn
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TaiFileDuAn(int maFileDa, int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
+                return Forbid();
+
+            try
+            {
+                var (fullPath, fileName, projectId) = await _fileDuAnService.GetDownloadInfoAsync(maFileDa);
+                if (projectId != maDuAn)
+                    throw new Exception("Tệp không thuộc dự án hiện tại.");
+
+                return PhysicalFile(fullPath, "application/octet-stream", fileName);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Details), new
+                {
+                    id = maDuAn,
+                    tuKhoa,
+                    locMaLoaiDuAn,
+                    locTrangThaiDuAn
+                });
+            }
         }
 
         [HttpGet]
@@ -280,6 +370,26 @@ namespace QuanLyDuAn.Controllers
                 locMaLoaiDuAn,
                 locTrangThaiDuAn
             });
+        }
+
+        private int? TryGetCurrentUserId()
+        {
+            var claimValue = User.FindFirstValue("MaNguoiDung");
+            if (int.TryParse(claimValue, out var currentUserId) && currentUserId > 0)
+            {
+                return currentUserId;
+            }
+
+            return null;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var currentUserId = TryGetCurrentUserId();
+            if (!currentUserId.HasValue)
+                throw new Exception("Khong xac dinh duoc nguoi dung hien tai.");
+
+            return currentUserId.Value;
         }
 
     }

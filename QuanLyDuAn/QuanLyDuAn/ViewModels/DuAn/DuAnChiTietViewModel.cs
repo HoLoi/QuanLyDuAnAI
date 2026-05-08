@@ -23,6 +23,23 @@ namespace QuanLyDuAn.ViewModels.DuAn
 
         public int? MaCongViecDauTien { get; set; }
 
+        public List<DuAnFileItemViewModel> DanhSachFile { get; set; } = new();
+        public bool CoTheQuanLyFile { get; set; }
+
+        public ProjectStatusCheckViewModel? StatusCheck { get; set; }
+        public bool HasApprovedBudget { get; set; }
+        public int? SoNgayConLai { get; set; }
+        public bool IsSapDenHan { get; set; }
+        public bool IsQuaHan { get; set; }
+
+        public DuAnBudgetSummaryViewModel? NganSachTongHop { get; set; }
+        public DuAnWorkStatusSummaryViewModel TienDoCongViec { get; set; } = new();
+        public DuAnDeadlinePreviewViewModel? DeadlineGanNhat { get; set; }
+        public List<DuAnRecentWorkItemViewModel> CongViecGanDay { get; set; } = new();
+        public List<DuAnRecentFileViewModel> TepGanDay { get; set; } = new();
+        public List<DuAnMemberPreviewViewModel> ThanhVienNoiBat { get; set; } = new();
+        public List<DuAnActivityPreviewViewModel> HoatDongGanDay { get; set; } = new();
+
         public string? TuKhoa { get; set; }
         public int? LocMaLoaiDuAn { get; set; }
         public string? LocTrangThaiDuAn { get; set; }

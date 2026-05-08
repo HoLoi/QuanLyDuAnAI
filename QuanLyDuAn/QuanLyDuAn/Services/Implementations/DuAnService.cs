@@ -133,6 +133,233 @@ namespace QuanLyDuAn.Services.Implementations
                 .Select(x => (int?)x.cv.MaCongViec)
                 .FirstOrDefaultAsync();
 
+            var danhSachFile = await _context.FileDuAn
+                .Where(x => x.MaDuAn == id && x.IsDeleted != true)
+                .OrderByDescending(x => x.NgayUploadFileDA ?? DateTime.MinValue)
+                .Select(x => new DuAnFileItemViewModel
+                {
+                    MaFileDA = x.MaFileDA,
+                    TenFileDA = x.TenFileDA ?? $"File {x.MaFileDA}",
+                    DuongDanFileDA = x.DuongDanFileDA ?? string.Empty,
+                    NgayUploadFileDA = x.NgayUploadFileDA
+                })
+                .ToListAsync();
+
+            var statusCheck = await CheckProjectStatusAsync(id);
+
+            var hasApprovedBudget = await _context.NganSach.AnyAsync(x =>
+                x.MaDuAn == id
+                && x.IsDeleted != true
+                && x.IsActive == true
+                && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi));
+
+            int? soNgayConLai = null;
+            var isSapDenHan = false;
+            var isQuaHan = false;
+            if (duAn.NgayKetThucDuAn.HasValue)
+            {
+                var diffDays = (duAn.NgayKetThucDuAn.Value.Date - DateTime.Today).Days;
+                soNgayConLai = diffDays;
+
+                var isCompleted = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.HoanThanh)
+                                  || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru);
+
+                if (!isCompleted)
+                {
+                    if (diffDays < 0)
+                        isQuaHan = true;
+                    else if (diffDays <= 7)
+                        isSapDenHan = true;
+                }
+            }
+
+            var trangThaiHoanThanh = new[]
+            {
+                TrangThai.HoanThanh,
+                TrangThai.HoanThanhHienThi,
+                TrangThai.Done,
+                TrangThai.Completed
+            };
+
+            var trangThaiDangThucHien = TrangThai.GetCommonStatusVariants(TrangThai.DangThucHien);
+            var trangThaiTamDung = TrangThai.GetCommonStatusVariants(TrangThai.TamDung);
+            var trangThaiChuaBatDau = TrangThai.GetCommonStatusVariants(TrangThai.ChuaBatDau);
+
+            var congViecHoanThanh = await queryCongViec
+                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec));
+
+            var congViecDangThucHien = await queryCongViec
+                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiDangThucHien.Contains(x.cv.TrangThaiCongViec));
+
+            var congViecTamDung = await queryCongViec
+                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiTamDung.Contains(x.cv.TrangThaiCongViec));
+
+            var congViecChuaBatDau = await queryCongViec
+                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiChuaBatDau.Contains(x.cv.TrangThaiCongViec));
+
+            var congViecTreHan = await queryCongViec
+                .CountAsync(x => x.cv.NgayKetThucCVDuKien.HasValue
+                                 && x.cv.NgayKetThucCVDuKien.Value < DateTime.Now
+                                 && !trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty));
+
+            decimal? tiLeHoanThanh = null;
+            var tiLeHoanThanhCap = 0m;
+            if (soLuongCongViec > 0)
+            {
+                tiLeHoanThanh = Math.Round((decimal)congViecHoanThanh / soLuongCongViec * 100m, 0);
+                tiLeHoanThanhCap = Math.Min(tiLeHoanThanh.Value, 100m);
+            }
+
+            var congViecGanDay = await queryCongViec
+                .OrderByDescending(x => x.cv.NgayTaoCongViec ?? DateTime.MinValue)
+                .ThenByDescending(x => x.cv.MaCongViec)
+                .Take(5)
+                .Select(x => new DuAnRecentWorkItemViewModel
+                {
+                    MaCongViec = x.cv.MaCongViec,
+                    TenCongViec = x.cv.TenCongViec ?? string.Empty,
+                    TenDanhMucCV = x.dm.TenDanhMucCV ?? $"Danh mục {x.dm.MaDanhMucCV}",
+                    TrangThaiCongViec = x.cv.TrangThaiCongViec ?? string.Empty,
+                    NgayTaoCongViec = x.cv.NgayTaoCongViec,
+                    NgayKetThucDuKien = x.cv.NgayKetThucCVDuKien
+                })
+                .ToListAsync();
+
+            var deadlineGanNhat = await queryCongViec
+                .Where(x => x.cv.NgayKetThucCVDuKien.HasValue
+                            && !trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty))
+                .OrderBy(x => x.cv.NgayKetThucCVDuKien)
+                .Select(x => new DuAnDeadlinePreviewViewModel
+                {
+                    MaCongViec = x.cv.MaCongViec,
+                    TenCongViec = x.cv.TenCongViec ?? string.Empty,
+                    TrangThaiCongViec = x.cv.TrangThaiCongViec ?? string.Empty,
+                    NgayKetThucDuKien = x.cv.NgayKetThucCVDuKien
+                })
+                .FirstOrDefaultAsync();
+
+            if (deadlineGanNhat?.NgayKetThucDuKien != null)
+            {
+                deadlineGanNhat.SoNgayConLai = (deadlineGanNhat.NgayKetThucDuKien.Value.Date - DateTime.Today).Days;
+            }
+
+            var tongNganSachDaDuyet = await _context.NganSach
+                .Where(x => x.MaDuAn == id
+                            && x.IsDeleted != true
+                            && x.IsActive == true
+                            && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi))
+                .SumAsync(x => x.SoTienNganSach ?? 0m);
+
+            var tongChiPhiDaDung = await (
+                from cp in _context.ChiPhi
+                join ns in _context.NganSach on cp.MaNganSach equals ns.MaNganSach
+                where cp.IsDeleted != true
+                      && ns.IsDeleted != true
+                      && ns.MaDuAn == id
+                select cp.SoTienDaChi ?? 0m
+            ).SumAsync();
+
+            var coChiPhi = await (
+                from cp in _context.ChiPhi
+                join ns in _context.NganSach on cp.MaNganSach equals ns.MaNganSach
+                where cp.IsDeleted != true
+                      && ns.IsDeleted != true
+                      && ns.MaDuAn == id
+                select cp.MaChiPhi
+            ).AnyAsync();
+
+            decimal? tongNganSachDaDuyetDisplay = hasApprovedBudget ? tongNganSachDaDuyet : null;
+            decimal? soTienConLai = tongNganSachDaDuyetDisplay.HasValue
+                ? tongNganSachDaDuyetDisplay.Value - tongChiPhiDaDung
+                : null;
+
+            decimal? phanTramSuDung = tongNganSachDaDuyetDisplay.HasValue && tongNganSachDaDuyetDisplay.Value > 0
+                ? Math.Round((tongChiPhiDaDung / tongNganSachDaDuyetDisplay.Value) * 100m, 0)
+                : null;
+
+            var phanTramCap = phanTramSuDung.HasValue
+                ? Math.Min(phanTramSuDung.Value, 100m)
+                : 0m;
+
+            var vuotNganSach = tongNganSachDaDuyetDisplay.HasValue && tongChiPhiDaDung > tongNganSachDaDuyetDisplay.Value;
+            var sapVuotNganSach = phanTramSuDung.HasValue && phanTramSuDung.Value >= 80m && phanTramSuDung.Value <= 100m;
+
+            var trangThaiNganSachHienThi = "Bình thường";
+            var trangThaiNganSachCss = "normal";
+
+            if (vuotNganSach)
+            {
+                trangThaiNganSachHienThi = "Vượt ngân sách";
+                trangThaiNganSachCss = "over";
+            }
+            else if (sapVuotNganSach)
+            {
+                trangThaiNganSachHienThi = "Sắp vượt";
+                trangThaiNganSachCss = "near";
+            }
+
+            var tepGanDay = danhSachFile
+                .OrderByDescending(x => x.NgayUploadFileDA ?? DateTime.MinValue)
+                .Take(5)
+                .Select(x => new DuAnRecentFileViewModel
+                {
+                    MaFileDA = x.MaFileDA,
+                    TenFileDA = x.TenFileDA,
+                    NgayUploadFileDA = x.NgayUploadFileDA
+                })
+                .ToList();
+
+            var thanhVienNoiBat = await (
+                from nvda in _context.NhanVienDuAn
+                join nd in _context.NguoiDung on nvda.MaNguoiDung equals nd.MaNguoiDung
+                where nvda.MaDuAn == id && nd.IsDeleted != true
+                orderby nvda.NgayThamGiaDuAn descending
+                select new DuAnMemberPreviewViewModel
+                {
+                    MaNguoiDung = nvda.MaNguoiDung,
+                    HoTenNguoiDung = nd.HoTenNguoiDung ?? $"Nhân viên {nd.MaNguoiDung}",
+                    VaiTroTrongDuAn = nvda.VaiTroTrongDuAn ?? TrangThai.VaiTroMember,
+                    NgayThamGiaDuAn = nvda.NgayThamGiaDuAn
+                })
+                .Take(5)
+                .ToListAsync();
+
+            var hoatDongQuanLy = await (
+                from nk in _context.NhatKyQuanLyDuAn
+                join nd in _context.NguoiDung on nk.MaNguoiDung equals nd.MaNguoiDung
+                where nk.MaDuAn == id
+                orderby nk.NkThoiGianQLDA descending
+                select new DuAnActivityPreviewViewModel
+                {
+                    NoiDung = nk.NkHanhDongQLDA ?? string.Empty,
+                    NguoiThucHien = nd.HoTenNguoiDung ?? $"Nhân viên {nd.MaNguoiDung}",
+                    ThoiGian = nk.NkThoiGianQLDA,
+                    LoaiHanhDong = "Quản lý dự án"
+                })
+                .Take(5)
+                .ToListAsync();
+
+            var hoatDongPhuTrach = await (
+                from nk in _context.NhatKyPhuTrachDuAn
+                join nd in _context.NguoiDung on nk.MaNguoiDung equals nd.MaNguoiDung
+                where nk.MaDuAn == id
+                orderby nk.NkThoiGianPTDA descending
+                select new DuAnActivityPreviewViewModel
+                {
+                    NoiDung = nk.NkHanhDongPTDA ?? string.Empty,
+                    NguoiThucHien = nd.HoTenNguoiDung ?? $"Nhân viên {nd.MaNguoiDung}",
+                    ThoiGian = nk.NkThoiGianPTDA,
+                    LoaiHanhDong = "Phụ trách dự án"
+                })
+                .Take(5)
+                .ToListAsync();
+
+            var hoatDongGanDay = hoatDongQuanLy
+                .Concat(hoatDongPhuTrach)
+                .OrderByDescending(x => x.ThoiGian ?? DateTime.MinValue)
+                .Take(5)
+                .ToList();
+
             return new DuAnChiTietViewModel
             {
                 MaDuAn = duAn.MaDuAn,
@@ -152,7 +379,43 @@ namespace QuanLyDuAn.Services.Implementations
                 SoLuongThanhVien = await _context.NhanVienDuAn.CountAsync(x => x.MaDuAn == id),
                 SoLuongCongViec = soLuongCongViec,
                 SoLuongChiTietCongViec = soLuongChiTietCongViec,
-                MaCongViecDauTien = maCongViecDauTien
+                MaCongViecDauTien = maCongViecDauTien,
+                DanhSachFile = danhSachFile,
+                StatusCheck = statusCheck,
+                HasApprovedBudget = hasApprovedBudget,
+                SoNgayConLai = soNgayConLai,
+                IsSapDenHan = isSapDenHan,
+                IsQuaHan = isQuaHan,
+                TienDoCongViec = new DuAnWorkStatusSummaryViewModel
+                {
+                    TongCongViec = soLuongCongViec,
+                    CongViecHoanThanh = congViecHoanThanh,
+                    CongViecDangThucHien = congViecDangThucHien,
+                    CongViecTreHan = congViecTreHan,
+                    CongViecTamDung = congViecTamDung,
+                    CongViecChuaBatDau = congViecChuaBatDau,
+                    TiLeHoanThanh = tiLeHoanThanh,
+                    TiLeHoanThanhCap = tiLeHoanThanhCap
+                },
+                NganSachTongHop = new DuAnBudgetSummaryViewModel
+                {
+                    TongNganSachDaDuyet = tongNganSachDaDuyetDisplay,
+                    TongChiPhiDaDung = tongChiPhiDaDung,
+                    SoTienConLai = soTienConLai,
+                    PhanTramSuDung = phanTramSuDung,
+                    PhanTramSuDungCap = phanTramCap,
+                    TrangThaiHienThi = trangThaiNganSachHienThi,
+                    TrangThaiCss = trangThaiNganSachCss,
+                    CoNganSachDaDuyet = hasApprovedBudget,
+                    CoChiPhi = coChiPhi,
+                    VuotNganSach = vuotNganSach,
+                    SapVuotNganSach = sapVuotNganSach
+                },
+                DeadlineGanNhat = deadlineGanNhat,
+                CongViecGanDay = congViecGanDay,
+                TepGanDay = tepGanDay,
+                ThanhVienNoiBat = thanhVienNoiBat,
+                HoatDongGanDay = hoatDongGanDay
             };
         }
 
