@@ -1,0 +1,208 @@
+.history-collapse-cell[b-oht1iihxji] {
+    background: #f9fbff;
+}
+
+.td-history-wrap[b-oht1iihxji] {
+    border: 1px solid #dfe6f1;
+    border-radius: 0.85rem;
+    padding: 0.85rem;
+    background: #fff;
+}
+
+.history-title[b-oht1iihxji] {
+    font-weight: 700;
+    color: #2f3f54;
+    margin-bottom: 0.75rem;
+}
+
+.history-timeline[b-oht1iihxji] {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.history-card[b-oht1iihxji] {
+    border: 1px solid #dfe6ef;
+    border-radius: 0.85rem;
+    background: #fcfdff;
+    padding: 0.75rem;
+    border-left: 4px solid #8fb2e8;
+}
+
+.history-card-header[b-oht1iihxji] {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-bottom: 0.65rem;
+}
+
+.history-code[b-oht1iihxji] {
+    font-weight: 700;
+    color: #2f3f54;
+}
+
+.history-time[b-oht1iihxji] {
+    font-size: 0.78rem;
+    color: #6c7f95;
+}
+
+.history-grid[b-oht1iihxji] {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.history-block[b-oht1iihxji] {
+    border: 1px solid #e5ebf4;
+    border-radius: 0.65rem;
+    background: #fff;
+    padding: 0.5rem;
+}
+
+.history-label[b-oht1iihxji] {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #6a7e93;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.15rem;
+}
+
+.history-value[b-oht1iihxji] {
+    color: #35465a;
+    font-weight: 500;
+}
+
+.history-notes[b-oht1iihxji] {
+    display: grid;
+    gap: 0.55rem;
+    margin-bottom: 0.65rem;
+}
+
+.history-note-item[b-oht1iihxji] {
+    border: 1px solid #e4eaf3;
+    border-radius: 0.65rem;
+    background: #fff;
+    padding: 0.5rem;
+}
+
+.history-note-value[b-oht1iihxji] {
+    color: #4c5f74;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.history-files[b-oht1iihxji] {
+    margin-bottom: 0.65rem;
+}
+
+.history-approval-panel[b-oht1iihxji] {
+    border: 1px dashed #d6dfeb;
+    border-radius: 0.75rem;
+    background: #f8fbff;
+    padding: 0.6rem;
+}
+
+.history-approval-form[b-oht1iihxji] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem;
+    margin-bottom: 0.5rem;
+}
+
+.history-approval-form:last-child[b-oht1iihxji] {
+    margin-bottom: 0;
+}
+
+.history-approval-form .btn[b-oht1iihxji] {
+    min-width: 132px;
+    font-weight: 600;
+}
+
+.td-report-badge[b-oht1iihxji],
+.td-ctcv-badge[b-oht1iihxji] {
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.td-badge-report-pending[b-oht1iihxji] {
+    background: #fff3cd;
+    color: #8a6d1f;
+    border-color: #f6dea0;
+}
+
+.td-badge-report-approved[b-oht1iihxji] {
+    background: #e9f7ef;
+    color: #1d6b3a;
+    border-color: #bfe7cf;
+}
+
+.td-badge-report-requested[b-oht1iihxji] {
+    background: #e8f4fd;
+    color: #1f5f8f;
+    border-color: #c2e2f8;
+}
+
+.td-badge-report-rejected[b-oht1iihxji] {
+    background: #fdecea;
+    color: #a23a31;
+    border-color: #f4c6c1;
+}
+
+.td-badge-report-default[b-oht1iihxji] {
+    background: #f2f4f8;
+    color: #4d5d70;
+    border-color: #dce3eb;
+}
+
+.td-badge-ctcv-not-started[b-oht1iihxji] {
+    background: #f3f4f6;
+    color: #4b5563;
+    border-color: #d9dde3;
+}
+
+.td-badge-ctcv-in-progress[b-oht1iihxji] {
+    background: #e8f4fd;
+    color: #1e628e;
+    border-color: #c4e0f7;
+}
+
+.td-badge-ctcv-blocked[b-oht1iihxji] {
+    background: #fdecea;
+    color: #a23a31;
+    border-color: #f3c7c3;
+}
+
+.td-badge-ctcv-waiting-confirm[b-oht1iihxji] {
+    background: #fff4d6;
+    color: #8a6a1f;
+    border-color: #f4e0a6;
+}
+
+.td-badge-ctcv-done[b-oht1iihxji] {
+    background: #e9f7ef;
+    color: #1f6a39;
+    border-color: #bfe5ce;
+}
+
+.td-badge-ctcv-default[b-oht1iihxji] {
+    background: #edf0f4;
+    color: #4d5d70;
+    border-color: #d8dfe8;
+}
+
+@media (max-width: 768px) {
+    .history-card-header[b-oht1iihxji] {
+        flex-direction: column;
+    }
+
+    .history-approval-form[b-oht1iihxji] {
+        grid-template-columns: 1fr;
+    }
+
+    .history-approval-form .btn[b-oht1iihxji] {
+        width: 100%;
+        min-width: 0;
+    }
+}

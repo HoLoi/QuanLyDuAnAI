@@ -1,0 +1,30 @@
+﻿@model QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecFileListPartialViewModel
+
+@if (!Model.DanhSachFile.Any())
+{
+    <div class="td-file-empty">Chưa có tệp</div>
+}
+else
+{
+    <div class="td-file-list">
+        @foreach (var file in Model.DanhSachFile)
+        {
+            <div class="td-file-item">
+                <div class="td-file-info">
+                    <div class="td-file-name" title="@file.TenFileTDCV">@file.TenFileTDCV</div>
+                    @if (file.NgayUploadFileTDCV.HasValue)
+                    {
+                        <div class="td-file-date">@file.NgayUploadFileTDCV.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                    }
+                </div>
+                <a asp-action="TaiFileTienDo"
+                   asp-route-maFileTdcv="@file.MaFileTDCV"
+                   asp-route-locMaDuAn="@Model.Filter.LocMaDuAn"
+                   asp-route-locMaCongViec="@Model.Filter.LocMaCongViec"
+                   asp-route-locMaChiTietCv="@Model.Filter.LocMaChiTietCv"
+                   asp-route-tuKhoa="@Model.Filter.TuKhoa"
+                   class="btn btn-outline-secondary btn-sm td-file-download">Tải</a>
+            </div>
+        }
+    </div>
+}

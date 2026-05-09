@@ -131,6 +131,7 @@
         {
             public const string Xem = "TienDo.Xem";
             public const string CapNhat = "TienDo.CapNhat";
+            public const string Duyet = "TienDo.Duyet";
         }
 
         public static class DeXuatNganSach

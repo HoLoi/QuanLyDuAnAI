@@ -1,0 +1,234 @@
+﻿.tien-do-table-host {
+    border: 1px solid var(--line);
+    border-radius: 0.85rem;
+    overflow: hidden;
+    background: #fff;
+}
+
+.tien-do-table-scroll {
+    max-width: 100%;
+}
+
+.tien-do-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.tien-do-table thead th {
+    vertical-align: middle;
+    white-space: normal;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #55657a;
+}
+
+.tien-do-table tbody td {
+    vertical-align: top;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.tien-do-table .col-progress {
+    width: 130px;
+}
+
+.tien-do-table .col-status {
+    width: 165px;
+}
+
+.tien-do-table .col-action {
+    width: 160px;
+    min-width: 160px;
+}
+
+.td-cell-title {
+    font-weight: 600;
+    color: #2f3f54;
+    margin-bottom: 0.2rem;
+}
+
+.td-subline {
+    color: #6d7f93;
+    font-size: 0.78rem;
+}
+
+.td-progress-wrap {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.td-progress-track {
+    height: 8px;
+}
+
+.td-progress-badge {
+    width: fit-content;
+    background: #eef3ff;
+    color: #3d57b8;
+    border: 1px solid #cad6ff;
+    font-weight: 600;
+}
+
+.td-latest-report {
+    display: grid;
+    gap: 0.22rem;
+}
+
+.td-meta-line {
+    font-size: 0.79rem;
+    color: #4e5f74;
+}
+
+.td-note-line {
+    font-size: 0.79rem;
+    color: #65778b;
+    background: #f6f8fc;
+    border: 1px solid #e4ebf5;
+    border-radius: 0.45rem;
+    padding: 0.3rem 0.42rem;
+}
+
+.table-actions-cell {
+    padding: 0.5rem;
+}
+
+.table-actions-stacked {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.table-actions-stacked .btn {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.td-report-badge,
+.td-ctcv-badge {
+    font-weight: 600;
+    border: 1px solid transparent;
+    white-space: normal;
+}
+
+.td-badge-report-pending {
+    background: #fff3cd;
+    color: #8a6d1f;
+    border-color: #f6dea0;
+}
+
+.td-badge-report-approved {
+    background: #e9f7ef;
+    color: #1d6b3a;
+    border-color: #bfe7cf;
+}
+
+.td-badge-report-requested {
+    background: #e8f4fd;
+    color: #1f5f8f;
+    border-color: #c2e2f8;
+}
+
+.td-badge-report-rejected {
+    background: #fdecea;
+    color: #a23a31;
+    border-color: #f4c6c1;
+}
+
+.td-badge-report-default {
+    background: #f2f4f8;
+    color: #4d5d70;
+    border-color: #dce3eb;
+}
+
+.td-badge-ctcv-not-started {
+    background: #f3f4f6;
+    color: #4b5563;
+    border-color: #d9dde3;
+}
+
+.td-badge-ctcv-in-progress {
+    background: #e8f4fd;
+    color: #1e628e;
+    border-color: #c4e0f7;
+}
+
+.td-badge-ctcv-blocked {
+    background: #fdecea;
+    color: #a23a31;
+    border-color: #f3c7c3;
+}
+
+.td-badge-ctcv-waiting-confirm {
+    background: #fff4d6;
+    color: #8a6a1f;
+    border-color: #f4e0a6;
+}
+
+.td-badge-ctcv-done {
+    background: #e9f7ef;
+    color: #1f6a39;
+    border-color: #bfe5ce;
+}
+
+.td-badge-ctcv-default {
+    background: #edf0f4;
+    color: #4d5d70;
+    border-color: #d8dfe8;
+}
+
+@media (max-width: 992px) {
+    .tien-do-table {
+        min-width: 100%;
+    }
+
+    .tien-do-table thead {
+        display: none;
+    }
+
+    .tien-do-table tbody tr.tien-do-main-row {
+        display: block;
+        border: 1px solid #dfe6ef;
+        border-radius: 0.8rem;
+        margin: 0.65rem;
+        overflow: hidden;
+    }
+
+    .tien-do-table tbody tr.tien-do-main-row td {
+        display: grid;
+        grid-template-columns: 130px minmax(0, 1fr);
+        gap: 0.45rem;
+        align-items: start;
+        border-bottom: 1px solid #eef2f7;
+        padding: 0.62rem 0.7rem;
+    }
+
+    .tien-do-table tbody tr.tien-do-main-row td:last-child {
+        border-bottom: 0;
+    }
+
+    .tien-do-table tbody tr.tien-do-main-row td::before {
+        content: attr(data-label);
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #65788e;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .tien-do-table .col-progress,
+    .tien-do-table .col-status,
+    .tien-do-table .col-action {
+        width: auto;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .tien-do-table tbody tr.tien-do-main-row td {
+        grid-template-columns: 1fr;
+    }
+
+    .tien-do-table tbody tr.tien-do-main-row td::before {
+        margin-bottom: 0.2rem;
+    }
+}

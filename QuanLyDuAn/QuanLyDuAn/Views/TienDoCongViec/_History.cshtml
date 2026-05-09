@@ -1,0 +1,128 @@
+﻿@model QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecRowPartialViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    string GetDuyetBadgeClass(string? statusCode)
+    {
+        if (TrangThai.EqualsValue(statusCode, TrangThai.ChoDuyet)) return "td-badge-report-pending";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.DaDuyet)) return "td-badge-report-approved";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.YeuCauBoSung)) return "td-badge-report-requested";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.TuChoi)) return "td-badge-report-rejected";
+        return "td-badge-report-default";
+    }
+
+    string GetCtcvBadgeClass(string? statusCode)
+    {
+        if (TrangThai.EqualsValue(statusCode, TrangThai.ChuaBatDau)) return "td-badge-ctcv-not-started";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.DangThucHien)) return "td-badge-ctcv-in-progress";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.BiCanCan)) return "td-badge-ctcv-blocked";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.ChoXacNhanHoanThanh)) return "td-badge-ctcv-waiting-confirm";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.HoanThanh)) return "td-badge-ctcv-done";
+        return "td-badge-ctcv-default";
+    }
+}
+
+<tr class="collapse tien-do-extra-row" id="@Model.LichSuCollapseId">
+    <td colspan="7" class="history-collapse-cell">
+        <div class="td-history-wrap">
+            <div class="history-title">Lịch sử báo cáo tiến độ</div>
+
+            <div class="history-timeline">
+                @foreach (var ls in Model.Item.LichSuTienDo)
+                {
+                    <article class="history-card">
+                        <header class="history-card-header">
+                            <div>
+                                <div class="history-code">Mã tiến độ #@ls.MaTienDo</div>
+                                <div class="history-time">@ls.ThoiGianCapNhat?.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                            <span class="badge td-report-badge @GetDuyetBadgeClass(ls.TrangThaiDuyetBaoCaoCode)">@ls.TrangThaiDuyetBaoCao</span>
+                        </header>
+
+                        <div class="history-grid">
+                            <div class="history-block">
+                                <div class="history-label">Người báo cáo</div>
+                                <div class="history-value">@ls.TenNguoiBaoCao</div>
+                            </div>
+                            <div class="history-block">
+                                <div class="history-label">Trạng thái đề xuất</div>
+                                <div class="history-value">
+                                    <span class="badge td-ctcv-badge @GetCtcvBadgeClass(ls.TrangThaiCTCVDeXuatCode)">@ls.TrangThaiCTCVDeXuat</span>
+                                </div>
+                            </div>
+                            <div class="history-block">
+                                <div class="history-label">Tiến độ snapshot</div>
+                                <div class="history-value">@ls.PhanTram%</div>
+                            </div>
+                            <div class="history-block">
+                                <div class="history-label">Người duyệt</div>
+                                <div class="history-value">@(string.IsNullOrWhiteSpace(ls.TenNguoiDuyet) ? "-" : ls.TenNguoiDuyet)</div>
+                            </div>
+                            <div class="history-block">
+                                <div class="history-label">Thời gian duyệt</div>
+                                <div class="history-value">@ls.ThoiGianDuyet?.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+
+                        <div class="history-notes">
+                            <div class="history-note-item">
+                                <div class="history-label">Ghi chú báo cáo</div>
+                                <div class="history-note-value">@(string.IsNullOrWhiteSpace(ls.GhiChuTienDo) ? "-" : ls.GhiChuTienDo)</div>
+                            </div>
+                            <div class="history-note-item">
+                                <div class="history-label">Ghi chú duyệt</div>
+                                <div class="history-note-value">@(string.IsNullOrWhiteSpace(ls.GhiChuDuyet) ? "-" : ls.GhiChuDuyet)</div>
+                            </div>
+                        </div>
+
+                        <div class="history-files">
+                            <div class="history-label">File minh chứng</div>
+                            @await Html.PartialAsync("_FileList", new QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecFileListPartialViewModel
+                            {
+                                DanhSachFile = ls.DanhSachFile,
+                                Filter = Model.Filter
+                            })
+                        </div>
+
+                        @if (Model.CanApprove && Model.Item.CoTheDuyetBaoCao && ls.CoTheXuLyDuyet)
+                        {
+                            <div class="history-approval-panel">
+                                <div class="history-label mb-2">Xử lý duyệt</div>
+
+                                <form asp-action="DuyetBaoCaoTienDo" method="post" class="history-approval-form">
+                                    <input type="hidden" name="MaTienDo" value="@ls.MaTienDo" />
+                                    <input type="hidden" name="locMaDuAn" value="@Model.Filter.LocMaDuAn" />
+                                    <input type="hidden" name="locMaCongViec" value="@Model.Filter.LocMaCongViec" />
+                                    <input type="hidden" name="locMaChiTietCv" value="@Model.Filter.LocMaChiTietCv" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
+                                    <input type="text" name="GhiChuDuyet" class="form-control form-control-sm" maxlength="255" placeholder="Ghi chú duyệt (không bắt buộc)" />
+                                    <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
+                                </form>
+
+                                <form asp-action="YeuCauBoSungBaoCaoTienDo" method="post" class="history-approval-form">
+                                    <input type="hidden" name="MaTienDo" value="@ls.MaTienDo" />
+                                    <input type="hidden" name="locMaDuAn" value="@Model.Filter.LocMaDuAn" />
+                                    <input type="hidden" name="locMaCongViec" value="@Model.Filter.LocMaCongViec" />
+                                    <input type="hidden" name="locMaChiTietCv" value="@Model.Filter.LocMaChiTietCv" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
+                                    <input type="text" name="GhiChuDuyet" class="form-control form-control-sm" maxlength="255" required placeholder="Nhập lý do yêu cầu bổ sung" />
+                                    <button type="submit" class="btn btn-warning btn-sm">Yêu cầu bổ sung</button>
+                                </form>
+
+                                <form asp-action="TuChoiBaoCaoTienDo" method="post" class="history-approval-form">
+                                    <input type="hidden" name="MaTienDo" value="@ls.MaTienDo" />
+                                    <input type="hidden" name="locMaDuAn" value="@Model.Filter.LocMaDuAn" />
+                                    <input type="hidden" name="locMaCongViec" value="@Model.Filter.LocMaCongViec" />
+                                    <input type="hidden" name="locMaChiTietCv" value="@Model.Filter.LocMaChiTietCv" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
+                                    <input type="text" name="GhiChuDuyet" class="form-control form-control-sm" maxlength="255" required placeholder="Nhập lý do từ chối" />
+                                    <button type="submit" class="btn btn-danger btn-sm">Từ chối</button>
+                                </form>
+                            </div>
+                        }
+                    </article>
+                }
+            </div>
+        </div>
+    </td>
+</tr>

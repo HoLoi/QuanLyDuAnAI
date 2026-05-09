@@ -1,0 +1,46 @@
+﻿.update-collapse-cell {
+    background: #f9fbff;
+}
+
+.td-update-wrap {
+    border: 1px solid #dde6f1;
+    border-radius: 0.85rem;
+    background: #fff;
+    padding: 0.85rem;
+}
+
+.update-title {
+    font-weight: 700;
+    color: #2f3f54;
+    margin-bottom: 0.75rem;
+}
+
+.td-update-wrap .form-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #5f7187;
+}
+
+.td-update-wrap .form-select,
+.td-update-wrap .form-control {
+    min-height: 40px;
+}
+
+.td-update-wrap .btn-primary {
+    min-height: 40px;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .td-update-wrap {
+        padding: 0.7rem;
+    }
+
+    .td-update-wrap .d-flex {
+        justify-content: stretch !important;
+    }
+
+    .td-update-wrap .btn-primary {
+        width: 100%;
+    }
+}

@@ -1,0 +1,39 @@
+﻿@model QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecPageViewModel
+
+<form asp-action="Index" method="get" class="td-filter-form row g-2 g-lg-3 mb-3">
+    <div class="col-12 col-md-6 col-xl-3">
+        <label class="form-label">Dự án</label>
+        <select class="form-select" name="locMaDuAn">
+            <option value="">Tất cả dự án</option>
+            @foreach (var item in Model.DanhSachDuAn)
+            {
+                <option value="@item.MaDuAn" selected="@(Model.Filter.LocMaDuAn == item.MaDuAn)">@item.TenDuAn</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+        <label class="form-label">Công việc</label>
+        <select class="form-select" name="locMaCongViec">
+            <option value="">Tất cả công việc</option>
+            @foreach (var item in Model.DanhSachCongViec)
+            {
+                <option value="@item.MaCongViec" selected="@(Model.Filter.LocMaCongViec == item.MaCongViec)">@item.TenCongViec</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-12 col-md-4 col-xl-2">
+        <label class="form-label">Mã chi tiết CV</label>
+        <input type="number" class="form-control" name="locMaChiTietCv" value="@Model.Filter.LocMaChiTietCv" min="1" />
+    </div>
+
+    <div class="col-12 col-md-8 col-xl-3">
+        <label class="form-label">Từ khóa</label>
+        <input type="text" class="form-control" name="tuKhoa" value="@Model.Filter.TuKhoa" placeholder="Tên dự án/công việc/chi tiết" />
+    </div>
+
+    <div class="col-12 col-xl-1 td-filter-submit-wrap">
+        <button type="submit" class="btn btn-primary td-filter-submit">Lọc</button>
+    </div>
+</form>

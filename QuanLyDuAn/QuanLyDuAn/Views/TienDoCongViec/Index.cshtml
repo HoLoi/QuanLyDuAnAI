@@ -1,5 +1,13 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecPageViewModel
+
+<div class="tien-do-page">
+    <div class="card tien-do-shell">
+        <div class="tien-do-header">
+            <h5 class="mb-0">Tiến độ công việc</h5>
+            <p class="text-muted mb-0">Theo dõi báo cáo tiến độ theo từng chi tiết công việc.</p>
+        </div>
+
+        @await Html.PartialAsync("_Filter", Model)
+        @await Html.PartialAsync("_Table", Model)
+    </div>
+</div>

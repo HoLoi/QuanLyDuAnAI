@@ -1,22 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\",
+  "WorkspaceRootPath": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl5\\quanlyduanai\\quanlyduan\\quanlyduan\\views\\tiendocongviec\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\views\\tiendocongviec\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl5\\quanlyduanai\\quanlyduan\\quanlyduan\\controllers\\tiendocongvieccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\controllers\\tiendocongvieccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl5\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\tiendocongviecservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\implementations\\tiendocongviecservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl5\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\interfaces\\itiendocongviecservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\interfaces\\itiendocongviecservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl6\\quanlyduanai\\quanlyduan\\quanlyduan\\controllers\\chatduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\controllers\\chatduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -55,53 +43,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Views\\TienDoCongViec\\Index.cshtml",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Views\\TienDoCongViec\\Index.cshtml",
-              "ToolTip": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Views\\TienDoCongViec\\Index.cshtml",
-              "RelativeToolTip": "QuanLyDuAn\\Views\\TienDoCongViec\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-08T14:56:12.525Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "TienDoCongViecService.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\TienDoCongViecService.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\TienDoCongViecService.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\TienDoCongViecService.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Services\\Implementations\\TienDoCongViecService.cs",
+              "Title": "ChatDuAnController.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T14:56:03.216Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ITienDoCongViecService.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Interfaces\\ITienDoCongViecService.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Interfaces\\ITienDoCongViecService.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Interfaces\\ITienDoCongViecService.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Services\\Interfaces\\ITienDoCongViecService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T14:55:20.616Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "TienDoCongViecController.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\TienDoCongViecController.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Controllers\\TienDoCongViecController.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl5\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\TienDoCongViecController.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Controllers\\TienDoCongViecController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAiAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-08T14:54:35.282Z",
+              "WhenOpened": "2026-05-09T16:12:19.164Z",
               "EditorCaption": ""
             }
           ]

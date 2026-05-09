@@ -567,6 +567,8 @@ namespace QuanLyDuAn.Migrations
 
                     b.HasKey("MaChiTietCV");
 
+                    b.HasIndex("DeletedBy");
+
                     b.HasIndex("MaCongViec");
 
                     b.ToTable("CT_CONG_VIEC", (string)null);
@@ -1816,6 +1818,10 @@ namespace QuanLyDuAn.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaTienDo"));
 
+                    b.Property<string>("GhiChuDuyet")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("GhiChuTienDo")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -1826,11 +1832,21 @@ namespace QuanLyDuAn.Migrations
                     b.Property<int>("MaNguoiDung")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MaNguoiDungDuyet")
+                        .HasColumnType("int");
+
                     b.Property<int?>("PhanTram")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("ThoiGianCapNhat")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ThoiGianDuyet")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TrangThaiCTCVDeXuat")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TrangThaiTienDo")
                         .HasMaxLength(50)
@@ -1841,6 +1857,8 @@ namespace QuanLyDuAn.Migrations
                     b.HasIndex("MaChiTietCV");
 
                     b.HasIndex("MaNguoiDung");
+
+                    b.HasIndex("MaNguoiDungDuyet");
 
                     b.ToTable("TIEN_DO_CONG_VIEC", (string)null);
                 });
@@ -2154,6 +2172,12 @@ namespace QuanLyDuAn.Migrations
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.CtCongViec", b =>
                 {
+                    b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("DeletedBy")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_CT_CONG_VIEC_DELETED_BY");
+
                     b.HasOne("QuanLyDuAn.Models.Entities.CongViec", null)
                         .WithMany()
                         .HasForeignKey("MaCongViec")
@@ -2731,6 +2755,12 @@ namespace QuanLyDuAn.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TIEN_DO__BAO CAO_NGUOI_DU");
+
+                    b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("MaNguoiDungDuyet")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_TIEN_DO__DUYET_NGUOI_DU");
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.TinNhan", b =>

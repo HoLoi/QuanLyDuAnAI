@@ -58,3 +58,14 @@ wwwroot\lib\jquery-validation\LICENSE.md
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
 wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+wwwroot\uploads\duan\2\2f7f4153823742128c08326eef7055ba.pdf
+wwwroot\uploads\duan\2\9cf1116bc5c2466299787cf51d7cde2f.pdf
+wwwroot\uploads\duan\2\b058cd1763c64c9294a047989b82a9a2.docx
+wwwroot\uploads\duan\2\b2d2139b66f44a1a8a4ca172ff557638.pdf
+wwwroot\uploads\tiendocongviec\3\15817701fcb244eab608696c9c84f572.docx
+wwwroot\uploads\tiendocongviec\3\35b9f2c2469e43a68b240862a92305fb.docx
+wwwroot\uploads\tiendocongviec\3\545aed0c9b3f4007b4eefbb22ba9d4f0.docx
+wwwroot\uploads\tiendocongviec\3\91bdbb3c5d5b4077b6139dd9c01aabe5.docx
+wwwroot\uploads\tiendocongviec\3\a62a38b4b9c6423e8ebc6961fc02b589.docx
+wwwroot\uploads\tiendocongviec\3\c1fa9545dd004ac485b0c2e349ca46b0.docx
+wwwroot\uploads\tiendocongviec\3\cb42f09dc5d748d48179fe9d800fb95c.docx

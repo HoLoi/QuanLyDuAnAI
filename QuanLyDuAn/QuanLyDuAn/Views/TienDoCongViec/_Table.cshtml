@@ -1,0 +1,157 @@
+﻿@model QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var canUpdate = Model.Permissions.Contains(Permissions.TienDo.CapNhat);
+    var canApprove = Model.Permissions.Contains(Permissions.TienDo.Duyet);
+
+    string GetDuyetBadgeClass(string? statusCode)
+    {
+        if (TrangThai.EqualsValue(statusCode, TrangThai.ChoDuyet)) return "td-badge-report-pending";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.DaDuyet)) return "td-badge-report-approved";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.YeuCauBoSung)) return "td-badge-report-requested";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.TuChoi)) return "td-badge-report-rejected";
+        return "td-badge-report-default";
+    }
+
+    string GetCtcvBadgeClass(string? statusCode)
+    {
+        if (TrangThai.EqualsValue(statusCode, TrangThai.ChuaBatDau)) return "td-badge-ctcv-not-started";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.DangThucHien)) return "td-badge-ctcv-in-progress";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.BiCanCan)) return "td-badge-ctcv-blocked";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.ChoXacNhanHoanThanh)) return "td-badge-ctcv-waiting-confirm";
+        if (TrangThai.EqualsValue(statusCode, TrangThai.HoanThanh)) return "td-badge-ctcv-done";
+        return "td-badge-ctcv-default";
+    }
+
+    string RutGonGhiChu(string? note, int maxLength = 90)
+    {
+        if (string.IsNullOrWhiteSpace(note)) return string.Empty;
+        var normalized = note.Trim();
+        if (normalized.Length <= maxLength) return normalized;
+        return normalized.Substring(0, maxLength).TrimEnd() + "...";
+    }
+}
+
+<div class="tien-do-table-host">
+    <div class="table-responsive tien-do-table-scroll">
+        <table class="table table-bordered table-sm app-data-table tien-do-table mb-0">
+            <thead>
+                <tr>
+                    <th>Công việc</th>
+                    <th>Chi tiết công việc</th>
+                    <th>Người thực hiện</th>
+                    <th class="col-progress">Tiến độ hiện tại</th>
+                    <th class="col-status">Trạng thái hiện tại</th>
+                    <th>Báo cáo mới nhất</th>
+                    <th class="col-action">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.DanhSach.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Không có dữ liệu tiến độ công việc.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model.DanhSach)
+                    {
+                        var rowModel = new QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecRowPartialViewModel
+                        {
+                            Item = item,
+                            Filter = Model.Filter,
+                            CanUpdate = canUpdate,
+                            CanApprove = canApprove,
+                            CollapseId = $"capnhat-{item.MaChiTietCV}",
+                            LichSuCollapseId = $"lichsu-{item.MaChiTietCV}"
+                        };
+
+                        var soFileMoiNhat = item.DanhSachFile.Count;
+                        var coBaoCao = item.MaTienDoMoiNhat.HasValue;
+                        var ghiChuTomTat = RutGonGhiChu(item.GhiChuBaoCaoGanNhat);
+                        var coTheXuLyBaoCao = canApprove && item.LichSuTienDo.Any(x => x.CoTheXuLyDuyet);
+
+                        <tr class="tien-do-main-row">
+                            <td data-label="Công việc">
+                                <div class="td-cell-title">@item.TenCongViec</div>
+                                <div class="td-subline">Dự án: @item.TenDuAn</div>
+                            </td>
+                            <td data-label="Chi tiết công việc">
+                                <div class="td-cell-title">@item.TenChiTietCongViec</div>
+                                <div class="td-subline">Mã CTCV: #@item.MaChiTietCV</div>
+                            </td>
+                            <td data-label="Người thực hiện">
+                                <div class="td-cell-title">@item.NguoiThucHien</div>
+                            </td>
+                            <td data-label="Tiến độ hiện tại" class="col-progress">
+                                <div class="td-progress-wrap">
+                                    <div class="progress td-progress-track">
+                                        <div class="progress-bar" role="progressbar" style="width: @item.PhanTramHienTai%;"></div>
+                                    </div>
+                                    <span class="badge td-progress-badge">@item.PhanTramHienTai%</span>
+                                </div>
+                            </td>
+                            <td data-label="Trạng thái hiện tại" class="col-status">
+                                <span class="badge td-ctcv-badge @GetCtcvBadgeClass(item.TrangThaiCTCVCode)">@item.TrangThaiCTCV</span>
+                            </td>
+                            <td data-label="Báo cáo mới nhất">
+                                @if (!coBaoCao)
+                                {
+                                    <span class="text-muted">Chưa có báo cáo</span>
+                                }
+                                else
+                                {
+                                    <div class="td-latest-report">
+                                        <span class="badge td-report-badge @GetDuyetBadgeClass(item.TrangThaiDuyetBaoCaoGanNhatCode)">@item.TrangThaiDuyetBaoCaoGanNhat</span>
+                                        <div class="td-meta-line"><span class="fw-semibold">Người báo cáo:</span> @item.TenNguoiBaoCaoGanNhat</div>
+                                        <div class="td-meta-line"><span class="fw-semibold">Thời gian:</span> @item.ThoiGianBaoCaoGanNhat?.ToString("dd/MM/yyyy HH:mm")</div>
+                                        <div class="td-meta-line"><span class="fw-semibold">Tệp minh chứng:</span> @soFileMoiNhat</div>
+                                        <div class="td-meta-line"><span class="fw-semibold">Đề xuất:</span> @item.TrangThaiCTCVDeXuatGanNhat</div>
+                                        @if (!string.IsNullOrWhiteSpace(ghiChuTomTat))
+                                        {
+                                            <div class="td-note-line" title="@item.GhiChuBaoCaoGanNhat">@ghiChuTomTat</div>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                            <td data-label="Thao tác" class="col-action table-actions-cell">
+                                <div class="table-actions table-actions-stacked">
+                                    @if (item.LichSuTienDo.Any())
+                                    {
+                                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" data-bs-toggle="collapse" data-bs-target="#@rowModel.LichSuCollapseId">
+                                            Lịch sử
+                                        </button>
+                                    }
+                                    @if (canUpdate && item.CoTheCapNhatTienDo)
+                                    {
+                                        <button type="button" class="btn btn-outline-primary btn-sm w-100" data-bs-toggle="collapse" data-bs-target="#@rowModel.CollapseId">
+                                            Báo cáo
+                                        </button>
+                                    }
+                                    @if (coTheXuLyBaoCao)
+                                    {
+                                        <button type="button" class="btn btn-outline-warning btn-sm w-100" data-bs-toggle="collapse" data-bs-target="#@rowModel.LichSuCollapseId">
+                                            Xử lý
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+
+                        @if (item.LichSuTienDo.Any())
+                        {
+                            @await Html.PartialAsync("_History", rowModel)
+                        }
+
+                        @if (canUpdate && item.CoTheCapNhatTienDo)
+                        {
+                            @await Html.PartialAsync("_UpdateForm", rowModel)
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

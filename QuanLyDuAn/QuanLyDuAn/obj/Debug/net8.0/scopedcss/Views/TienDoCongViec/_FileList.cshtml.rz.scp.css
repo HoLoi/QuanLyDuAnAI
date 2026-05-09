@@ -1,0 +1,52 @@
+.td-file-empty[b-ofst5s0f1x] {
+    color: #7a8a9c;
+    font-size: 0.82rem;
+}
+
+.td-file-list[b-ofst5s0f1x] {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.td-file-item[b-ofst5s0f1x] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem;
+    align-items: center;
+    border: 1px solid #e1e8f2;
+    border-radius: 0.65rem;
+    background: #fff;
+    padding: 0.45rem 0.55rem;
+}
+
+.td-file-info[b-ofst5s0f1x] {
+    min-width: 0;
+}
+
+.td-file-name[b-ofst5s0f1x] {
+    font-size: 0.84rem;
+    color: #34475d;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.td-file-date[b-ofst5s0f1x] {
+    margin-top: 0.12rem;
+    font-size: 0.76rem;
+    color: #7a8a9d;
+}
+
+.td-file-download[b-ofst5s0f1x] {
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+@media (max-width: 576px) {
+    .td-file-item[b-ofst5s0f1x] {
+        grid-template-columns: 1fr;
+    }
+
+    .td-file-download[b-ofst5s0f1x] {
+        width: 100%;
+    }
+}

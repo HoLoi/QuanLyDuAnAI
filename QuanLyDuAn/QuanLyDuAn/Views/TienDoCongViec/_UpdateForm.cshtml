@@ -1,0 +1,49 @@
+﻿@model QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecRowPartialViewModel
+@using QuanLyDuAn.Constants
+
+<tr class="collapse tien-do-extra-row" id="@Model.CollapseId">
+    <td colspan="7" class="update-collapse-cell">
+        <div class="td-update-wrap">
+            <div class="update-title">Gửi báo cáo tiến độ</div>
+
+            <form asp-action="CapNhatTienDo" method="post" enctype="multipart/form-data" class="row g-3">
+                <input type="hidden" name="MaChiTietCV" value="@Model.Item.MaChiTietCV" />
+                <input type="hidden" name="locMaDuAn" value="@Model.Filter.LocMaDuAn" />
+                <input type="hidden" name="locMaCongViec" value="@Model.Filter.LocMaCongViec" />
+                <input type="hidden" name="locMaChiTietCv" value="@Model.Filter.LocMaChiTietCv" />
+                <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
+
+                <div class="col-12 col-lg-4">
+                    <label class="form-label">Trạng thái đề xuất chi tiết công việc</label>
+                    <select class="form-select" name="TrangThaiCTCVMoi" required>
+                        @if (!Model.Item.TrangThaiDeXuatOptions.Any())
+                        {
+                            <option value="@Model.Item.TrangThaiCTCVCode">@Model.Item.TrangThaiCTCV</option>
+                        }
+                        else
+                        {
+                            foreach (var status in Model.Item.TrangThaiDeXuatOptions)
+                            {
+                                <option value="@status" selected="@(TrangThai.EqualsValue(Model.Item.TrangThaiCTCVCode, status))">@TrangThai.ToDisplay(status)</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                    <label class="form-label">Ghi chú tiến độ</label>
+                    <input type="text" class="form-control" name="GhiChuTienDo" maxlength="255" placeholder="Mô tả ngắn tình hình hiện tại" />
+                </div>
+
+                <div class="col-12 col-lg-4">
+                    <label class="form-label">Tệp minh chứng (có thể chọn nhiều)</label>
+                    <input type="file" class="form-control" name="Files" multiple />
+                </div>
+
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Gửi báo cáo</button>
+                </div>
+            </form>
+        </div>
+    </td>
+</tr>

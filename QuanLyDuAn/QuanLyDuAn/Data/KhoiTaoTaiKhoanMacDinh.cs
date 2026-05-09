@@ -155,6 +155,10 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.PhanCongChiTietCongViec.Xem,
             Permissions.PhanCongChiTietCongViec.ThucHien,
 
+            // Tiến độ
+            Permissions.TienDo.Xem,
+            Permissions.TienDo.Duyet,
+
             // Duyệt đề xuất ngân sách
             Permissions.DuyetNganSach.Xem,
             Permissions.DuyetNganSach.Duyet,
@@ -223,7 +227,9 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.PhanCongChiTietCongViec.ThucHien,
 
             // Tiến độ
+            Permissions.TienDo.Xem,
             Permissions.TienDo.CapNhat,
+            Permissions.TienDo.Duyet,
 
             // Chat
             Permissions.Chat.Xem,
@@ -612,7 +618,8 @@ public static class KhoiTaoTaiKhoanMacDinh
             ["TienDo"] = new[]
             {
                 Permissions.TienDo.Xem,
-                Permissions.TienDo.CapNhat
+                Permissions.TienDo.CapNhat,
+                Permissions.TienDo.Duyet
             },
 
             // ===== TAI CHINH =====

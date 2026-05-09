@@ -772,7 +772,9 @@ public partial class QuanLyDuAnDbContext : DbContext
         {
             entity.ToTable("TIEN_DO_CONG_VIEC");
             entity.HasKey(e => e.MaTienDo);
+            entity.Property(e => e.GhiChuDuyet).HasMaxLength(255);
             entity.Property(e => e.GhiChuTienDo).HasMaxLength(255);
+            entity.Property(e => e.TrangThaiCTCVDeXuat).HasMaxLength(50);
             entity.Property(e => e.TrangThaiTienDo).HasMaxLength(50);
             entity.HasOne<NguoiDung>()
                 .WithMany()
@@ -782,6 +784,10 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(d => d.MaChiTietCV)
                 .HasConstraintName("FK_TIEN_DO__BAO CAO_CONG_VIE");
+            entity.HasOne<NguoiDung>()
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiDungDuyet)
+                .HasConstraintName("FK_TIEN_DO__DUYET_NGUOI_DU");
         });
         modelBuilder.Entity<TieuChiDanhGia>(entity =>
         {

@@ -1166,6 +1166,11 @@ namespace QuanLyDuAn.Migrations
                 {
                     table.PrimaryKey("PK_CT_CONG_VIEC", x => x.MaChiTietCV);
                     table.ForeignKey(
+                        name: "FK_CT_CONG_VIEC_DELETED_BY",
+                        column: x => x.DeletedBy,
+                        principalTable: "NGUOI_DUNG",
+                        principalColumn: "MaNguoiDung");
+                    table.ForeignKey(
                         name: "FK_CT_CONG__CO_CONG_VIE",
                         column: x => x.MaCongViec,
                         principalTable: "CONG_VIEC",
@@ -1397,9 +1402,13 @@ namespace QuanLyDuAn.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MaChiTietCV = table.Column<int>(type: "int", nullable: false),
                     MaNguoiDung = table.Column<int>(type: "int", nullable: false),
+                    MaNguoiDungDuyet = table.Column<int>(type: "int", nullable: true),
+                    ThoiGianDuyet = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    GhiChuDuyet = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     PhanTram = table.Column<int>(type: "int", nullable: true),
                     GhiChuTienDo = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     ThoiGianCapNhat = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TrangThaiCTCVDeXuat = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     TrangThaiTienDo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
@@ -1413,6 +1422,11 @@ namespace QuanLyDuAn.Migrations
                     table.ForeignKey(
                         name: "FK_TIEN_DO__BAO CAO_NGUOI_DU",
                         column: x => x.MaNguoiDung,
+                        principalTable: "NGUOI_DUNG",
+                        principalColumn: "MaNguoiDung");
+                    table.ForeignKey(
+                        name: "FK_TIEN_DO__DUYET_NGUOI_DU",
+                        column: x => x.MaNguoiDungDuyet,
                         principalTable: "NGUOI_DUNG",
                         principalColumn: "MaNguoiDung");
                 });
@@ -1540,6 +1554,11 @@ namespace QuanLyDuAn.Migrations
                 name: "IX_CONG_VIEC_MaMucDo",
                 table: "CONG_VIEC",
                 column: "MaMucDo");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CT_CONG_VIEC_DeletedBy",
+                table: "CT_CONG_VIEC",
+                column: "DeletedBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CT_CONG_VIEC_MaCongViec",
@@ -1865,6 +1884,11 @@ namespace QuanLyDuAn.Migrations
                 name: "IX_TIEN_DO_CONG_VIEC_MaNguoiDung",
                 table: "TIEN_DO_CONG_VIEC",
                 column: "MaNguoiDung");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TIEN_DO_CONG_VIEC_MaNguoiDungDuyet",
+                table: "TIEN_DO_CONG_VIEC",
+                column: "MaNguoiDungDuyet");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TIN_NHAN_MaNguoiDung",

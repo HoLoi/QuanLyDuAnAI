@@ -1,0 +1,32 @@
+﻿.td-filter-form {
+    align-items: flex-end;
+}
+
+.td-filter-form .form-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #596a7e;
+    margin-bottom: 0.35rem;
+}
+
+.td-filter-form .form-select,
+.td-filter-form .form-control {
+    min-height: 40px;
+}
+
+.td-filter-submit-wrap {
+    display: grid;
+    align-items: end;
+}
+
+.td-filter-submit {
+    width: 100%;
+    min-height: 40px;
+    font-weight: 600;
+}
+
+@media (max-width: 1199px) {
+    .td-filter-submit-wrap {
+        margin-top: 0.1rem;
+    }
+}
