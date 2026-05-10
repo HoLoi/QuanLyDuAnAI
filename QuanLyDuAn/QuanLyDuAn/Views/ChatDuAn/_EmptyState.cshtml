@@ -1,0 +1,13 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
+
+<div class="chat-empty-state">
+    <div class="chat-empty-title">Bạn chưa tham gia dự án nào có phòng chat.</div>
+    @if (!string.IsNullOrWhiteSpace(Model.ThongBaoTrangThai))
+    {
+        <div class="chat-empty-text">@Model.ThongBaoTrangThai</div>
+    }
+    else
+    {
+        <div class="chat-empty-text">Hãy tham gia một dự án để bắt đầu trao đổi.</div>
+    }
+</div>

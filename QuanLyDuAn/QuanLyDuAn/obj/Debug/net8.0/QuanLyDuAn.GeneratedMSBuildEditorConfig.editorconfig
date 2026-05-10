@@ -9,329 +9,365 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = QuanLyDuAn
 build_property.RootNamespace = QuanLyDuAn
-build_property.ProjectDir = E:\D\Luan Van\dvl6\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\
+build_property.ProjectDir = E:\D\Luan Van\dvl7\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = E:\D\Luan Van\dvl6\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn
+build_property.MSBuildProjectDirectory = E:\D\Luan Van\dvl7\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Account/AccessDenied.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Account/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxBY2Nlc3NEZW5pZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Account/Login.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChiTietCongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChatDuAn/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdER1QW5cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChatDuAn/_ChatHeader.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdER1QW5cX0NoYXRIZWFkZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChatDuAn/_EmptyState.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdER1QW5cX0VtcHR5U3RhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChatDuAn/_MessageForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdER1QW5cX01lc3NhZ2VGb3JtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChatDuAn/_MessageItem.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdER1QW5cX01lc3NhZ2VJdGVtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChatDuAn/_MessageList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdER1QW5cX01lc3NhZ2VMaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChatDuAn/_RoomList.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdER1QW5cX1Jvb21MaXN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChiTietCongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hpVGlldENvbmdWaWVjXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChiTietCongViec/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChiTietCongViec/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hpVGlldENvbmdWaWVjXF9Gb3JtLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChiTietCongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChiTietCongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hpVGlldENvbmdWaWVjXF9UYWJsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChucDanh/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChucDanh/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2h1Y0RhbmhcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChucDanh/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChucDanh/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2h1Y0RhbmhcX0Zvcm0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChucDanh/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ChucDanh/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2h1Y0RhbmhcX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/CongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/CongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29uZ1ZpZWNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/CongViec/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/CongViec/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29uZ1ZpZWNcX0ZpbHRlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/CongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/CongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29uZ1ZpZWNcX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhGiaDuAn/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFuaEdpYUR1QW5cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhGiaNhanVien/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFuaEdpYU5oYW5WaWVuXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFuaE11Y0NvbmdWaWVjXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFuaE11Y0NvbmdWaWVjXF9GaWx0ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFuaE11Y0NvbmdWaWVjXF9Gb3JtLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DanhMucCongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFuaE11Y0NvbmdWaWVjXF9UYWJsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Dashboard/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Dashboard/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/DieuHuong.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/DieuHuong.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0Q29uZ1ZpZWNcRGlldUh1b25nLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0Q29uZ1ZpZWNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0Q29uZ1ZpZWNcX0ZpbHRlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0Q29uZ1ZpZWNcX0Zvcm0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatCongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0Q29uZ1ZpZWNcX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0TmdhblNhY2hcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0TmdhblNhY2hcX0ZpbHRlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0TmdhblNhY2hcX0Zvcm0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DeXuatNganSach/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVYdWF0TmdhblNhY2hcX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/ChiTiet.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/ChiTiet.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHVBblxDaGlUaWV0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHVBblxEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHVBblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHVBblxfRmlsdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHVBblxfRm9ybS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHVBblxfVGFibGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatCongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatCongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHV5ZXREZVh1YXRDb25nVmllY1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatCongViec/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatCongViec/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHV5ZXREZVh1YXRDb25nVmllY1xfRmlsdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatCongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatCongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHV5ZXREZVh1YXRDb25nVmllY1xfVGFibGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatNganSach/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatNganSach/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHV5ZXREZVh1YXROZ2FuU2FjaFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatNganSach/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatNganSach/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHV5ZXREZVh1YXROZ2FuU2FjaFxfRmlsdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatNganSach/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuyetDeXuatNganSach/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHV5ZXREZVh1YXROZ2FuU2FjaFxfVGFibGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Home/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Home/Privacy.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NganSach/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NganSach/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmdhblNhY2hcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NganSach/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NganSach/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmdhblNhY2hcX0ZpbHRlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NganSach/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NganSach/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmdhblNhY2hcX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblN1XEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblN1XF9GaWx0ZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblN1XF9Gb3JtLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanSu/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblN1XF9UYWJsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanVienDuAn/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanVienDuAn/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblZpZW5EdUFuXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanVienDuAn/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanVienDuAn/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblZpZW5EdUFuXF9Gb3JtLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanVienDuAn/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/NhanVienDuAn/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblZpZW5EdUFuXF9UYWJsZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongChiTietCongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongChiTietCongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGhhbkNvbmdDaGlUaWV0Q29uZ1ZpZWNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongChiTietCongViec/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongChiTietCongViec/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGhhbkNvbmdDaGlUaWV0Q29uZ1ZpZWNcX0Zvcm0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongChiTietCongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongChiTietCongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGhhbkNvbmdDaGlUaWV0Q29uZ1ZpZWNcX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongCongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongCongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGhhbkNvbmdDb25nVmllY1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongCongViec/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongCongViec/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGhhbkNvbmdDb25nVmllY1xfRm9ybS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongCongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanCongCongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGhhbkNvbmdDb25nVmllY1xfVGFibGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanQuyen/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/PhanQuyen/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGhhblF1eWVuXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Shared/Error.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Shared/_ValidationScriptsPartial.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbUR1QW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbUR1QW5cX0ZpbHRlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbUR1QW5cX0Zvcm0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TeamDuAn/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbUR1QW5cX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbVxfRmlsdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbVxfRm9ybS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Team/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhbVxfVGFibGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGhhbmhWaWVuVGVhbVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGhhbmhWaWVuVGVhbVxfRmlsdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/_Form.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/_Form.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGhhbmhWaWVuVGVhbVxfRm9ybS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/ThanhVienTeam/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGhhbmhWaWVuVGVhbVxfVGFibGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/_ViewImports.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/_ViewStart.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/DuAn/Details.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRHVBblxEZXRhaWxzLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = b-jtd9j9zdqz
-
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Shared/_Layout.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-9ovp82gysi
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/Index.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbkRvQ29uZ1ZpZWNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-neln28gb9j
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_FileList.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_FileList.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbkRvQ29uZ1ZpZWNcX0ZpbGVMaXN0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = b-ofst5s0f1x
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_Filter.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_Filter.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbkRvQ29uZ1ZpZWNcX0ZpbHRlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = b-2orchkld01
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_History.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_History.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbkRvQ29uZ1ZpZWNcX0hpc3RvcnkuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-oht1iihxji
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_Table.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_Table.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbkRvQ29uZ1ZpZWNcX1RhYmxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = b-95o9wa2mlh
 
-[E:/D/Luan Van/dvl6/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_UpdateForm.cshtml]
+[E:/D/Luan Van/dvl7/QuanLyDuAnAI/QuanLyDuAn/QuanLyDuAn/Views/TienDoCongViec/_UpdateForm.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbkRvQ29uZ1ZpZWNcX1VwZGF0ZUZvcm0uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-52p206r0zl

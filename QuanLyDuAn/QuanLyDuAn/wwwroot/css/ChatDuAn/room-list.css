@@ -1,0 +1,271 @@
+﻿.chat-room-list {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    overflow: hidden;
+}
+
+.chat-room-search {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.6rem;
+    align-items: stretch;
+}
+
+.chat-room-search input {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid rgba(67, 89, 113, 0.18);
+    border-radius: 0.9rem;
+    padding: 0.6rem 0.85rem;
+    background: #fff;
+    color: #2e3a4b;
+    outline: none;
+    box-shadow: 0 0.25rem 0.75rem rgba(67, 89, 113, 0.04);
+}
+
+.chat-room-search input:focus {
+    border-color: rgba(105, 108, 255, 0.55);
+    box-shadow: 0 0 0 0.18rem rgba(105, 108, 255, 0.12);
+}
+
+.chat-room-search .btn {
+    min-height: 44px;
+    border-radius: 0.9rem;
+    padding-inline: 1rem;
+    font-weight: 700;
+}
+
+.chat-room-items {
+    display: grid;
+    gap: 0.95rem;
+    align-content: start;
+    overflow-y: auto;
+    padding: 0.1rem 0.25rem 0.1rem 0.05rem;
+}
+
+.chat-room-items::-webkit-scrollbar {
+    width: 7px;
+}
+
+.chat-room-items::-webkit-scrollbar-track {
+    background: #f2f4f8;
+    border-radius: 999px;
+}
+
+.chat-room-items::-webkit-scrollbar-thumb {
+    background: rgba(105, 108, 255, 0.28);
+    border-radius: 999px;
+}
+
+.chat-room-item,
+.chat-room-item:hover,
+.chat-room-item:focus,
+.chat-room-item:visited {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+.chat-room-item *,
+.chat-room-item:hover *,
+.chat-room-item:focus * {
+    text-decoration: none !important;
+}
+
+.chat-room-item a {
+    color: inherit !important;
+    text-decoration: none !important;
+    pointer-events: none;
+}
+
+.chat-room-item {
+    position: relative;
+    display: block;
+    padding: 1.05rem 1rem;
+    border-radius: 1.1rem;
+    border: 1px solid rgba(67, 89, 113, 0.13);
+    background:
+        linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    box-shadow: 0 0.35rem 1rem rgba(67, 89, 113, 0.07);
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+.chat-room-item::after {
+    content: "";
+    position: absolute;
+    inset: auto 1rem 0 1rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(105, 108, 255, 0.18), transparent);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+.chat-room-item:hover {
+    transform: translateY(-2px);
+    border-color: rgba(105, 108, 255, 0.42);
+    background:
+        radial-gradient(circle at top right, rgba(105, 108, 255, 0.08), transparent 38%),
+        #ffffff;
+    box-shadow: 0 0.75rem 1.5rem rgba(67, 89, 113, 0.13);
+}
+
+.chat-room-item:hover::after {
+    opacity: 1;
+}
+
+.chat-room-item.active {
+    padding-left: 1.35rem;
+    border-color: rgba(105, 108, 255, 0.68);
+    background:
+        radial-gradient(circle at top right, rgba(105, 108, 255, 0.16), transparent 42%),
+        linear-gradient(180deg, #f8f8ff 0%, #ffffff 100%);
+    box-shadow: 0 0.8rem 1.6rem rgba(105, 108, 255, 0.13);
+}
+
+.chat-room-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0.65rem;
+    top: 1rem;
+    bottom: 1rem;
+    width: 4px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #696cff, #03c3ec);
+}
+
+.room-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.45rem;
+}
+
+.room-title {
+    min-width: 0;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #2e3a4b;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-decoration: none !important;
+}
+
+.room-status {
+    flex: 0 0 auto;
+    max-width: 120px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.65rem;
+    border: 1px solid rgba(3, 195, 236, 0.34);
+    background: rgba(3, 195, 236, 0.13);
+    color: #036c82;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.room-subtitle {
+    font-size: 0.82rem;
+    color: #7d8b9a;
+    margin-bottom: 0.48rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.room-latest {
+    font-size: 0.86rem;
+    color: #4d5a6a;
+    line-height: 1.4;
+    margin-bottom: 0.72rem;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4em;
+}
+
+.room-latest:empty::before {
+    content: "Chưa có tin nhắn";
+    color: #8a97a8;
+    font-style: italic;
+}
+
+.room-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 28px;
+    padding: 0.25rem 0.62rem;
+    border-radius: 999px;
+    border: 1px solid rgba(67, 89, 113, 0.13);
+    background: #f8fafc;
+    color: #5b6776;
+    font-size: 0.74rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 0.15rem 0.45rem rgba(67, 89, 113, 0.04);
+}
+
+.meta-pill i {
+    font-size: 0.76rem;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.chat-room-empty {
+    align-self: center;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: #f8fafc;
+    border: 1px dashed rgba(67, 89, 113, 0.25);
+    color: #7d8b9a;
+    text-align: center;
+    line-height: 1.45;
+}
+
+@media (max-width: 768px) {
+    .chat-room-search {
+        grid-template-columns: 1fr;
+    }
+
+    .chat-room-search .btn {
+        width: 100%;
+    }
+
+    .chat-room-item {
+        padding: 0.95rem;
+    }
+
+    .room-card-header {
+        align-items: flex-start;
+    }
+}

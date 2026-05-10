@@ -12,11 +12,16 @@ namespace QuanLyDuAn.Services.Implementations
     {
         private readonly QuanLyDuAnDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IChatDuAnService _chatDuAnService;
 
-        public DuAnService(QuanLyDuAnDbContext context, IHttpContextAccessor httpContextAccessor)
+        public DuAnService(
+            QuanLyDuAnDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            IChatDuAnService chatDuAnService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _chatDuAnService = chatDuAnService;
         }
 
         #region CRUD Operations
@@ -467,138 +472,145 @@ namespace QuanLyDuAn.Services.Implementations
 
         public async Task SaveAsync(DuAnCreateUpdateViewModel model)
         {
-            if (!model.MaLoaiDuAn.HasValue)
-                throw new Exception("Vui lòng chọn loại dự án.");
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            var maLoaiDuAn = model.MaLoaiDuAn.Value;
-            var tenDuAn = (model.TenDuAn ?? string.Empty).Trim();
-            var moTaDuAn = string.IsNullOrWhiteSpace(model.MoTaDuAn)
-                ? null
-                : model.MoTaDuAn.Trim();
-            var trangThai = TrangThai.ToCode((model.TrangThaiDuAn ?? string.Empty).Trim());
-            var maNguoiDung = model.MaNguoiDung ?? 0;
-            var ghiChuDuAn = string.IsNullOrWhiteSpace(model.GhiChuDuAn) ? null : model.GhiChuDuAn.Trim();
-
-            // Create mode
-            if (model.MaDuAn == null)
+            try
             {
-                // Validate start date >= today
-                if (model.NgayBatDauDuAn.HasValue && model.NgayBatDauDuAn.Value.Date < DateTime.Today)
-                    throw new Exception("Ngày bắt đầu không được nhỏ hơn ngày hôm nay.");
+                if (!model.MaLoaiDuAn.HasValue)
+                    throw new Exception("Vui lòng chọn loại dự án.");
 
-                var currentUserId = await GetCurrentUserIdAsync();
-                model.MaNguoiDung = currentUserId;
-                maNguoiDung = currentUserId;
-                trangThai = TrangThai.KhoiTao;
-            }
-            else
-            {
-                // Edit mode - validate manager permission and not completed
-                var existing = await _context.DuAn
-                    .FirstOrDefaultAsync(x => x.MaDuAn == model.MaDuAn && x.IsDeleted != true);
+                var maLoaiDuAn = model.MaLoaiDuAn.Value;
+                var tenDuAn = (model.TenDuAn ?? string.Empty).Trim();
+                var moTaDuAn = string.IsNullOrWhiteSpace(model.MoTaDuAn)
+                    ? null
+                    : model.MoTaDuAn.Trim();
+                var trangThai = TrangThai.ToCode((model.TrangThaiDuAn ?? string.Empty).Trim());
+                var maNguoiDung = model.MaNguoiDung ?? 0;
+                var ghiChuDuAn = string.IsNullOrWhiteSpace(model.GhiChuDuAn) ? null : model.GhiChuDuAn.Trim();
+                DuAn? duAnMoi = null;
 
-                if (existing == null)
-                    throw new Exception("Không tìm thấy dự án.");
-
-                // Check manager permission
-                var currentUserId = await GetCurrentUserIdAsync();
-                await CheckManagerPermissionAsync(model.MaDuAn.Value, currentUserId);
-
-                // Cannot edit if completed
-                if (TrangThai.EqualsValue(existing.TrangThaiDuAn, TrangThai.HoanThanh))
-                    throw new Exception("Dự án đã hoàn thành, không thể chỉnh sửa.");
-
-                maNguoiDung = existing.MaNguoiDung;
-
-                // Preserve status if not being changed
-                if (string.IsNullOrWhiteSpace(trangThai))
-                    trangThai = TrangThai.ToCode(existing.TrangThaiDuAn ?? TrangThai.KhoiTao);
-
-                await ValidateStatusTransitionAsync(existing, trangThai, ghiChuDuAn);
-            }
-
-            // Validate loai exists
-            var loaiExists = await _context.LoaiDuAn
-                .AnyAsync(x => x.MaLoaiDuAn == maLoaiDuAn);
-            if (!loaiExists)
-                throw new Exception("Loại dự án không tồn tại.");
-
-            // Validate GhiChuDuAn required for TamDung
-            if (TrangThai.EqualsValue(trangThai, TrangThai.TamDung))
-            {
-                if (string.IsNullOrWhiteSpace(ghiChuDuAn))
-                    throw new Exception("Ghi chú lý do tạm dừng không được để trống.");
-            }
-
-            // Create or update entity
-            if (model.MaDuAn == null)
-            {
-                var entity = new DuAn
+                // Create mode
+                if (model.MaDuAn == null)
                 {
-                    MaNguoiDung = maNguoiDung,
-                    MaLoaiDuAn = maLoaiDuAn,
-                    TenDuAn = tenDuAn,
-                    MoTaDuAn = moTaDuAn,
-                    NgayTaoDuAn = DateTime.Now,
-                    NgayBatDauDuAn = model.NgayBatDauDuAn,
-                    NgayKetThucDuAn = model.NgayKetThucDuAn,
-                    PhanTramHoanThanh = 0,
-                    TrangThaiDuAn = trangThai,
-                    GhiChuDuAn = ghiChuDuAn,
-                    IsDeleted = false
-                };
+                    // Validate start date >= today
+                    if (model.NgayBatDauDuAn.HasValue && model.NgayBatDauDuAn.Value.Date < DateTime.Today)
+                        throw new Exception("Ngày bắt đầu không được nhỏ hơn ngày hôm nay.");
 
-                _context.DuAn.Add(entity);
-            }
-            else
-            {
-                var entity = await _context.DuAn
-                    .FirstOrDefaultAsync(x => x.MaDuAn == model.MaDuAn && x.IsDeleted != true);
-
-                if (entity == null)
-                    throw new Exception("Không tìm thấy dự án.");
-
-                entity.MaLoaiDuAn = maLoaiDuAn;
-                entity.TenDuAn = tenDuAn;
-                entity.MoTaDuAn = moTaDuAn;
-                entity.NgayBatDauDuAn = model.NgayBatDauDuAn;
-                entity.NgayKetThucDuAn = model.NgayKetThucDuAn;
-                entity.TrangThaiDuAn = trangThai;
-                entity.GhiChuDuAn = ghiChuDuAn;
-
-                if (TrangThai.EqualsValue(trangThai, TrangThai.HoanThanh))
-                {
-                    entity.PhanTramHoanThanh = 100;
+                    var currentUserId = await GetCurrentUserIdAsync();
+                    model.MaNguoiDung = currentUserId;
+                    maNguoiDung = currentUserId;
+                    trangThai = TrangThai.KhoiTao;
                 }
-            }
-
-            await _context.SaveChangesAsync();
-
-            // Auto-check and transition if conditions met
-            if (model.MaDuAn == null)
-            {
-                var newProject = await _context.DuAn
-                    .Where(x => x.MaNguoiDung == maNguoiDung && x.TenDuAn == tenDuAn && x.IsDeleted != true)
-                    .OrderByDescending(x => x.MaDuAn)
-                    .FirstOrDefaultAsync();
-
-                if (newProject != null)
+                else
                 {
+                    // Edit mode - validate manager permission and not completed
+                    var existing = await _context.DuAn
+                        .FirstOrDefaultAsync(x => x.MaDuAn == model.MaDuAn && x.IsDeleted != true);
+
+                    if (existing == null)
+                        throw new Exception("Không tìm thấy dự án.");
+
+                    // Check manager permission
+                    var currentUserId = await GetCurrentUserIdAsync();
+                    await CheckManagerPermissionAsync(model.MaDuAn.Value, currentUserId);
+
+                    // Cannot edit if completed
+                    if (TrangThai.EqualsValue(existing.TrangThaiDuAn, TrangThai.HoanThanh))
+                        throw new Exception("Dự án đã hoàn thành, không thể chỉnh sửa.");
+
+                    maNguoiDung = existing.MaNguoiDung;
+
+                    // Preserve status if not being changed
+                    if (string.IsNullOrWhiteSpace(trangThai))
+                        trangThai = TrangThai.ToCode(existing.TrangThaiDuAn ?? TrangThai.KhoiTao);
+
+                    await ValidateStatusTransitionAsync(existing, trangThai, ghiChuDuAn);
+                }
+
+                // Validate loai exists
+                var loaiExists = await _context.LoaiDuAn
+                    .AnyAsync(x => x.MaLoaiDuAn == maLoaiDuAn);
+                if (!loaiExists)
+                    throw new Exception("Loại dự án không tồn tại.");
+
+                // Validate GhiChuDuAn required for TamDung
+                if (TrangThai.EqualsValue(trangThai, TrangThai.TamDung))
+                {
+                    if (string.IsNullOrWhiteSpace(ghiChuDuAn))
+                        throw new Exception("Ghi chú lý do tạm dừng không được để trống.");
+                }
+
+                // Create or update entity
+                if (model.MaDuAn == null)
+                {
+                    duAnMoi = new DuAn
+                    {
+                        MaNguoiDung = maNguoiDung,
+                        MaLoaiDuAn = maLoaiDuAn,
+                        TenDuAn = tenDuAn,
+                        MoTaDuAn = moTaDuAn,
+                        NgayTaoDuAn = DateTime.Now,
+                        NgayBatDauDuAn = model.NgayBatDauDuAn,
+                        NgayKetThucDuAn = model.NgayKetThucDuAn,
+                        PhanTramHoanThanh = 0,
+                        TrangThaiDuAn = trangThai,
+                        GhiChuDuAn = ghiChuDuAn,
+                        IsDeleted = false
+                    };
+
+                    _context.DuAn.Add(duAnMoi);
+                }
+                else
+                {
+                    var entity = await _context.DuAn
+                        .FirstOrDefaultAsync(x => x.MaDuAn == model.MaDuAn && x.IsDeleted != true);
+
+                    if (entity == null)
+                        throw new Exception("Không tìm thấy dự án.");
+
+                    entity.MaLoaiDuAn = maLoaiDuAn;
+                    entity.TenDuAn = tenDuAn;
+                    entity.MoTaDuAn = moTaDuAn;
+                    entity.NgayBatDauDuAn = model.NgayBatDauDuAn;
+                    entity.NgayKetThucDuAn = model.NgayKetThucDuAn;
+                    entity.TrangThaiDuAn = trangThai;
+                    entity.GhiChuDuAn = ghiChuDuAn;
+
+                    if (TrangThai.EqualsValue(trangThai, TrangThai.HoanThanh))
+                    {
+                        entity.PhanTramHoanThanh = 100;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Auto-check and transition if conditions met
+                if (model.MaDuAn == null && duAnMoi != null)
+                {
+                    await _chatDuAnService.DamBaoPhongChatDuAnAsync(duAnMoi.MaDuAn);
+
                     _context.NhatKyQuanLyDuAn.Add(new NhatKyQuanLyDuAn
                     {
-                        MaDuAn = newProject.MaDuAn,
+                        MaDuAn = duAnMoi.MaDuAn,
                         MaNguoiDung = maNguoiDung,
-                        NkHanhDongQLDA = $"Tạo dự án: {newProject.TenDuAn}",
+                        NkHanhDongQLDA = $"Tạo dự án: {duAnMoi.TenDuAn}",
                         NkThoiGianQLDA = DateTime.Now
                     });
 
                     await _context.SaveChangesAsync();
-                    await CheckAutoTransitionAsync(newProject.MaDuAn);
+                    await CheckAutoTransitionAsync(duAnMoi.MaDuAn);
                 }
+                else if (model.MaDuAn.HasValue)
+                {
+                    await CheckAutoTransitionAsync(model.MaDuAn.Value);
+                }
+
+                await transaction.CommitAsync();
             }
-            else
+            catch
             {
-                await CheckAutoTransitionAsync(model.MaDuAn.Value);
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 

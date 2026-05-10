@@ -17,6 +17,8 @@
     var canSeeDeXuatCongViec = permissions.Contains(Permissions.DeXuatCongViec.Xem);
     var canSeeDeXuatNganSach = permissions.Contains(Permissions.DeXuatNganSach.Xem);
     var canSeeNganSach = permissions.Contains(Permissions.NganSach.Xem);
+    var canSeeChatDuAn = permissions.Contains(Permissions.Chat.Xem)
+                         && !(User?.IsInRole("Admin") == true || User?.IsInRole("ADMIN") == true);
     var canSeeActivity = permissions.Contains(Permissions.NhatKy.Xem);
     var canProposeBudget = permissions.Contains(Permissions.DeXuatNganSach.Them);
     var budgetSummary = Model.NganSachTongHop;
@@ -27,6 +29,11 @@
                         || Model.IsSapDenHan
                         || Model.IsQuaHan
                         || (canSeeBudget && !Model.HasApprovedBudget);
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/DuAn/details.css" asp-append-version="true" />
 }
 
 <div class="project-details">
@@ -685,6 +692,17 @@
                                 <span class="quick-icon"><i class="bi bi-wallet2"></i></span>
                                 <span class="quick-title">Ngân sách</span>
                                 <span class="quick-desc">Theo dõi cấp phát</span>
+                            </a>
+                        }
+                        @if (canSeeChatDuAn)
+                        {
+                            <a asp-controller="ChatDuAn"
+                               asp-action="Index"
+                               asp-route-maDuAn="@Model.MaDuAn"
+                               class="quick-action-card">
+                                <span class="quick-icon"><i class="bi bi-chat-dots"></i></span>
+                                <span class="quick-title">Chat dự án</span>
+                                <span class="quick-desc">Trao đổi nội bộ</span>
                             </a>
                         }
                     </div>

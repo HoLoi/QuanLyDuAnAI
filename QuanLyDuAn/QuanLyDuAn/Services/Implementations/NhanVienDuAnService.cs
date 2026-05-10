@@ -12,11 +12,16 @@ namespace QuanLyDuAn.Services.Implementations
     {
         private readonly QuanLyDuAnDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IChatDuAnService _chatDuAnService;
 
-        public NhanVienDuAnService(QuanLyDuAnDbContext context, IHttpContextAccessor httpContextAccessor)
+        public NhanVienDuAnService(
+            QuanLyDuAnDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            IChatDuAnService chatDuAnService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _chatDuAnService = chatDuAnService;
         }
 
         public async Task<NhanVienDuAnPageViewModel> GetPageAsync(
@@ -181,6 +186,7 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             await _context.SaveChangesAsync();
+            await _chatDuAnService.DongBoThanhVienPhongChatAsync(maDuAn);
         }
 
         public async Task UpdateRoleAsync(int maDuAn, int maNguoiDung, string vaiTroTrongDuAn)
@@ -219,6 +225,7 @@ namespace QuanLyDuAn.Services.Implementations
             });
 
             await _context.SaveChangesAsync();
+            await _chatDuAnService.DongBoThanhVienPhongChatAsync(maDuAn);
         }
 
         public async Task RemoveAsync(int maDuAn, int maNguoiDung)
@@ -267,6 +274,7 @@ namespace QuanLyDuAn.Services.Implementations
             });
 
             await _context.SaveChangesAsync();
+            await _chatDuAnService.DongBoThanhVienPhongChatAsync(maDuAn);
         }
 
         private async Task<DuAn> GetProjectAsync(int maDuAn)

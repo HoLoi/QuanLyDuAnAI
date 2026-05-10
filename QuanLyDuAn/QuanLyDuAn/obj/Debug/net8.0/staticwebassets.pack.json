@@ -1,291 +1,323 @@
 {
   "Files": [
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\QuanLyDuAn.bundle.scp.css",
-      "PackagePath": "staticwebassets\\QuanLyDuAn.n9pkrh7h59.bundle.scp.css"
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\QuanLyDuAn.bundle.scp.css",
+      "PackagePath": "staticwebassets\\QuanLyDuAn.864pjry8y6.bundle.scp.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\site.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\ChatDuAn\\chat-header.css",
+      "PackagePath": "staticwebassets\\css\\ChatDuAn\\chat-header.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\ChatDuAn\\empty-state.css",
+      "PackagePath": "staticwebassets\\css\\ChatDuAn\\empty-state.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\ChatDuAn\\index.css",
+      "PackagePath": "staticwebassets\\css\\ChatDuAn\\index.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\ChatDuAn\\message-form.css",
+      "PackagePath": "staticwebassets\\css\\ChatDuAn\\message-form.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\ChatDuAn\\message-item.css",
+      "PackagePath": "staticwebassets\\css\\ChatDuAn\\message-item.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\ChatDuAn\\message-list.css",
+      "PackagePath": "staticwebassets\\css\\ChatDuAn\\message-list.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\ChatDuAn\\room-list.css",
+      "PackagePath": "staticwebassets\\css\\ChatDuAn\\room-list.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\DuAn\\details.css",
+      "PackagePath": "staticwebassets\\css\\DuAn\\details.css"
+    },
+    {
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\favicon.ico",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\js\\site.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\LICENSE",
       "PackagePath": "staticwebassets\\lib\\bootstrap"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\LICENSE.md"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.min.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\LICENSE.txt",
       "PackagePath": "staticwebassets\\lib\\jquery\\LICENSE.txt"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\dist\\jquery.js",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.js"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\2f7f4153823742128c08326eef7055ba.pdf",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\2f7f4153823742128c08326eef7055ba.pdf",
       "PackagePath": "staticwebassets\\uploads\\duan\\2\\2f7f4153823742128c08326eef7055ba.pdf"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\9cf1116bc5c2466299787cf51d7cde2f.pdf",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\9cf1116bc5c2466299787cf51d7cde2f.pdf",
       "PackagePath": "staticwebassets\\uploads\\duan\\2\\9cf1116bc5c2466299787cf51d7cde2f.pdf"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\b058cd1763c64c9294a047989b82a9a2.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\b058cd1763c64c9294a047989b82a9a2.docx",
       "PackagePath": "staticwebassets\\uploads\\duan\\2\\b058cd1763c64c9294a047989b82a9a2.docx"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\b2d2139b66f44a1a8a4ca172ff557638.pdf",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\duan\\2\\b2d2139b66f44a1a8a4ca172ff557638.pdf",
       "PackagePath": "staticwebassets\\uploads\\duan\\2\\b2d2139b66f44a1a8a4ca172ff557638.pdf"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\15817701fcb244eab608696c9c84f572.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\15817701fcb244eab608696c9c84f572.docx",
       "PackagePath": "staticwebassets\\uploads\\tiendocongviec\\3\\15817701fcb244eab608696c9c84f572.docx"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\35b9f2c2469e43a68b240862a92305fb.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\35b9f2c2469e43a68b240862a92305fb.docx",
       "PackagePath": "staticwebassets\\uploads\\tiendocongviec\\3\\35b9f2c2469e43a68b240862a92305fb.docx"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\545aed0c9b3f4007b4eefbb22ba9d4f0.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\545aed0c9b3f4007b4eefbb22ba9d4f0.docx",
       "PackagePath": "staticwebassets\\uploads\\tiendocongviec\\3\\545aed0c9b3f4007b4eefbb22ba9d4f0.docx"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\91bdbb3c5d5b4077b6139dd9c01aabe5.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\91bdbb3c5d5b4077b6139dd9c01aabe5.docx",
       "PackagePath": "staticwebassets\\uploads\\tiendocongviec\\3\\91bdbb3c5d5b4077b6139dd9c01aabe5.docx"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\a62a38b4b9c6423e8ebc6961fc02b589.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\a62a38b4b9c6423e8ebc6961fc02b589.docx",
       "PackagePath": "staticwebassets\\uploads\\tiendocongviec\\3\\a62a38b4b9c6423e8ebc6961fc02b589.docx"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\c1fa9545dd004ac485b0c2e349ca46b0.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\c1fa9545dd004ac485b0c2e349ca46b0.docx",
       "PackagePath": "staticwebassets\\uploads\\tiendocongviec\\3\\c1fa9545dd004ac485b0c2e349ca46b0.docx"
     },
     {
-      "Id": "E:\\D\\Luan Van\\dvl6\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\cb42f09dc5d748d48179fe9d800fb95c.docx",
+      "Id": "E:\\D\\Luan Van\\dvl7\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\uploads\\tiendocongviec\\3\\cb42f09dc5d748d48179fe9d800fb95c.docx",
       "PackagePath": "staticwebassets\\uploads\\tiendocongviec\\3\\cb42f09dc5d748d48179fe9d800fb95c.docx"
     },
     {

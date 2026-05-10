@@ -1,0 +1,57 @@
+﻿@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
+
+@{
+    ViewData["Title"] = "Chat dá»± Ă¡n";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/ChatDuAn/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ChatDuAn/room-list.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ChatDuAn/chat-header.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ChatDuAn/message-list.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ChatDuAn/message-item.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ChatDuAn/message-form.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/ChatDuAn/empty-state.css" asp-append-version="true" />
+}
+
+<div class="chat-du-an-page">
+    @if (!string.IsNullOrWhiteSpace(Model.ThongBaoTrangThai) && !Model.DanhSachPhong.Any())
+    {
+        @await Html.PartialAsync("_EmptyState", Model)
+    }
+    else
+    {
+        <div class="chat-layout">
+            <aside class="chat-sidebar">
+                @await Html.PartialAsync("_RoomList", Model)
+            </aside>
+
+            <section class="chat-main">
+                @if (Model.PhongDangChon == null)
+                {
+                    @await Html.PartialAsync("_EmptyState", Model)
+                }
+                else
+                {
+                    @await Html.PartialAsync("_ChatHeader", Model)
+                    @await Html.PartialAsync("_MessageList", Model)
+                    @await Html.PartialAsync("_MessageForm", Model)
+                }
+            </section>
+        </div>
+    }
+</div>
+
+@section Scripts
+{
+    <script>
+        (function () {
+            var messageList = document.getElementById('chat-message-list');
+            if (messageList) {
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+        })();
+    </script>
+}
+

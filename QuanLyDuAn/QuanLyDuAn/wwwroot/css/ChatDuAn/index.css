@@ -1,0 +1,41 @@
+.chat-du-an-page {
+    padding: 0.25rem 0;
+    overflow-x: hidden;
+}
+
+.chat-layout {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 1rem;
+    min-height: calc(100vh - 150px);
+}
+
+.chat-sidebar,
+.chat-main {
+    min-width: 0;
+    border-radius: 1rem;
+    border: 1px solid rgba(67, 89, 113, 0.14);
+    background: #fff;
+    box-shadow: 0 0.5rem 1.3rem rgba(67, 89, 113, 0.08);
+}
+
+.chat-sidebar {
+    overflow: hidden;
+}
+
+.chat-main {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
+}
+
+@media (max-width: 992px) {
+    .chat-layout {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+
+    .chat-main {
+        min-height: 70vh;
+    }
+}

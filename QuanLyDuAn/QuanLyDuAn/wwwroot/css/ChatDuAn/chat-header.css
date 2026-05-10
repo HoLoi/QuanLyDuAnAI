@@ -1,0 +1,68 @@
+.chat-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(67, 89, 113, 0.16);
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.chat-title-wrap {
+    min-width: 0;
+}
+
+.chat-title {
+    margin: 0;
+    font-weight: 700;
+    color: #2e3a4b;
+}
+
+.chat-subtitle {
+    margin-top: 0.55rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.chat-subtitle-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.58rem;
+    border-radius: 999px;
+    border: 1px solid rgba(67, 89, 113, 0.2);
+    background: #f8fafc;
+    color: #5b6776;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+
+.chat-subtitle-pill.status {
+    border-color: rgba(3, 195, 236, 0.34);
+    background: rgba(3, 195, 236, 0.12);
+    color: #036c82;
+}
+
+.chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.chat-header-actions .btn {
+    min-height: 38px;
+    border-radius: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .chat-header {
+        align-items: flex-start;
+    }
+
+    .chat-header-actions {
+        width: 100%;
+    }
+}

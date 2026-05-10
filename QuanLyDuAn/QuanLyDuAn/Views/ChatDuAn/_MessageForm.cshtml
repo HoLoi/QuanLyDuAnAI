@@ -1,0 +1,35 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var canShowForm = Model.CoTheGuiTinNhan
+                      && Model.PhongDangChon != null
+                      && Model.Permissions.Contains(Permissions.Chat.Gui);
+}
+
+<div class="chat-message-form">
+    @if (canShowForm)
+    {
+        <form asp-action="GuiTinNhan" method="post" class="chat-message-form-inner">
+            <input type="hidden" name="MaPhongChat" value="@Model.PhongDangChon!.MaPhongChat" />
+            <input type="hidden" name="MaDuAn" value="@Model.PhongDangChon!.MaDuAn" />
+            <input type="hidden" name="maDuAn" value="@Model.PhongDangChon!.MaDuAn" />
+            <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+
+            <div class="message-form-row">
+                <textarea name="NoiDungTinNhan"
+                          rows="2"
+                          maxlength="2000"
+                          placeholder="Nhập nội dung trao đổi..."
+                          class="message-input"></textarea>
+                <button type="submit" class="btn btn-primary message-submit">Gửi</button>
+            </div>
+        </form>
+    }
+    else
+    {
+        <div class="chat-send-disabled">
+            Bạn không có quyền gửi tin nhắn trong phòng chat này.
+        </div>
+    }
+</div>

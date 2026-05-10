@@ -1,0 +1,27 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnTinNhanItemViewModel
+
+@{
+    var rowClass = Model.LaTinNhanCuaToi ? "message-row mine" : "message-row";
+    var avatarText = string.IsNullOrWhiteSpace(Model.HoTenNguoiDung)
+        ? "U"
+        : Model.HoTenNguoiDung.Trim().Substring(0, 1).ToUpperInvariant();
+}
+
+<div class="@rowClass">
+    <div class="message-avatar">
+        @if (!string.IsNullOrWhiteSpace(Model.AnhDaiDien))
+        {
+            <img src="@Model.AnhDaiDien" alt="Avatar @Model.HoTenNguoiDung" />
+        }
+        else
+        {
+            <span>@avatarText</span>
+        }
+    </div>
+
+    <div class="message-bubble">
+        <div class="message-author">@Model.HoTenNguoiDung</div>
+        <div class="message-content">@Model.NoiDungTinNhan</div>
+        <div class="message-meta">@Model.ThoiGianGui?.ToString("dd/MM/yyyy HH:mm")</div>
+    </div>
+</div>

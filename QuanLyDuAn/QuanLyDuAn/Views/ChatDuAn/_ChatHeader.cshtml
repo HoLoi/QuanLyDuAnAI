@@ -1,0 +1,33 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+@if (Model.PhongDangChon != null)
+{
+    var canXemChiTietDuAn = Model.Permissions.Contains(Permissions.DuAn.Xem);
+
+    <div class="chat-header">
+        <div class="chat-title-wrap">
+            <h5 class="chat-title">@Model.PhongDangChon.TenPhong</h5>
+            <div class="chat-subtitle">
+                <span class="chat-subtitle-pill">Dự án: @Model.PhongDangChon.TenDuAn</span>
+                <span class="chat-subtitle-pill">@Model.PhongDangChon.SoThanhVien thành viên</span>
+                @if (!string.IsNullOrWhiteSpace(Model.PhongDangChon.TrangThaiDuAn))
+                {
+                    <span class="chat-subtitle-pill status">@Model.PhongDangChon.TrangThaiDuAn</span>
+                }
+            </div>
+        </div>
+
+        <div class="chat-header-actions">
+            @if (canXemChiTietDuAn)
+            {
+                <a asp-controller="DuAn"
+                   asp-action="Details"
+                   asp-route-id="@Model.PhongDangChon.MaDuAn"
+                   class="btn btn-sm btn-outline-primary">
+                    Chi tiết dự án
+                </a>
+            }
+        </div>
+    </div>
+}

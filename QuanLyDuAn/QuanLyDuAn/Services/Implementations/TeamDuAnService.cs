@@ -12,11 +12,16 @@ namespace QuanLyDuAn.Services.Implementations
     {
         private readonly QuanLyDuAnDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IChatDuAnService _chatDuAnService;
 
-        public TeamDuAnService(QuanLyDuAnDbContext context, IHttpContextAccessor httpContextAccessor)
+        public TeamDuAnService(
+            QuanLyDuAnDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            IChatDuAnService chatDuAnService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _chatDuAnService = chatDuAnService;
         }
 
         public async Task<TeamDuAnPageViewModel> GetPageAsync(
@@ -273,6 +278,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+            await _chatDuAnService.DongBoThanhVienPhongChatAsync(maDuAn);
         }
 
         public async Task DeleteAsync(int maDuAn, int maTeam, bool xoaNhanVienThuocTeam)
@@ -385,6 +391,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+            await _chatDuAnService.DongBoThanhVienPhongChatAsync(maDuAn);
         }
 
         private async Task<DuAn> GetProjectAsync(int maDuAn)

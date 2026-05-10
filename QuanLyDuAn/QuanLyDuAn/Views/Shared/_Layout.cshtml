@@ -5,6 +5,7 @@
     var currentPath = Context.Request.Path.Value ?? string.Empty;
     var pageTitle = ViewData["Title"]?.ToString() ?? "Dashboard";
     var userName = User?.Identity?.Name ?? "Người dùng";
+    var isAdmin = User?.IsInRole("Admin") == true || User?.IsInRole("ADMIN") == true;
     var grantedPermissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
     if (isAuthenticated)
@@ -48,6 +49,7 @@
     var canDanhGiaDuAn = grantedPermissions.Contains(Permissions.DanhGiaDuAn.Xem);
     var canDanhGiaNhanVien = grantedPermissions.Contains(Permissions.DanhGiaNhanVien.Xem);
     var canChat = grantedPermissions.Contains(Permissions.Chat.Xem);
+    var canChatDuAn = canChat && !isAdmin;
     var canNhatKy = grantedPermissions.Contains(Permissions.NhatKy.Xem);
 }
 
@@ -64,6 +66,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuanLyDuAn.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="@(isAuthenticated ? "layout-authenticated" : "layout-guest")">
     <div class="app-shell">
@@ -176,6 +179,14 @@
                                 <i class="bi bi-cash-stack"></i> Chi phí
                             </a>
                         }
+                    }
+
+                    @if (canChatDuAn)
+                    {
+                        <div class="text-uppercase text-muted small fw-bold mt-3 mb-1">Trao đổi</div>
+                        <a asp-controller="ChatDuAn" asp-action="Index" class="side-link">
+                            <i class="bi bi-chat-dots"></i> Chat dự án
+                        </a>
                     }
 
                     @if (canAiDataset || canAiTrain || canAiPredict || canAiDashboard)
