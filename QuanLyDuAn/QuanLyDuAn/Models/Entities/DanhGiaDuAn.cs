@@ -8,6 +8,10 @@ public partial class DanhGiaDuAn
     public int? DiemTongDanhGiaDA { get; set; }
     public string? NhanXetTongDuAn { get; set; }
     public DateTime? NgayDanhGiaDA { get; set; }
+    public string? TrangThaiDanhGiaDA { get; set; }
+    public int? MaNguoiDungDuyet { get; set; }
+    public DateTime? NgayDuyetDanhGiaDA { get; set; }
+    public string? LyDoTuChoiDanhGiaDA { get; set; }
     public bool? IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
     public int? DeletedBy { get; set; }

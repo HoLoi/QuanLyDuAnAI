@@ -746,6 +746,10 @@ namespace QuanLyDuAn.Services.Implementations
                       (cv, dmcv) => new { cv, dmcv })
                 .AnyAsync(x => x.dmcv.MaDuAn == maDuAn && x.cv.IsDeleted != true);
 
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var trangThaiDangThucHien = TrangThai.GetCommonStatusVariants(TrangThai.DangThucHien);
+            var trangThaiBiCanCan = TrangThai.GetCommonStatusVariants(TrangThai.BiCanCan);
+
             // Check all tasks done
             var totalTasks = await _context.CongViec
                 .Join(_context.DanhMucCongViec, cv => cv.MaDanhMucCV, dmcv => dmcv.MaDanhMucCV, 
@@ -758,7 +762,7 @@ namespace QuanLyDuAn.Services.Implementations
                       (cv, dmcv) => new { cv, dmcv })
                 .Where(x => x.dmcv.MaDuAn == maDuAn && 
                             x.cv.IsDeleted != true &&
-                            (x.cv.TrangThaiCongViec == TrangThai.HoanThanh || x.cv.TrangThaiCongViec == TrangThai.HoanThanhHienThi))
+                            trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty))
                 .CountAsync();
 
             //result.AllTasksDone = totalTasks > 0 && completedTasks == totalTasks && project.PhanTramHoanThanh == 100;
@@ -770,7 +774,7 @@ namespace QuanLyDuAn.Services.Implementations
                       (cv, dmcv) => new { cv, dmcv })
                 .AnyAsync(x => x.dmcv.MaDuAn == maDuAn && 
                                x.cv.IsDeleted != true &&
-                               (x.cv.TrangThaiCongViec == TrangThai.DangThucHien || x.cv.TrangThaiCongViec == TrangThai.DangThucHienHienThi));
+                               trangThaiDangThucHien.Contains(x.cv.TrangThaiCongViec ?? string.Empty));
 
             // Check blocked tasks
             result.HasBlockedTasks = await _context.CongViec
@@ -778,7 +782,7 @@ namespace QuanLyDuAn.Services.Implementations
                       (cv, dmcv) => new { cv, dmcv })
                 .AnyAsync(x => x.dmcv.MaDuAn == maDuAn && 
                                x.cv.IsDeleted != true &&
-                               (x.cv.TrangThaiCongViec == TrangThai.BiCanCan || x.cv.TrangThaiCongViec == TrangThai.BiCanCanHienThi));
+                               trangThaiBiCanCan.Contains(x.cv.TrangThaiCongViec ?? string.Empty));
 
             // Determine allowed transitions based on current status
             var currentStatus = project.TrangThaiDuAn ?? TrangThai.KhoiTao;
@@ -807,6 +811,7 @@ namespace QuanLyDuAn.Services.Implementations
             else if (TrangThai.EqualsValue(currentStatus, TrangThai.HoanThanh))
             {
                 result.IsCompleted = true;
+                result.CanReopen = true;
                 result.CanDelete = false;
                 result.CanPause = false;
                 result.CanRequestCompletion = false;
@@ -888,6 +893,10 @@ namespace QuanLyDuAn.Services.Implementations
             if (project == null)
                 throw new Exception("Không tìm thấy dự án.");
 
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var trangThaiDangThucHien = TrangThai.GetCommonStatusVariants(TrangThai.DangThucHien);
+            var trangThaiBiCanCan = TrangThai.GetCommonStatusVariants(TrangThai.BiCanCan);
+
             // Check all tasks done
             var totalTasks = await _context.CongViec
                 .Join(_context.DanhMucCongViec, cv => cv.MaDanhMucCV, dmcv => dmcv.MaDanhMucCV, 
@@ -900,7 +909,7 @@ namespace QuanLyDuAn.Services.Implementations
                       (cv, dmcv) => new { cv, dmcv })
                 .Where(x => x.dmcv.MaDuAn == maDuAn && 
                             x.cv.IsDeleted != true &&
-                            (x.cv.TrangThaiCongViec == TrangThai.HoanThanh || x.cv.TrangThaiCongViec == TrangThai.HoanThanhHienThi))
+                            trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty))
                 .CountAsync();
 
             if (!(totalTasks > 0 && completedTasks == totalTasks))
@@ -912,7 +921,7 @@ namespace QuanLyDuAn.Services.Implementations
                       (cv, dmcv) => new { cv, dmcv })
                 .AnyAsync(x => x.dmcv.MaDuAn == maDuAn && 
                                x.cv.IsDeleted != true &&
-                               (x.cv.TrangThaiCongViec == TrangThai.DangThucHien || x.cv.TrangThaiCongViec == TrangThai.DangThucHienHienThi));
+                               trangThaiDangThucHien.Contains(x.cv.TrangThaiCongViec ?? string.Empty));
 
             if (hasOngoing)
                 throw new Exception("Còn công việc đang thực hiện.");
@@ -923,14 +932,10 @@ namespace QuanLyDuAn.Services.Implementations
                       (cv, dmcv) => new { cv, dmcv })
                 .AnyAsync(x => x.dmcv.MaDuAn == maDuAn && 
                                x.cv.IsDeleted != true &&
-                               (x.cv.TrangThaiCongViec == TrangThai.BiCanCan || x.cv.TrangThaiCongViec == TrangThai.BiCanCanHienThi));
+                               trangThaiBiCanCan.Contains(x.cv.TrangThaiCongViec ?? string.Empty));
 
             if (hasBlocked)
                 throw new Exception("Có công việc bị cản cản.");
-
-            // Check 100% completion
-            if (project.PhanTramHoanThanh != 100)
-                throw new Exception("Tiến độ dự án chưa đạt 100%.");
 
             var hasBudget = await _context.NganSach
                 .AnyAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true);
@@ -992,6 +997,9 @@ namespace QuanLyDuAn.Services.Implementations
             var currentUserId = await GetCurrentUserIdAsync();
             await CheckManagerPermissionAsync(maDuAn, currentUserId);
 
+            if (!TrangThai.EqualsValue(project.TrangThaiDuAn, TrangThai.DangThucHien))
+                throw new Exception("Chỉ có thể yêu cầu hoàn thành khi dự án đang ở trạng thái đang thực hiện.");
+
             // Validate completion conditions
             await ValidateCompletionAsync(maDuAn);
 
@@ -1021,6 +1029,37 @@ namespace QuanLyDuAn.Services.Implementations
 
             // Transition to completed
             project.TrangThaiDuAn = TrangThai.HoanThanh;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task MoLaiDuAnAsync(int maDuAn, string lyDo)
+        {
+            if (string.IsNullOrWhiteSpace(lyDo))
+                throw new Exception("Vui lòng nhập lý do mở lại dự án.");
+
+            var project = await _context.DuAn
+                .FirstOrDefaultAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true);
+
+            if (project == null)
+                throw new Exception("Không tìm thấy dự án.");
+
+            var currentUserId = await GetCurrentUserIdAsync();
+            await CheckManagerPermissionAsync(maDuAn, currentUserId);
+
+            if (!TrangThai.LaHoanThanhCongViec(project.TrangThaiDuAn))
+                throw new Exception("Chỉ có thể mở lại dự án khi dự án đang ở trạng thái hoàn thành.");
+
+            project.TrangThaiDuAn = TrangThai.DangThucHien;
+            project.GhiChuDuAn = lyDo.Trim();
+
+            _context.NhatKyQuanLyDuAn.Add(new NhatKyQuanLyDuAn
+            {
+                MaDuAn = maDuAn,
+                MaNguoiDung = currentUserId,
+                NkHanhDongQLDA = $"Mở lại dự án từ trạng thái hoàn thành. Lý do: {lyDo.Trim()}",
+                NkThoiGianQLDA = DateTime.Now
+            });
+
             await _context.SaveChangesAsync();
         }
 

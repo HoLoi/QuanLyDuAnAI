@@ -1,0 +1,63 @@
+﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienFormViewModel
+
+<div class="dgnv-form card mb-3">
+    <div class="card-body">
+        <h6 class="mb-3">Form đánh giá nhân viên: @Model.TenNhanVien</h6>
+
+        @await Html.PartialAsync("_EmployeeStats", Model.ThongKe)
+
+        <form asp-action="Luu" method="post" class="vstack gap-2 mt-3">
+            <input type="hidden" asp-for="MaDanhGiaNhanVien" />
+            <input type="hidden" asp-for="MaDuAn" />
+            <input type="hidden" asp-for="MaNhanVien" />
+
+            @for (var i = 0; i < Model.TieuChi.Count; i++)
+            {
+                <div class="criteria-row">
+                    <input type="hidden" asp-for="TieuChi[i].MaChiTietDGNV" />
+                    <input type="hidden" asp-for="TieuChi[i].MaTieuChi" />
+                    <input type="hidden" asp-for="TieuChi[i].TenTieuChi" />
+
+                    <div class="criteria-title">@Model.TieuChi[i].TenTieuChi</div>
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <label class="form-label">Điểm (1-10)</label>
+                            <input asp-for="TieuChi[i].DiemDanhGiaNV" class="form-control" min="1" max="10" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Công việc liên quan (tùy chọn)</label>
+                            <input asp-for="TieuChi[i].MaCongViec" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nhận xét</label>
+                            <input asp-for="TieuChi[i].NoiDungDanhGiaNhanVien" class="form-control" maxlength="500" />
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div>
+                <label class="form-label">Nhận xét tổng quan</label>
+                <textarea asp-for="NhanXetTongQuan" class="form-control" rows="3" maxlength="500"></textarea>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                @if (Model.CoTheLuu)
+                {
+                    <button type="submit" class="btn btn-primary">Lưu đánh giá</button>
+                }
+                @if (Model.CoTheGuiDuyet && Model.MaDanhGiaNhanVien.HasValue)
+                {
+                    <button type="submit"
+                            class="btn btn-outline-primary"
+                            formaction="@Url.Action("GuiDuyet", "DanhGiaNhanVien")"
+                            formmethod="post"
+                            name="maDanhGiaNhanVien"
+                            value="@Model.MaDanhGiaNhanVien">
+                        Gửi duyệt
+                    </button>
+                }
+            </div>
+        </form>
+    </div>
+</div>

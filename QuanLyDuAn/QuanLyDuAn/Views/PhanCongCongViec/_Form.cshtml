@@ -3,33 +3,54 @@
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    bool canShowForm = permissions.Contains(Permissions.PhanCongCongViec.ThucHien)
-                       && Model.CoTheQuanLyCongViec
-                       && Model.ThanhVienCoThePhanCong.Any();
+    bool coQuyenThucHien = permissions.Contains(Permissions.PhanCongCongViec.ThucHien);
+    bool coTheQuanLy = Model.CoTheQuanLyCongViec;
+    bool coNhanSuHopLe = Model.ThanhVienCoThePhanCong.Any();
+    bool canShowForm = coQuyenThucHien && coTheQuanLy && coNhanSuHopLe;
 }
 
 @if (canShowForm)
 {
-    <form asp-action="ThemPhanCong" method="post">
+    <form asp-action="ThemPhanCong" method="post" class="pc-assignment-form">
         <input type="hidden" asp-for="Form.MaCongViec" />
 
-        <div class="row g-2">
-            <div class="col-md-6 mb-2">
-                <label asp-for="Form.MaNguoiDung" class="form-label">Nhân viên</label>
-                <select class="form-select" asp-for="Form.MaNguoiDung" required>
-                    <option value="">-- Chọn nhân viên thuộc dự án --</option>
-                    @foreach (var nv in Model.ThanhVienCoThePhanCong)
-                    {
-                        <option value="@nv.MaNguoiDung">@nv.HoTenNguoiDung - @nv.VaiTroTrongDuAn</option>
-                    }
-                </select>
-                <span asp-validation-for="Form.MaNguoiDung" class="text-danger"></span>
+        <div class="assignment-form-grid">
+            <div class="assignment-form-input">
+                <div class="pc-form-field">
+                    <label asp-for="Form.MaNguoiDung" class="form-label">Nhân viên</label>
+                    <select class="form-select" asp-for="Form.MaNguoiDung" required>
+                        <option value="">-- Chọn nhân viên thuộc dự án --</option>
+                        @foreach (var nv in Model.ThanhVienCoThePhanCong)
+                        {
+                            <option value="@nv.MaNguoiDung">@nv.HoTenNguoiDung - @nv.VaiTroTrongDuAn</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Form.MaNguoiDung" class="text-danger"></span>
+                </div>
             </div>
         </div>
 
-        <div class="d-flex gap-2 mt-2">
-            <button type="submit" class="btn btn-primary">Lưu phân công</button>
-            <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="btn btn-secondary">Làm mới</a>
+        <div class="assignment-form-actions">
+            <button type="submit" class="pc-btn pc-btn-primary">
+                <i class="bi bi-person-plus"></i>
+                Phân công
+            </button>
+            <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="pc-btn pc-btn-secondary">
+                <i class="bi bi-arrow-clockwise"></i>
+                Làm mới
+            </a>
         </div>
     </form>
+}
+else if (!coQuyenThucHien || !coTheQuanLy)
+{
+    <div class="pc-inline-note">
+        Bạn không có quyền phân công mục này.
+    </div>
+}
+else if (!coNhanSuHopLe)
+{
+    <div class="pc-inline-note">
+        Không còn nhân viên phù hợp để phân công.
+    </div>
 }

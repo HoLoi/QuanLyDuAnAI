@@ -7,32 +7,54 @@
     ViewBag.Permissions = permissions;
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Nhân viên phụ trách dự án</h5>
+@section Styles {
+    <link rel="stylesheet" href="~/css/ThanhVienDuAn/index.css" asp-append-version="true" />
+}
+
+<div class="thanh-vien-du-an-page">
+    <section class="thanh-vien-header-card">
+        <div>
+            <h2 class="thanh-vien-title">Quản lý thành viên dự án</h2>
+            <p class="thanh-vien-subtitle">Theo dõi danh sách nhân sự phụ trách và vai trò trong dự án.</p>
+        </div>
         <a asp-controller="DuAn"
            asp-action="Index"
            asp-route-tuKhoa="@Model.TuKhoa"
            asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
            asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-           class="btn btn-outline-secondary btn-sm">Quay lại dự án</a>
-    </div>
+           class="btn thanh-vien-back-btn">Quay lại dự án</a>
+    </section>
 
-    <div class="alert alert-light border mb-3">
-        <div><strong>Dự án:</strong> @Model.TenDuAn (Mã: @Model.MaDuAn)</div>
-        <div><strong>Trạng thái:</strong> @TrangThai.ToDisplay(Model.TrangThaiDuAn)</div>
-    </div>
+    <section class="thanh-vien-section-card thanh-vien-project-card">
+        <div class="thanh-vien-project-info">
+            <span><strong>Dự án:</strong> @Model.TenDuAn (Mã: @Model.MaDuAn)</span>
+            <span class="thanh-vien-status-badge">Trạng thái: @TrangThai.ToDisplay(Model.TrangThaiDuAn)</span>
+        </div>
+    </section>
 
     @if (!Model.CoTheChinhSua)
     {
-        <div class="alert alert-warning">@Model.LyDoKhongTheChinhSua</div>
+        <section class="thanh-vien-warning-card">
+            @Model.LyDoKhongTheChinhSua
+        </section>
     }
 
     @if (canShowForm)
     {
-        <partial name="_Form" model="Model" />
-        <hr />
+        <section class="thanh-vien-section-card thanh-vien-form-card">
+            <div class="thanh-vien-section-head">
+                <h3 class="thanh-vien-section-title">Thêm thành viên phụ trách</h3>
+                <p class="thanh-vien-section-note">Chọn nhân viên phù hợp để tham gia dự án.</p>
+            </div>
+            <partial name="_Form" model="Model" />
+        </section>
     }
 
-    <partial name="_Table" model="Model" />
+    <section class="thanh-vien-section-card thanh-vien-table-card">
+        <div class="thanh-vien-section-head">
+            <h3 class="thanh-vien-section-title">Danh sách thành viên phụ trách</h3>
+            <p class="thanh-vien-section-note">Cập nhật vai trò và quản lý thành viên theo phân quyền hiện tại.</p>
+        </div>
+        <partial name="_Table" model="Model" />
+    </section>
 </div>

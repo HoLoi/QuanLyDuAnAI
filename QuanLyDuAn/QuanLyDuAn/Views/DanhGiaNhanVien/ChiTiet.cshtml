@@ -1,0 +1,44 @@
+﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienChiTietViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết đánh giá nhân viên";
+}
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/form.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/employee-stats.css" asp-append-version="true" />
+}
+
+<div class="dgnv-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Chi tiết đánh giá nhân viên</h5>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Quay lại</a>
+    </div>
+
+    @await Html.PartialAsync("_EmployeeStats", Model.ThongKe)
+
+    <div class="row g-2 my-3">
+        <div class="col-md-4"><div class="mini-stat"><span>Nhân viên</span><strong>@Model.TenNhanVien</strong></div></div>
+        <div class="col-md-4"><div class="mini-stat"><span>Trạng thái</span><strong>@Model.TrangThaiDanhGia</strong></div></div>
+        <div class="col-md-4"><div class="mini-stat"><span>Điểm tổng</span><strong>@Model.DiemTongKet.ToString("0.0") - @Model.XepLoai</strong></div></div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead><tr><th>Tiêu chí</th><th>Điểm</th><th>Công việc</th><th>Nhận xét</th></tr></thead>
+            <tbody>
+            @foreach (var tc in Model.TieuChi)
+            {
+                <tr><td>@tc.TenTieuChi</td><td>@tc.DiemDanhGiaNV</td><td>@(tc.TenCongViec ?? tc.MaCongViec?.ToString() ?? "-")</td><td>@tc.NoiDungDanhGiaNhanVien</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3">
+        <label class="form-label">Nhận xét tổng quan</label>
+        <div class="p-2 border rounded">@(string.IsNullOrWhiteSpace(Model.NhanXetTongQuan) ? "-" : Model.NhanXetTongQuan)</div>
+    </div>
+</div>

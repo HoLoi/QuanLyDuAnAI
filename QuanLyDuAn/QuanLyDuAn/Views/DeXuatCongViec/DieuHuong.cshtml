@@ -1,24 +1,43 @@
 ﻿@model QuanLyDuAn.ViewModels.DeXuatCongViec.DeXuatCongViecDieuHuongViewModel
 
-<div class="card p-3">
-    <h5 class="mb-2">Đề xuất công việc</h5>
-    <div class="text-muted mb-3">@Model.TenDuAn</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/DeXuatCongViec/index.css" asp-append-version="true" />
+}
 
-    <div class="alert alert-warning mb-3">
-        Dự án chưa có ngân sách được duyệt. Bạn có muốn đề xuất ngân sách không?
-    </div>
+<div class="de-xuat-cong-viec-page de-xuat-cong-viec-dieu-huong">
+    <section class="dxcv-header-card">
+        <div>
+            <h1 class="dxcv-title">Đề xuất công việc</h1>
+            <p class="dxcv-subtitle">Tạo và theo dõi các đề xuất công việc trong phạm vi dự án</p>
+        </div>
+        <a asp-controller="DuAn" asp-action="Index" class="dxcv-action-btn dxcv-action-neutral">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại dự án
+        </a>
+    </section>
 
-    <div class="d-flex gap-2">
-        <a asp-action="DieuHuong"
-           asp-route-maDuAn="@Model.MaDuAn"
-           asp-route-deXuatNganSach="true"
-           class="btn btn-warning btn-sm">Có, đi đến đề xuất ngân sách</a>
+    <section class="dxcv-warning-card dxcv-warning-card-large">
+        <div class="dxcv-warning-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        <div>
+            <h2>Dự án chưa có ngân sách được duyệt</h2>
+            <p>Bạn có thể tạo đề xuất ngân sách trước, hoặc tiếp tục vào màn hình đề xuất công việc để theo dõi và chuẩn bị nội dung.</p>
+            <div class="dxcv-action-group mt-3">
+                <a asp-action="DieuHuong"
+                   asp-route-maDuAn="@Model.MaDuAn"
+                   asp-route-deXuatNganSach="true"
+                   class="dxcv-action-btn dxcv-action-primary">
+                    <i class="bi bi-cash"></i>
+                    Đề xuất ngân sách
+                </a>
 
-        <a asp-action="DieuHuong"
-           asp-route-maDuAn="@Model.MaDuAn"
-           asp-route-deXuatNganSach="false"
-           class="btn btn-outline-primary btn-sm">Không, vẫn đề xuất công việc</a>
-
-        <a asp-controller="DuAn" asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại danh sách dự án</a>
-    </div>
+                <a asp-action="DieuHuong"
+                   asp-route-maDuAn="@Model.MaDuAn"
+                   asp-route-deXuatNganSach="false"
+                   class="dxcv-action-btn dxcv-action-neutral">
+                    <i class="bi bi-briefcase"></i>
+                    Tiếp tục đề xuất công việc
+                </a>
+            </div>
+        </div>
+    </section>
 </div>

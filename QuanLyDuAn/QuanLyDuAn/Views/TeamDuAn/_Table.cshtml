@@ -7,62 +7,69 @@
     bool canDelete = permissions.Contains(Permissions.TeamDuAn.Xoa);
 }
 
-<h6>Danh sách team đang phụ trách</h6>
-<table class="table table-bordered mt-2">
-    <thead>
-        <tr>
-            <th>Mã team</th>
-            <th>Tên team</th>
-            <th>Ngày tham gia</th>
-            <th>Số thành viên phụ trách</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.DanhSachTeamPhuTrach.Count == 0)
-        {
-            <tr>
-                <td colspan="5" class="text-center text-muted">Chưa có team phụ trách.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model.DanhSachTeamPhuTrach)
-            {
+@if (Model.DanhSachTeamPhuTrach.Count == 0)
+{
+    <div class="team-empty-state">
+        <div class="team-empty-icon"><i class="bi bi-diagram-3"></i></div>
+        <div class="team-empty-title">Chưa có nhóm phụ trách</div>
+        <p class="team-empty-text">Hãy chọn nhóm và lưu để bắt đầu phân công phụ trách dự án.</p>
+    </div>
+}
+else
+{
+    <div class="team-table-scroll">
+        <table class="table table-bordered app-data-table team-table">
+            <thead>
                 <tr>
-                    <td>@item.MaTeam</td>
-                    <td>@item.TenTeam</td>
-                    <td>@item.NgayTeamThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@item.SoThanhVienPhuTrach</td>
-                    <td class="d-flex gap-1">
-                        @if (canEdit)
-                        {
-                            <a asp-action="Index"
-                               asp-route-maDuAn="@Model.MaDuAn"
-                               asp-route-maTeamDangChon="@item.MaTeam"
-                               asp-route-tuKhoa="@Model.TuKhoa"
-                               asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
-                               asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-                               class="btn btn-warning btn-sm">Sửa thành viên</a>
-                        }
-
-                        @if (canDelete)
-                        {
-                            <button type="button"
-                                    class="btn btn-danger btn-sm btn-mo-modal-xoa-team"
-                                    data-ma-team="@item.MaTeam"
-                                    data-ten-team="@item.TenTeam"
-                                    data-so-nhan-vien="@item.SoThanhVienPhuTrach"
-                                    disabled="@(Model.CoTheChinhSua ? null : "disabled")">
-                                Gỡ team
-                            </button>
-                        }
-                    </td>
+                    <th>Mã nhóm</th>
+                    <th>Tên nhóm</th>
+                    <th>Ngày tham gia</th>
+                    <th>Số thành viên phụ trách</th>
+                    <th class="col-actions">Thao tác</th>
                 </tr>
-            }
-        }
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DanhSachTeamPhuTrach)
+                {
+                    <tr>
+                        <td>@item.MaTeam</td>
+                        <td class="fw-semibold">@item.TenTeam</td>
+                        <td>@item.NgayTeamThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><span class="team-count-badge">@item.SoThanhVienPhuTrach thành viên</span></td>
+                        <td class="col-actions table-actions team-table-actions">
+                            @if (canEdit)
+                            {
+                                <a asp-action="Index"
+                                   asp-route-maDuAn="@Model.MaDuAn"
+                                   asp-route-maTeamDangChon="@item.MaTeam"
+                                   asp-route-tuKhoa="@Model.TuKhoa"
+                                   asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
+                                   asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
+                                   class="btn btn-sm team-action-btn team-action-warning">
+                                    <i class="bi bi-people"></i>
+                                    <span>Sửa thành viên</span>
+                                </a>
+                            }
+
+                            @if (canDelete)
+                            {
+                                <button type="button"
+                                        class="btn btn-sm team-action-btn team-action-danger btn-mo-modal-xoa-team"
+                                        data-ma-team="@item.MaTeam"
+                                        data-ten-team="@item.TenTeam"
+                                        data-so-nhan-vien="@item.SoThanhVienPhuTrach"
+                                        disabled="@(Model.CoTheChinhSua ? null : "disabled")">
+                                    <i class="bi bi-trash"></i>
+                                    <span>Gỡ nhóm</span>
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 @if (canDelete)
 {
@@ -70,7 +77,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Gỡ team phụ trách khỏi dự án</h5>
+                    <h5 class="modal-title">Gỡ nhóm phụ trách khỏi dự án</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form asp-action="XoaTeamKhoiDuAn" method="post">
@@ -82,27 +89,27 @@
                         <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
 
                         <p class="mb-2">
-                            Team <strong id="xoaTeam_tenTeam"></strong> hiện có
-                            <strong id="xoaTeam_soNhanVien"></strong> nhân viên trong dự án.
+                            Nhóm <strong id="xoaTeam_tenTeam"></strong> hiện có
+                            <strong id="xoaTeam_soNhanVien"></strong> thành viên trong dự án.
                         </p>
                         <p class="mb-2">Bạn muốn:</p>
 
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="luaChonXuLyNhanVien" id="giuNguyenNhanVien" value="1" checked>
                             <label class="form-check-label" for="giuNguyenNhanVien">
-                                [1] Giữ nguyên nhân viên phụ trách dự án thuộc team này
+                                [1] Giữ nguyên thành viên phụ trách dự án thuộc nhóm này
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="luaChonXuLyNhanVien" id="goNhanVienThuocTeam" value="2">
                             <label class="form-check-label" for="goNhanVienThuocTeam">
-                                [2] Gỡ luôn nhân viên đang phụ trách dự án thuộc team này (có kiểm tra phân công công việc)
+                                [2] Gỡ luôn thành viên đang phụ trách dự án thuộc nhóm này (có kiểm tra phân công công việc)
                             </label>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-danger">Xác nhận gỡ team</button>
+                        <button type="submit" class="btn btn-danger">Xác nhận gỡ nhóm</button>
                     </div>
                 </form>
             </div>

@@ -3,7 +3,10 @@
 @{
     var isAuthenticated = User?.Identity?.IsAuthenticated == true;
     var currentPath = Context.Request.Path.Value ?? string.Empty;
-    var pageTitle = ViewData["Title"]?.ToString() ?? "Dashboard";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? string.Empty;
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? string.Empty;
+    var pageTitle = ViewData["Title"]?.ToString();
+    var resolvedPageTitle = string.IsNullOrWhiteSpace(pageTitle) ? "Hệ thống quản lý dự án" : pageTitle.Trim();
     var userName = User?.Identity?.Name ?? "Người dùng";
     var isAdmin = User?.IsInRole("Admin") == true || User?.IsInRole("ADMIN") == true;
     var grantedPermissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -51,6 +54,13 @@
     var canChat = grantedPermissions.Contains(Permissions.Chat.Xem);
     var canChatDuAn = canChat && !isAdmin;
     var canNhatKy = grantedPermissions.Contains(Permissions.NhatKy.Xem);
+
+    bool IsActiveController(string controllerName) =>
+        string.Equals(currentController, controllerName, StringComparison.OrdinalIgnoreCase);
+
+    bool IsActiveRoute(string controllerName, string actionName) =>
+        IsActiveController(controllerName) &&
+        string.Equals(currentAction, actionName, StringComparison.OrdinalIgnoreCase);
 }
 
 <!DOCTYPE html>
@@ -58,7 +68,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@pageTitle - QuanLyDuAnAI</title>
+    <title>@resolvedPageTitle - QuanLyDuAnAI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap&subset=vietnamese" rel="stylesheet" />
@@ -66,13 +76,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuanLyDuAn.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout/sidebar.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="@(isAuthenticated ? "layout-authenticated" : "layout-guest")">
     <div class="app-shell">
         @if (isAuthenticated)
         {
-            <aside class="app-sidebar">
+            <aside class="app-sidebar" id="appSidebar">
                 <a asp-controller="Dashboard" asp-action="Index" class="brand-wrap text-decoration-none">
                     <span class="brand-logo"><i class="bi bi-rocket-takeoff-fill"></i></span>
                     <div>
@@ -81,143 +92,217 @@
                     </div>
                 </a>
 
-                <nav class="side-nav">
+                <nav class="side-nav sidebar-menu">
                     @if (canDashboard || canNhanSu || canChucDanh || canNhom || canPhanQuyen || canDuyetDoiQuanLy)
                     {
-                        <div class="text-uppercase text-muted small fw-bold mt-1 mb-1">Hệ thống</div>
+                        <div class="sidebar-section">
+                            <div class="sidebar-section-title">HỆ THỐNG</div>
 
-                        @if (canDashboard)
-                        {
-                            <a asp-controller="Dashboard" asp-action="Index" class="side-link"><i class="bi bi-grid"></i> Dashboard</a>
-                        }
+                            @if (canDashboard)
+                            {
+                                <a asp-controller="Dashboard" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("Dashboard") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-grid"></i></span>
+                                    <span class="sidebar-menu-text">Dashboard</span>
+                                </a>
+                            }
 
-                        @if (canNhanSu)
-                        {
-                            <a asp-controller="NhanSu" asp-action="Index" class="side-link"><i class="bi bi-people"></i> Nhân sự</a>
-                        }
+                            @if (canNhanSu)
+                            {
+                                <a asp-controller="NhanSu" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("NhanSu") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-people"></i></span>
+                                    <span class="sidebar-menu-text">Nhân sự</span>
+                                </a>
+                            }
 
-                        @if (canChucDanh)
-                        {
-                            <a asp-controller="ChucDanh" asp-action="Index" class="side-link"><i class="bi bi-person-badge"></i> Chức danh</a>
-                        }
+                            @if (canChucDanh)
+                            {
+                                <a asp-controller="ChucDanh" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("ChucDanh") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-person-badge"></i></span>
+                                    <span class="sidebar-menu-text">Chức danh</span>
+                                </a>
+                            }
 
-                        @if (canNhom)
-                        {
-                            <a asp-controller="Team" asp-action="Index" class="side-link"><i class="bi bi-people-fill"></i> Team</a>
-                        }
+                            @if (canNhom)
+                            {
+                                <a asp-controller="Team" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("Team") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-people-fill"></i></span>
+                                    <span class="sidebar-menu-text">Team</span>
+                                </a>
+                            }
 
-                        @if (canPhanQuyen)
-                        {
-                            <a asp-controller="PhanQuyen" asp-action="Index" class="side-link"><i class="bi bi-shield-lock"></i> Phân quyền</a>
-                        }
+                            @if (canPhanQuyen)
+                            {
+                                <a asp-controller="PhanQuyen" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("PhanQuyen") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-shield-lock"></i></span>
+                                    <span class="sidebar-menu-text">Phân quyền</span>
+                                </a>
+                            }
 
-                        @if (canDuyetDoiQuanLy)
-                        {
-                            <a asp-controller="DoiQuanLy" asp-action="Index" class="side-link"><i class="bi bi-person-check"></i> Duyệt đổi quản lý</a>
-                        }
+                            @if (canDuyetDoiQuanLy)
+                            {
+                                <a asp-controller="DoiQuanLy" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DoiQuanLy") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-person-check"></i></span>
+                                    <span class="sidebar-menu-text">Duyệt đổi quản lý</span>
+                                </a>
+                            }
+                        </div>
                     }
 
                     @if (canDuAn)
                     {
-                        <div class="text-uppercase text-muted small fw-bold mt-3 mb-1">Dự án</div>
+                        <div class="sidebar-section">
+                            <div class="sidebar-section-title">DỰ ÁN</div>
 
-                        @if (canDuAn)
-                        {
-                            <a asp-controller="DuAn" asp-action="Index" class="side-link">
-                                <i class="bi bi-kanban"></i> Dự án
-                            </a>
-                        }
+                            @if (canDuAn)
+                            {
+                                <a asp-controller="DuAn" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DuAn") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-kanban"></i></span>
+                                    <span class="sidebar-menu-text">Dự án</span>
+                                </a>
+                            }
+                        </div>
                     }
 
                     @if (canCongViec || canDeXuat || canDuyetDeXuat || canTienDo)
                     {
-                        <div class="text-uppercase text-muted small fw-bold mt-3 mb-1">Công việc</div>
+                        <div class="sidebar-section">
+                            <div class="sidebar-section-title">CÔNG VIỆC</div>
 
-                        @if (canDuyetDeXuat)
-                        {
-                            <a asp-controller="DuyetDeXuatCongViec" asp-action="Index" class="side-link">
-                                <i class="bi bi-check-circle"></i> Duyệt công việc
-                            </a>
-                        }
+                            @if (canDuyetDeXuat)
+                            {
+                                <a asp-controller="DuyetDeXuatCongViec" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DuyetDeXuatCongViec") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-check-circle"></i></span>
+                                    <span class="sidebar-menu-text">Duyệt công việc</span>
+                                </a>
+                            }
 
-                        @if (canCongViec)
-                        {
-                            <a asp-controller="CongViec" asp-action="Index" class="side-link">
-                                <i class="bi bi-list-task"></i> Công việc
-                            </a>
-                        }
+                            @if (canCongViec)
+                            {
+                                <a asp-controller="CongViec" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("CongViec") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-list-task"></i></span>
+                                    <span class="sidebar-menu-text">Công việc</span>
+                                </a>
+                            }
 
-                        @if (canTienDo)
-                        {
-                            <a asp-controller="TienDoCongViec" asp-action="Index" class="side-link">
-                                <i class="bi bi-graph-up-arrow"></i> Tiến độ
-                            </a>
-                        }
+                            @if (canTienDo)
+                            {
+                                <a asp-controller="TienDoCongViec" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("TienDoCongViec") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                                    <span class="sidebar-menu-text">Tiến độ</span>
+                                </a>
+                            }
+                        </div>
                     }
 
                     @if (canDeXuatNganSach || canDuyetNganSach || canNganSach || canChiPhi)
                     {
-                        <div class="text-uppercase text-muted small fw-bold mt-3 mb-1">Tài chính</div>
+                        <div class="sidebar-section">
+                            <div class="sidebar-section-title">TÀI CHÍNH</div>
 
-                        @if (canDuyetNganSach)
-                        {
-                            <a asp-controller="DuyetDeXuatNganSach" asp-action="Index" class="side-link">
-                                <i class="bi bi-check2-square"></i> Duyệt ngân sách
-                            </a>
-                        }
+                            @if (canDuyetNganSach)
+                            {
+                                <a asp-controller="DuyetDeXuatNganSach" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DuyetDeXuatNganSach") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-check2-square"></i></span>
+                                    <span class="sidebar-menu-text">Duyệt ngân sách</span>
+                                </a>
+                            }
 
-                        @if (canNganSach)
-                        {
-                            <a asp-controller="NganSach" asp-action="Index" class="side-link">
-                                <i class="bi bi-wallet2"></i> Ngân sách
-                            </a>
-                        }
+                            @if (canNganSach)
+                            {
+                                <a asp-controller="NganSach" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("NganSach") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-wallet2"></i></span>
+                                    <span class="sidebar-menu-text">Ngân sách</span>
+                                </a>
+                            }
 
-                        @if (canChiPhi)
-                        {
-                            <a asp-controller="ChiPhi" asp-action="Index" class="side-link">
-                                <i class="bi bi-cash-stack"></i> Chi phí
-                            </a>
-                        }
+                            @if (canChiPhi)
+                            {
+                                <a asp-controller="ChiPhi" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("ChiPhi") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-cash-stack"></i></span>
+                                    <span class="sidebar-menu-text">Chi phí</span>
+                                </a>
+                            }
+                        </div>
+                    }
+
+                    @if (canDanhGiaDuAn || canDanhGiaNhanVien)
+                    {
+                        <div class="sidebar-section">
+                            <div class="sidebar-section-title">ĐÁNH GIÁ</div>
+
+                            @if (canDanhGiaDuAn)
+                            {
+                                <a asp-controller="DanhGiaDuAn" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DanhGiaDuAn") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-clipboard2-check"></i></span>
+                                    <span class="sidebar-menu-text">Danh gia du an</span>
+                                </a>
+                            }
+
+                            @if (canDanhGiaNhanVien)
+                            {
+                                <a asp-controller="DanhGiaNhanVien" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DanhGiaNhanVien") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-person-check"></i></span>
+                                    <span class="sidebar-menu-text">Danh gia nhan vien</span>
+                                </a>
+                            }
+                        </div>
                     }
 
                     @if (canChatDuAn)
                     {
-                        <div class="text-uppercase text-muted small fw-bold mt-3 mb-1">Trao đổi</div>
-                        <a asp-controller="ChatDuAn" asp-action="Index" class="side-link">
-                            <i class="bi bi-chat-dots"></i> Chat dự án
-                        </a>
+                        <div class="sidebar-section">
+                            <div class="sidebar-section-title">TRAO ĐỔI</div>
+                            <a asp-controller="ChatDuAn" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("ChatDuAn") ? "active sidebar-active" : string.Empty)">
+                                <span class="sidebar-menu-icon"><i class="bi bi-chat-dots"></i></span>
+                                <span class="sidebar-menu-text">Chat dự án</span>
+                            </a>
+                        </div>
                     }
 
                     @if (canAiDataset || canAiTrain || canAiPredict || canAiDashboard)
                     {
-                        <div class="text-uppercase text-muted small fw-bold mt-3 mb-1">AI</div>
+                        <div class="sidebar-section">
+                            <div class="sidebar-section-title">AI</div>
 
-                        @if (canAiDataset)
-                        {
-                            <a asp-controller="AiDataset" asp-action="Index" class="side-link">Dataset</a>
-                        }
-                        @if (canAiTrain)
-                        {
-                            <a asp-controller="Ai" asp-action="Train" class="side-link">Train</a>
-                        }
-                        @if (canAiPredict)
-                        {
-                            <a asp-controller="Ai" asp-action="Predict" class="side-link">Predict</a>
-                        }
-                        @if (canAiDashboard)
-                        {
-                            <a asp-controller="Ai" asp-action="Dashboard" class="side-link">Dashboard</a>
-                        }
+                            @if (canAiDataset)
+                            {
+                                <a asp-controller="AiDataset" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("AiDataset") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-database"></i></span>
+                                    <span class="sidebar-menu-text">Dataset</span>
+                                </a>
+                            }
+                            @if (canAiTrain)
+                            {
+                                <a asp-controller="Ai" asp-action="Train" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Train") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-cpu"></i></span>
+                                    <span class="sidebar-menu-text">Train</span>
+                                </a>
+                            }
+                            @if (canAiPredict)
+                            {
+                                <a asp-controller="Ai" asp-action="Predict" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Predict") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-graph-up"></i></span>
+                                    <span class="sidebar-menu-text">Predict</span>
+                                </a>
+                            }
+                            @if (canAiDashboard)
+                            {
+                                <a asp-controller="Ai" asp-action="Dashboard" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Dashboard") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-speedometer2"></i></span>
+                                    <span class="sidebar-menu-text">Dashboard</span>
+                                </a>
+                            }
+                        </div>
                     }
                 </nav>
             </aside>
+            <button type="button" class="sidebar-backdrop" data-sidebar-dismiss aria-label="Đóng menu"></button>
         }
 
         <div class="app-main">
             <header class="app-topbar @(isAuthenticated ? string.Empty : "app-topbar-guest")">
                 <div>
-                    <h2 class="page-title mb-0">@pageTitle</h2>
+                    <h2 class="page-title mb-0">@resolvedPageTitle</h2>
                     @if (!isAuthenticated)
                     {
                         <p class="text-muted mb-0 small">Đăng nhập để truy cập hệ thống quản lý dự án.</p>
@@ -226,6 +311,9 @@
                 <div class="d-flex align-items-center gap-3">
                     @if (isAuthenticated)
                     {
+                        <button type="button" class="sidebar-toggle d-lg-none" data-sidebar-toggle aria-label="Mở menu">
+                            <i class="bi bi-list"></i>
+                        </button>
                         <span class="user-chip">
                             <i class="bi bi-person-circle"></i>
                             @userName
@@ -266,6 +354,41 @@
             </main>
         </div>
     </div>
+
+    <script>
+        (function () {
+            var toggleButtons = document.querySelectorAll("[data-sidebar-toggle]");
+            var dismissButtons = document.querySelectorAll("[data-sidebar-dismiss]");
+
+            function setSidebarState(isOpen) {
+                document.body.classList.toggle("sidebar-open", isOpen);
+            }
+
+            toggleButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    setSidebarState(!document.body.classList.contains("sidebar-open"));
+                });
+            });
+
+            dismissButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    setSidebarState(false);
+                });
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape") {
+                    setSidebarState(false);
+                }
+            });
+
+            window.addEventListener("resize", function () {
+                if (window.innerWidth >= 992) {
+                    setSidebarState(false);
+                }
+            });
+        })();
+    </script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

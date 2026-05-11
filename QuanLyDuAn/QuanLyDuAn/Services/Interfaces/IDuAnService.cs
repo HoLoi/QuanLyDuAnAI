@@ -20,6 +20,7 @@ namespace QuanLyDuAn.Services.Interfaces
         Task TransitionToDangThucHienAsync(int maDuAn);
         Task RequestCompletionAsync(int maDuAn);
         Task ConfirmCompletionAsync(int maDuAn);
+        Task MoLaiDuAnAsync(int maDuAn, string lyDo);
         Task PauseProjectAsync(int maDuAn, string ghiChuDuAn);
     }
 }

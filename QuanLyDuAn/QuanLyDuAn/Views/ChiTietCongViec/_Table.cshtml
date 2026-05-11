@@ -5,6 +5,7 @@
     var permissions = Model.Permissions;
     bool canEdit = permissions.Contains(Permissions.ChiTietCongViec.Sua) && Model.CoTheCapNhat;
     bool canDelete = permissions.Contains(Permissions.ChiTietCongViec.Xoa) && Model.CoTheCapNhat;
+
     var trangThaiOptions = new[]
     {
         TrangThai.ChuaBatDau,
@@ -13,101 +14,224 @@
         TrangThai.TamDung,
         TrangThai.HoanThanh
     };
+
+    string GetStatusIcon(string cssTrangThai)
+    {
+        return cssTrangThai switch
+        {
+            "workflow-success" => "bi-check2-circle",
+            "workflow-pending" => "bi-hourglass-split",
+            "workflow-blocked" => "bi-exclamation-octagon",
+            "workflow-paused" => "bi-pause-circle",
+            "workflow-cancelled" => "bi-x-octagon",
+            "workflow-idle" => "bi-circle",
+            _ => "bi-play-circle"
+        };
+    }
 }
 
-<h6>Danh sách chi tiết công việc</h6>
-<table class="table table-bordered table-sm app-data-table">
-    <thead>
-        <tr>
-            <th class="col-id">Mã</th>
-            <th>Tên CTCV</th>
-            <th>Nội dung</th>
-            <th class="col-date">Ngày bắt đầu CTCV</th>
-            <th class="col-date">Ngày kết thúc CTCV</th>
-            <th class="col-date">Ngày tạo</th>
-            <th class="col-status">Trạng thái</th>
-            <th class="col-action">Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (!Model.DanhSach.Any())
-        {
-            <tr>
-                <td colspan="8" class="text-center text-muted">Chưa có chi tiết công việc.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model.DanhSach)
-            {
-                var collapseId = $"edit-{item.MaChiTietCV}";
+@if (!Model.DanhSach.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-list-task"></i>
+        <p>Chưa có chi tiết công việc.</p>
+    </div>
+}
+else
+{
+    <div class="chi-tiet-table-wrapper d-none d-lg-block">
+        <table class="table app-data-table chi-tiet-table">
+            <thead>
                 <tr>
-                    <td class="col-id">@item.MaChiTietCV</td>
-                    <td>@item.TenCTCV</td>
-                    <td>@item.NoiDungChiTietCV</td>
-                    <td class="col-date">@item.NgayBatDauCTCV?.ToString("dd/MM/yyyy")</td>
-                    <td class="col-date">@item.NgayKetThucCTCV?.ToString("dd/MM/yyyy")</td>
-                    <td class="col-date">@item.NgayTaoCTCV?.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiCTCV)</td>
-                    <td class="col-action table-actions">
-                        @if (permissions.Contains(Permissions.PhanCongChiTietCongViec.Xem) && item.CoThePhanCongChiTietCongViec)
-                        {
-                            <a asp-controller="PhanCongChiTietCongViec" asp-action="Index" asp-route-maChiTietCv="@item.MaChiTietCV" class="btn btn-outline-secondary btn-sm">
-                                Phân công
-                            </a>
-                        }
-                        @if (canEdit)
-                        {
-                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#@collapseId">
-                                Sửa
-                            </button>
-                        }
-                        @if (canDelete)
-                        {
-                            <form asp-action="Xoa" method="post">
-                                <input type="hidden" name="maCongViec" value="@Model.CongViec.MaCongViec" />
-                                <input type="hidden" name="maChiTietCv" value="@item.MaChiTietCV" />
-                                <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
-                            </form>
-                        }
-                    </td>
+                    <th class="col-id">Mã</th>
+                    <th>Tên CTCV</th>
+                    <th>Nội dung</th>
+                    <th class="col-date">Ngày bắt đầu</th>
+                    <th class="col-date">Ngày kết thúc</th>
+                    <th class="col-date">Ngày tạo</th>
+                    <th class="col-status">Trạng thái</th>
+                    <th class="col-actions">Thao tác</th>
                 </tr>
-                @if (canEdit)
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DanhSach)
                 {
-                    <tr class="collapse" id="@collapseId">
-                        <td colspan="8">
-                            <form asp-action="Sua" method="post" class="row g-2">
-                                <input type="hidden" name="MaChiTietCV" value="@item.MaChiTietCV" />
-                                <input type="hidden" name="MaCongViec" value="@Model.CongViec.MaCongViec" />
-                                <div class="col-md-3">
-                                    <label class="form-label">Tên CTCV</label>
-                                    <input type="text" class="form-control" name="TenCTCV" value="@item.TenCTCV" maxlength="255" />
-                                </div>
-                                <div class="col-md-5">
-                                    <label class="form-label">Nội dung</label>
-                                    <input type="text" class="form-control" name="NoiDungChiTietCV" value="@item.NoiDungChiTietCV" maxlength="255" required />
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Ngày bắt đầu CTCV</label>
-                                    <input type="date" class="form-control" name="NgayBatDauCTCV" value="@item.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
-                                </div>
-                                <div class="col-md-2">
-                                    <label class="form-label">Trạng thái</label>
-                                    <select class="form-select" name="TrangThaiCTCV" required>
-                                        @foreach (var status in trangThaiOptions)
-                                        {
-                                            <option value="@status" selected="@(TrangThai.EqualsValue(item.TrangThaiCTCV, status))">@TrangThai.ToDisplay(status)</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary btn-sm">Lưu cập nhật</button>
-                                </div>
-                            </form>
+                    var collapseId = $"edit-{item.MaChiTietCV}";
+                    <tr>
+                        <td class="col-id">#@item.MaChiTietCV</td>
+                        <td>@item.TenCTCV</td>
+                        <td>@item.NoiDungChiTietCV</td>
+                        <td class="col-date">@item.NgayBatDauCTCV?.ToString("dd/MM/yyyy")</td>
+                        <td class="col-date">@item.NgayKetThucCTCV?.ToString("dd/MM/yyyy")</td>
+                        <td class="col-date">@item.NgayTaoCTCV?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="col-status">
+                            <span class="workflow-badge @item.CssTrangThai">
+                                <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                                @item.TrangThaiHienThi
+                            </span>
+                        </td>
+                        <td class="col-actions table-actions">
+                            @if (permissions.Contains(Permissions.PhanCongChiTietCongViec.Xem) && item.CoThePhanCongChiTietCongViec)
+                            {
+                                <a asp-controller="PhanCongChiTietCongViec" asp-action="Index" asp-route-maChiTietCv="@item.MaChiTietCV" class="btn btn-action btn-subtle">
+                                    <i class="bi bi-person-plus"></i>
+                                    Phân công
+                                </a>
+                            }
+                            @if (canEdit)
+                            {
+                                <button type="button" class="btn btn-action btn-subtle" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false">
+                                    <i class="bi bi-pencil-square"></i>
+                                    Sửa
+                                </button>
+                            }
+                            @if (canDelete)
+                            {
+                                <form asp-action="Xoa" method="post">
+                                    <input type="hidden" name="maCongViec" value="@Model.CongViec.MaCongViec" />
+                                    <input type="hidden" name="maChiTietCv" value="@item.MaChiTietCV" />
+                                    <button type="submit" class="btn btn-action btn-danger-soft">
+                                        <i class="bi bi-trash3"></i>
+                                        Xóa
+                                    </button>
+                                </form>
+                            }
                         </td>
                     </tr>
+                    @if (canEdit)
+                    {
+                        <tr class="collapse-row">
+                            <td colspan="8" class="p-0 border-0">
+                                <div class="collapse" id="@collapseId">
+                                    <form asp-action="Sua" method="post" class="edit-inline-form">
+                                        <input type="hidden" name="MaChiTietCV" value="@item.MaChiTietCV" />
+                                        <input type="hidden" name="MaCongViec" value="@Model.CongViec.MaCongViec" />
+
+                                        <div class="form-field">
+                                            <label>Tên CTCV</label>
+                                            <input type="text" class="form-control" name="TenCTCV" value="@item.TenCTCV" maxlength="255" />
+                                        </div>
+                                        <div class="form-field form-field--wide">
+                                            <label>Nội dung</label>
+                                            <input type="text" class="form-control" name="NoiDungChiTietCV" value="@item.NoiDungChiTietCV" maxlength="255" required />
+                                        </div>
+                                        <div class="form-field">
+                                            <label>Ngày bắt đầu</label>
+                                            <input type="date" class="form-control" name="NgayBatDauCTCV" value="@item.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
+                                        </div>
+                                        <div class="form-field">
+                                            <label>Trạng thái</label>
+                                            <select class="form-select" name="TrangThaiCTCV" required>
+                                                @foreach (var status in trangThaiOptions)
+                                                {
+                                                    <option value="@status" selected="@(TrangThai.EqualsValue(item.TrangThaiCTCV, status))">@TrangThai.ToDisplay(status)</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="submit" class="btn btn-form-primary btn-sm">
+                                                <i class="bi bi-check2"></i>
+                                                Lưu cập nhật
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
-            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chi-tiet-mobile-list d-lg-none">
+        @foreach (var item in Model.DanhSach)
+        {
+            var mobileEditId = $"edit-mobile-{item.MaChiTietCV}";
+            <article class="chi-tiet-mobile-card">
+                <div class="mobile-head">
+                    <div>
+                        <p class="mobile-id">CTCV #@item.MaChiTietCV</p>
+                        <h3>@item.TenCTCV</h3>
+                    </div>
+                    <span class="workflow-badge @item.CssTrangThai">
+                        <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                        @item.TrangThaiHienThi
+                    </span>
+                </div>
+
+                <p class="mobile-content">@item.NoiDungChiTietCV</p>
+
+                <div class="mobile-meta">
+                    <div><span>Bắt đầu</span><strong>@item.NgayBatDauCTCV?.ToString("dd/MM/yyyy")</strong></div>
+                    <div><span>Kết thúc</span><strong>@item.NgayKetThucCTCV?.ToString("dd/MM/yyyy")</strong></div>
+                    <div><span>Ngày tạo</span><strong>@item.NgayTaoCTCV?.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                </div>
+
+                <div class="mobile-actions">
+                    @if (permissions.Contains(Permissions.PhanCongChiTietCongViec.Xem) && item.CoThePhanCongChiTietCongViec)
+                    {
+                        <a asp-controller="PhanCongChiTietCongViec" asp-action="Index" asp-route-maChiTietCv="@item.MaChiTietCV" class="btn btn-action btn-subtle">
+                            <i class="bi bi-person-plus"></i>
+                            Phân công
+                        </a>
+                    }
+                    @if (canEdit)
+                    {
+                        <button type="button" class="btn btn-action btn-subtle" data-bs-toggle="collapse" data-bs-target="#@mobileEditId" aria-expanded="false">
+                            <i class="bi bi-pencil-square"></i>
+                            Sửa
+                        </button>
+                    }
+                    @if (canDelete)
+                    {
+                        <form asp-action="Xoa" method="post" class="w-100">
+                            <input type="hidden" name="maCongViec" value="@Model.CongViec.MaCongViec" />
+                            <input type="hidden" name="maChiTietCv" value="@item.MaChiTietCV" />
+                            <button type="submit" class="btn btn-action btn-danger-soft w-100">
+                                <i class="bi bi-trash3"></i>
+                                Xóa
+                            </button>
+                        </form>
+                    }
+                </div>
+
+                @if (canEdit)
+                {
+                    <div class="collapse" id="@mobileEditId">
+                        <form asp-action="Sua" method="post" class="edit-inline-form edit-inline-form--mobile">
+                            <input type="hidden" name="MaChiTietCV" value="@item.MaChiTietCV" />
+                            <input type="hidden" name="MaCongViec" value="@Model.CongViec.MaCongViec" />
+
+                            <div class="form-field">
+                                <label>Tên CTCV</label>
+                                <input type="text" class="form-control" name="TenCTCV" value="@item.TenCTCV" maxlength="255" />
+                            </div>
+                            <div class="form-field">
+                                <label>Nội dung</label>
+                                <input type="text" class="form-control" name="NoiDungChiTietCV" value="@item.NoiDungChiTietCV" maxlength="255" required />
+                            </div>
+                            <div class="form-field">
+                                <label>Ngày bắt đầu</label>
+                                <input type="date" class="form-control" name="NgayBatDauCTCV" value="@item.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="form-field">
+                                <label>Trạng thái</label>
+                                <select class="form-select" name="TrangThaiCTCV" required>
+                                    @foreach (var status in trangThaiOptions)
+                                    {
+                                        <option value="@status" selected="@(TrangThai.EqualsValue(item.TrangThaiCTCV, status))">@TrangThai.ToDisplay(status)</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-form-primary btn-sm w-100">
+                                <i class="bi bi-check2"></i>
+                                Lưu cập nhật
+                            </button>
+                        </form>
+                    </div>
+                }
+            </article>
         }
-    </tbody>
-</table>
+    </div>
+}

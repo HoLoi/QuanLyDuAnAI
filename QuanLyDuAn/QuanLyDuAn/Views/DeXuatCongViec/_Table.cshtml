@@ -8,51 +8,92 @@
     string? locTrangThai = ViewBag.LocTrangThai as string;
 }
 
-<table class="table table-bordered table-sm app-data-table">
-    <thead>
-        <tr>
-            <th class="col-id">Mã</th>
-            <th>Công việc đề xuất</th>
-            <th>Mô tả</th>
-            <th>Người đề xuất</th>
-            <th>Chi phí</th>
-            <th class="col-date">Ngày đề xuất</th>
-            <th class="col-status">Trạng thái</th>
-            <th class="col-actions"></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Count == 0)
-        {
+<div class="dxcv-table-scroll">
+    <table class="table dxcv-table">
+        <thead>
             <tr>
-                <td colspan="8" class="text-center text-muted">Chưa có đề xuất công việc.</td>
+                <th class="col-id">Mã</th>
+                <th>Công việc đề xuất</th>
+                <th>Người đề xuất</th>
+                <th>Chi phí</th>
+                <th>Ngày đề xuất</th>
+                <th>Trạng thái</th>
+                <th class="col-actions">Hành động</th>
             </tr>
-        }
-        else
-        {
-            @foreach (var item in Model)
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
             {
                 <tr>
-                    <td class="col-id">@item.MaDeXuatCV</td>
-                    <td>@item.TenCongViecDeXuat</td>
-                    <td>@item.MoTaCongViecDeXuat</td>
-                    <td>@item.NguoiDungDeXuat</td>
-                    <td>@item.ChiPhiDeXuat?.ToString("N0")</td>
-                    <td class="col-date">@item.NgayDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)</td>
-                    <td class="col-actions table-actions">
-                        @if (canCancel && TrangThai.EqualsValue(item.TrangThaiCongViecDeXuat, TrangThai.ChoDuyet))
-                        {
-                            <form asp-action="HuyDeXuat" method="post">
-                                <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
-                                <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
-                                <input type="hidden" name="locTrangThai" value="@locTrangThai" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Hủy</button>
-                            </form>
-                        }
+                    <td colspan="7">
+                        <div class="dxcv-empty-state">Chưa có đề xuất công việc.</div>
                     </td>
                 </tr>
             }
-        }
-    </tbody>
-</table>
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    var statusCode = TrangThai.ToCode(item.TrangThaiCongViecDeXuat);
+                    var badgeClass = "dxcv-status-neutral";
+                    if (TrangThai.EqualsValue(statusCode, TrangThai.ChoDuyet)) { badgeClass = "dxcv-status-pending"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaDuyet)) { badgeClass = "dxcv-status-approved"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.TuChoi)) { badgeClass = "dxcv-status-rejected"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaHuy)) { badgeClass = "dxcv-status-canceled"; }
+
+                    <tr>
+                        <td class="col-id">#@item.MaDeXuatCV</td>
+                        <td>
+                            <div class="dxcv-row-title">@item.TenCongViecDeXuat</div>
+                            <div class="dxcv-row-subtitle">@item.NgayBatDauCongViecDeXuat?.ToString("dd/MM/yyyy") - @item.NgayKetThucCVDeXuatDuKien?.ToString("dd/MM/yyyy")</div>
+                        </td>
+                        <td>@item.NguoiDungDeXuat</td>
+                        <td class="text-nowrap">@item.ChiPhiDeXuat?.ToString("N0") VNĐ</td>
+                        <td class="text-nowrap">@item.NgayDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <span class="dxcv-status-badge @badgeClass">@TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)</span>
+                        </td>
+                        <td class="col-actions">
+                            <div class="dxcv-action-group">
+                                <button type="button" class="dxcv-action-btn dxcv-action-neutral" data-bs-toggle="collapse" data-bs-target="#dxcv-detail-@item.MaDeXuatCV" aria-expanded="false" aria-controls="dxcv-detail-@item.MaDeXuatCV">
+                                    <i class="bi bi-eye"></i>
+                                    Xem chi tiết
+                                </button>
+                                @if (canCancel && TrangThai.EqualsValue(item.TrangThaiCongViecDeXuat, TrangThai.ChoDuyet))
+                                {
+                                    <form asp-action="HuyDeXuat" method="post" class="d-inline">
+                                        <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
+                                        <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                                        <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                                        <button type="submit" class="dxcv-action-btn dxcv-action-danger">
+                                            <i class="bi bi-x-circle"></i>
+                                            Hủy đề xuất
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="collapse" id="dxcv-detail-@item.MaDeXuatCV">
+                        <td colspan="7" class="dxcv-detail-cell">
+                            <div class="dxcv-detail-grid">
+                                <div>
+                                    <span>Mô tả</span>
+                                    <p>@item.MoTaCongViecDeXuat</p>
+                                </div>
+                                <div>
+                                    <span>Người duyệt</span>
+                                    <p>@(string.IsNullOrWhiteSpace(item.NguoiDungDuyet) ? "Chưa duyệt" : item.NguoiDungDuyet)</p>
+                                </div>
+                                <div>
+                                    <span>Ngày duyệt</span>
+                                    <p>@(item.NgayDuyetDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm") ?? "-")</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

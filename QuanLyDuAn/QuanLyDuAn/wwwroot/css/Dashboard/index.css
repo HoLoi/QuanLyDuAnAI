@@ -1,0 +1,335 @@
+﻿.dashboard-overview-page {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.45));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.2rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.16));
+    border: 1px solid rgba(105, 108, 255, 0.18);
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+}
+
+.dashboard-header-content {
+    min-width: 0;
+}
+
+.dashboard-title {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.dashboard-subtitle {
+    margin: 0.4rem 0 0;
+    color: #5f7390;
+    font-size: 0.95rem;
+}
+
+.dashboard-updated {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #455f82;
+    font-size: 0.84rem;
+    background: #ffffff;
+    border: 1px solid #d7e2f0;
+    border-radius: 999px;
+    padding: 0.4rem 0.72rem;
+    white-space: nowrap;
+}
+
+.overview-grid,
+.warning-grid,
+.pending-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.overview-card,
+.warning-card,
+.chart-card,
+.suggestion-card,
+.status-pill-card {
+    background: #ffffff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+}
+
+.overview-card,
+.warning-card {
+    padding: 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.32rem;
+}
+
+.overview-card-icon {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.08rem;
+    color: #4f62d6;
+    background: #eef0ff;
+    margin-bottom: 0.2rem;
+}
+
+.overview-card-label {
+    color: #697e98;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.overview-card-value {
+    color: #2f4968;
+    font-size: 1.66rem;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.overview-card-note {
+    margin: 0;
+    color: #7890a8;
+    font-size: 0.82rem;
+    line-height: 1.38;
+}
+
+.section-heading {
+    margin-bottom: 0.6rem;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: 1.08rem;
+    color: #314866;
+    font-weight: 700;
+}
+
+.section-heading p {
+    margin: 0.24rem 0 0;
+    font-size: 0.86rem;
+    color: #7289a1;
+}
+
+.status-section,
+.warning-section,
+.pending-section,
+.suggestion-section,
+.ai-section,
+.chart-grid {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.status-pill-card {
+    padding: 0.88rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.status-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.45rem;
+}
+
+.status-header span {
+    color: #5f7795;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.status-header strong {
+    color: #304a6a;
+    font-size: 1.2rem;
+}
+
+.status-pill-card .progress {
+    height: 8px;
+    background: #edf2ff;
+    border-radius: 999px;
+}
+
+.status-pill-card .progress-bar {
+    background: linear-gradient(90deg, #6f8bff, #03b7e6);
+    border-radius: 999px;
+}
+
+.status-pill-card small {
+    color: #7a90a9;
+    font-size: 0.76rem;
+}
+
+.warning-title-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.45rem;
+}
+
+.warning-title-wrap h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #365173;
+}
+
+.warning-value {
+    font-size: 1.32rem;
+    font-weight: 700;
+}
+
+.warning-card-ok {
+    background: linear-gradient(180deg, #ffffff, #f4fff9);
+    border-color: #cfeadb;
+}
+
+.warning-card-ok .warning-value {
+    color: #1f9f58;
+}
+
+.warning-card-danger {
+    background: linear-gradient(180deg, #ffffff, #fff4f3);
+    border-color: #f1d0cc;
+}
+
+.warning-card-danger .warning-value {
+    color: #d1473e;
+}
+
+.dashboard-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    margin-top: 0.35rem;
+    padding: 0.42rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid #c7d4ea;
+    background: #f7faff;
+    color: #355173;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    width: fit-content;
+}
+
+.dashboard-action-btn:hover,
+.dashboard-action-btn:focus {
+    color: #2a3d57;
+    background: #e8f0fd;
+    border-color: #adbfde;
+}
+
+.chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.chart-card {
+    padding: 0.95rem;
+}
+
+.chart-wrapper {
+    width: 100%;
+    height: 290px;
+    overflow: hidden;
+}
+
+.chart-wrapper canvas {
+    max-width: 100%;
+}
+
+.ai-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.suggestion-section .suggestion-card {
+    padding: 0.8rem 0.9rem;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.empty-dashboard-state {
+    border: 1px dashed #c8d7ee;
+    border-radius: 14px;
+    padding: 0.85rem;
+    color: #607893;
+    font-size: 0.87rem;
+    background: #f8fbff;
+}
+
+@media (max-width: 1199.98px) {
+    .overview-grid,
+    .warning-grid,
+    .pending-grid,
+    .status-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chart-grid,
+    .ai-section {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-wrapper {
+        height: 270px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .dashboard-overview-page {
+        padding: 0.88rem;
+        border-radius: 16px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        border-radius: 14px;
+    }
+
+    .dashboard-title {
+        font-size: 1.28rem;
+    }
+
+    .dashboard-updated {
+        white-space: normal;
+    }
+
+    .overview-grid,
+    .warning-grid,
+    .pending-grid,
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .overview-card-value {
+        font-size: 1.5rem;
+    }
+
+    .chart-wrapper {
+        height: 250px;
+    }
+}

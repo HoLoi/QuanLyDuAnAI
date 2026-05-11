@@ -1,0 +1,44 @@
+﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnThongKeViewModel
+
+@{
+    var coDuLieuAi = Model.CoDuLieuAi == true;
+    var tinhTrangTienDo = "Chưa đủ dữ liệu";
+    if (coDuLieuAi && Model.DuAnBiTreTheoAi.HasValue)
+    {
+        tinhTrangTienDo = Model.DuAnBiTreTheoAi.Value ? "Có trễ" : "Không trễ";
+    }
+
+    string DinhDangPhanTram(double? giaTri)
+    {
+        if (!giaTri.HasValue)
+        {
+            return "-";
+        }
+
+        return $"{(giaTri.Value * 100d):0.##}%";
+    }
+}
+
+<div class="ai-insight-card card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <h6 class="mb-2">Gợi ý AI về nguyên nhân trễ</h6>
+
+        @if (!coDuLieuAi)
+        {
+            <div class="empty-note">@(string.IsNullOrWhiteSpace(Model.TrangThaiDuLieuAi) ? "Chưa có dữ liệu AI cho dự án này" : Model.TrangThaiDuLieuAi)</div>
+        }
+        else
+        {
+            <div class="row g-2">
+                <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Tình trạng tiến độ</span><strong>@tinhTrangTienDo</strong></div></div>
+                <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Nguyên nhân AI dự đoán</span><strong>@(string.IsNullOrWhiteSpace(Model.TenNguyenNhanAiDuDoan) ? "-" : Model.TenNguyenNhanAiDuDoan)</strong></div></div>
+                <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Độ tin cậy</span><strong>@DinhDangPhanTram(Model.DoTinCayAi)</strong></div></div>
+                <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Thời gian dự đoán</span><strong>@(Model.ThoiGianDuDoanAi?.ToString("dd/MM/yyyy HH:mm") ?? "-")</strong></div></div>
+                <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Nguyên nhân Manager đã xác nhận</span><strong>@(string.IsNullOrWhiteSpace(Model.TenNguyenNhanManagerXacNhan) ? "-" : Model.TenNguyenNhanManagerXacNhan)</strong></div></div>
+                <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Độ tin cậy Manager xác nhận</span><strong>@DinhDangPhanTram(Model.DoTinCayManagerXacNhan)</strong></div></div>
+            </div>
+        }
+
+        <p class="ai-note mb-0">AI chỉ hỗ trợ tham khảo, quyết định đánh giá vẫn do người quản lý thực hiện.</p>
+    </div>
+</div>

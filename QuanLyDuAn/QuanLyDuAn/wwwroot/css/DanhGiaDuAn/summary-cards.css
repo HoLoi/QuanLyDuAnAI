@@ -1,0 +1,3 @@
+﻿.summary-item { border: 1px solid #e5e9f2; border-radius: 12px; padding: 10px 12px; background: #fff; display: flex; justify-content: space-between; align-items: center; }
+.summary-item span { color: #6b7a90; font-size: .82rem; }
+.summary-item strong { font-size: 1.15rem; }

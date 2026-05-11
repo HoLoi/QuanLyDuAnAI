@@ -7,12 +7,14 @@ namespace QuanLyDuAn.Constants
     {
         public const string ChoDuyet = "ChoDuyet";
         public const string DaDuyet = "DaDuyet";
+        public const string Nhap = "Nhap";
         public const string YeuCauBoSung = "YeuCauBoSung";
         public const string TuChoi = "TuChoi";
         public const string DaHuy = "DaHuy";
 
         public const string ChoDuyetHienThi = "Chờ duyệt";
         public const string DaDuyetHienThi = "Đã duyệt";
+        public const string NhapHienThi = "Nhập";
         public const string YeuCauBoSungHienThi = "Yêu cầu bổ sung";
         public const string TuChoiHienThi = "Từ chối";
         public const string DaHuyHienThi = "Đã hủy";
@@ -126,6 +128,8 @@ namespace QuanLyDuAn.Constants
                 return new[] { ChoDuyet, ChoDuyetHienThi };
             if (normalized == Normalize(DaDuyet))
                 return new[] { DaDuyet, DaDuyetHienThi };
+            if (normalized == Normalize(Nhap))
+                return new[] { Nhap, NhapHienThi };
             if (normalized == Normalize(YeuCauBoSung))
                 return new[] { YeuCauBoSung, YeuCauBoSungHienThi };
             if (normalized == Normalize(TuChoi))
@@ -170,6 +174,7 @@ namespace QuanLyDuAn.Constants
 
             if (normalized == Normalize(ChoDuyet)) return ChoDuyet;
             if (normalized == Normalize(DaDuyet)) return DaDuyet;
+            if (normalized == Normalize(Nhap)) return Nhap;
             if (normalized == Normalize(YeuCauBoSung)) return YeuCauBoSung;
             if (normalized == Normalize(TuChoi)) return TuChoi;
             if (normalized == Normalize(DaHuy)) return DaHuy;
@@ -201,6 +206,7 @@ namespace QuanLyDuAn.Constants
 
             if (normalized == Normalize(ChoDuyet)) return ChoDuyetHienThi;
             if (normalized == Normalize(DaDuyet)) return DaDuyetHienThi;
+            if (normalized == Normalize(Nhap)) return NhapHienThi;
             if (normalized == Normalize(YeuCauBoSung)) return YeuCauBoSungHienThi;
             if (normalized == Normalize(TuChoi)) return TuChoiHienThi;
             if (normalized == Normalize(DaHuy)) return DaHuyHienThi;

@@ -1,68 +1,207 @@
-﻿@model QuanLyDuAn.ViewModels.DuyetDeXuatCongViec.DuyetDeXuatCongViecPageViewModel
+@model QuanLyDuAn.ViewModels.DuyetDeXuatCongViec.DuyetDeXuatCongViecPageViewModel
 @using QuanLyDuAn.Constants
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    
     var canApprove = permissions.Contains(Permissions.DuyetDeXuatCongViec.Duyet);
+
+    string GetStatusBadgeClass(string? status)
+    {
+        if (TrangThai.EqualsValue(status, TrangThai.ChoDuyet))
+            return "is-pending";
+        if (TrangThai.EqualsValue(status, TrangThai.DaDuyet))
+            return "is-approved";
+        if (TrangThai.EqualsValue(status, TrangThai.TuChoi))
+            return "is-rejected";
+        if (TrangThai.EqualsValue(status, TrangThai.DaHuy))
+            return "is-cancelled";
+
+        return "is-neutral";
+    }
 }
 
-<table class="table table-bordered table-sm">
-    <thead>
-        <tr>
-            <th>Mã</th>
-            <th>Dự án</th>
-            <th>Người đề xuất</th>
-            <th>Công việc</th>
-            <th>Mô tả</th>
-            <th>Chi phí</th>
-            <th>Ngày đề xuất</th>
-            <th>Trạng thái</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.DanhSach.Count == 0)
-        {
-            <tr>
-                <td colspan="9" class="text-center text-muted">Không có đề xuất công việc.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model.DanhSach)
-            {
+<div class="duyet-de-xuat-cong-viec-section-head">
+    <h2 class="duyet-de-xuat-cong-viec-section-title">Danh sách đề xuất</h2>
+    <p class="duyet-de-xuat-cong-viec-section-note">Bảng rút gọn theo thông tin chính, bấm xem chi tiết để mở thông tin đầy đủ.</p>
+</div>
+
+@if (Model.DanhSach.Count == 0)
+{
+    <div class="duyet-de-xuat-cong-viec-empty-state">
+        <p class="duyet-de-xuat-cong-viec-empty-title">Chưa có đề xuất cần xử lý.</p>
+    </div>
+}
+else
+{
+    <div class="duyet-de-xuat-cong-viec-table-scroll">
+        <table class="table duyet-de-xuat-cong-viec-table">
+            <thead>
                 <tr>
-                    <td>@item.MaDeXuatCV</td>
-                    <td>@item.TenDuAn</td>
-                    <td>@item.NguoiDungDeXuat</td>
-                    <td>@item.TenCongViecDeXuat</td>
-                    <td>@item.MoTaCongViecDeXuat</td>
-                    <td>@item.ChiPhiDeXuat?.ToString("N0")</td>
-                    <td>@item.NgayDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)</td>
-                    <td>
-                        @if (canApprove && TrangThai.EqualsValue(item.TrangThaiCongViecDeXuat, TrangThai.ChoDuyet))
-                        {
-                            <div class="d-flex gap-1">
-                                <form asp-action="Duyet" method="post">
-                                    <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
-                                    <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
-                                    <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
-                                    <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
-                                </form>
-                                <form asp-action="TuChoi" method="post" class="d-flex gap-1">
-                                    <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
-                                    <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
-                                    <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
-                                    <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do" />
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Từ chối</button>
-                                </form>
-                            </div>
-                        }
-                    </td>
+                    <th>Mã</th>
+                    <th>Dự án</th>
+                    <th>Công việc đề xuất</th>
+                    <th>Chi phí đề xuất</th>
+                    <th>Ngày đề xuất</th>
+                    <th>Trạng thái</th>
+                    <th class="col-actions">Hành động</th>
                 </tr>
-            }
-        }
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DanhSach)
+                {
+                    var isPending = TrangThai.EqualsValue(item.TrangThaiCongViecDeXuat, TrangThai.ChoDuyet);
+                    var detailRowId = $"dxcv-detail-{item.MaDeXuatCV}";
+                    <tr class="duyet-de-xuat-cong-viec-main-row">
+                        <td class="text-nowrap">#@item.MaDeXuatCV</td>
+                        <td>
+                            <div class="duyet-de-xuat-cong-viec-cell-title">@item.TenDuAn</div>
+                            <div class="duyet-de-xuat-cong-viec-cell-sub">Mã dự án: @item.MaDuAn</div>
+                        </td>
+                        <td>
+                            <div class="duyet-de-xuat-cong-viec-cell-title">@item.TenCongViecDeXuat</div>
+                        </td>
+                        <td class="text-nowrap">
+                            @if (item.ChiPhiDeXuat.HasValue)
+                            {
+                                @($"{item.ChiPhiDeXuat.Value:N0} VNĐ")
+                            }
+                            else
+                            {
+                                <span class="duyet-de-xuat-cong-viec-cell-sub">0 VNĐ</span>
+                            }
+                        </td>
+                        <td class="text-nowrap">@item.NgayDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <span class="duyet-de-xuat-cong-viec-status-badge @GetStatusBadgeClass(item.TrangThaiCongViecDeXuat)">
+                                @TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)
+                            </span>
+                        </td>
+                        <td class="col-actions">
+                            <div class="duyet-de-xuat-cong-viec-table-actions">
+                                @if (canApprove && isPending)
+                                {
+                                    <form asp-action="Duyet" method="post" class="js-confirm-submit" data-confirm="Xác nhận duyệt đề xuất này?">
+                                        <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
+                                        <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
+                                        <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
+                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-approve">Duyệt</button>
+                                    </form>
+                                    <form asp-action="TuChoi" method="post" class="js-confirm-submit" data-confirm="Xác nhận từ chối đề xuất này?">
+                                        <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
+                                        <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
+                                        <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
+                                        <input type="hidden" name="lyDo" value="" />
+                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-reject">Từ chối</button>
+                                    </form>
+                                }
+                                <button type="button"
+                                        class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-detail js-toggle-detail"
+                                        data-target="@detailRowId"
+                                        aria-expanded="false">
+                                    Xem chi tiết
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr id="@detailRowId" class="duyet-de-xuat-cong-viec-detail-row d-none">
+                        <td colspan="7">
+                            <div class="duyet-de-xuat-cong-viec-detail-card">
+                                <div class="duyet-de-xuat-cong-viec-detail-grid">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Người đề xuất</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">@item.NguoiDungDeXuat</span>
+                                    </div>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Thời gian dự kiến</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                            @if (item.NgayBatDauCongViecDeXuat.HasValue || item.NgayKetThucCVDeXuatDuKien.HasValue)
+                                            {
+                                                @($"{item.NgayBatDauCongViecDeXuat:dd/MM/yyyy HH:mm} đến {item.NgayKetThucCVDeXuatDuKien:dd/MM/yyyy HH:mm}")
+                                            }
+                                            else
+                                            {
+                                                @:Chưa có dữ liệu
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item duyet-de-xuat-cong-viec-detail-item-wide">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Mô tả công việc</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                            @if (!string.IsNullOrWhiteSpace(item.MoTaCongViecDeXuat))
+                                            {
+                                                @item.MoTaCongViecDeXuat
+                                            }
+                                            else
+                                            {
+                                                @:Chưa có mô tả
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Danh mục công việc</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                            @if (!string.IsNullOrWhiteSpace(item.TenDanhMucCongViec))
+                                            {
+                                                @item.TenDanhMucCongViec
+                                            }
+                                            else
+                                            {
+                                                @:Chưa có thông tin
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Mức độ ưu tiên</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                            @if (!string.IsNullOrWhiteSpace(item.TenMucDoUuTien))
+                                            {
+                                                @item.TenMucDoUuTien
+                                            }
+                                            else
+                                            {
+                                                @:Chưa có thông tin
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Người duyệt</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                            @if (!string.IsNullOrWhiteSpace(item.NguoiDungDuyet))
+                                            {
+                                                @item.NguoiDungDuyet
+                                            }
+                                            else
+                                            {
+                                                @:Chưa duyệt
+                                            }
+                                        </span>
+                                    </div>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Ngày duyệt</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                            @(item.NgayDuyetDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa duyệt")
+                                        </span>
+                                    </div>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item duyet-de-xuat-cong-viec-detail-item-wide">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label">Lý do từ chối / ghi chú</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value">Không có</span>
+                                    </div>
+                                </div>
+                                @if (canApprove && isPending)
+                                {
+                                    <form asp-action="TuChoi" method="post" class="duyet-de-xuat-cong-viec-reject-form js-confirm-submit" data-confirm="Xác nhận từ chối đề xuất này?">
+                                        <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
+                                        <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
+                                        <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
+                                        <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Nhập lý do từ chối (nếu có)" />
+                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-reject">Gửi từ chối kèm lý do</button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

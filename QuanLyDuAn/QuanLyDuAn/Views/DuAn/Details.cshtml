@@ -1,4 +1,4 @@
-@model QuanLyDuAn.ViewModels.DuAn.DuAnChiTietViewModel
+﻿@model QuanLyDuAn.ViewModels.DuAn.DuAnChiTietViewModel
 @using QuanLyDuAn.Constants
 
 @{
@@ -6,6 +6,17 @@
     var permissions = Model.Permissions;
     var canManageFiles = Model.CoTheQuanLyFile;
     var statusCheck = Model.StatusCheck;
+    var currentUserClaim = User?.FindFirst("MaNguoiDung")?.Value;
+    var isProjectManager = int.TryParse(currentUserClaim, out var currentUserId) && currentUserId == Model.MaNguoiDung;
+    var canManageProjectWorkflow = permissions.Contains(Permissions.DuAn.Sua) && isProjectManager;
+    var canShowConfirmCompletionButton = canManageProjectWorkflow
+        && statusCheck != null
+        && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh)
+        && statusCheck.CanConfirmCompletion;
+    var canShowReopenButton = canManageProjectWorkflow
+        && statusCheck != null
+        && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.HoanThanh)
+        && statusCheck.CanReopen;
     var canSeeBudget = permissions.Contains(Permissions.NganSach.Xem) || permissions.Contains(Permissions.DeXuatNganSach.Xem);
     var canSeeChiPhi = permissions.Contains(Permissions.ChiPhi.Xem);
     var canSeeFinance = canSeeBudget || canSeeChiPhi;
@@ -19,6 +30,8 @@
     var canSeeNganSach = permissions.Contains(Permissions.NganSach.Xem);
     var canSeeChatDuAn = permissions.Contains(Permissions.Chat.Xem)
                          && !(User?.IsInRole("Admin") == true || User?.IsInRole("ADMIN") == true);
+    var canSeeDanhGiaDuAn = permissions.Contains(Permissions.DanhGiaDuAn.Xem);
+    var canSeeDanhGiaNhanVien = permissions.Contains(Permissions.DanhGiaNhanVien.Xem);
     var canSeeActivity = permissions.Contains(Permissions.NhatKy.Xem);
     var canProposeBudget = permissions.Contains(Permissions.DeXuatNganSach.Them);
     var budgetSummary = Model.NganSachTongHop;
@@ -55,7 +68,7 @@
                        asp-route-tuKhoa="@Model.TuKhoa"
                        asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
                        asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-                       class="btn btn-light btn-sm">Quay lại danh sách</a>
+                       class="btn detail-header-btn detail-header-btn-back">Quay lại danh sách</a>
                     @if (permissions.Contains(Permissions.DuAn.Sua))
                     {
                         <a asp-action="Sua"
@@ -63,7 +76,31 @@
                            asp-route-tuKhoa="@Model.TuKhoa"
                            asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
                            asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-                           class="btn btn-warning btn-sm">Sửa dự án</a>
+                           class="btn detail-header-btn detail-header-btn-edit">Sửa dự án</a>
+                    }
+                    @if (canShowConfirmCompletionButton)
+                    {
+                        <form asp-action="XacNhanHoanThanh"
+                              method="post"
+                              class="detail-header-form"
+                              onsubmit="return confirm('Xác nhận hoàn thành dự án này?');">
+                            <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                            <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                            <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                            <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                            <button type="submit" class="btn detail-header-btn detail-header-btn-confirm">
+                                Xác nhận hoàn thành
+                            </button>
+                        </form>
+                    }
+                    @if (canShowReopenButton)
+                    {
+                        <button type="button"
+                                class="btn detail-header-btn detail-header-btn-reopen"
+                                data-bs-toggle="modal"
+                                data-bs-target="#reopenFromDetailsModal">
+                            Mở lại dự án
+                        </button>
                     }
                 </div>
             </div>
@@ -705,9 +742,69 @@
                                 <span class="quick-desc">Trao đổi nội bộ</span>
                             </a>
                         }
+
+                        @if (canSeeDanhGiaDuAn)
+                        {
+                            <a asp-controller="DanhGiaDuAn"
+                               asp-action="Index"
+                               asp-route-maDuAn="@Model.MaDuAn"
+                               class="quick-action-card">
+                                <span class="quick-icon"><i class="bi bi-clipboard2-check"></i></span>
+                                <span class="quick-title">Đánh giá dự án</span>
+                                <span class="quick-desc">Tổng kết chất lượng</span>
+                            </a>
+                        }
+                        @if (canSeeDanhGiaNhanVien)
+                        {
+                            <a asp-controller="DanhGiaNhanVien"
+                               asp-action="Index"
+                               asp-route-maDuAn="@Model.MaDuAn"
+                               class="quick-action-card">
+                                <span class="quick-icon"><i class="bi bi-person-check"></i></span>
+                                <span class="quick-title">Đánh giá nhân viên</span>
+                                <span class="quick-desc">Theo dõi nhân sự</span>
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@if (canShowReopenButton)
+{
+    <div class="modal fade" id="reopenFromDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Mở lại dự án</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <form asp-action="MoLaiDuAn" method="post">
+                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                    <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                    <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+
+                    <div class="modal-body">
+                        <label for="reopenReasonFromDetails" class="form-label">Lý do mở lại dự án</label>
+                        <textarea name="lyDo"
+                                  id="reopenReasonFromDetails"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Nhập lý do mở lại dự án..."
+                                  required></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-warning">Xác nhận mở lại</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+

@@ -147,6 +147,12 @@ namespace QuanLyDuAn.Services.Implementations
             if (model.NgayKetThucCVDeXuatDuKien < model.NgayBatDauCongViecDeXuat)
                 throw new Exception("Ngày kết thúc dự kiến phải lớn hơn hoặc bằng ngày bắt đầu.");
 
+            if (string.IsNullOrWhiteSpace(model.TenCongViecDeXuat))
+                throw new Exception("Tên công việc đề xuất không được để trống.");
+
+            if (string.IsNullOrWhiteSpace(model.MoTaCongViecDeXuat))
+                throw new Exception("Mô tả công việc đề xuất không được để trống.");
+
             var maDuAn = model.MaDuAn.Value;
             var maDanhMucCv = model.MaDanhMucCV.Value;
             var maMucDo = model.MaMucDo.Value;
@@ -157,14 +163,54 @@ namespace QuanLyDuAn.Services.Implementations
             if (duAn == null)
                 throw new Exception("Không tìm thấy dự án.");
 
+            EnsureProjectAllowsWorkProposal(duAn.TrangThaiDuAn);
+
+            if (duAn.NgayBatDauDuAn.HasValue && model.NgayBatDauCongViecDeXuat.Value.Date < duAn.NgayBatDauDuAn.Value.Date)
+                throw new Exception("Ngày bắt đầu đề xuất không được sớm hơn ngày bắt đầu dự án.");
+
+            if (duAn.NgayKetThucDuAn.HasValue && model.NgayKetThucCVDeXuatDuKien.Value.Date > duAn.NgayKetThucDuAn.Value.Date)
+                throw new Exception("Ngày kết thúc đề xuất không được muộn hơn ngày kết thúc dự án.");
+
             var nganSachHienTai = await _context.NganSach
-                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true && x.IsActive == true)
+                .Where(x => x.MaDuAn == maDuAn
+                    && x.IsDeleted != true
+                    && x.IsActive == true
+                    && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi))
                 .OrderByDescending(x => x.Version)
                 .ThenByDescending(x => x.NgayCapNhatNganSach)
                 .FirstOrDefaultAsync();
 
             if (nganSachHienTai == null)
                 throw new Exception("Dự án chưa có ngân sách hiện hành. Vui lòng đề xuất ngân sách trước.");
+
+            var tongChiPhiDaDung = await (
+                from cp in _context.ChiPhi
+                join ns in _context.NganSach on cp.MaNganSach equals ns.MaNganSach
+                where cp.IsDeleted != true
+                      && ns.IsDeleted != true
+                      && ns.MaDuAn == maDuAn
+                select cp.SoTienDaChi ?? 0
+            ).SumAsync();
+
+            var nganSachConLai = (nganSachHienTai.SoTienNganSach ?? 0) - tongChiPhiDaDung;
+            if (model.ChiPhiDeXuat.Value > nganSachConLai)
+            {
+                throw new Exception($"Chi phí đề xuất vượt ngân sách còn lại ({Math.Max(nganSachConLai, 0):N0} VNĐ).");
+            }
+
+            var tenCongViecDeXuat = model.TenCongViecDeXuat.Trim();
+            var moTaCongViecDeXuat = model.MoTaCongViecDeXuat.Trim();
+
+            var duplicatedPendingProposalExists = await _context.DeXuatCongViec.AnyAsync(x =>
+                x.IsDeleted != true
+                && x.MaDuAn == maDuAn
+                && (x.TrangThaiCongViecDeXuat == TrangThai.ChoDuyet || x.TrangThaiCongViecDeXuat == TrangThai.ChoDuyetHienThi)
+                && x.TenCongViecDeXuat == tenCongViecDeXuat
+                && x.NgayBatDauCongViecDeXuat == model.NgayBatDauCongViecDeXuat
+                && x.NgayKetThucCVDeXuatDuKien == model.NgayKetThucCVDeXuatDuKien);
+
+            if (duplicatedPendingProposalExists)
+                throw new Exception("Đã tồn tại đề xuất công việc trùng thông tin và đang chờ duyệt.");
 
             var danhMucExists = await _context.DanhMucCongViec
                 .AnyAsync(x => x.MaDanhMucCV == maDanhMucCv && x.MaDuAn == maDuAn && x.IsDeleted != true);
@@ -184,8 +230,8 @@ namespace QuanLyDuAn.Services.Implementations
                 MaDanhMucCV = maDanhMucCv,
                 MaMucDo = maMucDo,
                 MaNguoiDungDeXuat = currentUserId,
-                TenCongViecDeXuat = model.TenCongViecDeXuat.Trim(),
-                MoTaCongViecDeXuat = model.MoTaCongViecDeXuat.Trim(),
+                TenCongViecDeXuat = tenCongViecDeXuat,
+                MoTaCongViecDeXuat = moTaCongViecDeXuat,
                 ChiPhiDeXuat = model.ChiPhiDeXuat,
                 NgayBatDauCongViecDeXuat = model.NgayBatDauCongViecDeXuat,
                 NgayKetThucCVDeXuatDuKien = model.NgayKetThucCVDeXuatDuKien,
@@ -259,6 +305,14 @@ namespace QuanLyDuAn.Services.Implementations
 
         private async Task EnsureCanProposeForProjectAsync(int maNguoiDung, int maDuAn)
         {
+            var isProjectManager = await _context.DuAn.AnyAsync(x =>
+                x.MaDuAn == maDuAn &&
+                x.IsDeleted != true &&
+                x.MaNguoiDung == maNguoiDung);
+
+            if (isProjectManager)
+                throw new Exception("Quản lý dự án chỉ có quyền duyệt đề xuất công việc, không tạo đề xuất.");
+
             var coTeamPhuTrach = await _context.TeamDuAn.AnyAsync(x => x.MaDuAn == maDuAn);
 
             if (coTeamPhuTrach)
@@ -311,6 +365,15 @@ namespace QuanLyDuAn.Services.Implementations
                 .Distinct()
                 .ToList();
 
+            var managedProjectIds = await _context.DuAn
+                .Where(x => x.IsDeleted != true && x.MaNguoiDung == maNguoiDung)
+                .Select(x => x.MaDuAn)
+                .ToListAsync();
+
+            allowedProjectIds = allowedProjectIds
+                .Except(managedProjectIds)
+                .ToList();
+
             return await _context.DuAn
                 .Where(x => x.IsDeleted != true && allowedProjectIds.Contains(x.MaDuAn))
                 .OrderBy(x => x.TenDuAn)
@@ -325,6 +388,18 @@ namespace QuanLyDuAn.Services.Implementations
         private static bool IsPending(string? status)
         {
             return TrangThai.EqualsValue(status, TrangThai.ChoDuyet);
+        }
+
+        private static void EnsureProjectAllowsWorkProposal(string? projectStatus)
+        {
+            if (TrangThai.LaHoanThanhCongViec(projectStatus)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.ChoXacNhanHoanThanh)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.TamDung)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.LuuTru)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.DaHuy))
+            {
+                throw new Exception("Dự án đang ở trạng thái không cho phép tạo đề xuất công việc mới.");
+            }
         }
     }
 }

@@ -8,27 +8,29 @@
 
 @if (canShowForm)
 {
-    <form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+    <form asp-action="Index" method="get" class="team-filter-form">
         <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
         <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
         <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
         <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
 
-        <div class="col-md-6">
-            <label class="form-label">Chọn team phụ trách</label>
-            <select name="maTeamDangChon" class="form-select" required>
-                <option value="">-- Chọn team --</option>
-                @foreach (var team in Model.DanhSachTeamCoTheGan)
-                {
-                    <option value="@team.MaTeam" selected="@(Model.MaTeamDangChon == team.MaTeam ? "selected" : null)">
-                        @team.TenTeam (@TrangThai.ToDisplay(team.TrangThaiTeam))
-                    </option>
-                }
-            </select>
-        </div>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label class="form-label">Chọn nhóm phụ trách</label>
+                <select name="maTeamDangChon" class="form-select" required>
+                    <option value="">-- Chọn nhóm --</option>
+                    @foreach (var team in Model.DanhSachTeamCoTheGan)
+                    {
+                        <option value="@team.MaTeam" selected="@(Model.MaTeamDangChon == team.MaTeam ? "selected" : null)">
+                            @team.TenTeam (@TrangThai.ToDisplay(team.TrangThaiTeam))
+                        </option>
+                    }
+                </select>
+            </div>
 
-        <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-outline-primary">Tải thành viên</button>
+            <div class="col-md-4">
+                <button type="submit" class="btn team-btn-secondary">Tải thành viên</button>
+            </div>
         </div>
     </form>
 }

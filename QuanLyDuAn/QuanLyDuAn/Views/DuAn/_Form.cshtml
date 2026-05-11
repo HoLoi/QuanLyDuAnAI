@@ -175,6 +175,11 @@
                 {
                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#pauseModal">Tạm dừng dự án</button>
                 }
+
+                @if (Model.StatusCheck.CanReopen && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.HoanThanh))
+                {
+                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#reopenModal">Mở lại dự án</button>
+                }
             </div>
 
             <!-- Conditions for transitions -->
@@ -204,6 +209,36 @@
         </div>
     </div>
 }
+
+<!-- Modal Mở lại dự án -->
+<div class="modal fade" id="reopenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mở lại dự án</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="MoLaiDuAn" method="post">
+                <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
+                <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
+                <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reopenReason" class="form-label">Lý do mở lại</label>
+                        <textarea name="lyDo" id="reopenReason" class="form-control" rows="4" required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">Mở lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Tạm dừng -->
 <div class="modal fade" id="pauseModal" tabindex="-1">

@@ -16,38 +16,43 @@
 
 @if (canShowForm)
 {
-    <h6>Thêm chi tiết công việc</h6>
-    <form asp-action="Them" method="post" class="mb-3">
+    <form asp-action="Them" method="post" class="detail-form-grid">
         <input type="hidden" name="MaCongViec" value="@Model.CongViec.MaCongViec" />
 
-        <div class="row g-2">
-            <div class="col-md-3">
-                <label class="form-label">Tên CTCV</label>
-                <input type="text" class="form-control" name="TenCTCV" value="@Model.Form.TenCTCV" maxlength="255" />
-            </div>
-            <div class="col-md-5">
-                <label class="form-label">Nội dung</label>
-                <input type="text" class="form-control" name="NoiDungChiTietCV" maxlength="255" required />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Ngày bắt đầu CTCV</label>
-                <input type="date" class="form-control" name="NgayBatDauCTCV" value="@Model.Form.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Trạng thái</label>
-                <select class="form-select" name="TrangThaiCTCV" required>
-                    @foreach (var item in trangThaiOptions)
-                    {
-                        <option value="@item" selected="@(TrangThai.EqualsValue(Model.Form.TrangThaiCTCV, item))">@TrangThai.ToDisplay(item)</option>
-                    }
-                </select>
-            </div>
+        <div class="form-field">
+            <label for="TenCTCV">Tên CTCV</label>
+            <input id="TenCTCV" type="text" class="form-control" name="TenCTCV" value="@Model.Form.TenCTCV" maxlength="255" placeholder="Ví dụ: Thiết kế API cho module báo cáo" />
         </div>
 
-        <div class="d-flex gap-2 mt-2">
-            <button type="submit" class="btn btn-primary">Thêm chi tiết</button>
-            <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="btn btn-secondary">Làm mới</a>
+        <div class="form-field form-field--wide">
+            <label for="NoiDungChiTietCV">Nội dung</label>
+            <input id="NoiDungChiTietCV" type="text" class="form-control" name="NoiDungChiTietCV" maxlength="255" required placeholder="Mô tả đầu việc chi tiết cần thực hiện" />
+        </div>
+
+        <div class="form-field">
+            <label for="NgayBatDauCTCV">Ngày bắt đầu CTCV</label>
+            <input id="NgayBatDauCTCV" type="date" class="form-control" name="NgayBatDauCTCV" value="@Model.Form.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
+        </div>
+
+        <div class="form-field">
+            <label for="TrangThaiCTCV">Trạng thái</label>
+            <select id="TrangThaiCTCV" class="form-select" name="TrangThaiCTCV" required>
+                @foreach (var item in trangThaiOptions)
+                {
+                    <option value="@item" selected="@(TrangThai.EqualsValue(Model.Form.TrangThaiCTCV, item))">@TrangThai.ToDisplay(item)</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-form-primary">
+                <i class="bi bi-plus-circle"></i>
+                Thêm chi tiết
+            </button>
+            <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="btn btn-form-secondary">
+                <i class="bi bi-arrow-repeat"></i>
+                Làm mới
+            </a>
         </div>
     </form>
-    <hr />
 }

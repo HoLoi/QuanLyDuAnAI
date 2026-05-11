@@ -10,6 +10,9 @@
         public DateTime? NgayBatDauCTCV { get; set; }
         public DateTime? NgayKetThucCTCV { get; set; }
         public string TrangThaiCTCV { get; set; } = string.Empty;
+        public string TrangThaiHienThi { get; set; } = string.Empty;
+        public string CssTrangThai { get; set; } = string.Empty;
+        public string? ThongDiepWorkflow { get; set; }
         public bool CoThePhanCongChiTietCongViec { get; set; }
     }
 }

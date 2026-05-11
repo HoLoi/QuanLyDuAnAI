@@ -17,6 +17,11 @@ namespace QuanLyDuAn.ViewModels.CongViec
         public DateTime? NgayKetThucCVThucTe { get; set; }
         public DateTime? NgayTaoCongViec { get; set; }
         public string TrangThaiCongViec { get; set; } = string.Empty;
+        public string TrangThaiHienThi { get; set; } = string.Empty;
+        public string CssTrangThai { get; set; } = string.Empty;
+        public string? ThongDiepWorkflow { get; set; }
         public bool CoThePhanCongCongViec { get; set; }
+        public bool CoTheXacNhanHoanThanh { get; set; }
+        public bool CoTheMoLai { get; set; }
     }
 }

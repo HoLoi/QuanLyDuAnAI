@@ -18,6 +18,7 @@ namespace QuanLyDuAn.Services
             dichVu.AddScoped<ITeamDuAnService, TeamDuAnService>();
             dichVu.AddScoped<INhanVienDuAnService, NhanVienDuAnService>();
             dichVu.AddScoped<IDanhMucCongViecService, DanhMucCongViecService>();
+            dichVu.AddScoped<ITrangThaiWorkflowService, TrangThaiWorkflowService>();
             dichVu.AddScoped<ICongViecService, CongViecService>();
             dichVu.AddScoped<IChiTietCongViecService, ChiTietCongViecService>();
             dichVu.AddScoped<IPhanCongCongViecService, PhanCongCongViecService>();
@@ -25,6 +26,8 @@ namespace QuanLyDuAn.Services
             dichVu.AddScoped<IChatDuAnService, ChatDuAnService>();
             dichVu.AddScoped<ITienDoCongViecService, TienDoCongViecService>();
             dichVu.AddScoped<IFileTienDoCongViecService, FileTienDoCongViecService>();
+            dichVu.AddScoped<IDanhGiaDuAnService, DanhGiaDuAnService>();
+            dichVu.AddScoped<IDanhGiaNhanVienService, DanhGiaNhanVienService>();
             dichVu.AddScoped<IDeXuatCongViecService, DeXuatCongViecService>();
             dichVu.AddScoped<IDuyetDeXuatCongViecService, DyetDeXuatCongViecService>();
             dichVu.AddScoped<INganSachService, NganSachService>();

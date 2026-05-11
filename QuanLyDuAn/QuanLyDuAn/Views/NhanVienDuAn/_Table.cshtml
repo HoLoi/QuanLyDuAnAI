@@ -7,85 +7,94 @@
     bool canDelete = permissions.Contains(Permissions.ThanhVienDuAn.Xoa);
 }
 
-<h6>Danh sách nhân viên đang phụ trách</h6>
-<table class="table table-bordered mt-2">
-    <thead>
-        <tr>
-            <th>Mã NV</th>
-            <th>Họ tên</th>
-            <th>Vai trò trong dự án</th>
-            <th>Ngày tham gia</th>
-            <th>Thuộc team phụ trách</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.DanhSachNhanVienPhuTrach.Count == 0)
-        {
-            <tr>
-                <td colspan="6" class="text-center text-muted">Chưa có nhân viên phụ trách.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model.DanhSachNhanVienPhuTrach)
-            {
+@if (Model.DanhSachNhanVienPhuTrach.Count == 0)
+{
+    <div class="thanh-vien-empty-state">
+        <div class="thanh-vien-empty-icon"><i class="bi bi-people"></i></div>
+        <div class="thanh-vien-empty-title">Chưa có thành viên phụ trách</div>
+        <p class="thanh-vien-empty-text">Danh sách thành viên sẽ hiển thị sau khi bạn thêm nhân sự vào dự án.</p>
+    </div>
+}
+else
+{
+    <div class="thanh-vien-table-scroll">
+        <table class="table table-bordered app-data-table thanh-vien-table">
+            <thead>
                 <tr>
-                    <td>@item.MaNguoiDung</td>
-                    <td>@item.HoTenNguoiDung</td>
-                    <td>
-                        @if (canEdit)
-                        {
-                            <form asp-action="CapNhatVaiTro" method="post" class="d-flex gap-1">
-                                <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
-                                <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
-                                <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
-                                <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
-                                <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
-                                <select name="vaiTroTrongDuAn" class="form-select form-select-sm">
-                                    <option value="@TrangThai.VaiTroLeader"
-                                            selected="@(TrangThai.EqualsValue(item.VaiTroTrongDuAn, TrangThai.VaiTroLeader) ? "selected" : null)">
-                                        @TrangThai.VaiTroLeaderHienThi
-                                    </option>
-                                    <option value="@TrangThai.VaiTroMember"
-                                            selected="@(TrangThai.EqualsValue(item.VaiTroTrongDuAn, TrangThai.VaiTroMember) ? "selected" : null)">
-                                        @TrangThai.VaiTroMemberHienThi
-                                    </option>
-                                </select>
-                                <button type="submit" class="btn btn-warning btn-sm" disabled="@(!Model.CoTheChinhSua)">Lưu</button>
-                            </form>
-                        }
-                        else
-                        {
-                            @TrangThai.ToDisplayVaiTroTrongDuAn(item.VaiTroTrongDuAn)
-                        }
-                    </td>
-                    <td>@item.NgayThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>
-                        @if (item.ThuocTeamPhuTrach)
-                        {
-                            <span class="text-success">Có (@item.TenTeamPhuTrach)</span>
-                        }
-                        else
-                        {
-                            <span class="text-muted">Không</span>
-                        }
-                    </td>
-                    <td>
-                        @if (canDelete)
-                        {
-                            <form asp-action="XoaNhanVien" method="post">
-                                <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
-                                <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
-                                <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
-                                <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
-                                <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
-                                <button type="submit" class="btn btn-danger btn-sm" disabled="@(!Model.CoTheChinhSua)">Xóa</button>
-                            </form>
-                        }
-                    </td>
+                    <th>Mã NV</th>
+                    <th>Họ tên</th>
+                    <th>Vai trò trong dự án</th>
+                    <th>Ngày tham gia</th>
+                    <th>Thuộc nhóm phụ trách</th>
+                    <th class="col-actions">Thao tác</th>
                 </tr>
-            }
-        }
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DanhSachNhanVienPhuTrach)
+                {
+                    <tr>
+                        <td>@item.MaNguoiDung</td>
+                        <td class="fw-semibold">@item.HoTenNguoiDung</td>
+                        <td>
+                            @if (canEdit)
+                            {
+                                <form asp-action="CapNhatVaiTro" method="post" class="d-flex gap-1 thanh-vien-role-form">
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                                    <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                                    <select name="vaiTroTrongDuAn" class="form-select form-select-sm">
+                                        <option value="@TrangThai.VaiTroLeader"
+                                                selected="@(TrangThai.EqualsValue(item.VaiTroTrongDuAn, TrangThai.VaiTroLeader) ? "selected" : null)">
+                                            @TrangThai.VaiTroLeaderHienThi
+                                        </option>
+                                        <option value="@TrangThai.VaiTroMember"
+                                                selected="@(TrangThai.EqualsValue(item.VaiTroTrongDuAn, TrangThai.VaiTroMember) ? "selected" : null)">
+                                            @TrangThai.VaiTroMemberHienThi
+                                        </option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm thanh-vien-action-btn thanh-vien-action-warning" disabled="@(!Model.CoTheChinhSua)">
+                                        <i class="bi bi-save"></i>
+                                        <span>Lưu</span>
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="thanh-vien-role-badge">@TrangThai.ToDisplayVaiTroTrongDuAn(item.VaiTroTrongDuAn)</span>
+                            }
+                        </td>
+                        <td>@item.NgayThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            @if (item.ThuocTeamPhuTrach)
+                            {
+                                <span class="thanh-vien-team-badge is-in-team">Có (@item.TenTeamPhuTrach)</span>
+                            }
+                            else
+                            {
+                                <span class="thanh-vien-team-badge is-no-team">Không</span>
+                            }
+                        </td>
+                        <td class="col-actions table-actions thanh-vien-table-actions">
+                            @if (canDelete)
+                            {
+                                <form asp-action="XoaNhanVien" method="post">
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                                    <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                                    <button type="submit" class="btn btn-sm thanh-vien-action-btn thanh-vien-action-danger" disabled="@(!Model.CoTheChinhSua)">
+                                        <i class="bi bi-trash"></i>
+                                        <span>Xóa</span>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

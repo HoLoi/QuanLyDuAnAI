@@ -271,11 +271,14 @@ public partial class QuanLyDuAnDbContext : DbContext
         {
             entity.ToTable("CT_DANH_GIA_DU_AN");
             entity.HasKey(e => e.MaChiTietDGDA);
-            entity.Property(e => e.TieuChi).HasMaxLength(50);
             entity.HasOne<DanhGiaDuAn>()
                 .WithMany()
                 .HasForeignKey(d => d.MaDanhGiaDuAn)
                 .HasConstraintName("FK_CT_DGDA_CO_DANH_GIA");
+            entity.HasOne<TieuChiDanhGia>()
+                .WithMany()
+                .HasForeignKey(d => d.MaTieuChi)
+                .HasConstraintName("FK_CT_DGDA_TIEU_CHI");
         });
         modelBuilder.Entity<CtDanhGiaNhanVien>(entity =>
         {
@@ -289,12 +292,18 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(d => d.MaDanhGiaNhanVien)
                 .HasConstraintName("FK_CT_DGNV_CO_DANH_GIA");
+            entity.HasOne<TieuChiDanhGia>()
+                .WithMany()
+                .HasForeignKey(d => d.MaTieuChi)
+                .HasConstraintName("FK_CT_DGNV_TIEU_CHI");
         });
         modelBuilder.Entity<DanhGiaDuAn>(entity =>
         {
             entity.ToTable("DANH_GIA_DU_AN");
             entity.HasKey(e => e.MaDanhGiaDuAn);
             entity.Property(e => e.NhanXetTongDuAn).HasMaxLength(255);
+            entity.Property(e => e.TrangThaiDanhGiaDA).HasMaxLength(50);
+            entity.Property(e => e.LyDoTuChoiDanhGiaDA).HasMaxLength(500);
             entity.HasOne<NguoiDung>()
                 .WithMany()
                 .HasForeignKey(d => d.MaNguoiDung)
@@ -305,6 +314,10 @@ public partial class QuanLyDuAnDbContext : DbContext
                 .HasConstraintName("FK_DANH_GIA_DUOC DANH_DU_AN");
             entity.HasOne<NguoiDung>()
                 .WithMany()
+                .HasForeignKey(d => d.MaNguoiDungDuyet)
+                .HasConstraintName("FK_DGDA_DUYET_NGUOI_DUNG");
+            entity.HasOne<NguoiDung>()
+                .WithMany()
                 .HasForeignKey(d => d.DeletedBy)
                 .HasConstraintName("FK_DGDA_DELETED_BY");
         });
@@ -313,18 +326,21 @@ public partial class QuanLyDuAnDbContext : DbContext
             entity.ToTable("DANH_GIA_NHAN_VIEN");
             entity.HasKey(e => e.MaDanhGiaNhanVien);
             entity.Property(e => e.XepLoai).HasMaxLength(50);
+            entity.Property(e => e.TrangThaiDanhGiaNV).HasMaxLength(50);
+            entity.Property(e => e.NhanXetTongQuanNV).HasMaxLength(500);
+            entity.Property(e => e.LyDoTuChoiDanhGiaNV).HasMaxLength(500);
             entity.HasOne<NguoiDung>()
                 .WithMany()
                 .HasForeignKey(d => d.MaNguoiDungDanhGia)
                 .HasConstraintName("FK_DGNV_DANH_GIA_NGUOI_DU");
-            entity.HasOne<TieuChiDanhGia>()
-                .WithMany()
-                .HasForeignKey(d => d.MaTieuChi)
-                .HasConstraintName("FK_DANH_GIA_DUA VAO_TIEU_CHI");
             entity.HasOne<NguoiDung>()
                 .WithMany()
                 .HasForeignKey(d => d.MaNguoiDung)
                 .HasConstraintName("FK_DANH_GIA_DUOC_NGUOI_DU");
+            entity.HasOne<NguoiDung>()
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiDungDuyet)
+                .HasConstraintName("FK_DGNV_DUYET_NGUOI_DUNG");
             entity.HasOne<DuAn>()
                 .WithMany()
                 .HasForeignKey(d => d.MaDuAn)

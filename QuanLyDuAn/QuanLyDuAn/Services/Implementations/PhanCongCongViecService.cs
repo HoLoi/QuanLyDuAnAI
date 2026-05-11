@@ -68,7 +68,10 @@ namespace QuanLyDuAn.Services.Implementations
             vm.ThanhVienCoThePhanCong = await (
                 from nd in _context.NguoiDung
                 join nvda in _context.NhanVienDuAn on nd.MaNguoiDung equals nvda.MaNguoiDung
+                join asp in _context.Aspnetusers on nd.Id equals asp.Id
                 where nvda.MaDuAn == maDuAn
+                      && nd.IsDeleted != true
+                      && (!asp.LockoutEnd.HasValue || asp.LockoutEnd <= DateTime.UtcNow)
                       && !maDaPhanCong.Contains(nd.MaNguoiDung)
                 select new PhanCongCongViecOptionViewModel
                 {
@@ -97,11 +100,7 @@ namespace QuanLyDuAn.Services.Implementations
             if (!coThePhanCong)
                 throw new Exception("Bạn không có quyền phân công công việc này.");
 
-            var thuocDuAn = await _context.NhanVienDuAn
-                .AnyAsync(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNhanVien);
-
-            if (!thuocDuAn)
-                throw new Exception("Nhân viên không thuộc dự án này. Vui lòng thêm nhân viên vào dự án trước.");
+            await KiemTraNhanVienHopLeAsync(maDuAn, maNhanVien);
 
             var daTonTai = await _context.PhanCongCongViec
                 .AnyAsync(x => x.MaCongViec == maCongViec && x.MaNguoiDung == maNhanVien);
@@ -163,8 +162,39 @@ namespace QuanLyDuAn.Services.Implementations
 
         private static void KiemTraTrangThaiCongViec(CongViec congViec)
         {
-            if (TrangThai.LaHoanThanhCongViec(congViec.TrangThaiCongViec))
-                throw new Exception("Công việc đã hoàn thành, không thể thực hiện phân công.");
+            var trangThaiCongViec = TrangThai.ToCode(congViec.TrangThaiCongViec);
+            if (TrangThai.LaHoanThanhCongViec(trangThaiCongViec)
+                || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.LuuTru)
+                || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.TamDung))
+            {
+                throw new Exception("Công việc đã đóng, không thể thực hiện phân công.");
+            }
+        }
+
+        private async Task KiemTraNhanVienHopLeAsync(int maDuAn, int maNhanVien)
+        {
+            var nhanVien = await (
+                from nd in _context.NguoiDung
+                join asp in _context.Aspnetusers on nd.Id equals asp.Id
+                where nd.MaNguoiDung == maNhanVien && nd.IsDeleted != true
+                select new
+                {
+                    nd.MaNguoiDung,
+                    asp.LockoutEnd
+                }).FirstOrDefaultAsync();
+
+            if (nhanVien == null)
+                throw new Exception("Người được phân công không tồn tại hoặc đã bị xóa.");
+
+            if (nhanVien.LockoutEnd.HasValue && nhanVien.LockoutEnd.Value > DateTime.UtcNow)
+                throw new Exception("Tài khoản của người được phân công đang bị khóa.");
+
+            var thuocDuAn = await _context.NhanVienDuAn
+                .AnyAsync(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNhanVien);
+
+            if (!thuocDuAn)
+                throw new Exception("Nhân viên không thuộc dự án này. Vui lòng thêm nhân viên vào dự án trước.");
         }
 
         private async Task<int> GetCurrentUserIdAsync()
@@ -189,8 +219,19 @@ namespace QuanLyDuAn.Services.Implementations
         private async Task<bool> KiemTraQuyenPhanCongAsync(int maDuAn, int maNguoiDungHienTai)
         {
             var httpUser = _httpContextAccessor.HttpContext?.User;
-            if (httpUser?.IsInRole("Admin") == true || httpUser?.IsInRole("Manager") == true)
-                return true;
+            if (httpUser?.IsInRole("Admin") == true)
+                return false;
+
+            if (httpUser?.IsInRole("Manager") == true)
+            {
+                var laQuanLyDuAn = await _context.DuAn
+                    .AnyAsync(x => x.MaDuAn == maDuAn
+                                   && x.MaNguoiDung == maNguoiDungHienTai
+                                   && x.IsDeleted != true);
+
+                if (laQuanLyDuAn)
+                    return true;
+            }
 
             var teamDuAnIds = await _context.TeamDuAn
                 .Where(x => x.MaDuAn == maDuAn)

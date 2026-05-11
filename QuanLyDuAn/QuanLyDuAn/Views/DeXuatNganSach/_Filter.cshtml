@@ -1,20 +1,44 @@
 ﻿@model QuanLyDuAn.ViewModels.DeXuatNganSach.DeXuatNganSachPageViewModel
 @using QuanLyDuAn.Constants
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
-    <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
-
-    <div class="col-md-6">
-        <select name="locTrangThai" class="form-select">
-            <option value="">-- Tất cả trạng thái --</option>
-            <option value="@TrangThai.ChoDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoDuyet))">@TrangThai.ChoDuyetHienThi</option>
-            <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
-            <option value="@TrangThai.TuChoi" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TuChoi))">@TrangThai.TuChoiHienThi</option>
-            <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
-        </select>
+<form asp-action="Index" method="get" class="dxns-filter-form">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label" for="locMaDuAn">Dự án</label>
+            <select id="locMaDuAn" name="locMaDuAn" class="form-select">
+                @foreach (var duAn in Model.DanhSachDuAn)
+                {
+                    if (Model.LocMaDuAn == duAn.MaDuAn)
+                    {
+                        <option value="@duAn.MaDuAn" selected>@duAn.TenDuAn</option>
+                    }
+                    else
+                    {
+                        <option value="@duAn.MaDuAn">@duAn.TenDuAn</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label" for="locTrangThai">Trạng thái đề xuất</label>
+            <select id="locTrangThai" name="locTrangThai" class="form-select">
+                <option value="">-- Tất cả trạng thái --</option>
+                <option value="@TrangThai.ChoDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoDuyet))">@TrangThai.ChoDuyetHienThi</option>
+                <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
+                <option value="@TrangThai.TuChoi" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TuChoi))">@TrangThai.TuChoiHienThi</option>
+                <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
+            </select>
+        </div>
     </div>
-    <div class="col-md-6 d-flex gap-2">
-        <button class="btn btn-outline-primary w-100" type="submit">Lọc</button>
-        <a asp-action="Index" asp-route-locMaDuAn="@Model.LocMaDuAn" class="btn btn-outline-secondary w-100">Bỏ lọc</a>
+
+    <div class="dxns-filter-actions">
+        <button class="dxns-action-btn dxns-action-primary" type="submit">
+            <i class="bi bi-funnel"></i>
+            Lọc
+        </button>
+        <a asp-action="Index" asp-route-locMaDuAn="@Model.LocMaDuAn" class="dxns-action-btn dxns-action-neutral">
+            <i class="bi bi-x-circle"></i>
+            Bỏ lọc
+        </a>
     </div>
 </form>

@@ -3,52 +3,74 @@
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    
+
     string? tuKhoa = ViewBag.TuKhoa as string;
     int? locMaDuAn = ViewBag.LocMaDuAn as int?;
+    var danhSach = Model ?? new List<QuanLyDuAn.ViewModels.DanhMucCongViec.DanhMucCongViecViewModel>();
 }
 
-<table class="table table-bordered mt-3 app-data-table">
-    <thead>
-        <tr>
-            <th class="col-id">Mã</th>
-            <th>Tên danh mục</th>
-            <th>Mô tả</th>
-            <th class="col-date">Ngày tạo</th>
-            <th class="col-count">Số công việc</th>
-            <th class="col-actions"></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td class="col-id">@item.MaDanhMucCV</td>
-                <td>@item.TenDanhMucCV</td>
-                <td>@item.MoTaDanhMucCV</td>
-                <td class="col-date">@item.NgayTaoDMCV?.ToString("dd/MM/yyyy")</td>
-                <td class="col-count">@item.SoLuongCongViec</td>
-                <td class="col-actions table-actions">
-                    @if (permissions.Contains(Permissions.DanhMucCongViec.Sua))
-                    {
-                        <a asp-action="Sua"
-                           asp-route-id="@item.MaDanhMucCV"
-                           asp-route-tuKhoa="@tuKhoa"
-                           asp-route-locMaDuAn="@locMaDuAn"
-                           class="btn btn-outline-warning btn-sm">Sửa</a>
-                    }
+@if (!danhSach.Any())
+{
+    <div class="danh-muc-empty-state">
+        <div class="danh-muc-empty-icon"><i class="bi bi-folder2-open"></i></div>
+        <div class="danh-muc-empty-title">Chưa có danh mục công việc</div>
+        <p class="danh-muc-empty-text">Hãy thêm danh mục mới để bắt đầu quản lý công việc theo nhóm.</p>
+    </div>
+}
+else
+{
+    <div class="danh-muc-table-scroll">
+        <table class="table table-bordered app-data-table danh-muc-table">
+            <thead>
+                <tr>
+                    <th class="col-id">Mã</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th class="col-date">Ngày tạo</th>
+                    <th class="col-count">Số công việc</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in danhSach)
+                {
+                    <tr>
+                        <td class="col-id">@item.MaDanhMucCV</td>
+                        <td class="fw-semibold">@item.TenDanhMucCV</td>
+                        <td>@item.MoTaDanhMucCV</td>
+                        <td class="col-date">@item.NgayTaoDMCV?.ToString("dd/MM/yyyy")</td>
+                        <td class="col-count">
+                            <span class="danh-muc-count-badge">@item.SoLuongCongViec công việc</span>
+                        </td>
+                        <td class="col-actions table-actions danh-muc-table-actions">
+                            @if (permissions.Contains(Permissions.DanhMucCongViec.Sua))
+                            {
+                                <a asp-action="Sua"
+                                   asp-route-id="@item.MaDanhMucCV"
+                                   asp-route-tuKhoa="@tuKhoa"
+                                   asp-route-locMaDuAn="@locMaDuAn"
+                                   class="btn btn-sm danh-muc-action-btn danh-muc-action-warning">
+                                    <i class="bi bi-pencil-square"></i>
+                                    <span>Sửa</span>
+                                </a>
+                            }
 
-                    @if (permissions.Contains(Permissions.DanhMucCongViec.Xoa))
-                    {
-                        <form asp-action="XoaDanhMucCongViec" method="post">
-                            <input type="hidden" name="maDanhMucCV" value="@item.MaDanhMucCV" />
-                            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
-                            <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                            @if (permissions.Contains(Permissions.DanhMucCongViec.Xoa))
+                            {
+                                <form asp-action="XoaDanhMucCongViec" method="post">
+                                    <input type="hidden" name="maDanhMucCV" value="@item.MaDanhMucCV" />
+                                    <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                                    <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                                    <button type="submit" class="btn btn-sm danh-muc-action-btn danh-muc-action-danger">
+                                        <i class="bi bi-trash"></i>
+                                        <span>Xóa</span>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

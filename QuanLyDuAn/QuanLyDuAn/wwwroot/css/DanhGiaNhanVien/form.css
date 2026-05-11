@@ -1,0 +1,6 @@
+﻿.dgnv-form { border-radius: 12px; border: 1px solid #e5e9f2; }
+.criteria-row { border: 1px solid #edf1f7; border-radius: 10px; padding: 10px; background: #fcfdff; }
+.criteria-title { font-weight: 600; margin-bottom: 6px; }
+.mini-stat { border: 1px solid #e5e9f2; border-radius: 10px; padding: 8px 10px; background: #fff; }
+.mini-stat span { display: block; color: #6b7a90; font-size: .78rem; }
+.mini-stat strong { font-size: .95rem; }

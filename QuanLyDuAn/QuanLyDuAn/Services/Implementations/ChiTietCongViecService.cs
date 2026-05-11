@@ -12,17 +12,23 @@ namespace QuanLyDuAn.Services.Implementations
     {
         private readonly QuanLyDuAnDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ITrangThaiWorkflowService _trangThaiWorkflowService;
 
-        public ChiTietCongViecService(QuanLyDuAnDbContext context, IHttpContextAccessor httpContextAccessor)
+        public ChiTietCongViecService(
+            QuanLyDuAnDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            ITrangThaiWorkflowService trangThaiWorkflowService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _trangThaiWorkflowService = trangThaiWorkflowService;
         }
 
         public async Task<ChiTietCongViecPageViewModel> GetPageAsync(int maCongViec)
         {
             var congViec = await LayCongViecAsync(maCongViec);
-            var coTheCapNhat = await CoTheCapNhatAsync(congViec);
+            var coTheCapNhat = await CoTheCapNhatAsync(congViec)
+                               && !BiKhoaCapNhatTheoTrangThaiCongViec(congViec.TrangThaiCongViec);
             var coThePhanCongChiTietCongViec = await CoThePhanCongChiTietCongViecAsync(congViec);
 
             var danhSach = await _context.CtCongViec
@@ -42,6 +48,14 @@ namespace QuanLyDuAn.Services.Implementations
                     CoThePhanCongChiTietCongViec = coThePhanCongChiTietCongViec
                 })
                 .ToListAsync();
+            GanThongTinWorkflowUi(danhSach);
+
+            var trangThaiCongViec = TrangThai.ToCode(congViec.TrangThaiCongViec);
+            var tongSoChiTiet = danhSach.Count;
+            var soChiTietHoanThanh = danhSach.Count(x => TrangThai.LaHoanThanhCongViec(x.TrangThaiCTCV));
+            var phanTramTienDo = tongSoChiTiet == 0
+                ? 0
+                : (int)Math.Round((double)soChiTietHoanThanh * 100 / tongSoChiTiet);
 
             return new ChiTietCongViecPageViewModel
             {
@@ -50,7 +64,13 @@ namespace QuanLyDuAn.Services.Implementations
                 {
                     MaCongViec = congViec.MaCongViec,
                     TenCongViec = congViec.TenCongViec ?? string.Empty,
-                    TenTrangThai = TrangThai.ToDisplay(congViec.TrangThaiCongViec)
+                    TenTrangThai = TrangThai.ToDisplay(trangThaiCongViec),
+                    TrangThaiCongViec = trangThaiCongViec,
+                    CssTrangThai = LayCssTrangThai(trangThaiCongViec),
+                    ThongDiepWorkflow = LayThongDiepWorkflow(trangThaiCongViec),
+                    TongSoChiTiet = tongSoChiTiet,
+                    SoChiTietHoanThanh = soChiTietHoanThanh,
+                    PhanTramTienDo = phanTramTienDo
                 },
                 Form = new ChiTietCongViecCreateUpdateViewModel
                 {
@@ -67,6 +87,8 @@ namespace QuanLyDuAn.Services.Implementations
             var congViec = await LayCongViecAsync(form.MaCongViec);
             KiemTraDuLieuDauVao(form, congViec);
             await KiemTraQuyenCapNhatAsync(congViec);
+            await KiemTraTrangThaiCongViecTruocKhiThemAsync(congViec);
+            var currentUserId = await GetCurrentUserIdAsync();
 
             var trangThai = TrangThai.ToCode(form.TrangThaiCTCV);
 
@@ -85,7 +107,10 @@ namespace QuanLyDuAn.Services.Implementations
             _context.CtCongViec.Add(entity);
             await _context.SaveChangesAsync();
 
-            await DongBoTrangThaiCongViecTheoChiTietAsync(congViec.MaCongViec);
+            await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                congViec.MaCongViec,
+                currentUserId,
+                "Thêm chi tiết công việc");
             await _context.SaveChangesAsync();
         }
 
@@ -97,6 +122,8 @@ namespace QuanLyDuAn.Services.Implementations
             var congViec = await LayCongViecAsync(form.MaCongViec);
             KiemTraDuLieuDauVao(form, congViec);
             await KiemTraQuyenCapNhatAsync(congViec);
+            KiemTraTrangThaiCongViecChoCapNhat(congViec, "sửa");
+            var currentUserId = await GetCurrentUserIdAsync();
 
             var entity = await _context.CtCongViec
                 .FirstOrDefaultAsync(x =>
@@ -117,7 +144,10 @@ namespace QuanLyDuAn.Services.Implementations
 
             await _context.SaveChangesAsync();
 
-            await DongBoTrangThaiCongViecTheoChiTietAsync(congViec.MaCongViec);
+            await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                congViec.MaCongViec,
+                currentUserId,
+                "Cập nhật chi tiết công việc");
             await _context.SaveChangesAsync();
         }
 
@@ -125,6 +155,8 @@ namespace QuanLyDuAn.Services.Implementations
         {
             var congViec = await LayCongViecAsync(maCongViec);
             await KiemTraQuyenCapNhatAsync(congViec);
+            KiemTraTrangThaiCongViecChoCapNhat(congViec, "xóa");
+            var currentUserId = await GetCurrentUserIdAsync();
 
             var entity = await _context.CtCongViec
                 .FirstOrDefaultAsync(x =>
@@ -137,10 +169,13 @@ namespace QuanLyDuAn.Services.Implementations
 
             entity.IsDeleted = true;
             entity.DeletedAt = DateTime.Now;
-            entity.DeletedBy = await GetCurrentUserIdAsync();
+            entity.DeletedBy = currentUserId;
             await _context.SaveChangesAsync();
 
-            await DongBoTrangThaiCongViecTheoChiTietAsync(congViec.MaCongViec);
+            await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                congViec.MaCongViec,
+                currentUserId,
+                "Xóa chi tiết công việc");
             await _context.SaveChangesAsync();
         }
 
@@ -260,11 +295,12 @@ namespace QuanLyDuAn.Services.Implementations
             if (isEmployee)
                 return await LaLeaderTeamHoacDuAnAsync(maDuAn, maNguoiDungHienTai);
 
+            var leaderVariants = new[] { TrangThai.VaiTroLeader, TrangThai.VaiTroLeaderHienThi };
             var laLeaderDuAn = await _context.NhanVienDuAn
                 .AnyAsync(x =>
                     x.MaDuAn == maDuAn &&
                     x.MaNguoiDung == maNguoiDungHienTai &&
-                    TrangThai.EqualsValue(x.VaiTroTrongDuAn, TrangThai.VaiTroLeader));
+                    leaderVariants.Contains(x.VaiTroTrongDuAn ?? string.Empty));
 
             if (laLeaderDuAn)
                 return true;
@@ -330,32 +366,103 @@ namespace QuanLyDuAn.Services.Implementations
             return TrangThai.EqualsValue(vaiTroTrongDuAn, TrangThai.VaiTroLeader);
         }
 
-        private async Task DongBoTrangThaiCongViecTheoChiTietAsync(int maCongViec)
+        private async Task KiemTraTrangThaiCongViecTruocKhiThemAsync(CongViec congViec)
         {
-            var congViec = await LayCongViecAsync(maCongViec);
-            var chiTietMoiNhat = await _context.CtCongViec
-                .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true)
-                .OrderByDescending(x => x.NgayBatDauCTCV)
-                .ThenByDescending(x => x.NgayTaoCTCV)
-                .ThenByDescending(x => x.MaChiTietCV)
-                .FirstOrDefaultAsync();
-
-            if (chiTietMoiNhat == null)
+            var trangThaiCongViec = TrangThai.ToCode(congViec.TrangThaiCongViec);
+            if (TrangThai.LaHoanThanhCongViec(trangThaiCongViec))
             {
-                congViec.TrangThaiCongViec = TrangThai.ChuaBatDau;
-                congViec.NgayKetThucCVThucTe = null;
-                return;
+                throw new Exception("Công việc đã hoàn thành. Vui lòng mở lại công việc trước khi thêm chi tiết mới.");
             }
 
-            var trangThaiChiTiet = TrangThai.ToCode(chiTietMoiNhat.TrangThaiCTCV);
-            congViec.TrangThaiCongViec = string.IsNullOrWhiteSpace(trangThaiChiTiet)
-                ? TrangThai.ChuaBatDau
-                : trangThaiChiTiet;
+            if (TrangThai.EqualsValue(trangThaiCongViec, TrangThai.TamDung)
+                || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.DaHuy))
+            {
+                throw new Exception("Công việc đang tạm dừng hoặc đã hủy, không thể thêm chi tiết mới.");
+            }
 
-            if (TrangThai.LaHoanThanhCongViec(trangThaiChiTiet))
-                congViec.NgayKetThucCVThucTe = chiTietMoiNhat.NgayKetThucCTCV ?? DateTime.Now;
-            else
-                congViec.NgayKetThucCVThucTe = null;
+            var maDuAn = await GetMaDuAnAsync(congViec);
+            var trangThaiDuAn = await _context.DuAn
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
+                .Select(x => x.TrangThaiDuAn)
+                .FirstOrDefaultAsync();
+
+            if (TrangThai.LaHoanThanhCongViec(trangThaiDuAn)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.LuuTru)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.DaHuy))
+            {
+                throw new Exception("Dự án đã hoàn thành hoặc đã đóng. Vui lòng mở lại dự án trước khi phát sinh thêm chi tiết.");
+            }
+        }
+
+        private static void GanThongTinWorkflowUi(List<ChiTietCongViecItemViewModel> danhSach)
+        {
+            foreach (var item in danhSach)
+            {
+                var trangThai = TrangThai.ToCode(item.TrangThaiCTCV);
+                item.TrangThaiCTCV = trangThai;
+                item.TrangThaiHienThi = TrangThai.ToDisplay(trangThai);
+                item.CssTrangThai = LayCssTrangThai(trangThai);
+                item.ThongDiepWorkflow = LayThongDiepWorkflow(trangThai);
+            }
+        }
+
+        private static string LayCssTrangThai(string? trangThai)
+        {
+            if (TrangThai.LaHoanThanhCongViec(trangThai))
+                return "workflow-success";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.ChoXacNhanHoanThanh))
+                return "workflow-pending";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.BiCanCan))
+                return "workflow-blocked";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.TamDung))
+                return "workflow-paused";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.DaHuy))
+                return "workflow-cancelled";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.ChuaBatDau))
+                return "workflow-idle";
+
+            return "workflow-active";
+        }
+
+        private static string? LayThongDiepWorkflow(string? trangThai)
+        {
+            if (TrangThai.LaHoanThanhCongViec(trangThai))
+                return "Công việc đã hoàn thành, các cập nhật thường sẽ bị khóa.";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.ChoXacNhanHoanThanh))
+                return "Đang chờ xác nhận hoàn thành, vui lòng xử lý trước khi mở rộng thêm chi tiết.";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.BiCanCan))
+                return "Công việc đang bị cản trở, cần xử lý blocker để tiếp tục.";
+
+            return null;
+        }
+
+        private static void KiemTraTrangThaiCongViecChoCapNhat(CongViec congViec, string thaoTac)
+        {
+            var trangThaiCongViec = TrangThai.ToCode(congViec.TrangThaiCongViec);
+            if (TrangThai.LaHoanThanhCongViec(trangThaiCongViec))
+            {
+                throw new Exception($"Công việc đã hoàn thành. Vui lòng mở lại công việc trước khi {thaoTac} chi tiết.");
+            }
+
+            if (TrangThai.EqualsValue(trangThaiCongViec, TrangThai.TamDung)
+                || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.DaHuy))
+            {
+                throw new Exception("Công việc đang tạm dừng hoặc đã hủy, không thể cập nhật chi tiết.");
+            }
+        }
+
+        private static bool BiKhoaCapNhatTheoTrangThaiCongViec(string? trangThaiCongViec)
+        {
+            return TrangThai.LaHoanThanhCongViec(trangThaiCongViec)
+                   || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.TamDung)
+                   || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.DaHuy);
         }
     }
 }

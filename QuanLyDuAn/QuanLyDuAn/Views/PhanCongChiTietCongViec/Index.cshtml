@@ -3,29 +3,90 @@
 
 @{
     var permissions = Model.Permissions;
-    bool canShowForm = permissions.Contains(Permissions.PhanCongChiTietCongViec.ThucHien);
+    var soDaPhanCong = Model.DanhSachPhanCong.Count;
+    var soConCoThePhanCong = Model.ThanhVienCoThePhanCong.Count;
+    var tongNhanSuScope = soDaPhanCong + soConCoThePhanCong;
 
     ViewBag.Permissions = permissions;
     ViewData["Title"] = "Phân công chi tiết công việc";
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Phân công chi tiết công việc</h5>
-        <a asp-controller="ChiTietCongViec" asp-action="Index" asp-route-maCongViec="@Model.ChiTietCongViec.MaCongViec" class="btn btn-outline-secondary btn-sm">Quay lại chi tiết công việc</a>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/PhanCongChiTietCongViec/index.css" asp-append-version="true" />
+}
 
-    <div class="alert alert-light border mb-3">
-        <div><strong>Công việc:</strong> @Model.ChiTietCongViec.TenCongViec (Mã: @Model.ChiTietCongViec.MaCongViec)</div>
-        <div><strong>Chi tiết công việc:</strong> @Model.ChiTietCongViec.TenChiTietCongViec (Mã: @Model.ChiTietCongViec.MaChiTietCV)</div>
-        <div><strong>Trạng thái:</strong> @Model.ChiTietCongViec.TenTrangThai</div>
-    </div>
+<div class="phan-cong-chi-tiet-cong-viec-page">
+    <section class="pct-header-card">
+        <div class="pct-header-content">
+            <h1 class="pct-title">Phân công chi tiết công việc</h1>
+            <p class="pct-subtitle">Giao nhân sự thực hiện từng chi tiết công việc đã được phân công công việc cha</p>
+        </div>
+        <a asp-controller="ChiTietCongViec" asp-action="Index" asp-route-maCongViec="@Model.ChiTietCongViec.MaCongViec" class="pct-back-btn">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại chi tiết công việc
+        </a>
+    </section>
 
-    @if (canShowForm)
-    {
+    <section class="pct-summary-grid">
+        <article class="pct-summary-card">
+            <span class="pct-summary-icon"><i class="bi bi-list-task"></i></span>
+            <div class="pct-summary-content">
+                <span class="pct-summary-label">Chi tiết công việc</span>
+                <strong class="pct-summary-value">@Model.ChiTietCongViec.TenChiTietCongViec</strong>
+                <p class="pct-summary-note">Mã chi tiết: #@Model.ChiTietCongViec.MaChiTietCV</p>
+            </div>
+        </article>
+
+        <article class="pct-summary-card">
+            <span class="pct-summary-icon parent"><i class="bi bi-diagram-3"></i></span>
+            <div class="pct-summary-content">
+                <span class="pct-summary-label">Công việc cha</span>
+                <strong class="pct-summary-value">@Model.ChiTietCongViec.TenCongViec</strong>
+                <p class="pct-summary-note">Mã công việc: #@Model.ChiTietCongViec.MaCongViec</p>
+            </div>
+        </article>
+
+        <article class="pct-summary-card">
+            <span class="pct-summary-icon status"><i class="bi bi-check2-circle"></i></span>
+            <div class="pct-summary-content">
+                <span class="pct-summary-label">Trạng thái</span>
+                <strong class="pct-summary-value">@Model.ChiTietCongViec.TenTrangThai</strong>
+                <p class="pct-summary-note">Theo dõi trạng thái thực thi của chi tiết công việc</p>
+            </div>
+        </article>
+
+        <article class="pct-summary-card">
+            <span class="pct-summary-icon assigned"><i class="bi bi-people-fill"></i></span>
+            <div class="pct-summary-content">
+                <span class="pct-summary-label">Đã phân công</span>
+                <strong class="pct-summary-value">@soDaPhanCong</strong>
+                <p class="pct-summary-note">Nhân sự đang thực hiện chi tiết công việc</p>
+            </div>
+        </article>
+
+        <article class="pct-summary-card">
+            <span class="pct-summary-icon available"><i class="bi bi-person-plus"></i></span>
+            <div class="pct-summary-content">
+                <span class="pct-summary-label">Còn có thể phân công</span>
+                <strong class="pct-summary-value">@soConCoThePhanCong</strong>
+                <p class="pct-summary-note">Trong tổng @tongNhanSuScope nhân sự đủ điều kiện</p>
+            </div>
+        </article>
+    </section>
+
+    <section class="pct-section-card">
+        <div class="pct-section-head">
+            <h2 class="pct-section-title">Phân công nhân sự</h2>
+            <p class="pct-section-note">Danh sách chỉ bao gồm nhân sự đã được phân công vào công việc cha.</p>
+        </div>
         <partial name="_Form" model="Model" />
-        <hr />
-    }
+    </section>
 
-    <partial name="_Table" model="Model" />
+    <section class="pct-section-card">
+        <div class="pct-section-head">
+            <h2 class="pct-section-title">Danh sách phân công chi tiết</h2>
+            <p class="pct-section-note">Kiểm soát nhân sự thực hiện từng hạng mục chi tiết trong công việc.</p>
+        </div>
+        <partial name="_Table" model="Model" />
+    </section>
 </div>

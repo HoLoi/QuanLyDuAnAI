@@ -7,35 +7,57 @@
     ViewBag.Permissions = permissions;
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Team phụ trách dự án</h5>
+@section Styles {
+    <link rel="stylesheet" href="~/css/TeamDuAn/index.css" asp-append-version="true" />
+}
+
+<div class="team-du-an-page">
+    <section class="team-header-card">
+        <div>
+            <h2 class="team-title">Quản lý nhóm phụ trách dự án</h2>
+            <p class="team-subtitle">Theo dõi nhóm phụ trách và thành viên được giao trong dự án.</p>
+        </div>
         <a asp-controller="DuAn"
            asp-action="Index"
            asp-route-tuKhoa="@Model.TuKhoa"
            asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
            asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-           class="btn btn-outline-secondary btn-sm">Quay lại dự án</a>
-    </div>
+           class="btn team-back-btn">Quay lại dự án</a>
+    </section>
 
-    <div class="alert alert-light border mb-3">
-        <div><strong>Dự án:</strong> @Model.TenDuAn (Mã: @Model.MaDuAn)</div>
-        <div><strong>Trạng thái:</strong> @TrangThai.ToDisplay(Model.TrangThaiDuAn)</div>
-    </div>
+    <section class="team-section-card team-project-card">
+        <div class="team-project-info">
+            <span><strong>Dự án:</strong> @Model.TenDuAn (Mã: @Model.MaDuAn)</span>
+            <span class="team-status-badge">Trạng thái: @TrangThai.ToDisplay(Model.TrangThaiDuAn)</span>
+        </div>
+    </section>
 
     @if (!Model.CoTheChinhSua)
     {
-        <div class="alert alert-warning">@Model.LyDoKhongTheChinhSua</div>
+        <section class="team-warning-card">
+            @Model.LyDoKhongTheChinhSua
+        </section>
     }
 
     @if (canShowForm)
     {
-        <partial name="_Filter" model="Model" />
-        <partial name="_Form" model="Model" />
-        <hr />
+        <section class="team-section-card team-filter-card">
+            <div class="team-section-head">
+                <h3 class="team-section-title">Chọn nhóm phụ trách</h3>
+                <p class="team-section-note">Tải danh sách thành viên của nhóm trước khi lưu.</p>
+            </div>
+            <partial name="_Filter" model="Model" />
+            <partial name="_Form" model="Model" />
+        </section>
     }
 
-    <partial name="_Table" model="Model" />
+    <section class="team-section-card team-table-card">
+        <div class="team-section-head">
+            <h3 class="team-section-title">Danh sách nhóm đang phụ trách</h3>
+            <p class="team-section-note">Quản lý các nhóm tham gia dự án và điều chỉnh thành viên.</p>
+        </div>
+        <partial name="_Table" model="Model" />
+    </section>
 </div>
 
 @section Scripts {

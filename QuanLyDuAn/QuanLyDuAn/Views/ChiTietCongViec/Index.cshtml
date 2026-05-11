@@ -1,27 +1,107 @@
 ﻿@model QuanLyDuAn.ViewModels.ChiTietCongViec.ChiTietCongViecPageViewModel
 @using QuanLyDuAn.Constants
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/ChiTietCongViec/index.css" asp-append-version="true" />
+}
+
 @{
+    ViewData["Title"] = "Chi tiết công việc";
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.ChiTietCongViec.Them) && Model.CoTheCapNhat;
     ViewBag.Permissions = permissions;
+
+    string statusIcon = Model.CongViec.CssTrangThai switch
+    {
+        "workflow-success" => "bi-check2-circle",
+        "workflow-pending" => "bi-hourglass-split",
+        "workflow-blocked" => "bi-exclamation-octagon",
+        "workflow-paused" => "bi-pause-circle",
+        "workflow-cancelled" => "bi-x-octagon",
+        "workflow-idle" => "bi-circle",
+        _ => "bi-play-circle"
+    };
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Chi tiết công việc</h5>
-        <a asp-controller="CongViec" asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại công việc</a>
-    </div>
+<div class="chi-tiet-dashboard">
+    <section class="detail-hero">
+        <div>
+            <p class="hero-kicker">Chi tiết công việc</p>
+            <h1 class="hero-title">Chi tiết công việc</h1>
+            <p class="hero-subtitle">@Model.CongViec.TenCongViec (Công việc cha #@Model.CongViec.MaCongViec)</p>
+        </div>
+        <a asp-controller="CongViec" asp-action="Index" class="hero-back">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại Công việc
+        </a>
+    </section>
 
-    <div class="alert alert-light border mb-3">
-        <div><strong>Công việc:</strong> @Model.CongViec.TenCongViec (Mã: @Model.CongViec.MaCongViec)</div>
-        <div><strong>Trạng thái hiện tại:</strong> @Model.CongViec.TenTrangThai</div>
-    </div>
+    <section class="overview-grid">
+        <article class="overview-card">
+            <span class="overview-icon"><i class="bi bi-diagram-3"></i></span>
+            <div class="overview-content">
+                <span class="overview-label">Trạng thái công việc cha</span>
+                <span class="workflow-badge @Model.CongViec.CssTrangThai">
+                    <i class="bi @statusIcon"></i>
+                    @Model.CongViec.TenTrangThai
+                </span>
+            </div>
+        </article>
+        <article class="overview-card">
+            <span class="overview-icon"><i class="bi bi-graph-up-arrow"></i></span>
+            <div class="overview-content">
+                <span class="overview-label">Tiến độ hoàn thành chi tiết</span>
+                <div class="progress-line">
+                    <div class="progress-line-fill" style="width:@Model.CongViec.PhanTramTienDo%"></div>
+                </div>
+                <strong class="overview-value">@Model.CongViec.PhanTramTienDo%</strong>
+            </div>
+        </article>
+        <article class="overview-card">
+            <span class="overview-icon"><i class="bi bi-check2-square"></i></span>
+            <div class="overview-content">
+                <span class="overview-label">Số lượng chi tiết hoàn thành</span>
+                <strong class="overview-value">@Model.CongViec.SoChiTietHoanThanh/@Model.CongViec.TongSoChiTiet</strong>
+            </div>
+        </article>
+    </section>
+
+    @if (TrangThai.LaHoanThanhCongViec(Model.CongViec.TrangThaiCongViec))
+    {
+        <section class="workflow-banner workflow-banner--success">
+            <i class="bi bi-check2-circle"></i>
+            <p>Công việc đã hoàn thành. Hệ thống khóa cập nhật thường, chỉ mở lại theo đúng quy trình.</p>
+        </section>
+    }
+    else if (TrangThai.EqualsValue(Model.CongViec.TrangThaiCongViec, TrangThai.ChoXacNhanHoanThanh))
+    {
+        <section class="workflow-banner workflow-banner--pending">
+            <i class="bi bi-hourglass-split"></i>
+            <p>Đang chờ xác nhận hoàn thành. Vui lòng xử lý xác nhận trước khi thêm thay đổi mới.</p>
+        </section>
+    }
+    else if (!string.IsNullOrWhiteSpace(Model.CongViec.ThongDiepWorkflow))
+    {
+        <section class="workflow-banner @Model.CongViec.CssTrangThai">
+            <i class="bi bi-info-circle"></i>
+            <p>@Model.CongViec.ThongDiepWorkflow</p>
+        </section>
+    }
 
     @if (canShowForm)
     {
-        <partial name="_Form" model="Model" />
+        <section class="dashboard-card">
+            <header class="card-header-line">
+                <h2>Thêm chi tiết công việc</h2>
+            </header>
+            <partial name="_Form" model="Model" />
+        </section>
     }
 
-    <partial name="_Table" model="Model" />
+    <section class="dashboard-card">
+        <header class="card-header-line">
+            <h2>Danh sách chi tiết công việc</h2>
+        </header>
+        <partial name="_Table" model="Model" />
+    </section>
 </div>

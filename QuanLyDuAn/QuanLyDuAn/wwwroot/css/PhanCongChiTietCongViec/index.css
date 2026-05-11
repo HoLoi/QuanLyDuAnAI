@@ -1,0 +1,406 @@
+﻿.phan-cong-chi-tiet-cong-viec-page {
+    --pct-surface: #ffffff;
+    --pct-text: #2f4968;
+    --pct-muted: #7289a1;
+    --pct-border: #dfe7f4;
+    --pct-shadow: 0 10px 24px rgba(48, 71, 102, 0.08);
+    --pct-primary: #4361ee;
+    --pct-danger-soft: #fff1f1;
+    --pct-danger-border: #f6cfcf;
+    --pct-radius-lg: 18px;
+    --pct-radius-md: 12px;
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.46));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.15rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-header-card,
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-card,
+.phan-cong-chi-tiet-cong-viec-page .pct-section-card,
+.phan-cong-chi-tiet-cong-viec-page .pct-empty-state {
+    background: var(--pct-surface);
+    border: 1px solid var(--pct-border);
+    border-radius: var(--pct-radius-lg);
+    box-shadow: var(--pct-shadow);
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+    border-color: rgba(105, 108, 255, 0.2);
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-title {
+    margin: 0;
+    font-size: 1.42rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-subtitle {
+    margin: 0.36rem 0 0;
+    color: #607792;
+    font-size: 0.9rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    border: 1px solid #ccd8ea;
+    background: #f6f9ff;
+    color: #3f5877;
+    border-radius: 0.72rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-back-btn:hover,
+.phan-cong-chi-tiet-cong-viec-page .pct-back-btn:focus {
+    color: #324a67;
+    border-color: #b5c6dd;
+    background: #ebf2ff;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-grid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-card {
+    padding: 0.9rem;
+    display: flex;
+    gap: 0.72rem;
+    align-items: flex-start;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-icon {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf2ff;
+    color: #4358c9;
+    flex-shrink: 0;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-icon.parent {
+    background: #e8f7ff;
+    color: #0f7fa5;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-icon.status {
+    background: #fff6de;
+    color: #9a6700;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-icon.assigned {
+    background: #eaf7ee;
+    color: #1f7a3e;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-icon.available {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-label {
+    display: block;
+    color: #6d839d;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-value {
+    display: block;
+    color: var(--pct-text);
+    font-size: 1.08rem;
+    line-height: 1.3;
+    margin-top: 0.16rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-summary-note {
+    margin: 0.28rem 0 0;
+    color: #7890a8;
+    font-size: 0.76rem;
+    line-height: 1.35;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-section-card {
+    padding: 1rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-section-head {
+    display: grid;
+    gap: 0.22rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-section-title {
+    margin: 0;
+    font-size: 1.03rem;
+    font-weight: 700;
+    color: #314866;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-section-note {
+    margin: 0;
+    color: var(--pct-muted);
+    font-size: 0.84rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .assignment-form-grid {
+    display: grid;
+    gap: 0.72rem;
+    grid-template-columns: minmax(0, 460px);
+}
+
+.phan-cong-chi-tiet-cong-viec-page .assignment-form-input {
+    border: 1px solid #e2eaf6;
+    border-radius: 12px;
+    background: #fcfdff;
+    padding: 0.74rem 0.78rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-form-field .form-label {
+    margin-bottom: 0.34rem;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #5d7592;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-form-field .form-select {
+    min-height: 41px;
+    border-radius: 0.72rem;
+    border: 1px solid #d6e0ef;
+    box-shadow: none;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-form-field .form-select:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.phan-cong-chi-tiet-cong-viec-page .assignment-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn {
+    border-radius: 0.68rem;
+    border: 1px solid transparent;
+    padding: 0.46rem 0.72rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.34rem;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    border-color: rgba(105, 108, 255, 0.34);
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-primary:hover,
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-primary:focus {
+    color: #fff;
+    filter: brightness(1.03);
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-secondary {
+    color: #3f5877;
+    background: #f7faff;
+    border-color: #ccd8ea;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-secondary:hover,
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-secondary:focus {
+    color: #324a67;
+    background: #ebf2ff;
+    border-color: #b5c6dd;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-danger-soft {
+    color: #b54141;
+    background: var(--pct-danger-soft);
+    border-color: var(--pct-danger-border);
+    padding: 0.36rem 0.62rem;
+    font-size: 0.76rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-danger-soft:hover,
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-danger-soft:focus {
+    background: #ffe7e7;
+    border-color: #eeacac;
+    color: #9f3333;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-btn-neutral-soft {
+    color: #4a607d;
+    background: #f5f8fd;
+    border-color: #cfdbeb;
+    padding: 0.36rem 0.62rem;
+    font-size: 0.74rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-inline-note {
+    border: 1px dashed #cad8ee;
+    border-radius: var(--pct-radius-md);
+    background: #f8fbff;
+    color: #5f7895;
+    font-size: 0.86rem;
+    padding: 0.7rem 0.85rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid #e1e8f5;
+    border-radius: 14px;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table {
+    margin: 0;
+    min-width: 760px;
+    border-color: #e4ebf7;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table td,
+.phan-cong-chi-tiet-cong-viec-page .pct-table th {
+    border-color: #e7edf7;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table tbody tr:hover {
+    background: #f9fbff;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table .col-id {
+    width: 84px;
+    white-space: nowrap;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table .col-date {
+    width: 210px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table .col-actions {
+    width: 170px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-subsection {
+    margin-top: 0.22rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-subsection-title {
+    margin: 0;
+    color: #314866;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-subsection-note {
+    margin: 0.2rem 0 0;
+    color: #7289a1;
+    font-size: 0.8rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-table-subtle {
+    min-width: 760px;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-empty-state {
+    border-style: dashed;
+    text-align: center;
+    padding: 1.2rem;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-empty-state i {
+    font-size: 1.7rem;
+    color: #7c92ad;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-empty-state h3 {
+    margin: 0.28rem 0 0;
+    font-size: 1rem;
+    color: #34506f;
+}
+
+.phan-cong-chi-tiet-cong-viec-page .pct-empty-state p {
+    margin: 0.32rem 0 0;
+    color: #7289a1;
+    font-size: 0.84rem;
+}
+
+@media (max-width: 1199.98px) {
+    .phan-cong-chi-tiet-cong-viec-page .pct-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991.98px) {
+    .phan-cong-chi-tiet-cong-viec-page {
+        border-radius: 16px;
+        padding: 0.95rem;
+    }
+
+    .phan-cong-chi-tiet-cong-viec-page .pct-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .phan-cong-chi-tiet-cong-viec-page .pct-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .phan-cong-chi-tiet-cong-viec-page .assignment-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .phan-cong-chi-tiet-cong-viec-page .assignment-form-actions {
+        gap: 0.45rem;
+    }
+
+    .phan-cong-chi-tiet-cong-viec-page .pct-table {
+        min-width: 640px;
+    }
+}

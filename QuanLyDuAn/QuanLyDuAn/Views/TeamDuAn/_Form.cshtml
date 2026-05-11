@@ -8,27 +8,27 @@
 
 @if (canShowForm && Model.MaTeamDangChon.HasValue)
 {
-    <form asp-action="LuuTeamPhuTrach" method="post">
+    <form asp-action="LuuTeamPhuTrach" method="post" class="team-entry-form">
         <input type="hidden" asp-for="MaDuAn" />
         <input type="hidden" asp-for="MaTeamDangChon" />
         <input type="hidden" asp-for="TuKhoa" />
         <input type="hidden" asp-for="LocMaLoaiDuAn" />
         <input type="hidden" asp-for="LocTrangThaiDuAn" />
 
-        <div class="border rounded p-3 mb-3">
-            <div class="fw-semibold mb-2">Chọn thành viên trong team</div>
+        <div class="team-member-box">
+            <div class="team-member-title">Chọn thành viên trong nhóm</div>
 
             @if (Model.DanhSachThanhVienTeam.Count == 0)
             {
-                <div class="text-muted">Team chưa có thành viên.</div>
+                <div class="team-muted-text">Nhóm chưa có thành viên.</div>
             }
             else
             {
                 <div class="row g-2">
                     @foreach (var item in Model.DanhSachThanhVienTeam)
                     {
-                        <div class="col-md-6">
-                            <label class="form-check-label d-flex align-items-center gap-2">
+                        <div class="col-lg-6 col-md-12">
+                            <label class="form-check-label d-flex align-items-center gap-2 team-check-item">
                                 <input class="form-check-input"
                                        type="checkbox"
                                        name="SelectedMaNguoiDung"
@@ -50,9 +50,9 @@
             }
         </div>
 
-        <button type="submit" class="btn btn-primary"
+        <button type="submit" class="btn team-btn-primary"
                 disabled="@((Model.CoTheChinhSua && Model.DanhSachThanhVienTeam.Count > 0) ? null : "disabled")">
-            Lưu team phụ trách
+            Lưu nhóm phụ trách
         </button>
     </form>
 }

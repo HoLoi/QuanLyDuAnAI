@@ -1,54 +1,89 @@
-﻿@model List<QuanLyDuAn.ViewModels.NganSach.NganSachItemViewModel>
+@model List<QuanLyDuAn.ViewModels.NganSach.NganSachItemViewModel>
 @using QuanLyDuAn.Constants
 
-<table class="table table-bordered table-sm app-data-table">
-    <thead>
-        <tr>
-            <th class="col-id">Mã</th>
-            <th>Dự án</th>
-            <th>Ngân sách</th>
-            <th>Mô tả</th>
-            <th class="col-count">Phiên bản</th>
-            <th>Trạng thái</th>
-            <th>Hiệu lực</th>
-            <th>Người đề xuất</th>
-            <th>Người duyệt</th>
-            <th class="col-date">Ngày duyệt</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Count == 0)
-        {
-            <tr>
-                <td colspan="10" class="text-center text-muted">Chưa có ngân sách.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model)
-            {
+@{
+    string GetStatusBadgeClass(string? status)
+    {
+        if (TrangThai.EqualsValue(status, TrangThai.DaDuyet))
+            return "is-approved";
+        if (TrangThai.EqualsValue(status, TrangThai.DaThayThe))
+            return "is-replaced";
+        if (TrangThai.EqualsValue(status, TrangThai.GiuNguyen))
+            return "is-kept";
+
+        return "is-neutral";
+    }
+}
+
+<div class="ngan-sach-section-head">
+    <h2 class="ngan-sach-section-title">Danh sách ngân sách</h2>
+    <p class="ngan-sach-section-note">Hiển thị các phiên bản ngân sách theo dự án, trạng thái phê duyệt và hiệu lực sử dụng.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="ngan-sach-empty-state">
+        <p class="ngan-sach-empty-title">Chưa có ngân sách.</p>
+    </div>
+}
+else
+{
+    <div class="ngan-sach-table-scroll">
+        <table class="table ngan-sach-table">
+            <thead>
                 <tr>
-                    <td class="col-id">@item.MaNganSach</td>
-                    <td>@item.TenDuAn</td>
-                    <td>@item.SoTienNganSach?.ToString("N0")</td>
-                    <td>@item.MoTaNganSach</td>
-                    <td class="col-count">@item.Version</td>
-                    <td>@TrangThai.ToDisplay(item.TrangThaiNganSach)</td>
-                    <td>
-                        @if (item.IsActive)
-                        {
-                            <span class="badge bg-success">Đang sử dụng</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">Không còn hiệu lực</span>
-                        }
-                    </td>
-                    <td>@item.NguoiDungDeXuat</td>
-                    <td>@item.NguoiDungDuyet</td>
-                    <td class="col-date">@item.NgayDuyetNganSach?.ToString("dd/MM/yyyy HH:mm")</td>
+                    <th>Mã</th>
+                    <th>Dự án</th>
+                    <th>Ngân sách</th>
+                    <th>Phiên bản</th>
+                    <th>Trạng thái</th>
+                    <th>Hiệu lực</th>
+                    <th>Người duyệt</th>
+                    <th>Ngày duyệt</th>
                 </tr>
-            }
-        }
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="text-nowrap">#@item.MaNganSach</td>
+                        <td>
+                            <div class="ngan-sach-cell-title">@item.TenDuAn</div>
+                            <div class="ngan-sach-cell-sub">Mã dự án: @item.MaDuAn</div>
+                        </td>
+                        <td class="text-nowrap">@($"{item.SoTienNganSach ?? 0:N0} VNĐ")</td>
+                        <td class="text-nowrap">v@(item.Version ?? 0)</td>
+                        <td>
+                            <span class="ngan-sach-status-badge @GetStatusBadgeClass(item.TrangThaiNganSach)">
+                                @TrangThai.ToDisplay(item.TrangThaiNganSach)
+                            </span>
+                        </td>
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="ngan-sach-status-badge is-active">Đang hiệu lực</span>
+                            }
+                            else
+                            {
+                                <span class="ngan-sach-status-badge is-inactive">Không hiệu lực</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.NguoiDungDuyet))
+                            {
+                                @item.NguoiDungDuyet
+                            }
+                            else
+                            {
+                                <span class="ngan-sach-cell-sub">Chưa duyệt</span>
+                            }
+                        </td>
+                        <td class="text-nowrap">
+                            @(item.NgayDuyetNganSach?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa duyệt")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

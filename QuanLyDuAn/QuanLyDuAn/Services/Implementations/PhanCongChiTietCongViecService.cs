@@ -184,9 +184,11 @@ namespace QuanLyDuAn.Services.Implementations
 
         private static void KiemTraTrangThaiChiTietCongViec(CtCongViec chiTietCongViec)
         {
-            if (TrangThai.LaHoanThanhCongViec(chiTietCongViec.TrangThaiCTCV)
-                || TrangThai.EqualsValue(chiTietCongViec.TrangThaiCTCV, TrangThai.DaHuy)
-                || TrangThai.EqualsValue(chiTietCongViec.TrangThaiCTCV, TrangThai.LuuTru))
+            var trangThaiChiTiet = TrangThai.ToCode(chiTietCongViec.TrangThaiCTCV);
+            if (TrangThai.LaHoanThanhCongViec(trangThaiChiTiet)
+                || TrangThai.EqualsValue(trangThaiChiTiet, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(trangThaiChiTiet, TrangThai.LuuTru)
+                || TrangThai.EqualsValue(trangThaiChiTiet, TrangThai.TamDung))
             {
                 throw new Exception("Chi tiết công việc đã đóng, không thể thực hiện phân công.");
             }
@@ -246,8 +248,19 @@ namespace QuanLyDuAn.Services.Implementations
         private async Task<bool> KiemTraQuyenPhanCongAsync(int maDuAn, int maNguoiDungHienTai)
         {
             var httpUser = _httpContextAccessor.HttpContext?.User;
-            if (httpUser?.IsInRole("Admin") == true || httpUser?.IsInRole("Manager") == true)
-                return true;
+            if (httpUser?.IsInRole("Admin") == true)
+                return false;
+
+            if (httpUser?.IsInRole("Manager") == true)
+            {
+                var laQuanLyDuAn = await _context.DuAn
+                    .AnyAsync(x => x.MaDuAn == maDuAn
+                                   && x.MaNguoiDung == maNguoiDungHienTai
+                                   && x.IsDeleted != true);
+
+                if (laQuanLyDuAn)
+                    return true;
+            }
 
             var vaiTroTrongDuAn = await _context.NhanVienDuAn
                 .Where(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNguoiDungHienTai)

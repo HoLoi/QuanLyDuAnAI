@@ -325,6 +325,30 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> MoLaiDuAn(int maDuAn, string lyDo, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
+                return Forbid();
+
+            try
+            {
+                await _service.MoLaiDuAnAsync(maDuAn, lyDo);
+                TempData["Success"] = "Đã mở lại dự án.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index), new
+            {
+                tuKhoa,
+                locMaLoaiDuAn,
+                locTrangThaiDuAn
+            });
+        }
+
+        [HttpPost]
         public async Task<IActionResult> TamDungDuAn(int maDuAn, string ghiChuDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))

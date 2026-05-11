@@ -15,6 +15,7 @@ namespace QuanLyDuAn.Services.Implementations
         private readonly QuanLyDuAnDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IWebHostEnvironment _environment;
+        private readonly ITrangThaiWorkflowService _trangThaiWorkflowService;
         private static readonly HashSet<string> AllowedEvidenceExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
             ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".png", ".jpg", ".jpeg", ".zip"
@@ -24,11 +25,13 @@ namespace QuanLyDuAn.Services.Implementations
         public TienDoCongViecService(
             QuanLyDuAnDbContext context,
             IHttpContextAccessor httpContextAccessor,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            ITrangThaiWorkflowService trangThaiWorkflowService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _environment = environment;
+            _trangThaiWorkflowService = trangThaiWorkflowService;
         }
 
         public async Task<TienDoCongViecPageViewModel> GetPageAsync(int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
@@ -519,9 +522,12 @@ namespace QuanLyDuAn.Services.Implementations
 
                     contextInfo.ChiTietCongViec.TrangThaiCTCV = trangThaiDeXuat;
                     contextInfo.ChiTietCongViec.NgayKetThucCTCV = TrangThai.LaHoanThanhCongViec(trangThaiDeXuat) ? DateTime.Now : null;
+                    await _context.SaveChangesAsync();
 
-                    await DongBoTienDoCongViecAsync(contextInfo.MaCongViec);
-                    await DongBoTienDoDuAnAsync(contextInfo.MaDuAn);
+                    await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                        contextInfo.MaCongViec,
+                        currentUserId,
+                        "Duyệt báo cáo tiến độ");
                 }
 
                 await _context.SaveChangesAsync();
@@ -718,105 +724,6 @@ namespace QuanLyDuAn.Services.Implementations
 
             var reviewProjectIds = await GetProjectIdsForReviewAsync(currentUserId, roleFlags);
             return reviewProjectIds.Contains(maDuAn);
-        }
-
-        private async Task DongBoTienDoCongViecAsync(int maCongViec)
-        {
-            var chiTietRows = await _context.CtCongViec
-                .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true)
-                .Select(x => new { x.MaChiTietCV, x.TrangThaiCTCV })
-                .ToListAsync();
-
-            var congViec = await _context.CongViec
-                .FirstOrDefaultAsync(x => x.MaCongViec == maCongViec && x.IsDeleted != true);
-
-            if (congViec == null)
-                return;
-
-            if (chiTietRows.Count == 0)
-            {
-                congViec.TrangThaiCongViec = TrangThai.ChuaBatDau;
-                congViec.NgayKetThucCVThucTe = null;
-                return;
-            }
-
-            var statusCodes = chiTietRows
-                .Select(x => TrangThai.ToCode(x.TrangThaiCTCV))
-                .ToList();
-
-            var percentList = statusCodes
-                .Select(TinhPhanTramTheoTrangThai)
-                .ToList();
-
-            var allCompleted = statusCodes.Count > 0 && statusCodes.All(x => TrangThai.LaHoanThanhCongViec(x));
-            var anyStarted = percentList.Any(x => x > 0);
-
-            if (allCompleted)
-            {
-                congViec.TrangThaiCongViec = TrangThai.HoanThanh;
-                congViec.NgayKetThucCVThucTe = DateTime.Now;
-            }
-            else if (anyStarted)
-            {
-                congViec.TrangThaiCongViec = TrangThai.DangThucHien;
-                congViec.NgayKetThucCVThucTe = null;
-            }
-            else
-            {
-                congViec.TrangThaiCongViec = TrangThai.ChuaBatDau;
-                congViec.NgayKetThucCVThucTe = null;
-            }
-        }
-
-        private async Task DongBoTienDoDuAnAsync(int maDuAn)
-        {
-            var duAn = await _context.DuAn
-                .FirstOrDefaultAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true);
-
-            if (duAn == null)
-                return;
-
-            var chiTietRows = await (
-                from ct in _context.CtCongViec
-                join cv in _context.CongViec on ct.MaCongViec equals cv.MaCongViec
-                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
-                where ct.IsDeleted != true
-                      && cv.IsDeleted != true
-                      && dm.IsDeleted != true
-                      && dm.MaDuAn == maDuAn
-                select new
-                {
-                    ct.MaChiTietCV,
-                    ct.TrangThaiCTCV
-                }).ToListAsync();
-
-            if (chiTietRows.Count == 0)
-            {
-                duAn.PhanTramHoanThanh = 0;
-                return;
-            }
-
-            var statusCodes = chiTietRows
-                .Select(x => TrangThai.ToCode(x.TrangThaiCTCV))
-                .ToList();
-
-            var percentList = statusCodes
-                .Select(TinhPhanTramTheoTrangThai)
-                .ToList();
-
-            duAn.PhanTramHoanThanh = percentList.Count == 0
-                ? 0
-                : (int)Math.Round(percentList.Average());
-
-            var tatCaCongViecHoanThanh = statusCodes.Count > 0 && statusCodes.All(x => TrangThai.LaHoanThanhCongViec(x));
-
-            if (tatCaCongViecHoanThanh)
-            {
-                if (TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.KhoiTao))
-                    duAn.TrangThaiDuAn = TrangThai.DangThucHien;
-                else if (TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.DangThucHien))
-                    duAn.TrangThaiDuAn = TrangThai.ChoXacNhanHoanThanh;
-            }
         }
 
         private static void KiemTraTrangThaiChiTietHopLe(string trangThaiChiTiet)

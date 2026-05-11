@@ -1,26 +1,59 @@
-﻿@model QuanLyDuAn.ViewModels.NganSach.NganSachPageViewModel
+@model QuanLyDuAn.ViewModels.NganSach.NganSachPageViewModel
 @using QuanLyDuAn.Constants
 
 @{
+    ViewData["Title"] = "Ngân sách";
     var permissions = Model.Permissions;
     var canApprove = permissions.Contains(Permissions.DuyetNganSach.Xem);
-
     ViewBag.Permissions = permissions;
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Ngân sách</h5>
-        <div class="d-flex gap-2">
-            @if (canApprove)
-            {
-                <a asp-controller="DuyetDeXuatNganSach"
-                   asp-action="Index"
-                   class="btn btn-outline-primary btn-sm">Duyệt đề xuất ngân sách</a>
-            }
-        </div>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/NganSach/index.css" asp-append-version="true" />
+}
 
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
-</div>
+<section class="ngan-sach-page">
+    <header class="ngan-sach-header-card">
+        <div class="ngan-sach-header-content">
+            <h1 class="ngan-sach-title">Ngân sách</h1>
+            <p class="ngan-sach-subtitle">Theo dõi ngân sách được duyệt, phiên bản ngân sách và tình hình sử dụng theo dự án</p>
+            <p class="ngan-sach-readonly-note">Màn hình chỉ phục vụ xem/theo dõi. Mọi thay đổi ngân sách thực hiện qua luồng Đề xuất và Duyệt đề xuất ngân sách.</p>
+        </div>
+        @if (canApprove)
+        {
+            <a asp-controller="DuyetDeXuatNganSach"
+               asp-action="Index"
+               class="ngan-sach-header-action">Duyệt đề xuất ngân sách</a>
+        }
+    </header>
+
+    @if (Model.DanhSach.Count > 0)
+    {
+        <section class="ngan-sach-stats-grid">
+            <article class="ngan-sach-stat-card">
+                <span class="ngan-sach-stat-label">Tổng ngân sách</span>
+                <strong class="ngan-sach-stat-value">@($"{Model.TongNganSach:N0} VNĐ")</strong>
+            </article>
+            <article class="ngan-sach-stat-card">
+                <span class="ngan-sach-stat-label">Ngân sách đang hiệu lực</span>
+                <strong class="ngan-sach-stat-value">@($"{Model.TongNganSachDangHieuLuc:N0} VNĐ")</strong>
+            </article>
+            <article class="ngan-sach-stat-card">
+                <span class="ngan-sach-stat-label">Đã sử dụng</span>
+                <strong class="ngan-sach-stat-value">@($"{Model.TongDaSuDung:N0} VNĐ")</strong>
+            </article>
+            <article class="ngan-sach-stat-card">
+                <span class="ngan-sach-stat-label">Còn lại</span>
+                <strong class="ngan-sach-stat-value">@($"{Model.TongConLai:N0} VNĐ")</strong>
+            </article>
+        </section>
+    }
+
+    <section class="ngan-sach-section-card">
+        <partial name="_Filter" model="Model" />
+    </section>
+
+    <section class="ngan-sach-section-card">
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
+</section>

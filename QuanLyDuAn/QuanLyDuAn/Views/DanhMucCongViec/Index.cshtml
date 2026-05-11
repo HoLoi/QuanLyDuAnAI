@@ -5,6 +5,7 @@
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.DanhMucCongViec.Them)
         || permissions.Contains(Permissions.DanhMucCongViec.Sua);
+    var hasValidationErrors = ViewData.ModelState.Values.Any(v => v.Errors.Count > 0);
 
     ViewBag.Permissions = permissions;
     ViewBag.DanhSachDuAn = Model.DanhSachDuAn;
@@ -13,22 +14,50 @@
     ViewBag.LocMaDuAn = Model.LocMaDuAn;
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Quản lý danh mục công việc</h5>
-        <a asp-controller="DuAn" asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại dự án</a>
-    </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/DanhMucCongViec/index.css" asp-append-version="true" />
+}
 
-    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+<div class="danh-muc-page">
+    <section class="danh-muc-header-card">
+        <div>
+            <h2 class="danh-muc-title">Quản lý danh mục công việc</h2>
+            <p class="danh-muc-subtitle">Theo dõi và quản lý các danh mục công việc theo từng dự án.</p>
+        </div>
+        <a asp-controller="DuAn" asp-action="Index" class="btn danh-muc-back-btn">Quay lại dự án</a>
+    </section>
+
+    @if (hasValidationErrors)
+    {
+        <div asp-validation-summary="All" class="text-danger danh-muc-validation-summary"></div>
+    }
 
     @if (canShowForm)
     {
-        <partial name="_Form" for="Form" />
-        <hr />
+        <section class="danh-muc-section-card danh-muc-form-card">
+            <div class="danh-muc-section-head">
+                <h3 class="danh-muc-section-title">Thông tin danh mục</h3>
+                <p class="danh-muc-section-note">Thêm mới hoặc cập nhật danh mục công việc cho dự án.</p>
+            </div>
+            <partial name="_Form" for="Form" />
+        </section>
     }
 
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
+    <section class="danh-muc-section-card danh-muc-filter-card">
+        <div class="danh-muc-section-head">
+            <h3 class="danh-muc-section-title">Bộ lọc</h3>
+            <p class="danh-muc-section-note">Lọc nhanh danh mục theo từ khóa.</p>
+        </div>
+        <partial name="_Filter" model="Model" />
+    </section>
+
+    <section class="danh-muc-section-card danh-muc-table-card">
+        <div class="danh-muc-section-head">
+            <h3 class="danh-muc-section-title">Danh sách danh mục</h3>
+            <p class="danh-muc-section-note">Danh sách các danh mục công việc hiện có trong dự án.</p>
+        </div>
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
 </div>
 
 @section Scripts {

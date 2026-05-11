@@ -1,27 +1,33 @@
-﻿@model QuanLyDuAn.ViewModels.NganSach.NganSachPageViewModel
+@model QuanLyDuAn.ViewModels.NganSach.NganSachPageViewModel
 @using QuanLyDuAn.Constants
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
-    <div class="col-md-6">
-        <select name="locMaDuAn" class="form-select">
-            <option value="">-- Tất cả dự án --</option>
+<div class="ngan-sach-section-head">
+    <h2 class="ngan-sach-section-title">Bộ lọc ngân sách</h2>
+    <p class="ngan-sach-section-note">Lọc theo dự án và trạng thái để theo dõi phiên bản ngân sách hiệu lực hoặc đã thay thế.</p>
+</div>
+
+<form asp-action="Index" method="get" class="ngan-sach-filter-form">
+    <div>
+        <label for="locMaDuAn" class="form-label">Dự án</label>
+        <select id="locMaDuAn" name="locMaDuAn" class="form-select">
+            <option value="">Tất cả dự án</option>
             @foreach (var item in Model.DanhSachDuAn)
             {
                 <option value="@item.MaDuAn" selected="@(Model.LocMaDuAn == item.MaDuAn)">@item.TenDuAn</option>
             }
         </select>
     </div>
-    <div class="col-md-6">
-        <select name="locTrangThai" class="form-select">
-            <option value="">-- Tất cả trạng thái --</option>
+    <div>
+        <label for="locTrangThai" class="form-label">Trạng thái ngân sách</label>
+        <select id="locTrangThai" name="locTrangThai" class="form-select">
+            <option value="">Tất cả trạng thái</option>
             <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
             <option value="@TrangThai.DaThayThe" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaThayThe))">@TrangThai.DaThayTheHienThi</option>
             <option value="@TrangThai.GiuNguyen" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.GiuNguyen))">@TrangThai.GiuNguyenHienThi</option>
         </select>
     </div>
-
-    <div class="col-12 d-flex gap-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
-        <a asp-action="Index" class="btn btn-outline-secondary w-100">Bỏ lọc</a>
+    <div class="ngan-sach-filter-actions">
+        <button type="submit" class="ngan-sach-filter-btn-primary">Lọc dữ liệu</button>
+        <a asp-action="Index" class="ngan-sach-filter-btn-secondary">Làm mới</a>
     </div>
 </form>

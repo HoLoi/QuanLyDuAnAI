@@ -1,26 +1,99 @@
 ﻿@model QuanLyDuAn.ViewModels.CongViec.CongViecPageViewModel
 @using QuanLyDuAn.Constants
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/CongViec/index.css" asp-append-version="true" />
+}
+
 @{
+    ViewData["Title"] = "Công việc";
     var permissions = Model.Permissions;
     var canApprove = permissions.Contains(Permissions.DuyetDeXuatCongViec.Xem);
 
+    var tongCongViec = Model.DanhSach.Count;
+    var dangThucHien = Model.DanhSach.Count(x => TrangThai.EqualsValue(x.TrangThaiCongViec, TrangThai.DangThucHien));
+    var choXacNhan = Model.DanhSach.Count(x => TrangThai.EqualsValue(x.TrangThaiCongViec, TrangThai.ChoXacNhanHoanThanh));
+    var hoanThanh = Model.DanhSach.Count(x => TrangThai.LaHoanThanhCongViec(x.TrangThaiCongViec));
+    var biCan = Model.DanhSach.Count(x => TrangThai.EqualsValue(x.TrangThaiCongViec, TrangThai.BiCanCan));
+
     ViewBag.Permissions = permissions;
+    ViewBag.LocMaDuAn = Model.LocMaDuAn;
+    ViewBag.LocTrangThai = Model.LocTrangThai;
+    ViewBag.TuKhoa = Model.TuKhoa;
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <h5 class="mb-0">Công việc</h5>
-        <div class="d-flex gap-2">
-            @if (canApprove)
-            {
-                <a asp-controller="DuyetDeXuatCongViec"
-                   asp-action="Index"
-                   class="btn btn-outline-primary btn-sm">Duyệt đề xuất công việc</a>
-            }
+<div class="cong-viec-dashboard">
+    <section class="dashboard-hero">
+        <div>
+            <p class="hero-kicker">Tổng quan công việc</p>
+            <h1 class="hero-title">Công việc</h1>
+            <p class="hero-subtitle">Theo dõi trạng thái, tiến độ và xử lý công việc theo dự án.</p>
         </div>
-    </div>
+        @if (canApprove)
+        {
+            <a asp-controller="DuyetDeXuatCongViec"
+               asp-action="Index"
+               class="hero-action">
+                <i class="bi bi-check2-square"></i>
+                Duyệt đề xuất công việc
+            </a>
+        }
+    </section>
 
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
+    <section class="summary-grid">
+        <article class="summary-card">
+            <span class="summary-icon"><i class="bi bi-list-task"></i></span>
+            <div class="summary-meta">
+                <span class="summary-label">Tổng công việc</span>
+                <strong class="summary-value">@tongCongViec</strong>
+                <p class="summary-description">Toàn bộ đầu việc đang quản lý.</p>
+            </div>
+        </article>
+        <article class="summary-card summary-card--active">
+            <span class="summary-icon"><i class="bi bi-play-circle"></i></span>
+            <div class="summary-meta">
+                <span class="summary-label">Đang thực hiện</span>
+                <strong class="summary-value">@dangThucHien</strong>
+                <p class="summary-description">Các công việc đang triển khai.</p>
+            </div>
+        </article>
+        <article class="summary-card summary-card--pending">
+            <span class="summary-icon"><i class="bi bi-hourglass-split"></i></span>
+            <div class="summary-meta">
+                <span class="summary-label">Chờ xác nhận hoàn thành</span>
+                <strong class="summary-value">@choXacNhan</strong>
+                <p class="summary-description">Cần Leader/Manager xác nhận.</p>
+            </div>
+        </article>
+        <article class="summary-card summary-card--success">
+            <span class="summary-icon"><i class="bi bi-check2-circle"></i></span>
+            <div class="summary-meta">
+                <span class="summary-label">Hoàn thành</span>
+                <strong class="summary-value">@hoanThanh</strong>
+                <p class="summary-description">Đã kết thúc đúng quy trình.</p>
+            </div>
+        </article>
+        <article class="summary-card summary-card--blocked">
+            <span class="summary-icon"><i class="bi bi-exclamation-octagon"></i></span>
+            <div class="summary-meta">
+                <span class="summary-label">Bị cản</span>
+                <strong class="summary-value">@biCan</strong>
+                <p class="summary-description">Đang gặp trở ngại cần xử lý.</p>
+            </div>
+        </article>
+    </section>
+
+    <section class="dashboard-card">
+        <header class="card-header-line">
+            <h2>Bộ lọc công việc</h2>
+        </header>
+        <partial name="_Filter" model="Model" />
+    </section>
+
+    <section class="dashboard-card">
+        <header class="card-header-line">
+            <h2>Danh sách công việc</h2>
+        </header>
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
 </div>

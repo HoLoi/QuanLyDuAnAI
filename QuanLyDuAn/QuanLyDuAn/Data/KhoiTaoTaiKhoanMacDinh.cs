@@ -105,6 +105,9 @@ public static class KhoiTaoTaiKhoanMacDinh
             // ===== CHAT (tu? ch?n) =====
             Permissions.Chat.Xem,
             Permissions.Chat.Gui,
+            Permissions.DanhGiaDuAn.Xem,
+            Permissions.DanhGiaDuAn.Duyet,
+            Permissions.DanhGiaNhanVien.Xem,
 
             // AI 
             Permissions.AI.Dataset,
@@ -183,6 +186,7 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.DanhGiaDuAn.Xem,
             Permissions.DanhGiaDuAn.DanhGia,
             Permissions.DanhGiaDuAn.Sua,
+            Permissions.DanhGiaNhanVien.Duyet,
             Permissions.DanhGiaNhanVien.Xem,
             Permissions.DanhGiaNhanVien.DanhGia,
             Permissions.DanhGiaNhanVien.Sua,
@@ -240,7 +244,8 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.ThongKe.XuatFile,
 
             // Xem đánh giá
-            Permissions.DanhGiaNhanVien.Xem
+            Permissions.DanhGiaNhanVien.Xem,
+            Permissions.DanhGiaDuAn.Xem
         });
     }
 
@@ -420,20 +425,38 @@ public static class KhoiTaoTaiKhoanMacDinh
         var mau = new[]
         {
             (ten: "Tien do", diem: 10d, moTa: "Danh gia theo muc do dap ung tien do", loai: "NhanVien"),
-            (ten: "Chat luong", diem: 10d, moTa: "Danh gia chat luong dau ra", loai: "NhanVien"),
-            (ten: "Hop tac", diem: 10d, moTa: "Danh gia kha nang lam viec nhom", loai: "NhanVien"),
-            (ten: "Hieu qua ngan sach", diem: 10d, moTa: "Danh gia su dung ngan sach cua du an", loai: "DuAn")
+            (ten: "Chat luong cong viec", diem: 10d, moTa: "Danh gia chat luong dau ra", loai: "NhanVien"),
+            (ten: "Trach nhiem va chu dong", diem: 10d, moTa: "Danh gia tinh than trach nhiem va chu dong", loai: "NhanVien"),
+            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia kha nang phoi hop trong du an", loai: "NhanVien"),
+            (ten: "Bao cao va minh chung", diem: 10d, moTa: "Danh gia chat luong bao cao tien do", loai: "NhanVien"),
+            (ten: "Tien do", diem: 10d, moTa: "Danh gia tien do tong the du an", loai: "DuAn"),
+            (ten: "Chat luong", diem: 10d, moTa: "Danh gia chat luong tong the du an", loai: "DuAn"),
+            (ten: "Chi phi ngan sach", diem: 10d, moTa: "Danh gia kha nang kiem soat chi phi", loai: "DuAn"),
+            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia su phoi hop giua cac ben", loai: "DuAn"),
+            (ten: "Hieu qua tong the", diem: 10d, moTa: "Danh gia hieu qua dau ra cua du an", loai: "DuAn"),
+            (ten: "Tien do", diem: 10d, moTa: "Danh gia tien do tong the du an", loai: "DanhGiaDuAn"),
+            (ten: "Chat luong", diem: 10d, moTa: "Danh gia chat luong tong the du an", loai: "DanhGiaDuAn"),
+            (ten: "Chi phi ngan sach", diem: 10d, moTa: "Danh gia kha nang kiem soat chi phi", loai: "DanhGiaDuAn"),
+            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia su phoi hop giua cac ben", loai: "DanhGiaDuAn"),
+            (ten: "Hieu qua tong the", diem: 10d, moTa: "Danh gia hieu qua dau ra cua du an", loai: "DanhGiaDuAn"),
+            (ten: "Tien do", diem: 10d, moTa: "Danh gia theo muc do dap ung tien do", loai: "DanhGiaNhanVien"),
+            (ten: "Chat luong cong viec", diem: 10d, moTa: "Danh gia chat luong dau ra", loai: "DanhGiaNhanVien"),
+            (ten: "Trach nhiem va chu dong", diem: 10d, moTa: "Danh gia tinh than trach nhiem va chu dong", loai: "DanhGiaNhanVien"),
+            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia kha nang phoi hop trong du an", loai: "DanhGiaNhanVien"),
+            (ten: "Bao cao va minh chung", diem: 10d, moTa: "Danh gia chat luong bao cao tien do", loai: "DanhGiaNhanVien")
         };
 
         var hienCo = await dbContext.TieuChiDanhGia
             .AsNoTracking()
-            .Where(x => x.TenTieuChi != null)
-            .Select(x => x.TenTieuChi!)
+            .Where(x => x.TenTieuChi != null && x.LoaiTieuChi != null)
+            .Select(x => new { x.TenTieuChi, x.LoaiTieuChi })
             .ToListAsync();
 
         foreach (var item in mau)
         {
-            if (hienCo.Contains(item.ten, StringComparer.OrdinalIgnoreCase))
+            if (hienCo.Any(x =>
+                string.Equals(x.TenTieuChi, item.ten, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(x.LoaiTieuChi, item.loai, StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
             }
@@ -673,14 +696,16 @@ public static class KhoiTaoTaiKhoanMacDinh
             {
                 Permissions.DanhGiaDuAn.Xem,
                 Permissions.DanhGiaDuAn.DanhGia,
-                Permissions.DanhGiaDuAn.Sua
+                Permissions.DanhGiaDuAn.Sua,
+                Permissions.DanhGiaDuAn.Duyet
             },
 
             ["DanhGiaNhanVien"] = new[]
             {
                 Permissions.DanhGiaNhanVien.Xem,
                 Permissions.DanhGiaNhanVien.DanhGia,
-                Permissions.DanhGiaNhanVien.Sua
+                Permissions.DanhGiaNhanVien.Sua,
+                Permissions.DanhGiaNhanVien.Duyet
             },
 
             // ===== KHAC =====

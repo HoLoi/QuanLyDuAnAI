@@ -1,0 +1,4 @@
+.employee-stats .stat-box { border: 1px solid #e5e9f2; border-radius: 10px; padding: 8px 10px; background: #fff; height: 100%; }
+.employee-stats .stat-box span { display: block; color: #6b7a90; font-size: .78rem; }
+.employee-stats .stat-box strong { font-size: .95rem; }
+.employee-stats .empty-note { border: 1px dashed #d4dced; border-radius: 10px; padding: 10px; color: #6b7a90; background: #fafcff; }

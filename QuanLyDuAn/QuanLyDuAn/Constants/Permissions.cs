@@ -168,9 +168,10 @@
 
         public static class DanhGiaDuAn
         {
-            public const string Xem = "DanhGiaDanhGiaDuAn.Xem";
-            public const string DanhGia = "DanhGiaDanhGiaDuAn.DanhGia";
-            public const string Sua = "DanhGiaDanhGiaDuAn.Sua";
+            public const string Xem = "DanhGiaDuAn.Xem";
+            public const string DanhGia = "DanhGiaDuAn.DanhGia";
+            public const string Sua = "DanhGiaDuAn.Sua";
+            public const string Duyet = "DanhGiaDuAn.Duyet";
         }
 
         public static class DanhGiaNhanVien
@@ -178,6 +179,7 @@
             public const string Xem = "DanhGiaNhanVien.Xem";
             public const string DanhGia = "DanhGiaNhanVien.DanhGia";
             public const string Sua = "DanhGiaNhanVien.Sua";
+            public const string Duyet = "DanhGiaNhanVien.Duyet";
         }
 
         public static class Chat

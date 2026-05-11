@@ -1,0 +1,16 @@
+﻿@model string
+
+@{
+    var css = "status-badge status-khac";
+    if (string.Equals(Model, "DaDuyet", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-da-duyet"; }
+    else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-cho-duyet"; }
+    else if (string.Equals(Model, "TuChoi", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-tu-choi"; }
+    else if (string.Equals(Model, "Nhap", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-nhap"; }
+
+    var text = Model;
+    if (string.Equals(Model, "Nhap", StringComparison.OrdinalIgnoreCase)) { text = "Nháp"; }
+    else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Chờ duyệt"; }
+    else if (string.Equals(Model, "DaDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Đã duyệt"; }
+    else if (string.Equals(Model, "TuChoi", StringComparison.OrdinalIgnoreCase)) { text = "Từ chối"; }
+}
+<span class="@css">@text</span>

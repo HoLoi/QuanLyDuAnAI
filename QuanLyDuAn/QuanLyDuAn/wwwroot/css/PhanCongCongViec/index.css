@@ -1,0 +1,407 @@
+﻿.phan-cong-cong-viec-page {
+    --pc-surface: #ffffff;
+    --pc-text: #2f4968;
+    --pc-muted: #7289a1;
+    --pc-border: #dfe7f4;
+    --pc-shadow: 0 10px 24px rgba(48, 71, 102, 0.08);
+    --pc-primary: #4361ee;
+    --pc-primary-soft: #eef2ff;
+    --pc-danger-soft: #fff1f1;
+    --pc-danger-border: #f6cfcf;
+    --pc-radius-lg: 18px;
+    --pc-radius-md: 12px;
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.46));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.15rem;
+}
+
+.phan-cong-cong-viec-page .pc-header-card,
+.phan-cong-cong-viec-page .pc-summary-card,
+.phan-cong-cong-viec-page .pc-section-card,
+.phan-cong-cong-viec-page .pc-empty-state {
+    background: var(--pc-surface);
+    border: 1px solid var(--pc-border);
+    border-radius: var(--pc-radius-lg);
+    box-shadow: var(--pc-shadow);
+}
+
+.phan-cong-cong-viec-page .pc-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+    border-color: rgba(105, 108, 255, 0.2);
+}
+
+.phan-cong-cong-viec-page .pc-title {
+    margin: 0;
+    font-size: 1.42rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.phan-cong-cong-viec-page .pc-subtitle {
+    margin: 0.36rem 0 0;
+    color: #607792;
+    font-size: 0.9rem;
+}
+
+.phan-cong-cong-viec-page .pc-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    border: 1px solid #ccd8ea;
+    background: #f6f9ff;
+    color: #3f5877;
+    border-radius: 0.72rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+}
+
+.phan-cong-cong-viec-page .pc-back-btn:hover,
+.phan-cong-cong-viec-page .pc-back-btn:focus {
+    color: #324a67;
+    border-color: #b5c6dd;
+    background: #ebf2ff;
+}
+
+.phan-cong-cong-viec-page .pc-summary-grid {
+    display: grid;
+    gap: 0.8rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.phan-cong-cong-viec-page .pc-summary-card {
+    padding: 0.9rem;
+    display: flex;
+    gap: 0.72rem;
+    align-items: flex-start;
+}
+
+.phan-cong-cong-viec-page .pc-summary-icon {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf2ff;
+    color: #4358c9;
+    flex-shrink: 0;
+}
+
+.phan-cong-cong-viec-page .pc-summary-icon.status {
+    background: #ecf7ff;
+    color: #0f7fa5;
+}
+
+.phan-cong-cong-viec-page .pc-summary-icon.progress {
+    background: #fff6de;
+    color: #9a6700;
+}
+
+.phan-cong-cong-viec-page .pc-summary-icon.assigned {
+    background: #eaf7ee;
+    color: #1f7a3e;
+}
+
+.phan-cong-cong-viec-page .pc-summary-icon.available {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.phan-cong-cong-viec-page .pc-summary-label {
+    display: block;
+    color: #6d839d;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.phan-cong-cong-viec-page .pc-summary-value {
+    display: block;
+    color: var(--pc-text);
+    font-size: 1.08rem;
+    line-height: 1.3;
+    margin-top: 0.16rem;
+}
+
+.phan-cong-cong-viec-page .pc-summary-note {
+    margin: 0.28rem 0 0;
+    color: #7890a8;
+    font-size: 0.76rem;
+    line-height: 1.35;
+}
+
+.phan-cong-cong-viec-page .pc-section-card {
+    padding: 1rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+.phan-cong-cong-viec-page .pc-section-head {
+    display: grid;
+    gap: 0.22rem;
+}
+
+.phan-cong-cong-viec-page .pc-section-title {
+    margin: 0;
+    font-size: 1.03rem;
+    font-weight: 700;
+    color: #314866;
+}
+
+.phan-cong-cong-viec-page .pc-section-note {
+    margin: 0;
+    color: var(--pc-muted);
+    font-size: 0.84rem;
+}
+
+.phan-cong-cong-viec-page .assignment-form-grid {
+    display: grid;
+    gap: 0.72rem;
+    grid-template-columns: minmax(0, 460px);
+}
+
+.phan-cong-cong-viec-page .assignment-form-input {
+    border: 1px solid #e2eaf6;
+    border-radius: 12px;
+    background: #fcfdff;
+    padding: 0.74rem 0.78rem;
+}
+
+.phan-cong-cong-viec-page .pc-form-field .form-label {
+    margin-bottom: 0.34rem;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #5d7592;
+}
+
+.phan-cong-cong-viec-page .pc-form-field .form-select {
+    min-height: 41px;
+    border-radius: 0.72rem;
+    border: 1px solid #d6e0ef;
+    box-shadow: none;
+}
+
+.phan-cong-cong-viec-page .pc-form-field .form-select:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.phan-cong-cong-viec-page .assignment-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.phan-cong-cong-viec-page .pc-btn {
+    border-radius: 0.68rem;
+    border: 1px solid transparent;
+    padding: 0.46rem 0.72rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.34rem;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.phan-cong-cong-viec-page .pc-btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    border-color: rgba(105, 108, 255, 0.34);
+}
+
+.phan-cong-cong-viec-page .pc-btn-primary:hover,
+.phan-cong-cong-viec-page .pc-btn-primary:focus {
+    color: #fff;
+    filter: brightness(1.03);
+}
+
+.phan-cong-cong-viec-page .pc-btn-secondary {
+    color: #3f5877;
+    background: #f7faff;
+    border-color: #ccd8ea;
+}
+
+.phan-cong-cong-viec-page .pc-btn-secondary:hover,
+.phan-cong-cong-viec-page .pc-btn-secondary:focus {
+    color: #324a67;
+    background: #ebf2ff;
+    border-color: #b5c6dd;
+}
+
+.phan-cong-cong-viec-page .pc-btn-danger-soft {
+    color: #b54141;
+    background: var(--pc-danger-soft);
+    border-color: var(--pc-danger-border);
+    padding: 0.36rem 0.62rem;
+    font-size: 0.76rem;
+}
+
+.phan-cong-cong-viec-page .pc-btn-danger-soft:hover,
+.phan-cong-cong-viec-page .pc-btn-danger-soft:focus {
+    background: #ffe7e7;
+    border-color: #eeacac;
+    color: #9f3333;
+}
+
+.phan-cong-cong-viec-page .pc-btn-neutral-soft {
+    color: #4a607d;
+    background: #f5f8fd;
+    border-color: #cfdbeb;
+    padding: 0.36rem 0.62rem;
+    font-size: 0.74rem;
+}
+
+.phan-cong-cong-viec-page .pc-inline-note {
+    border: 1px dashed #cad8ee;
+    border-radius: var(--pc-radius-md);
+    background: #f8fbff;
+    color: #5f7895;
+    font-size: 0.86rem;
+    padding: 0.7rem 0.85rem;
+}
+
+.phan-cong-cong-viec-page .pc-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid #e1e8f5;
+    border-radius: 14px;
+}
+
+.phan-cong-cong-viec-page .pc-table {
+    margin: 0;
+    min-width: 760px;
+    border-color: #e4ebf7;
+}
+
+.phan-cong-cong-viec-page .pc-table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.phan-cong-cong-viec-page .pc-table td,
+.phan-cong-cong-viec-page .pc-table th {
+    border-color: #e7edf7;
+}
+
+.phan-cong-cong-viec-page .pc-table tbody tr:hover {
+    background: #f9fbff;
+}
+
+.phan-cong-cong-viec-page .pc-table .col-id {
+    width: 84px;
+    white-space: nowrap;
+}
+
+.phan-cong-cong-viec-page .pc-table .col-date {
+    width: 210px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.phan-cong-cong-viec-page .pc-table .col-actions {
+    width: 170px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.phan-cong-cong-viec-page .pc-subsection {
+    margin-top: 0.22rem;
+}
+
+.phan-cong-cong-viec-page .pc-subsection-title {
+    margin: 0;
+    color: #314866;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.phan-cong-cong-viec-page .pc-subsection-note {
+    margin: 0.2rem 0 0;
+    color: #7289a1;
+    font-size: 0.8rem;
+}
+
+.phan-cong-cong-viec-page .pc-table-subtle {
+    min-width: 760px;
+}
+
+.phan-cong-cong-viec-page .pc-empty-state {
+    border-style: dashed;
+    text-align: center;
+    padding: 1.2rem;
+}
+
+.phan-cong-cong-viec-page .pc-empty-state i {
+    font-size: 1.7rem;
+    color: #7c92ad;
+}
+
+.phan-cong-cong-viec-page .pc-empty-state h3 {
+    margin: 0.28rem 0 0;
+    font-size: 1rem;
+    color: #34506f;
+}
+
+.phan-cong-cong-viec-page .pc-empty-state p {
+    margin: 0.32rem 0 0;
+    color: #7289a1;
+    font-size: 0.84rem;
+}
+
+@media (max-width: 1199.98px) {
+    .phan-cong-cong-viec-page .pc-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991.98px) {
+    .phan-cong-cong-viec-page {
+        border-radius: 16px;
+        padding: 0.95rem;
+    }
+
+    .phan-cong-cong-viec-page .pc-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .phan-cong-cong-viec-page .pc-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .phan-cong-cong-viec-page .assignment-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .phan-cong-cong-viec-page .assignment-form-actions {
+        gap: 0.45rem;
+    }
+
+    .phan-cong-cong-viec-page .pc-table {
+        min-width: 640px;
+    }
+}

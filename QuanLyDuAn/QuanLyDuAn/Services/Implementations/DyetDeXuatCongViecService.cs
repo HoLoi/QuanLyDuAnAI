@@ -4,6 +4,7 @@ using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.DuyetDeXuatCongViec;
+using System.Data;
 using System.Security.Claims;
 
 namespace QuanLyDuAn.Services.Implementations
@@ -27,6 +28,12 @@ namespace QuanLyDuAn.Services.Implementations
                 from dx in _context.DeXuatCongViec
                 join da in _context.DuAn on dx.MaDuAn equals da.MaDuAn
                 join ndDeXuat in _context.NguoiDung on dx.MaNguoiDungDeXuat equals ndDeXuat.MaNguoiDung
+                join ndDuyetLeft in _context.NguoiDung on dx.MaNguoiDungDuyet equals ndDuyetLeft.MaNguoiDung into ndDuyetGroup
+                from ndDuyet in ndDuyetGroup.DefaultIfEmpty()
+                join dmcvLeft in _context.DanhMucCongViec on dx.MaDanhMucCV equals dmcvLeft.MaDanhMucCV into dmcvGroup
+                from dmcv in dmcvGroup.DefaultIfEmpty()
+                join mdLeft in _context.MucDoUuTien on dx.MaMucDo equals mdLeft.MaMucDo into mdGroup
+                from md in mdGroup.DefaultIfEmpty()
                 where dx.IsDeleted != true
                       && da.IsDeleted != true
                       && da.MaNguoiDung == currentUserId
@@ -37,12 +44,16 @@ namespace QuanLyDuAn.Services.Implementations
                     TenDuAn = da.TenDuAn ?? $"Dự án {da.MaDuAn}",
                     MaNguoiDungDeXuat = dx.MaNguoiDungDeXuat,
                     NguoiDungDeXuat = ndDeXuat.HoTenNguoiDung ?? $"Nhân viên {dx.MaNguoiDungDeXuat}",
+                    NguoiDungDuyet = ndDuyet != null ? (ndDuyet.HoTenNguoiDung ?? $"Nhân viên {ndDuyet.MaNguoiDung}") : string.Empty,
                     TenCongViecDeXuat = dx.TenCongViecDeXuat ?? string.Empty,
                     MoTaCongViecDeXuat = dx.MoTaCongViecDeXuat ?? string.Empty,
+                    TenDanhMucCongViec = dmcv != null ? (dmcv.TenDanhMucCV ?? string.Empty) : string.Empty,
+                    TenMucDoUuTien = md != null ? (md.TenMucDo ?? string.Empty) : string.Empty,
                     ChiPhiDeXuat = dx.ChiPhiDeXuat,
                     NgayBatDauCongViecDeXuat = dx.NgayBatDauCongViecDeXuat,
                     NgayKetThucCVDeXuatDuKien = dx.NgayKetThucCVDeXuatDuKien,
                     NgayDeXuatCongViec = dx.NgayDeXuatCongViec,
+                    NgayDuyetDeXuatCongViec = dx.NgayDuyetDeXuatCongViec,
                     TrangThaiCongViecDeXuat = dx.TrangThaiCongViecDeXuat ?? string.Empty
                 };
 
@@ -74,6 +85,7 @@ namespace QuanLyDuAn.Services.Implementations
         public async Task ApproveAsync(int maDeXuatCv)
         {
             var currentUserId = await GetCurrentUserIdAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
             var deXuat = await _context.DeXuatCongViec
                 .FirstOrDefaultAsync(x => x.MaDeXuatCV == maDeXuatCv && x.IsDeleted != true);
@@ -85,6 +97,22 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Đề xuất công việc không còn ở trạng thái chờ duyệt.");
 
             await EnsureIsProjectManagerAsync(currentUserId, deXuat.MaDuAn);
+            var duAn = await _context.DuAn
+                .FirstOrDefaultAsync(x => x.MaDuAn == deXuat.MaDuAn && x.IsDeleted != true);
+
+            if (duAn == null)
+                throw new Exception("Không tìm thấy dự án của đề xuất công việc.");
+
+            if (TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn))
+                throw new Exception("Dự án đã hoàn thành. Vui lòng mở lại dự án trước khi duyệt đề xuất công việc.");
+
+            if (TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru))
+            {
+                throw new Exception("Dự án đã đóng, không thể duyệt đề xuất công việc.");
+            }
+
+            var canRollbackDuAn = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh);
 
             var danhMucHopLe = await _context.DanhMucCongViec
                 .AnyAsync(x => x.MaDanhMucCV == deXuat.MaDanhMucCV && x.MaDuAn == deXuat.MaDuAn && x.IsDeleted != true);
@@ -99,7 +127,11 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Mức độ ưu tiên của đề xuất không còn hợp lệ.");
 
             var nganSachHienTai = await _context.NganSach
-                .Where(x => x.MaDuAn == deXuat.MaDuAn && x.IsDeleted != true && x.IsActive == true)
+                .Where(x =>
+                    x.MaDuAn == deXuat.MaDuAn
+                    && x.IsDeleted != true
+                    && x.IsActive == true
+                    && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi))
                 .OrderByDescending(x => x.Version)
                 .ThenByDescending(x => x.NgayCapNhatNganSach)
                 .FirstOrDefaultAsync();
@@ -107,7 +139,12 @@ namespace QuanLyDuAn.Services.Implementations
             if (nganSachHienTai == null)
                 throw new Exception("Dự án chưa có ngân sách hiện hành để duyệt đề xuất công việc.");
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            var daCoCongViecTuDeXuat = await _context.CongViec.AnyAsync(x =>
+                x.IsDeleted != true &&
+                x.MaDeXuatCV == deXuat.MaDeXuatCV);
+
+            if (daCoCongViecTuDeXuat)
+                throw new Exception("Đề xuất công việc này đã được duyệt trước đó.");
 
             var congViec = new CongViec
             {
@@ -165,6 +202,18 @@ namespace QuanLyDuAn.Services.Implementations
                 NkHanhDongQLDA = $"Duyệt đề xuất công việc #{deXuat.MaDeXuatCV}",
                 NkThoiGianQLDA = DateTime.Now
             });
+
+            if (canRollbackDuAn)
+            {
+                duAn.TrangThaiDuAn = TrangThai.DangThucHien;
+                _context.NhatKyQuanLyDuAn.Add(new NhatKyQuanLyDuAn
+                {
+                    MaDuAn = deXuat.MaDuAn,
+                    MaNguoiDung = currentUserId,
+                    NkHanhDongQLDA = $"Dự án tự chuyển về {TrangThai.ToDisplay(TrangThai.DangThucHien)} do duyệt thêm công việc mới từ đề xuất #{deXuat.MaDeXuatCV}.",
+                    NkThoiGianQLDA = DateTime.Now
+                });
+            }
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();

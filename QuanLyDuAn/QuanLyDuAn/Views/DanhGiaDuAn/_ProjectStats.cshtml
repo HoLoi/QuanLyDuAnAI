@@ -1,0 +1,39 @@
+﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnThongKeViewModel
+
+@{
+    var hasData = !string.IsNullOrWhiteSpace(Model.TenDuAn)
+                  || Model.TongCongViec > 0
+                  || Model.TongChiTietCongViec > 0
+                  || Model.SoBaoCaoTienDo > 0
+                  || Model.TongNganSach > 0
+                  || Model.TongChiPhi > 0;
+    var chenhLechNganSach = Model.TongNganSach - Model.TongChiPhi;
+}
+
+<div class="project-stats card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <h6 class="mb-3">Dữ liệu hỗ trợ đánh giá dự án</h6>
+
+        @if (!hasData)
+        {
+            <div class="empty-note">Chưa có dữ liệu hỗ trợ cho dự án này.</div>
+        }
+        else
+        {
+            <div class="row g-2">
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tổng công việc</span><strong>@Model.TongCongViec</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Công việc hoàn thành</span><strong>@Model.CongViecHoanThanh</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Công việc trễ hạn</span><strong>@Model.CongViecTreHan</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tỷ lệ hoàn thành</span><strong>@Model.TyLeHoanThanh.ToString("0.##")%</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngân sách được duyệt</span><strong>@Model.TongNganSach.ToString("N0")</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Chi phí đã dùng</span><strong>@Model.TongChiPhi.ToString("N0")</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tỷ lệ sử dụng ngân sách</span><strong>@Model.TyLeSuDungNganSach.ToString("0.##")%</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số báo cáo tiến độ</span><strong>@Model.SoBaoCaoTienDo</strong></div></div>
+                @if (chenhLechNganSach != 0m)
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Chênh lệch ngân sách</span><strong>@chenhLechNganSach.ToString("N0")</strong></div></div>
+                }
+            </div>
+        }
+    </div>
+</div>

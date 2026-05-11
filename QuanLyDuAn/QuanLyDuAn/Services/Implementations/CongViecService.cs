@@ -11,17 +11,22 @@ namespace QuanLyDuAn.Services.Implementations
     {
         private readonly QuanLyDuAnDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ITrangThaiWorkflowService _trangThaiWorkflowService;
 
-        public CongViecService(QuanLyDuAnDbContext context, IHttpContextAccessor httpContextAccessor)
+        public CongViecService(
+            QuanLyDuAnDbContext context,
+            IHttpContextAccessor httpContextAccessor,
+            ITrangThaiWorkflowService trangThaiWorkflowService)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _trangThaiWorkflowService = trangThaiWorkflowService;
         }
 
         public async Task<CongViecPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai, string? tuKhoa)
         {
             var currentUserId = await GetCurrentUserIdAsync();
-            var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
+            var (isAdmin, isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
             var allowedProjectIds = await GetAccessibleProjectIdsAsync();
             var projectOptions = await GetProjectOptionsAsync(allowedProjectIds);
 
@@ -80,7 +85,7 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
-            if (isEmployee && !isManager)
+            if (isEmployee && !isManager && !isAdmin)
             {
                 var duAnIds = await query
                     .Select(x => x.MaDuAn)
@@ -111,7 +116,9 @@ namespace QuanLyDuAn.Services.Implementations
                 .ThenByDescending(x => x.MaCongViec)
                 .ToListAsync();
 
-            await GanCoThePhanCongCongViecAsync(danhSach, currentUserId, isManager, isEmployee);
+            await GanCoThePhanCongCongViecAsync(danhSach, currentUserId, isManager, isEmployee, isAdmin);
+            await GanCoTheXuLyTrangThaiCongViecAsync(danhSach, currentUserId);
+            GanThongTinWorkflowUi(danhSach);
 
             return new CongViecPageViewModel
             {
@@ -123,11 +130,73 @@ namespace QuanLyDuAn.Services.Implementations
             };
         }
 
+        public async Task XacNhanHoanThanhCongViecAsync(int maCongViec)
+        {
+            var currentUserId = await GetCurrentUserIdAsync();
+            var (congViec, duAn) = await LayThongTinCongViecVaDuAnAsync(maCongViec);
+
+            await KiemTraQuyenXuLyTrangThaiCongViecAsync(congViec.MaCongViec, duAn.MaDuAn, currentUserId);
+
+            if (!TrangThai.EqualsValue(congViec.TrangThaiCongViec, TrangThai.ChoXacNhanHoanThanh))
+                throw new Exception("Công việc phải ở trạng thái chờ xác nhận hoàn thành.");
+
+            congViec.TrangThaiCongViec = TrangThai.HoanThanh;
+            if (!congViec.NgayKetThucCVThucTe.HasValue)
+                congViec.NgayKetThucCVThucTe = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            await _trangThaiWorkflowService.DongBoTrangThaiDuAnTheoCongViecAsync(
+                duAn.MaDuAn,
+                currentUserId,
+                "Xác nhận hoàn thành công việc");
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task MoLaiCongViecAsync(int maCongViec, string lyDo)
+        {
+            if (string.IsNullOrWhiteSpace(lyDo))
+                throw new Exception("Vui lòng nhập lý do mở lại công việc.");
+
+            var currentUserId = await GetCurrentUserIdAsync();
+            var (congViec, duAn) = await LayThongTinCongViecVaDuAnAsync(maCongViec);
+
+            await KiemTraQuyenXuLyTrangThaiCongViecAsync(congViec.MaCongViec, duAn.MaDuAn, currentUserId);
+
+            if (!TrangThai.LaHoanThanhCongViec(congViec.TrangThaiCongViec))
+                throw new Exception("Chỉ có thể mở lại công việc đã hoàn thành.");
+
+            if (TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn))
+                throw new Exception("Dự án đang ở trạng thái hoàn thành. Vui lòng mở lại dự án trước.");
+
+            congViec.TrangThaiCongViec = TrangThai.DangThucHien;
+            congViec.NgayKetThucCVThucTe = null;
+
+            _context.NhatKyQuanLyDuAn.Add(new Models.Entities.NhatKyQuanLyDuAn
+            {
+                MaDuAn = duAn.MaDuAn,
+                MaNguoiDung = currentUserId,
+                NkHanhDongQLDA = $"Mở lại công việc #{congViec.MaCongViec}. Lý do: {lyDo.Trim()}",
+                NkThoiGianQLDA = DateTime.Now
+            });
+
+            await _context.SaveChangesAsync();
+
+            await _trangThaiWorkflowService.DongBoTrangThaiDuAnTheoCongViecAsync(
+                duAn.MaDuAn,
+                currentUserId,
+                "Mở lại công việc");
+
+            await _context.SaveChangesAsync();
+        }
+
         private async Task GanCoThePhanCongCongViecAsync(
             List<CongViecItemViewModel> danhSach,
             int currentUserId,
             bool isManager,
-            bool isEmployee)
+            bool isEmployee,
+            bool isAdmin)
         {
             if (danhSach.Count == 0)
             {
@@ -135,7 +204,7 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             // Manager/Admin: giữ nguyên luồng phân quyền hiện tại, không chặn theo vai trò dự án.
-            if (!isEmployee || isManager)
+            if (!isEmployee || isManager || isAdmin)
             {
                 foreach (var item in danhSach)
                 {
@@ -173,11 +242,107 @@ namespace QuanLyDuAn.Services.Implementations
             }
         }
 
+        private async Task GanCoTheXuLyTrangThaiCongViecAsync(List<CongViecItemViewModel> danhSach, int currentUserId)
+        {
+            if (danhSach.Count == 0)
+                return;
+
+            var maDuAnTheoCongViec = danhSach.ToDictionary(x => x.MaCongViec, x => x.MaDuAn);
+            var duAnIds = maDuAnTheoCongViec.Values.Distinct().ToList();
+
+            var managerProjectIds = await _context.DuAn
+                .Where(x => duAnIds.Contains(x.MaDuAn) && x.IsDeleted != true && x.MaNguoiDung == currentUserId)
+                .Select(x => x.MaDuAn)
+                .ToListAsync();
+
+            var leaderVariants = new[] { TrangThai.VaiTroLeader, TrangThai.VaiTroLeaderHienThi };
+            var leaderProjectIds = await _context.NhanVienDuAn
+                .Where(x => x.MaNguoiDung == currentUserId && duAnIds.Contains(x.MaDuAn))
+                .Where(x => leaderVariants.Contains(x.VaiTroTrongDuAn ?? string.Empty))
+                .Select(x => x.MaDuAn)
+                .ToListAsync();
+
+            var teamLeaderIds = await _context.NhanVienTeam
+                .Where(x => x.MaNguoiDung == currentUserId && x.IsLeader == true)
+                .Select(x => x.MaTeam)
+                .Distinct()
+                .ToListAsync();
+
+            var leaderTeamProjectIds = await _context.TeamDuAn
+                .Where(x => teamLeaderIds.Contains(x.MaTeam) && duAnIds.Contains(x.MaDuAn))
+                .Select(x => x.MaDuAn)
+                .Distinct()
+                .ToListAsync();
+
+            var allowedProjectIds = managerProjectIds
+                .Concat(leaderProjectIds)
+                .Concat(leaderTeamProjectIds)
+                .Distinct()
+                .ToHashSet();
+
+            foreach (var item in danhSach)
+            {
+                var trangThai = TrangThai.ToCode(item.TrangThaiCongViec);
+                var coQuyen = allowedProjectIds.Contains(item.MaDuAn);
+                item.CoTheXacNhanHoanThanh = coQuyen && TrangThai.EqualsValue(trangThai, TrangThai.ChoXacNhanHoanThanh);
+                item.CoTheMoLai = coQuyen && TrangThai.LaHoanThanhCongViec(trangThai);
+            }
+        }
+
+        private static void GanThongTinWorkflowUi(List<CongViecItemViewModel> danhSach)
+        {
+            foreach (var item in danhSach)
+            {
+                var trangThai = TrangThai.ToCode(item.TrangThaiCongViec);
+                item.TrangThaiCongViec = trangThai;
+                item.TrangThaiHienThi = TrangThai.ToDisplay(trangThai);
+                item.CssTrangThai = LayCssTrangThai(trangThai);
+                item.ThongDiepWorkflow = LayThongDiepWorkflow(trangThai);
+            }
+        }
+
+        private static string LayCssTrangThai(string? trangThai)
+        {
+            if (TrangThai.LaHoanThanhCongViec(trangThai))
+                return "workflow-success";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.ChoXacNhanHoanThanh))
+                return "workflow-pending";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.BiCanCan))
+                return "workflow-blocked";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.TamDung))
+                return "workflow-paused";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.DaHuy))
+                return "workflow-cancelled";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.ChuaBatDau))
+                return "workflow-idle";
+
+            return "workflow-active";
+        }
+
+        private static string? LayThongDiepWorkflow(string? trangThai)
+        {
+            if (TrangThai.LaHoanThanhCongViec(trangThai))
+                return "Công việc đã hoàn thành và đang ở trạng thái khóa tác nghiệp.";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.ChoXacNhanHoanThanh))
+                return "Công việc đã đủ điều kiện và đang chờ xác nhận hoàn thành.";
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.BiCanCan))
+                return "Công việc đang bị cản trở, cần xử lý để tiếp tục.";
+
+            return null;
+        }
+
         private async Task<List<int>> GetAccessibleProjectIdsAsync()
         {
-            var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
+            var (isAdmin, isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
 
-            if (!isManager && !isEmployee)
+            if (isAdmin || (!isManager && !isEmployee))
             {
                 return await _context.DuAn
                     .Where(x => x.IsDeleted != true)
@@ -249,7 +414,7 @@ namespace QuanLyDuAn.Services.Implementations
             return maNguoiDung;
         }
 
-        private async Task<(bool IsManager, bool IsEmployee)> GetCurrentUserRoleFlagsAsync()
+        private async Task<(bool IsAdmin, bool IsManager, bool IsEmployee)> GetCurrentUserRoleFlagsAsync()
         {
             var user = _httpContextAccessor.HttpContext?.User;
             var aspUserId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -269,7 +434,61 @@ namespace QuanLyDuAn.Services.Implementations
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToHashSet();
 
-            return (normalizedRoles.Contains("MANAGER"), normalizedRoles.Contains("EMPLOYEE"));
+            return (normalizedRoles.Contains("ADMIN"), normalizedRoles.Contains("MANAGER"), normalizedRoles.Contains("EMPLOYEE"));
+        }
+
+        private async Task<(Models.Entities.CongViec CongViec, Models.Entities.DuAn DuAn)> LayThongTinCongViecVaDuAnAsync(int maCongViec)
+        {
+            var duLieu = await (
+                from cv in _context.CongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                join da in _context.DuAn on dm.MaDuAn equals da.MaDuAn
+                where cv.MaCongViec == maCongViec
+                      && cv.IsDeleted != true
+                      && dm.IsDeleted != true
+                      && da.IsDeleted != true
+                select new { cv, da }
+            ).FirstOrDefaultAsync();
+
+            if (duLieu == null)
+                throw new Exception("Không tìm thấy công việc.");
+
+            return (duLieu.cv, duLieu.da);
+        }
+
+        private async Task KiemTraQuyenXuLyTrangThaiCongViecAsync(int maCongViec, int maDuAn, int currentUserId)
+        {
+            var coQuyenManager = await _context.DuAn
+                .AnyAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true && x.MaNguoiDung == currentUserId);
+
+            if (coQuyenManager)
+                return;
+
+            var leaderVariants = new[] { TrangThai.VaiTroLeader, TrangThai.VaiTroLeaderHienThi };
+            var laLeaderDuAn = await _context.NhanVienDuAn
+                .AnyAsync(x => x.MaDuAn == maDuAn
+                            && x.MaNguoiDung == currentUserId
+                            && leaderVariants.Contains(x.VaiTroTrongDuAn ?? string.Empty));
+
+            if (laLeaderDuAn)
+                return;
+
+            var teamIds = await _context.TeamDuAn
+                .Where(x => x.MaDuAn == maDuAn)
+                .Select(x => x.MaTeam)
+                .ToListAsync();
+
+            if (teamIds.Count > 0)
+            {
+                var laLeaderTeam = await _context.NhanVienTeam
+                    .AnyAsync(x => teamIds.Contains(x.MaTeam)
+                                && x.MaNguoiDung == currentUserId
+                                && x.IsLeader == true);
+                if (laLeaderTeam)
+                    return;
+            }
+
+            throw new Exception("Bạn không có quyền xác nhận hoặc mở lại công việc này.");
         }
     }
 }

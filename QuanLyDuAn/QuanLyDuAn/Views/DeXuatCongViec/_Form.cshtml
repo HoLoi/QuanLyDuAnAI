@@ -8,20 +8,19 @@
 
 @if (canShowForm)
 {
-    <form asp-action="TaoDeXuat" method="post" class="border rounded p-3 mb-3">
+    <form asp-action="TaoDeXuat" method="post" class="dxcv-form" novalidate>
         <input type="hidden" asp-for="LocMaDuAn" />
         <input type="hidden" asp-for="LocTrangThai" />
         <input type="hidden" asp-for="Form.MaDuAn" />
 
-        <div class="row g-2">
+        <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">Dự án</label>
                 <input class="form-control" value="@Model.TenDuAn" readonly />
                 <span asp-validation-for="Form.MaDuAn" class="text-danger"></span>
             </div>
             <div class="col-md-4">
-                <label asp-for="Form.ChiPhiDeXuat" class="form-label">Chi phí đề xuất</label>
-                @*<input asp-for="Form.ChiPhiDeXuat" class="form-control" />*@
+                <label asp-for="Form.ChiPhiDeXuat" class="form-label">Chi phí đề xuất (VNĐ)</label>
                 <input asp-for="Form.ChiPhiDeXuat"
                        class="form-control"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
@@ -65,12 +64,21 @@
                 <span asp-validation-for="Form.NgayKetThucCVDeXuatDuKien" class="text-danger"></span>
             </div>
             <div class="col-12">
-                <label asp-for="Form.MoTaCongViecDeXuat" class="form-label">Mô tả</label>
+                <label asp-for="Form.MoTaCongViecDeXuat" class="form-label">Mô tả công việc</label>
                 <textarea asp-for="Form.MoTaCongViecDeXuat" class="form-control" rows="3"></textarea>
                 <span asp-validation-for="Form.MoTaCongViecDeXuat" class="text-danger"></span>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary mt-3">Gửi đề xuất</button>
+        <div class="dxcv-form-actions">
+            <button type="submit" class="dxcv-action-btn dxcv-action-primary">
+                <i class="bi bi-send"></i>
+                Tạo đề xuất
+            </button>
+            <a asp-action="Index" asp-route-locMaDuAn="@Model.LocMaDuAn" asp-route-locTrangThai="@Model.LocTrangThai" class="dxcv-action-btn dxcv-action-neutral">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Làm mới
+            </a>
+        </div>
     </form>
 }

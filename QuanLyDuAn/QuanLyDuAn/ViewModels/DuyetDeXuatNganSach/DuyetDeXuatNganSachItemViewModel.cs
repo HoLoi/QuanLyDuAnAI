@@ -10,7 +10,9 @@ namespace QuanLyDuAn.ViewModels.DuyetDeXuatNganSach
         public string LyDoDeXuat { get; set; } = string.Empty;
         public int MaNguoiDungDeXuat { get; set; }
         public string NguoiDungDeXuat { get; set; } = string.Empty;
+        public string NguoiDungDuyet { get; set; } = string.Empty;
         public DateTime? NgayDeXuat { get; set; }
+        public DateTime? NgayDuyet { get; set; }
         public string TrangThaiDeXuat { get; set; } = string.Empty;
     }
 }

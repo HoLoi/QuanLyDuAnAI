@@ -1,0 +1,334 @@
+.ngan-sach-page {
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.45));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.15rem;
+}
+
+.ngan-sach-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(105, 108, 255, 0.2);
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+    padding: 1rem 1.1rem;
+}
+
+.ngan-sach-title {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.ngan-sach-subtitle {
+    margin: 0.38rem 0 0;
+    color: #607792;
+    font-size: 0.92rem;
+}
+
+.ngan-sach-readonly-note {
+    margin: 0.45rem 0 0;
+    color: #4b6889;
+    font-size: 0.83rem;
+}
+
+.ngan-sach-header-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cdd8e8;
+    background: #f6f9ff;
+    color: #3f5d80;
+    border-radius: 0.72rem;
+    padding: 0.46rem 0.72rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ngan-sach-header-action:hover,
+.ngan-sach-header-action:focus {
+    color: #2f4868;
+    background: #eaf1fd;
+}
+
+.ngan-sach-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.82rem;
+}
+
+.ngan-sach-stat-card {
+    background: #fff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+    padding: 0.95rem;
+    display: grid;
+    gap: 0.24rem;
+}
+
+.ngan-sach-stat-label {
+    color: #697e98;
+    font-size: 0.83rem;
+    font-weight: 600;
+}
+
+.ngan-sach-stat-value {
+    color: #2f4968;
+    font-size: 1.18rem;
+    line-height: 1.25;
+}
+
+.ngan-sach-section-card {
+    background: #fff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+    padding: 1rem;
+    display: grid;
+    gap: 0.85rem;
+}
+
+.ngan-sach-section-head {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.ngan-sach-section-title {
+    margin: 0;
+    font-size: 1.03rem;
+    font-weight: 700;
+    color: #314866;
+}
+
+.ngan-sach-section-note {
+    margin: 0;
+    font-size: 0.84rem;
+    color: #7289a1;
+}
+
+.ngan-sach-filter-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+}
+
+.ngan-sach-filter-form .form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #5d7592;
+}
+
+.ngan-sach-filter-form .form-control,
+.ngan-sach-filter-form .form-select {
+    min-height: 40px;
+    border-radius: 0.72rem;
+    border: 1px solid #d6e0ef;
+    box-shadow: none;
+}
+
+.ngan-sach-filter-form .form-control:focus,
+.ngan-sach-filter-form .form-select:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.ngan-sach-filter-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    align-content: end;
+}
+
+.ngan-sach-filter-btn-primary,
+.ngan-sach-filter-btn-secondary {
+    min-height: 40px;
+    border-radius: 0.72rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.ngan-sach-filter-btn-primary {
+    border-color: rgba(105, 108, 255, 0.33);
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    color: #fff;
+}
+
+.ngan-sach-filter-btn-primary:hover,
+.ngan-sach-filter-btn-primary:focus {
+    color: #fff;
+    filter: brightness(1.03);
+}
+
+.ngan-sach-filter-btn-secondary {
+    border-color: #cdd8e8;
+    background: #f6f9ff;
+    color: #436082;
+}
+
+.ngan-sach-filter-btn-secondary:hover,
+.ngan-sach-filter-btn-secondary:focus {
+    color: #2f4868;
+    background: #eaf1fd;
+}
+
+.ngan-sach-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 14px;
+    border: 1px solid #e1e8f5;
+}
+
+.ngan-sach-table {
+    margin: 0;
+    min-width: 980px;
+    border-color: #e1e8f5;
+}
+
+.ngan-sach-table th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.81rem;
+    font-weight: 700;
+}
+
+.ngan-sach-table td,
+.ngan-sach-table th {
+    border-color: #e7edf7;
+    vertical-align: top;
+}
+
+.ngan-sach-table tbody tr {
+    transition: background-color 0.16s ease;
+}
+
+.ngan-sach-table tbody tr:hover {
+    background: #f9fbff;
+}
+
+.ngan-sach-cell-title {
+    color: #304969;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.ngan-sach-cell-sub {
+    color: #7289a1;
+    font-size: 0.77rem;
+}
+
+.ngan-sach-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.28rem 0.68rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.ngan-sach-status-badge.is-active {
+    background: #e9f8ee;
+    color: #1f7a3e;
+    border-color: rgba(31, 122, 62, 0.24);
+}
+
+.ngan-sach-status-badge.is-inactive,
+.ngan-sach-status-badge.is-neutral {
+    background: #f4f6fa;
+    color: #607389;
+    border-color: rgba(96, 115, 137, 0.22);
+}
+
+.ngan-sach-status-badge.is-approved {
+    background: #edf2ff;
+    color: #3f56c4;
+    border-color: rgba(63, 86, 196, 0.25);
+}
+
+.ngan-sach-status-badge.is-replaced {
+    background: #fff2f2;
+    color: #b54141;
+    border-color: rgba(181, 65, 65, 0.26);
+}
+
+.ngan-sach-status-badge.is-kept {
+    background: #eef2f7;
+    color: #5f6f82;
+    border-color: rgba(95, 111, 130, 0.26);
+}
+
+.ngan-sach-empty-state {
+    border: 1px dashed #c7d6eb;
+    border-radius: 14px;
+    background: #f8fbff;
+    text-align: center;
+    padding: 1.15rem;
+}
+
+.ngan-sach-empty-title {
+    margin: 0;
+    font-weight: 700;
+    color: #34506f;
+}
+
+@media (max-width: 1199.98px) {
+    .ngan-sach-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 991.98px) {
+    .ngan-sach-page {
+        border-radius: 16px;
+        padding: 0.95rem;
+    }
+
+    .ngan-sach-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ngan-sach-filter-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .ngan-sach-filter-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ngan-sach-title {
+        font-size: 1.28rem;
+    }
+
+    .ngan-sach-filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .ngan-sach-filter-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .ngan-sach-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

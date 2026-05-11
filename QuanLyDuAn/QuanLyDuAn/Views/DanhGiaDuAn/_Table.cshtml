@@ -1,0 +1,76 @@
+﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnPageViewModel
+@using QuanLyDuAn.Constants
+
+<div class="table-responsive dgda-table-wrap">
+    <table class="table table-hover align-middle dgda-table">
+        <thead>
+            <tr>
+                <th>Dự án</th>
+                <th>Quản lý</th>
+                <th>Trạng thái dự án</th>
+                <th>Đánh giá</th>
+                <th>Điểm</th>
+                <th>Người đánh giá</th>
+                <th>Ngày đánh giá</th>
+                <th class="text-end">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.DanhSach)
+            {
+                <tr>
+                    <td>
+                        <div class="fw-semibold">@item.TenDuAn</div>
+                        <div class="text-muted small">Mã dự án: @item.MaDuAn | Hoàn thành: @item.PhanTramHoanThanh%</div>
+                    </td>
+                    <td>@item.TenNguoiQuanLy</td>
+                    <td>@item.TrangThaiDuAn</td>
+                    <td>@await Html.PartialAsync("_TrangThaiDanhGiaBadge", item.TrangThaiDanhGia)</td>
+                    <td>@await Html.PartialAsync("_ScoreBadge", item)</td>
+                    <td>@item.TenNguoiDanhGia</td>
+                    <td>@(item.NgayDanhGia?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                    <td class="text-end">
+                        <div class="d-flex gap-1 justify-content-end flex-wrap">
+                            <a asp-action="ChiTiet" asp-route-maDanhGiaDuAn="@item.MaDanhGiaDuAn" class="btn btn-sm btn-outline-secondary">Xem chi tiết</a>
+                            @if (item.CoTheSua)
+                            {
+                                <a asp-action="Form" asp-route-maDuAn="@item.MaDuAn" class="btn btn-sm btn-warning">Sửa</a>
+                            }
+                            @if (item.CoTheGuiDuyet)
+                            {
+                                <form asp-action="GuiDuyet" method="post">
+                                    <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                    <button type="submit" class="btn btn-sm btn-primary">Gửi duyệt</button>
+                                </form>
+                            }
+                            @if (item.CoTheDuyet)
+                            {
+                                <form asp-action="Duyet" method="post">
+                                    <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                    <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
+                                </form>
+                            }
+                            @if (item.CoTheTuChoi)
+                            {
+                                <form asp-action="TuChoi" method="post" class="d-flex gap-1">
+                                    <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                    <input type="text" name="lyDoTuChoi" class="form-control form-control-sm" placeholder="Lý do" required />
+                                    <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
+                                </form>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

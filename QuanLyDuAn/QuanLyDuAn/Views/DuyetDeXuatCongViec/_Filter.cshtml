@@ -1,21 +1,28 @@
-﻿@model QuanLyDuAn.ViewModels.DuyetDeXuatCongViec.DuyetDeXuatCongViecPageViewModel
+@model QuanLyDuAn.ViewModels.DuyetDeXuatCongViec.DuyetDeXuatCongViecPageViewModel
 @using QuanLyDuAn.Constants
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
-    <div class="col-md-4">
-        <input type="number" name="locMaDuAn" value="@Model.LocMaDuAn" class="form-control" placeholder="Mã dự án" />
+<div class="duyet-de-xuat-cong-viec-section-head">
+    <h2 class="duyet-de-xuat-cong-viec-section-title">Bộ lọc danh sách</h2>
+    <p class="duyet-de-xuat-cong-viec-section-note">Lọc theo dự án và trạng thái để xử lý nhanh các đề xuất cần duyệt.</p>
+</div>
+
+<form asp-action="Index" method="get" class="duyet-de-xuat-cong-viec-filter-form">
+    <div>
+        <label for="locMaDuAn" class="form-label">Mã dự án</label>
+        <input id="locMaDuAn" type="number" name="locMaDuAn" value="@Model.LocMaDuAn" class="form-control" placeholder="Nhập mã dự án" />
     </div>
-    <div class="col-md-4">
-        <select name="locTrangThai" class="form-select">
-            <option value="">-- Tất cả trạng thái --</option>
+    <div>
+        <label for="locTrangThai" class="form-label">Trạng thái đề xuất</label>
+        <select id="locTrangThai" name="locTrangThai" class="form-select">
+            <option value="">Tất cả trạng thái</option>
             <option value="@TrangThai.ChoDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoDuyet))">@TrangThai.ChoDuyetHienThi</option>
             <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
             <option value="@TrangThai.TuChoi" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TuChoi))">@TrangThai.TuChoiHienThi</option>
             <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
         </select>
     </div>
-    <div class="col-md-4 d-flex gap-2">
-        <button class="btn btn-outline-primary" type="submit">Lọc</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Bỏ lọc</a>
+    <div class="duyet-de-xuat-cong-viec-filter-actions">
+        <button class="duyet-de-xuat-cong-viec-filter-btn-primary" type="submit">Lọc dữ liệu</button>
+        <a asp-action="Index" class="duyet-de-xuat-cong-viec-filter-btn-secondary">Làm mới</a>
     </div>
 </form>

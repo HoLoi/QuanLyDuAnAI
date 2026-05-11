@@ -122,6 +122,9 @@ namespace QuanLyDuAn.Services.Implementations
             if (!model.NganSachDeXuat.HasValue || model.NganSachDeXuat.Value <= 0)
                 throw new Exception("Ngân sách đề xuất phải lớn hơn 0.");
 
+            if (string.IsNullOrWhiteSpace(model.LyDoDeXuat))
+                throw new Exception("Lý do đề xuất không được để trống.");
+
             var maDuAn = model.MaDuAn.Value;
             var currentUserId = await GetCurrentUserIdAsync();
             await EnsureCanProposeForProjectAsync(currentUserId, maDuAn);
@@ -129,6 +132,8 @@ namespace QuanLyDuAn.Services.Implementations
             var duAn = await _context.DuAn.FirstOrDefaultAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true);
             if (duAn == null)
                 throw new Exception("Không tìm thấy dự án.");
+
+            EnsureProjectAllowsBudgetProposal(duAn.TrangThaiDuAn);
 
             var pendingExists = await _context.DeXuatNganSach.AnyAsync(x =>
                 x.IsDeleted != true &&
@@ -144,13 +149,27 @@ namespace QuanLyDuAn.Services.Implementations
                 .ThenByDescending(x => x.NgayCapNhatNganSach)
                 .FirstOrDefaultAsync();
 
+            var tongChiPhiDaDung = await (
+                from cp in _context.ChiPhi
+                join ns in _context.NganSach on cp.MaNganSach equals ns.MaNganSach
+                where cp.IsDeleted != true
+                      && ns.IsDeleted != true
+                      && ns.MaDuAn == maDuAn
+                select cp.SoTienDaChi ?? 0
+            ).SumAsync();
+
+            if (model.NganSachDeXuat.Value < tongChiPhiDaDung)
+                throw new Exception($"Ngân sách đề xuất không được nhỏ hơn tổng chi phí đã dùng ({tongChiPhiDaDung:N0} VNĐ).");
+
+            var lyDoDeXuat = model.LyDoDeXuat.Trim();
+
             var entity = new DeXuatNganSach
             {
                 MaDuAn = maDuAn,
                 MaNganSachCu = nganSachHienTai?.MaNganSach,
                 NganSachCu = nganSachHienTai?.SoTienNganSach,
                 NganSachDeXuat = model.NganSachDeXuat,
-                LyDoDeXuat = model.LyDoDeXuat.Trim(),
+                LyDoDeXuat = lyDoDeXuat,
                 MaNguoiDungDeXuat = currentUserId,
                 NgayDeXuat = DateTime.Now,
                 TrangThaiDeXuat = TrangThai.ChoDuyet,
@@ -258,6 +277,14 @@ namespace QuanLyDuAn.Services.Implementations
 
         private async Task EnsureCanProposeForProjectAsync(int maNguoiDung, int maDuAn)
         {
+            var isProjectManager = await _context.DuAn.AnyAsync(x =>
+                x.MaDuAn == maDuAn &&
+                x.IsDeleted != true &&
+                x.MaNguoiDung == maNguoiDung);
+
+            if (isProjectManager)
+                throw new Exception("Quản lý dự án chỉ có quyền duyệt đề xuất ngân sách, không tạo đề xuất.");
+
             var coTeamPhuTrach = await _context.TeamDuAn.AnyAsync(x => x.MaDuAn == maDuAn);
 
             if (coTeamPhuTrach)
@@ -310,6 +337,15 @@ namespace QuanLyDuAn.Services.Implementations
                 .Distinct()
                 .ToList();
 
+            var managedProjectIds = await _context.DuAn
+                .Where(x => x.IsDeleted != true && x.MaNguoiDung == maNguoiDung)
+                .Select(x => x.MaDuAn)
+                .ToListAsync();
+
+            allowedProjectIds = allowedProjectIds
+                .Except(managedProjectIds)
+                .ToList();
+
             var nganSachMoiNhatTheoDuAn = await _context.NganSach
                 .Where(x => allowedProjectIds.Contains(x.MaDuAn) && x.IsDeleted != true && x.IsActive == true)
                 .GroupBy(x => x.MaDuAn)
@@ -346,6 +382,18 @@ namespace QuanLyDuAn.Services.Implementations
         private static bool IsPending(string? status)
         {
             return TrangThai.EqualsValue(status, TrangThai.ChoDuyet);
+        }
+
+        private static void EnsureProjectAllowsBudgetProposal(string? projectStatus)
+        {
+            if (TrangThai.LaHoanThanhCongViec(projectStatus)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.ChoXacNhanHoanThanh)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.TamDung)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.LuuTru)
+                || TrangThai.EqualsValue(projectStatus, TrangThai.DaHuy))
+            {
+                throw new Exception("Dự án đang ở trạng thái không cho phép tạo đề xuất ngân sách mới.");
+            }
         }
     }
 }

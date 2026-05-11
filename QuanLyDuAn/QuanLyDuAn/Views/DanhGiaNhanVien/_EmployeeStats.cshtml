@@ -1,0 +1,35 @@
+@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienThongKeViewModel
+
+@{
+    var hasData = !string.IsNullOrWhiteSpace(Model.TenNhanVien)
+                  || Model.TongChiTietDuocGiao > 0
+                  || Model.SoLanCapNhatTienDo > 0
+                  || Model.SoFileMinhChung > 0;
+}
+
+<div class="employee-stats card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <h6 class="mb-3">Dữ liệu gợi ý đánh giá nhân viên</h6>
+        @if (!hasData)
+        {
+            <div class="empty-note">Chưa có dữ liệu hỗ trợ.</div>
+        }
+        else
+        {
+            <div class="row g-2">
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Nhân viên</span><strong>@Model.TenNhanVien</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Dự án</span><strong>@Model.TenDuAn</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Vai trò</span><strong>@Model.VaiTroTrongDuAn</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tổng chi tiết được giao</span><strong>@Model.TongChiTietDuocGiao</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Chi tiết hoàn thành</span><strong>@Model.ChiTietHoanThanh</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Chi tiết đang làm</span><strong>@Model.ChiTietDangLam</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Chi tiết trễ hạn</span><strong>@Model.ChiTietTreHan</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tỷ lệ hoàn thành</span><strong>@Model.TyLeHoanThanh.ToString("0.0")%</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số lần cập nhật tiến độ</span><strong>@Model.SoLanCapNhatTienDo</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Lần cập nhật gần nhất</span><strong>@(Model.LanCapNhatGanNhat?.ToString("dd/MM/yyyy HH:mm") ?? "-")</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số file minh chứng</span><strong>@Model.SoFileMinhChung</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Điểm trung bình tiến độ</span><strong>@Model.DiemTrungBinhTienDo.ToString("0.##")</strong></div></div>
+            </div>
+        }
+    </div>
+</div>

@@ -7,81 +7,86 @@
     var maChiTietCv = Model.ChiTietCongViec.MaChiTietCV;
 }
 
-<h6>Danh sách đã phân công</h6>
-
-<table class="table table-bordered mt-2 app-data-table">
-    <thead>
-        <tr>
-            <th class="col-id">Mã NV</th>
-            <th>Nhân viên</th>
-            <th>Vai trò</th>
-            <th class="col-date">Ngày giao</th>
-            <th class="col-actions"></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (!Model.DanhSachPhanCong.Any())
-        {
-            <tr>
-                <td colspan="5" class="text-center text-muted">Chưa có phân công chi tiết công việc.</td>
-            </tr>
-        }
-        else
-        {
-            @foreach (var item in Model.DanhSachPhanCong)
-            {
-                <tr>
-                    <td class="col-id">@item.MaNguoiDung</td>
-                    <td>@item.TenNhanVien</td>
-                    <td>@item.VaiTro</td>
-                    <td class="col-date">@item.NgayGiaoChiTietCongViec?.ToString("dd/MM/yyyy")</td>
-                    <td class="col-actions table-actions">
-                        @if (canDelete)
-                        {
-                            <form asp-action="XoaPhanCong" method="post">
-                                <input type="hidden" name="maChiTietCv" value="@maChiTietCv" />
-                                <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
-                                <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
-                            </form>
-                        }
-                    </td>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
-
-<h6 class="mt-3">Nhân viên thuộc dự án (có thể phân công)</h6>
-
-@if (!Model.ThanhVienCoThePhanCong.Any())
+@if (!Model.DanhSachPhanCong.Any())
 {
-    <div class="alert alert-warning d-flex align-items-center gap-3">
-        <i class="bi bi-diagram-3 fs-3"></i>
-        <div>
-            <h6 class="mb-1">Không có nhân sự để phân công</h6>
-            @*<p class="mb-0 text-muted">Chỉ nhân viên thuộc dự án, thuộc team đang phụ trách và chưa được phân công mới hiển thị ở đây.</p>*@
-        </div>
+    <div class="pct-empty-state">
+        <i class="bi bi-people"></i>
+        <h3>Chưa có nhân sự được phân công.</h3>
+        <p>Danh sách phân công sẽ hiển thị tại đây khi bạn giao người thực hiện cho chi tiết công việc này.</p>
     </div>
 }
 else
 {
-    <table class="table table-bordered mt-2 app-data-table">
-        <thead>
-            <tr>
-                <th class="col-id">Mã NV</th>
-                <th>Nhân viên</th>
-                <th>Vai trò trong dự án</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var nv in Model.ThanhVienCoThePhanCong)
-            {
+    <div class="pct-table-scroll">
+        <table class="table pct-table">
+            <thead>
                 <tr>
-                    <td class="col-id">@nv.MaNguoiDung</td>
-                    <td>@nv.HoTenNguoiDung</td>
-                    <td>@nv.VaiTroTrongDuAn</td>
+                    <th class="col-id">Mã NV</th>
+                    <th>Nhân viên</th>
+                    <th class="col-date">Ngày giao việc</th>
+                    <th class="col-actions">Thao tác</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DanhSachPhanCong)
+                {
+                    <tr>
+                        <td class="col-id">@item.MaNguoiDung</td>
+                        <td>@item.TenNhanVien</td>
+                        <td class="col-date">@item.NgayGiaoChiTietCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="col-actions">
+                            @if (canDelete)
+                            {
+                                <form asp-action="XoaPhanCong" method="post">
+                                    <input type="hidden" name="maChiTietCv" value="@maChiTietCv" />
+                                    <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
+                                    <button type="submit" class="pct-btn pct-btn-danger-soft">Xóa phân công</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div class="pct-subsection">
+    <h3 class="pct-subsection-title">Nhân sự có thể phân công</h3>
+    <p class="pct-subsection-note">Chỉ gồm người thuộc dự án và đã được phân công ở công việc cha.</p>
+</div>
+
+@if (!Model.ThanhVienCoThePhanCong.Any())
+{
+    <div class="pct-inline-note">
+        Không còn nhân viên phù hợp để phân công.
+    </div>
+}
+else
+{
+    <div class="pct-table-scroll">
+        <table class="table pct-table pct-table-subtle">
+            <thead>
+                <tr>
+                    <th class="col-id">Mã NV</th>
+                    <th>Nhân viên</th>
+                    <th>Vai trò trong dự án</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var nv in Model.ThanhVienCoThePhanCong)
+                {
+                    <tr>
+                        <td class="col-id">@nv.MaNguoiDung</td>
+                        <td>@nv.HoTenNguoiDung</td>
+                        <td>@nv.VaiTroTrongDuAn</td>
+                        <td class="col-actions">
+                            <button type="button" class="pct-btn pct-btn-neutral-soft" disabled>Chọn ở form</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }

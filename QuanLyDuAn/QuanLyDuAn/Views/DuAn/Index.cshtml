@@ -2,8 +2,19 @@
 @using QuanLyDuAn.Constants
 
 @{
+    ViewData["Title"] = "Quản lý dự án";
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.DuAn.Them) || permissions.Contains(Permissions.DuAn.Sua);
+    bool canCreate = permissions.Contains(Permissions.DuAn.Them);
+    var hasValidationErrors = ViewData.ModelState.Values.Any(v => v.Errors.Count > 0);
+    var danhSach = Model.DanhSach ?? new List<QuanLyDuAn.ViewModels.DuAn.DuAnViewModel>();
+
+    var tongDuAn = danhSach.Count;
+    var soDangThucHien = danhSach.Count(x => TrangThai.EqualsValue(x.TrangThaiDuAn, TrangThai.DangThucHien));
+    var soChoXacNhanHoanThanh = danhSach.Count(x => TrangThai.EqualsValue(x.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh));
+    var soHoanThanh = danhSach.Count(x => TrangThai.LaHoanThanhCongViec(x.TrangThaiDuAn));
+    var soCoNganSachDaDuyet = danhSach.Count(x => x.HasApprovedBudget);
+
     ViewBag.Permissions = permissions;
     ViewBag.DanhSachLoaiDuAn = Model.DanhSachLoaiDuAn;
     ViewBag.TuKhoa = Model.TuKhoa;
@@ -11,20 +22,96 @@
     ViewBag.LocTrangThaiDuAn = Model.LocTrangThaiDuAn;
 }
 
-<div class="card p-3">
-    <h5>Quản lý dự án</h5>
+@section Styles {
+    <link rel="stylesheet" href="~/css/DuAn/index.css" asp-append-version="true" />
+}
 
-    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+<div class="du-an-page">
+    <section class="du-an-header-card">
+        <div class="du-an-header-content">
+            <h2 class="du-an-title">Quản lý dự án</h2>
+            <p class="du-an-subtitle">Theo dõi danh sách dự án, trạng thái, tiến độ, thành viên và ngân sách</p>
+        </div>
+        @if (canCreate)
+        {
+            <a href="#du-an-form-card" class="btn du-an-primary-btn">
+                <i class="bi bi-plus-circle"></i>
+                <span>Thêm dự án</span>
+            </a>
+        }
+    </section>
+
+    @if (hasValidationErrors)
+    {
+        <div asp-validation-summary="All" class="text-danger du-an-validation-summary"></div>
+    }
+
+    @if (tongDuAn > 0)
+    {
+        <section class="du-an-stats-grid">
+            <article class="du-an-stat-card">
+                <span class="du-an-stat-icon"><i class="bi bi-kanban"></i></span>
+                <div class="du-an-stat-label">Tổng dự án</div>
+                <div class="du-an-stat-value">@tongDuAn</div>
+                <p class="du-an-stat-note">Tổng số dự án đang quản lý</p>
+            </article>
+
+            <article class="du-an-stat-card">
+                <span class="du-an-stat-icon status-active"><i class="bi bi-play-circle"></i></span>
+                <div class="du-an-stat-label">Đang thực hiện</div>
+                <div class="du-an-stat-value">@soDangThucHien</div>
+                <p class="du-an-stat-note">Các dự án đang triển khai</p>
+            </article>
+
+            <article class="du-an-stat-card">
+                <span class="du-an-stat-icon status-pending"><i class="bi bi-hourglass-split"></i></span>
+                <div class="du-an-stat-label">Chờ xác nhận hoàn thành</div>
+                <div class="du-an-stat-value">@soChoXacNhanHoanThanh</div>
+                <p class="du-an-stat-note">Đang chờ bước xác nhận cuối</p>
+            </article>
+
+            <article class="du-an-stat-card">
+                <span class="du-an-stat-icon status-done"><i class="bi bi-check2-circle"></i></span>
+                <div class="du-an-stat-label">Hoàn thành</div>
+                <div class="du-an-stat-value">@soHoanThanh</div>
+                <p class="du-an-stat-note">Dự án đã hoàn tất</p>
+            </article>
+
+            <article class="du-an-stat-card">
+                <span class="du-an-stat-icon status-budget"><i class="bi bi-wallet2"></i></span>
+                <div class="du-an-stat-label">Có ngân sách đã duyệt</div>
+                <div class="du-an-stat-value">@soCoNganSachDaDuyet</div>
+                <p class="du-an-stat-note">Dự án đã có ngân sách khả dụng</p>
+            </article>
+        </section>
+    }
 
     @if (canShowForm)
     {
-        <partial name="_Form" for="Form" />
-
-        <hr />
+        <section class="du-an-section-card du-an-form-card" id="du-an-form-card">
+            <div class="du-an-section-head">
+                <h3 class="du-an-section-title">@((Model.Form.MaDuAn.HasValue ? "Cập nhật dự án" : "Tạo dự án mới"))</h3>
+                <p class="du-an-section-note">Nhập thông tin dự án để lưu vào hệ thống.</p>
+            </div>
+            <partial name="_Form" for="Form" />
+        </section>
     }
 
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
+    <section class="du-an-section-card du-an-filter-card">
+        <div class="du-an-section-head">
+            <h3 class="du-an-section-title">Bộ lọc dự án</h3>
+            <p class="du-an-section-note">Lọc nhanh theo từ khóa, loại dự án và trạng thái.</p>
+        </div>
+        <partial name="_Filter" model="Model" />
+    </section>
+
+    <section class="du-an-section-card du-an-table-card">
+        <div class="du-an-section-head">
+            <h3 class="du-an-section-title">Danh sách dự án</h3>
+            <p class="du-an-section-note">Theo dõi thông tin tổng quan và thao tác nhanh trên từng dự án.</p>
+        </div>
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
 </div>
 
 @section Scripts {

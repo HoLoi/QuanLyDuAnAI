@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Services.Interfaces;
@@ -17,7 +17,7 @@ public class DashboardService : IDashboardService
 
     public async Task<DashboardViewModel> GetDashboardAsync()
     {
-        var projects = await _db.DuAn
+        var projectsForChart = await _db.DuAn
             .Where(x => x.IsDeleted != true)
             .OrderByDescending(x => x.MaDuAn)
             .Take(12)
@@ -40,6 +40,30 @@ public class DashboardService : IDashboardService
         ).ToListAsync();
 
         var expenseMap = expenseByProject.ToDictionary(x => x.ProjectId, x => x.Total);
+        var totalExpense = expenseByProject.Sum(x => x.Total);
+
+        var duAnStatuses = await _db.DuAn
+            .Where(x => x.IsDeleted != true)
+            .Select(x => x.TrangThaiDuAn)
+            .ToListAsync();
+
+        var deXuatCongViecStatuses = await _db.DeXuatCongViec
+            .Where(x => x.IsDeleted != true)
+            .Select(x => x.TrangThaiCongViecDeXuat)
+            .ToListAsync();
+
+        var deXuatNganSachStatuses = await _db.DeXuatNganSach
+            .Where(x => x.IsDeleted != true)
+            .Select(x => x.TrangThaiDeXuat)
+            .ToListAsync();
+
+        var yeuCauDoiQuanLyStatuses = await _db.YeuCauDoiQuanLy
+            .Where(x => x.IsDeleted != true)
+            .Select(x => x.TrangThaiYeuCauDoiQuanLy)
+            .ToListAsync();
+
+        int CountDuAnByStatus(string expected)
+            => duAnStatuses.Count(x => TrangThai.EqualsValue(x, expected));
 
         return new DashboardViewModel
         {
@@ -47,13 +71,25 @@ public class DashboardService : IDashboardService
             TongCongViec = totalTasks,
             TongNhanVien = totalEmployees,
             TongNganSach = totalBudget,
-            TenDuAn = projects.Select(x => x.TenDuAn ?? $"Du an #{x.MaDuAn}").ToList(),
-            PhanTramTienDo = projects.Select(x => x.PhanTramHoanThanh ?? 0).ToList(),
-            ChiPhiTheoDuAn = projects.Select(x => expenseMap.TryGetValue(x.MaDuAn, out var value) ? value : 0).ToList(),
-            DuAnDungTienDo = projects.Count(x =>
-                x.TrangThaiDuAn != null && !x.TrangThaiDuAn.Contains(TrangThai.TreTienDo, StringComparison.OrdinalIgnoreCase)),
-            DuAnTreTienDo = projects.Count(x =>
-                x.TrangThaiDuAn != null && x.TrangThaiDuAn.Contains(TrangThai.TreTienDo, StringComparison.OrdinalIgnoreCase)),
+            TongChiPhi = totalExpense,
+            NganSachConLai = totalBudget - totalExpense,
+            TyLeSuDungNganSach = totalBudget > 0
+                ? Math.Round((totalExpense / totalBudget) * 100m, 2, MidpointRounding.AwayFromZero)
+                : 0,
+
+            TenDuAn = projectsForChart.Select(x => x.TenDuAn ?? $"Dự án #{x.MaDuAn}").ToList(),
+            PhanTramTienDo = projectsForChart.Select(x => x.PhanTramHoanThanh ?? 0).ToList(),
+            ChiPhiTheoDuAn = projectsForChart.Select(x => expenseMap.TryGetValue(x.MaDuAn, out var value) ? value : 0).ToList(),
+
+            DuAnKhoiTao = CountDuAnByStatus(TrangThai.KhoiTao),
+            DuAnDangThucHien = CountDuAnByStatus(TrangThai.DangThucHien),
+            DuAnTamDung = CountDuAnByStatus(TrangThai.TamDung),
+            DuAnChoXacNhanHoanThanh = CountDuAnByStatus(TrangThai.ChoXacNhanHoanThanh),
+            DuAnHoanThanh = duAnStatuses.Count(TrangThai.LaHoanThanhCongViec),
+
+            DuAnDungTienDo = duAnStatuses.Count(x => !TrangThai.EqualsValue(x, TrangThai.TreTienDo)),
+            DuAnTreTienDo = duAnStatuses.Count(x => TrangThai.EqualsValue(x, TrangThai.TreTienDo)),
+
             CongViecTreHan = await _db.CongViec.CountAsync(x =>
                 x.IsDeleted != true
                 && x.NgayKetThucCVDuKien.HasValue
@@ -62,6 +98,7 @@ public class DashboardService : IDashboardService
                 && x.TrangThaiCongViec != TrangThai.HoanThanhHienThi
                 && x.TrangThaiCongViec != TrangThai.Done
                 && x.TrangThaiCongViec != TrangThai.Completed),
+
             NhanSuQuaTai = await (from pc in _db.PhanCongCongViec
                                   join cv in _db.CongViec on pc.MaCongViec equals cv.MaCongViec
                                   where cv.IsDeleted != true
@@ -72,6 +109,7 @@ public class DashboardService : IDashboardService
                                   group pc by pc.MaNguoiDung into g
                                   where g.Count() > 5
                                   select g.Key).CountAsync(),
+
             DuAnVuotNganSach = await (from da in _db.DuAn
                                       where da.IsDeleted != true
                                       let nganSach = _db.NganSach
@@ -85,12 +123,18 @@ public class DashboardService : IDashboardService
                                                     select cp.SoTienDaChi ?? 0).Sum()
                                       where chiPhi > nganSach && nganSach > 0
                                       select da.MaDuAn).CountAsync(),
+
             DuAnThieuDatasetAi = await (from da in _db.DuAn
                                         where da.IsDeleted != true
                                         join ds in _db.AiDataset on da.MaDuAn equals ds.MaDuAn into dsJoin
                                         from ds in dsJoin.DefaultIfEmpty()
                                         where ds == null
                                         select da.MaDuAn).CountAsync(),
+
+            DeXuatCongViecChoDuyet = deXuatCongViecStatuses.Count(x => TrangThai.EqualsValue(x, TrangThai.ChoDuyet)),
+            DeXuatNganSachChoDuyet = deXuatNganSachStatuses.Count(x => TrangThai.EqualsValue(x, TrangThai.ChoDuyet)),
+            YeuCauDoiQuanLyChoDuyet = yeuCauDoiQuanLyStatuses.Count(x => TrangThai.EqualsValue(x, TrangThai.ChoDuyet)),
+
             WorkflowHealthItems = [],
             Suggestions = []
         };

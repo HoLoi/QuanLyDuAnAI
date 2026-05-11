@@ -3,61 +3,199 @@
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    
+    int? locMaDuAn = ViewBag.LocMaDuAn as int?;
+    string? locTrangThai = ViewBag.LocTrangThai as string;
+    string? tuKhoa = ViewBag.TuKhoa as string;
+
+    bool canWorkflowMutate = permissions.Contains(Permissions.TienDo.Duyet)
+                             || permissions.Contains(Permissions.DuyetDeXuatCongViec.Duyet);
+
+    string GetStatusIcon(string cssTrangThai)
+    {
+        return cssTrangThai switch
+        {
+            "workflow-success" => "bi-check2-circle",
+            "workflow-pending" => "bi-hourglass-split",
+            "workflow-blocked" => "bi-exclamation-octagon",
+            "workflow-paused" => "bi-pause-circle",
+            "workflow-cancelled" => "bi-x-octagon",
+            "workflow-idle" => "bi-circle",
+            _ => "bi-play-circle"
+        };
+    }
 }
 
-<table class="table table-bordered table-sm app-data-table">
-    <thead>
-        <tr>
-            <th class="col-id">Mã</th>
-            <th>Dự án</th>
-            <th>Danh mục</th>
-            <th>Công việc</th>
-            <th>Mô tả</th>
-            <th>Mức độ</th>
-            <th>Chi phí</th>
-            <th class="col-date">Bắt đầu</th>
-            <th class="col-date">Kết thúc</th>
-            <th class="col-status">Trạng thái</th>
-            <th class="col-action">Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Count == 0)
-        {
-            <tr><td colspan="11" class="text-center text-muted">Chưa có công việc.</td></tr>
-        }
-        else
-        {
-            @foreach (var item in Model)
-            {
+@if (Model.Count == 0)
+{
+    <div class="empty-state">
+        <i class="bi bi-inboxes"></i>
+        <p>Chưa có công việc phù hợp bộ lọc hiện tại.</p>
+    </div>
+}
+else
+{
+    <div class="workflow-table-wrapper d-none d-lg-block">
+        <table class="table app-data-table workflow-table">
+            <thead>
                 <tr>
-                    <td class="col-id">@item.MaCongViec</td>
-                    <td>@item.TenDuAn</td>
-                    <td>@item.TenDanhMucCV</td>
-                    <td>@item.TenCongViec</td>
-                    <td>@item.MoTaCongViec</td>
-                    <td>@item.TenMucDo</td>
-                    <td>@item.ChiPhiDaChi.ToString("N0")</td>
-                    <td class="col-date">@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</td>
-                    <td class="col-date">@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</td>
-                    <td class="col-status">@TrangThai.ToDisplay(item.TrangThaiCongViec)</td>
-                    <td>
-                        @if (permissions.Contains(Permissions.PhanCongCongViec.Xem) && item.CoThePhanCongCongViec)
-                        {
-                            <a asp-controller="PhanCongCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-sm btn-outline-primary mb-1">
-                                <i class="bi bi-person-plus"></i> Phân công
-                            </a>
-                        }
-                        @if (permissions.Contains(Permissions.ChiTietCongViec.Xem))
-                        {
-                            <a asp-controller="ChiTietCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-sm btn-outline-secondary mb-1">
-                                <i class="bi bi-card-text"></i> Chi tiết
-                            </a>
-                        }
-                    </td>
+                    <th class="col-id">Mã</th>
+                    <th>Dự án</th>
+                    <th>Công việc</th>
+                    <th>Mức độ</th>
+                    <th>Chi phí</th>
+                    <th class="col-date">Bắt đầu</th>
+                    <th class="col-date">Kết thúc dự kiến</th>
+                    <th class="col-status">Trạng thái</th>
+                    <th class="col-actions">Thao tác</th>
                 </tr>
-            }
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="col-id">#@item.MaCongViec</td>
+                        <td>
+                            <div class="fw-semibold">@item.TenDuAn</div>
+                            <small class="text-muted">@item.TenDanhMucCV</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@item.TenCongViec</div>
+                            <small class="text-muted">@item.MoTaCongViec</small>
+                        </td>
+                        <td>@item.TenMucDo</td>
+                        <td>@item.ChiPhiDaChi.ToString("N0")</td>
+                        <td class="col-date">@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</td>
+                        <td class="col-date">@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</td>
+                        <td class="col-status">
+                            <span class="workflow-badge @item.CssTrangThai">
+                                <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                                @item.TrangThaiHienThi
+                            </span>
+                        </td>
+                        <td class="col-actions table-actions">
+                            @if (permissions.Contains(Permissions.PhanCongCongViec.Xem) && item.CoThePhanCongCongViec)
+                            {
+                                <a asp-controller="PhanCongCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-action btn-subtle">
+                                    <i class="bi bi-person-plus"></i>
+                                    Phân công
+                                </a>
+                            }
+                            @if (permissions.Contains(Permissions.ChiTietCongViec.Xem))
+                            {
+                                <a asp-controller="ChiTietCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-action btn-subtle">
+                                    <i class="bi bi-layout-text-sidebar-reverse"></i>
+                                    Chi tiết
+                                </a>
+                            }
+                            @if (item.CoTheXacNhanHoanThanh && canWorkflowMutate)
+                            {
+                                <form asp-action="XacNhanHoanThanh" method="post">
+                                    <input type="hidden" name="maCongViec" value="@item.MaCongViec" />
+                                    <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                                    <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                                    <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                                    <button type="submit" class="btn btn-action btn-confirm">
+                                        <i class="bi bi-check2-circle"></i>
+                                        Xác nhận hoàn thành
+                                    </button>
+                                </form>
+                            }
+                            @if (item.CoTheMoLai && canWorkflowMutate)
+                            {
+                                <form asp-action="MoLai" method="post" class="reopen-form">
+                                    <input type="hidden" name="maCongViec" value="@item.MaCongViec" />
+                                    <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                                    <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                                    <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                                    <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do mở lại" required />
+                                    <button type="submit" class="btn btn-action btn-reopen">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                        Mở lại
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="task-mobile-list d-lg-none">
+        @foreach (var item in Model)
+        {
+            <article class="task-mobile-card">
+                <div class="task-mobile-head">
+                    <div>
+                        <p class="task-mobile-id">Công việc #@item.MaCongViec</p>
+                        <h3>@item.TenCongViec</h3>
+                    </div>
+                    <span class="workflow-badge @item.CssTrangThai">
+                        <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                        @item.TrangThaiHienThi
+                    </span>
+                </div>
+
+                <p class="task-mobile-desc">@item.MoTaCongViec</p>
+
+                <div class="task-mobile-meta">
+                    <div><span>Dự án</span><strong>@item.TenDuAn</strong></div>
+                    <div><span>Danh mục</span><strong>@item.TenDanhMucCV</strong></div>
+                    <div><span>Mức độ</span><strong>@item.TenMucDo</strong></div>
+                    <div><span>Chi phí</span><strong>@item.ChiPhiDaChi.ToString("N0")</strong></div>
+                    <div><span>Bắt đầu</span><strong>@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</strong></div>
+                    <div><span>Kết thúc dự kiến</span><strong>@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</strong></div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(item.ThongDiepWorkflow))
+                {
+                    <div class="workflow-note @item.CssTrangThai">@item.ThongDiepWorkflow</div>
+                }
+
+                <div class="task-mobile-actions">
+                    @if (permissions.Contains(Permissions.PhanCongCongViec.Xem) && item.CoThePhanCongCongViec)
+                    {
+                        <a asp-controller="PhanCongCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-action btn-subtle">
+                            <i class="bi bi-person-plus"></i>
+                            Phân công
+                        </a>
+                    }
+                    @if (permissions.Contains(Permissions.ChiTietCongViec.Xem))
+                    {
+                        <a asp-controller="ChiTietCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-action btn-subtle">
+                            <i class="bi bi-layout-text-sidebar-reverse"></i>
+                            Chi tiết
+                        </a>
+                    }
+                    @if (item.CoTheXacNhanHoanThanh && canWorkflowMutate)
+                    {
+                        <form asp-action="XacNhanHoanThanh" method="post" class="w-100">
+                            <input type="hidden" name="maCongViec" value="@item.MaCongViec" />
+                            <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                            <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <button type="submit" class="btn btn-action btn-confirm w-100">
+                                <i class="bi bi-check2-circle"></i>
+                                Xác nhận hoàn thành
+                            </button>
+                        </form>
+                    }
+                    @if (item.CoTheMoLai && canWorkflowMutate)
+                    {
+                        <form asp-action="MoLai" method="post" class="reopen-form reopen-form-mobile">
+                            <input type="hidden" name="maCongViec" value="@item.MaCongViec" />
+                            <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
+                            <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do mở lại" required />
+                            <button type="submit" class="btn btn-action btn-reopen w-100">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                                Mở lại
+                            </button>
+                        </form>
+                    }
+                </div>
+            </article>
         }
-    </tbody>
-</table>
+    </div>
+}

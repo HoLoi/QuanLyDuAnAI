@@ -2,58 +2,118 @@
 @using QuanLyDuAn.Constants
 
 @{
+    ViewData["Title"] = "Đề xuất công việc";
+
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.DeXuatCongViec.Them);
 
     ViewBag.Permissions = permissions;
     ViewBag.LocMaDuAn = Model.LocMaDuAn;
     ViewBag.LocTrangThai = Model.LocTrangThai;
+
+    var nganSachConLai = (Model.NganSachDuAn ?? 0) - Model.TongChiPhiDaDung;
+    if (nganSachConLai < 0)
+    {
+        nganSachConLai = 0;
+    }
+
+    var hasModelErrors = ViewData.ModelState.Values.Any(v => v.Errors.Count > 0);
 }
 
-<div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
+@section Styles {
+    <link rel="stylesheet" href="~/css/DeXuatCongViec/index.css" asp-append-version="true" />
+}
+
+<div class="de-xuat-cong-viec-page">
+    <section class="dxcv-header-card">
         <div>
-            <h5 class="mb-0">Đề xuất công việc</h5>
-            <div class="text-muted">@Model.TenDuAn</div>
+            <h1 class="dxcv-title">Đề xuất công việc</h1>
+            <p class="dxcv-subtitle">Tạo và theo dõi các đề xuất công việc trong phạm vi dự án</p>
         </div>
-        <a asp-controller="DuAn" asp-action="Index" class="btn btn-outline-secondary btn-sm">Quay lại dự án</a>
-    </div>
+        <a asp-controller="DuAn" asp-action="Index" class="dxcv-action-btn dxcv-action-neutral">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại dự án
+        </a>
+    </section>
 
-    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+    @if (hasModelErrors)
+    {
+        <div asp-validation-summary="All" class="dxcv-validation-summary text-danger"></div>
+    }
 
-    <div class="border rounded p-3 mb-3">
-        <div class="row g-2">
-            <div class="col-md-6">
-                <div class="small text-muted">Ngân sách dự án</div>
-                <div class="fw-semibold">
-                    @(Model.NganSachDuAn.HasValue ? $"{Model.NganSachDuAn.Value:N0} VNĐ" : "Chưa có ngân sách được duyệt")
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="small text-muted">Tổng chi phí đã dùng</div>
-                <div class="fw-semibold">@Model.TongChiPhiDaDung.ToString("N0") VNĐ</div>
-            </div>
-        </div>
+    <section class="dxcv-summary-grid">
+        <article class="dxcv-summary-card">
+            <span class="dxcv-summary-icon"><i class="bi bi-kanban"></i></span>
+            <span class="dxcv-summary-label">Dự án</span>
+            <strong class="dxcv-summary-value">@Model.TenDuAn</strong>
+            <p class="dxcv-summary-note">Mã dự án: #@Model.MaDuAn</p>
+        </article>
 
-        @if (!Model.HasApprovedBudget)
-        {
-            <div class="mt-3">
-                <a asp-controller="DeXuatNganSach"
-                   asp-action="Index"
-                   asp-route-locMaDuAn="@Model.MaDuAn"
-                   class="btn btn-warning btn-sm">Đề xuất ngân sách</a>
+        <article class="dxcv-summary-card">
+            <span class="dxcv-summary-icon"><i class="bi bi-wallet2"></i></span>
+            <span class="dxcv-summary-label">Ngân sách hiện tại</span>
+            <strong class="dxcv-summary-value">
+                @(Model.NganSachDuAn.HasValue ? $"{Model.NganSachDuAn.Value:N0} VNĐ" : "Chưa có ngân sách duyệt")
+            </strong>
+            <p class="dxcv-summary-note">Nguồn kiểm soát chi phí đề xuất</p>
+        </article>
+
+        <article class="dxcv-summary-card">
+            <span class="dxcv-summary-icon"><i class="bi bi-cash-stack"></i></span>
+            <span class="dxcv-summary-label">Đã sử dụng</span>
+            <strong class="dxcv-summary-value">@Model.TongChiPhiDaDung.ToString("N0") VNĐ</strong>
+            <p class="dxcv-summary-note">Tổng chi phí thực tế của dự án</p>
+        </article>
+
+        <article class="dxcv-summary-card">
+            <span class="dxcv-summary-icon"><i class="bi bi-pie-chart"></i></span>
+            <span class="dxcv-summary-label">Ngân sách còn lại</span>
+            <strong class="dxcv-summary-value">@nganSachConLai.ToString("N0") VNĐ</strong>
+            <p class="dxcv-summary-note">Giá trị tham chiếu khi tạo đề xuất mới</p>
+        </article>
+    </section>
+
+    @if (!Model.HasApprovedBudget)
+    {
+        <section class="dxcv-warning-card">
+            <div class="dxcv-warning-icon"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <h2>Dự án chưa có ngân sách được duyệt</h2>
+                <p>Hãy tạo đề xuất ngân sách trước để đảm bảo đề xuất công việc bám đúng dòng tiền của dự án.</p>
             </div>
-        }
-    </div>
+            <a asp-action="DieuHuong" asp-route-maDuAn="@Model.MaDuAn" class="dxcv-action-btn dxcv-action-primary">
+                <i class="bi bi-arrow-right-circle"></i>
+                Mở điều hướng ngân sách
+            </a>
+        </section>
+    }
 
     @if (canShowForm)
     {
-        <partial name="_Form" model="Model" />
-        <hr />
+        <section class="dxcv-section-card">
+            <div class="dxcv-section-heading">
+                <h2>Tạo đề xuất mới</h2>
+                <p>Điền thông tin công việc cần bổ sung trong phạm vi dự án hiện tại.</p>
+            </div>
+            <partial name="_Form" model="Model" />
+        </section>
     }
 
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
+    <section class="dxcv-section-card">
+        <div class="dxcv-section-heading">
+            <h2>Bộ lọc danh sách</h2>
+            <p>Lọc nhanh theo dự án và trạng thái xử lý đề xuất.</p>
+        </div>
+        <partial name="_Filter" model="Model" />
+    </section>
+
+    <section class="dxcv-section-card">
+        <div class="dxcv-section-heading">
+            <h2>Danh sách đề xuất công việc</h2>
+            <p>Theo dõi trạng thái chờ duyệt, đã duyệt, từ chối hoặc đã hủy.</p>
+        </div>
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
 </div>
 
 @section Scripts {

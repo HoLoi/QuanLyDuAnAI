@@ -1,0 +1,207 @@
+﻿.thanh-vien-du-an-page {
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.1rem;
+}
+
+.thanh-vien-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-radius: 18px;
+    border: 1px solid rgba(105, 108, 255, 0.2);
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+}
+
+.thanh-vien-title { margin: 0; font-size: 1.35rem; font-weight: 700; color: #304766; }
+.thanh-vien-subtitle { margin: 0.38rem 0 0; color: #607792; font-size: 0.9rem; }
+
+.thanh-vien-back-btn,
+.thanh-vien-btn-primary {
+    min-height: 40px;
+    border-radius: 0.72rem;
+    padding: 0.45rem 0.86rem;
+    font-size: 0.83rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+.thanh-vien-back-btn {
+    border-color: #cfdced;
+    background: #ffffff;
+    color: #3d5677;
+}
+
+.thanh-vien-back-btn:hover,
+.thanh-vien-back-btn:focus {
+    color: #314967;
+    background: #f3f7fd;
+    border-color: #b8c9e0;
+}
+
+.thanh-vien-btn-primary {
+    border-color: rgba(105, 108, 255, 0.32);
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    color: #fff;
+}
+
+.thanh-vien-btn-primary:hover,
+.thanh-vien-btn-primary:focus { color: #fff; filter: brightness(1.03); }
+
+.thanh-vien-section-card,
+.thanh-vien-warning-card {
+    background: #fff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+    padding: 1rem;
+}
+
+.thanh-vien-warning-card {
+    border-color: #f1d0cc;
+    background: linear-gradient(180deg, #ffffff, #fff4f3);
+    color: #a64f47;
+    font-weight: 600;
+}
+
+.thanh-vien-project-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: center;
+    color: #3f5777;
+}
+
+.thanh-vien-status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.28rem 0.65rem;
+    background: #edf2ff;
+    border: 1px solid rgba(63, 86, 196, 0.25);
+    color: #3f56c4;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.thanh-vien-section-head { display: grid; gap: 0.2rem; margin-bottom: 0.7rem; }
+.thanh-vien-section-title { margin: 0; font-size: 1rem; font-weight: 700; color: #314866; }
+.thanh-vien-section-note { margin: 0; font-size: 0.83rem; color: #7289a1; }
+
+.thanh-vien-select-box {
+    border: 1px solid #dbe5f2;
+    border-radius: 0.9rem;
+    background: #f9fbff;
+    padding: 0.85rem;
+    margin-bottom: 0.85rem;
+}
+
+.thanh-vien-check-item { padding: 0.5rem 0.55rem; border-radius: 0.65rem; }
+.thanh-vien-check-item:hover { background: #eef3fb; }
+.thanh-vien-muted-text { color: #7389a4; font-size: 0.88rem; }
+
+.thanh-vien-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid #e1e8f5;
+}
+
+.thanh-vien-table { margin: 0; min-width: 980px; }
+
+.thanh-vien-table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.thanh-vien-table tbody tr:hover { background: #f9fbff; }
+
+.thanh-vien-role-form .form-select {
+    min-width: 165px;
+    border-radius: 0.62rem;
+    border: 1px solid #d6e0ef;
+}
+
+.thanh-vien-role-badge,
+.thanh-vien-team-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.58rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.thanh-vien-role-badge {
+    background: #edf2ff;
+    color: #3f56c4;
+    border: 1px solid rgba(63, 86, 196, 0.25);
+}
+
+.thanh-vien-team-badge.is-in-team {
+    background: #e8f7ee;
+    color: #1f7a3e;
+    border: 1px solid rgba(31, 122, 62, 0.23);
+}
+
+.thanh-vien-team-badge.is-no-team {
+    background: #f3f5fa;
+    color: #607389;
+    border: 1px solid rgba(96, 115, 137, 0.21);
+}
+
+.thanh-vien-action-btn {
+    border-radius: 0.6rem;
+    padding: 0.34rem 0.58rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.26rem;
+    border: 1px solid #cdd9ea;
+    background: #f8fbff;
+    color: #3f5877;
+}
+
+.thanh-vien-action-warning:hover,
+.thanh-vien-action-warning:focus { background: #fff5de; border-color: #e8ca87; color: #9b6b00; }
+.thanh-vien-action-danger:hover,
+.thanh-vien-action-danger:focus { background: #ffeaea; border-color: #e5a8a8; color: #b54141; }
+
+.thanh-vien-empty-state {
+    border: 1px dashed #c7d6eb;
+    border-radius: 14px;
+    background: #f8fbff;
+    text-align: center;
+    padding: 1.1rem;
+}
+
+.thanh-vien-empty-icon { font-size: 1.75rem; color: #7c92ad; }
+.thanh-vien-empty-title { margin-top: 0.2rem; font-weight: 700; color: #34506f; }
+.thanh-vien-empty-text { margin: 0.35rem 0 0; color: #7289a1; font-size: 0.86rem; }
+
+@media (max-width: 991.98px) {
+    .thanh-vien-du-an-page { border-radius: 16px; padding: 0.95rem; }
+    .thanh-vien-header-card { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 575.98px) {
+    .thanh-vien-du-an-page { padding: 0.82rem; }
+    .thanh-vien-header-card,
+    .thanh-vien-section-card,
+    .thanh-vien-warning-card { border-radius: 14px; padding: 0.85rem; }
+    .thanh-vien-back-btn,
+    .thanh-vien-btn-primary { width: 100%; }
+}

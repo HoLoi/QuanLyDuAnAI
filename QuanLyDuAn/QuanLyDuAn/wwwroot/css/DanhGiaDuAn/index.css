@@ -1,0 +1,349 @@
+.danh-gia-du-an-page {
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.15rem;
+}
+
+.danh-gia-du-an-page .danh-gia-card {
+    background: #fff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+    padding: 1rem;
+}
+
+.danh-gia-du-an-page .page-head {
+    border: 1px solid rgba(105, 108, 255, 0.2);
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+    border-radius: 16px;
+    padding: 0.9rem 1rem;
+}
+
+.danh-gia-du-an-page .page-head h5 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.danh-gia-du-an-page .page-head p {
+    color: #617893;
+    font-size: 0.9rem;
+}
+
+.danh-gia-du-an-page .dgda-filter {
+    margin: 0.9rem 0;
+    padding: 0.85rem;
+    border: 1px solid #dbe4f2;
+    border-radius: 14px;
+    background: #f7faff;
+}
+
+.danh-gia-du-an-page .dgda-filter .form-label {
+    margin-bottom: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #5c7592;
+}
+
+.danh-gia-du-an-page .dgda-filter .form-control,
+.danh-gia-du-an-page .dgda-filter .form-select {
+    min-height: 40px;
+    border-radius: 0.72rem;
+    border: 1px solid #d6e0ef;
+    box-shadow: none;
+}
+
+.danh-gia-du-an-page .dgda-filter .form-control:focus,
+.danh-gia-du-an-page .dgda-filter .form-select:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.danh-gia-du-an-page .dgda-summary {
+    margin-top: 0.8rem;
+}
+
+.danh-gia-du-an-page .summary-item {
+    border: 1px solid #e4e9f3;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(48, 71, 102, 0.06);
+    padding: 0.7rem 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.danh-gia-du-an-page .summary-item span {
+    font-size: 0.82rem;
+    color: #6b8099;
+    font-weight: 600;
+}
+
+.danh-gia-du-an-page .summary-item strong {
+    font-size: 1.22rem;
+    color: #2f4968;
+}
+
+.danh-gia-du-an-page .project-stats,
+.danh-gia-du-an-page .ai-insight-card,
+.danh-gia-du-an-page .dgda-form {
+    border-radius: 16px;
+    border: 1px solid #e4e9f3;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+}
+
+.danh-gia-du-an-page .project-stats h6,
+.danh-gia-du-an-page .ai-insight-card h6,
+.danh-gia-du-an-page .dgda-form h6 {
+    color: #314866;
+    font-weight: 700;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box,
+.danh-gia-du-an-page .ai-insight-card .stat-box {
+    border: 1px solid #dfe8f5;
+    border-radius: 12px;
+    background: #fff;
+    padding: 0.6rem 0.72rem;
+    height: 100%;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box span,
+.danh-gia-du-an-page .ai-insight-card .stat-box span {
+    display: block;
+    color: #657d97;
+    font-size: 0.78rem;
+    margin-bottom: 0.2rem;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box strong,
+.danh-gia-du-an-page .ai-insight-card .stat-box strong {
+    color: #2f4968;
+    font-size: 0.94rem;
+    line-height: 1.35;
+}
+
+.danh-gia-du-an-page .empty-note {
+    border: 1px dashed #d2ddec;
+    border-radius: 12px;
+    padding: 0.72rem;
+    color: #6d8199;
+    background: #f9fbff;
+}
+
+.danh-gia-du-an-page .ai-insight-card {
+    background: linear-gradient(180deg, #ffffff, #f7faff);
+}
+
+.danh-gia-du-an-page .ai-note {
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed #d6e1ef;
+    color: #5f7692;
+    font-size: 0.84rem;
+}
+
+.danh-gia-du-an-page .mini-stat {
+    border: 1px solid #dce5f3;
+    border-radius: 12px;
+    background: #fff;
+    padding: 0.6rem 0.72rem;
+    height: 100%;
+}
+
+.danh-gia-du-an-page .mini-stat span {
+    display: block;
+    color: #6b8099;
+    font-size: 0.78rem;
+    margin-bottom: 0.2rem;
+}
+
+.danh-gia-du-an-page .mini-stat strong {
+    color: #2f4968;
+    font-size: 0.95rem;
+}
+
+.danh-gia-du-an-page .criteria-row {
+    border: 1px solid #e6edf8;
+    border-radius: 12px;
+    padding: 0.75rem;
+    background: #fcfdff;
+}
+
+.danh-gia-du-an-page .criteria-title {
+    color: #365173;
+    font-weight: 700;
+    margin-bottom: 0.45rem;
+}
+
+.danh-gia-du-an-page .dgda-form .form-label {
+    font-size: 0.82rem;
+    color: #5d7592;
+    font-weight: 600;
+}
+
+.danh-gia-du-an-page .dgda-form .form-control,
+.danh-gia-du-an-page .dgda-form .form-select,
+.danh-gia-du-an-page .dgda-form textarea {
+    border: 1px solid #d6e0ef;
+    border-radius: 0.72rem;
+    box-shadow: none;
+}
+
+.danh-gia-du-an-page .dgda-form .form-control:focus,
+.danh-gia-du-an-page .dgda-form .form-select:focus,
+.danh-gia-du-an-page .dgda-form textarea:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.danh-gia-du-an-page .score-badge {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.12rem;
+    border: 1px solid #d7e4f8;
+    border-radius: 999px;
+    padding: 0.28rem 0.75rem;
+    background: #f5f9ff;
+    text-align: center;
+    min-width: 98px;
+}
+
+.danh-gia-du-an-page .score-badge strong {
+    color: #2f4968;
+    line-height: 1.1;
+}
+
+.danh-gia-du-an-page .score-badge small {
+    color: #5f7590;
+    font-size: 0.74rem;
+}
+
+.danh-gia-du-an-page .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.66rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.danh-gia-du-an-page .status-nhap {
+    background: #edf4ff;
+    color: #2c5da8;
+    border-color: #cfe0ff;
+}
+
+.danh-gia-du-an-page .status-cho-duyet {
+    background: #fff6df;
+    color: #9a6510;
+    border-color: #f2ddae;
+}
+
+.danh-gia-du-an-page .status-da-duyet {
+    background: #ebf9e5;
+    color: #2c8a3f;
+    border-color: #cce9c3;
+}
+
+.danh-gia-du-an-page .status-tu-choi {
+    background: #fff1f1;
+    color: #c0473f;
+    border-color: #efcbc7;
+}
+
+.danh-gia-du-an-page .status-khac {
+    background: #eff2f7;
+    color: #5c718c;
+    border-color: #d5ddea;
+}
+
+.danh-gia-du-an-page .dgda-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 14px;
+    border: 1px solid #e1e8f5;
+}
+
+.danh-gia-du-an-page .dgda-table {
+    margin: 0;
+    min-width: 980px;
+    border-color: #e1e8f5;
+}
+
+.danh-gia-du-an-page .dgda-table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.danh-gia-du-an-page .dgda-table td {
+    color: #334e6f;
+    font-size: 0.88rem;
+    vertical-align: middle;
+}
+
+.danh-gia-du-an-page .dgda-table tbody tr {
+    transition: background-color 0.16s ease;
+}
+
+.danh-gia-du-an-page .dgda-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.danh-gia-du-an-page .empty-box {
+    border: 1px dashed #d6e0ee;
+    border-radius: 14px;
+    padding: 1.2rem;
+    text-align: center;
+    background: #fbfcff;
+}
+
+.danh-gia-du-an-page .empty-icon {
+    font-size: 1.4rem;
+    color: #8fa1bd;
+}
+
+.danh-gia-du-an-page .empty-text {
+    color: #6b7a90;
+    margin-top: 0.3rem;
+}
+
+@media (max-width: 991.98px) {
+    .danh-gia-du-an-page .danh-gia-card {
+        padding: 0.85rem;
+    }
+
+    .danh-gia-du-an-page .score-badge {
+        min-width: 88px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .danh-gia-du-an-page {
+        padding: 0.78rem;
+    }
+
+    .danh-gia-du-an-page .page-head {
+        padding: 0.8rem;
+    }
+
+    .danh-gia-du-an-page .page-head h5 {
+        font-size: 1.2rem;
+    }
+
+    .danh-gia-du-an-page .dgda-table {
+        min-width: 860px;
+    }
+}

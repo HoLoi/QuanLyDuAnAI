@@ -6,6 +6,7 @@ using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.DuyetDeXuatNganSach;
 using System;
+using System.Data;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -31,6 +32,8 @@ namespace QuanLyDuAn.Services.Implementations
                 from dx in _context.DeXuatNganSach
                 join da in _context.DuAn on dx.MaDuAn equals da.MaDuAn
                 join nd in _context.NguoiDung on dx.MaNguoiDungDeXuat equals nd.MaNguoiDung
+                join ndDuyetLeft in _context.NguoiDung on dx.MaNguoiDungDuyet equals ndDuyetLeft.MaNguoiDung into ndDuyetGroup
+                from ndDuyet in ndDuyetGroup.DefaultIfEmpty()
                 where dx.IsDeleted != true
                       && da.IsDeleted != true
                       && da.MaNguoiDung == currentUserId
@@ -44,7 +47,9 @@ namespace QuanLyDuAn.Services.Implementations
                     LyDoDeXuat = dx.LyDoDeXuat ?? string.Empty,
                     MaNguoiDungDeXuat = dx.MaNguoiDungDeXuat,
                     NguoiDungDeXuat = nd.HoTenNguoiDung ?? $"Nhân viên {dx.MaNguoiDungDeXuat}",
+                    NguoiDungDuyet = ndDuyet != null ? (ndDuyet.HoTenNguoiDung ?? $"Nhân viên {ndDuyet.MaNguoiDung}") : string.Empty,
                     NgayDeXuat = dx.NgayDeXuat,
+                    NgayDuyet = dx.NgayDuyet,
                     TrangThaiDeXuat = dx.TrangThaiDeXuat ?? string.Empty
                 };
 
@@ -76,6 +81,7 @@ namespace QuanLyDuAn.Services.Implementations
         public async Task ApproveAsync(int maDeXuatNs)
         {
             var currentUserId = await GetCurrentUserIdAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
             var deXuat = await _context.DeXuatNganSach
                 .FirstOrDefaultAsync(x => x.MaDeXuatNS == maDeXuatNs && x.IsDeleted != true);
@@ -87,25 +93,47 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Đề xuất ngân sách không còn ở trạng thái chờ duyệt.");
 
             await EnsureIsProjectManagerAsync(currentUserId, deXuat.MaDuAn);
+            var duAn = await _context.DuAn
+                .FirstOrDefaultAsync(x => x.MaDuAn == deXuat.MaDuAn && x.IsDeleted != true);
 
-            NganSach? nganSachCu = null;
+            if (duAn == null)
+                throw new Exception("Không tìm thấy dự án của đề xuất ngân sách.");
 
-            if (deXuat.MaNganSachCu.HasValue)
+            if (TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn)
+                || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru)
+                || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.DaHuy))
             {
-                nganSachCu = await _context.NganSach
-                    .FirstOrDefaultAsync(x => x.MaNganSach == deXuat.MaNganSachCu && x.IsDeleted != true);
+                throw new Exception("Dự án đã hoàn thành hoặc đã đóng, không thể duyệt đề xuất ngân sách.");
+            }
 
-                if (nganSachCu == null)
-                    throw new Exception("Không tìm thấy ngân sách hiện hành gắn với đề xuất.");
+            var tongChiPhiDaDung = await (
+                from cp in _context.ChiPhi
+                join ns in _context.NganSach on cp.MaNganSach equals ns.MaNganSach
+                where cp.IsDeleted != true
+                      && ns.IsDeleted != true
+                      && ns.MaDuAn == deXuat.MaDuAn
+                select cp.SoTienDaChi ?? 0
+            ).SumAsync();
+
+            var nganSachDeXuat = deXuat.NganSachDeXuat ?? 0;
+            if (nganSachDeXuat < tongChiPhiDaDung)
+                throw new Exception($"Ngân sách đề xuất không được nhỏ hơn tổng chi phí đã dùng ({tongChiPhiDaDung:N0} VNĐ).");
+
+            var nganSachDangActive = await _context.NganSach
+                .Where(x => x.MaDuAn == deXuat.MaDuAn && x.IsDeleted != true && x.IsActive == true)
+                .ToListAsync();
+
+            if (deXuat.MaNganSachCu.HasValue
+                && !nganSachDangActive.Any(x => x.MaNganSach == deXuat.MaNganSachCu.Value))
+            {
+                throw new Exception("Không tìm thấy ngân sách hiện hành gắn với đề xuất.");
             }
 
             var maxVersion = await _context.NganSach
                 .Where(x => x.MaDuAn == deXuat.MaDuAn && x.IsDeleted != true)
                 .MaxAsync(x => (int?)x.Version) ?? 0;
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
-
-            if (nganSachCu != null)
+            foreach (var nganSachCu in nganSachDangActive)
             {
                 nganSachCu.IsActive = false;
                 nganSachCu.TrangThaiNganSach = TrangThai.DaThayThe;

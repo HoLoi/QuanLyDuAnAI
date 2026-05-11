@@ -1,0 +1,10 @@
+.dgda-form { border-radius: 12px; border: 1px solid #e5e9f2; }
+.criteria-row { border: 1px solid #edf1f7; border-radius: 10px; padding: 10px; background: #fcfdff; }
+.criteria-title { font-weight: 600; margin-bottom: 6px; }
+.mini-stat { border: 1px solid #e5e9f2; border-radius: 10px; padding: 8px 10px; background: #fff; }
+.mini-stat span { display: block; color: #6b7a90; font-size: .78rem; }
+.mini-stat strong { font-size: .95rem; }
+.project-stats .stat-box { border: 1px solid #e5e9f2; border-radius: 10px; padding: 8px 10px; background: #fff; height: 100%; }
+.project-stats .stat-box span { display: block; color: #6b7a90; font-size: .78rem; }
+.project-stats .stat-box strong { font-size: .95rem; }
+.project-stats .empty-note { border: 1px dashed #d4dced; border-radius: 10px; padding: 10px; color: #6b7a90; background: #fafcff; }

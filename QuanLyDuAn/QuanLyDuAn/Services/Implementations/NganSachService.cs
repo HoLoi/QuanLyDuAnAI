@@ -51,10 +51,7 @@ namespace QuanLyDuAn.Services.Implementations
                         : string.Empty
                 };
 
-            if (allowedProjectIds.Count > 0)
-            {
-                query = query.Where(x => allowedProjectIds.Contains(x.MaDuAn));
-            }
+            query = query.Where(x => allowedProjectIds.Contains(x.MaDuAn));
 
             if (locMaDuAn.HasValue)
             {
@@ -70,15 +67,39 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            var danhSach = await query
+                .OrderByDescending(x => x.NgayDuyetNganSach)
+                .ThenByDescending(x => x.MaNganSach)
+                .ToListAsync();
+
+            var maNganSachList = danhSach
+                .Select(x => x.MaNganSach)
+                .Distinct()
+                .ToList();
+
+            decimal tongDaSuDung = 0;
+            if (maNganSachList.Count > 0)
+            {
+                tongDaSuDung = await _context.ChiPhi
+                    .Where(x => x.IsDeleted != true && maNganSachList.Contains(x.MaNganSach))
+                    .SumAsync(x => x.SoTienDaChi ?? 0);
+            }
+
+            var tongNganSach = danhSach.Sum(x => x.SoTienNganSach ?? 0);
+            var tongNganSachDangHieuLuc = danhSach
+                .Where(x => x.IsActive)
+                .Sum(x => x.SoTienNganSach ?? 0);
+
             return new NganSachPageViewModel
             {
-                DanhSach = await query
-                    .OrderByDescending(x => x.NgayDuyetNganSach)
-                    .ThenByDescending(x => x.MaNganSach)
-                    .ToListAsync(),
+                DanhSach = danhSach,
                 DanhSachDuAn = projectOptions,
                 LocMaDuAn = locMaDuAn,
-                LocTrangThai = locTrangThai
+                LocTrangThai = locTrangThai,
+                TongNganSach = tongNganSach,
+                TongNganSachDangHieuLuc = tongNganSachDangHieuLuc,
+                TongDaSuDung = tongDaSuDung,
+                TongConLai = tongNganSachDangHieuLuc - tongDaSuDung
             };
         }
 
@@ -122,12 +143,8 @@ namespace QuanLyDuAn.Services.Implementations
 
         private async Task<List<NganSachDuAnOptionViewModel>> GetProjectOptionsAsync(List<int> allowedProjectIds)
         {
-            var query = _context.DuAn.Where(x => x.IsDeleted != true);
-
-            if (allowedProjectIds.Count > 0)
-            {
-                query = query.Where(x => allowedProjectIds.Contains(x.MaDuAn));
-            }
+            var query = _context.DuAn
+                .Where(x => x.IsDeleted != true && allowedProjectIds.Contains(x.MaDuAn));
 
             return await query
                 .OrderBy(x => x.TenDuAn)

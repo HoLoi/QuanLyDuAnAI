@@ -1,5 +1,60 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienPageViewModel
+@using QuanLyDuAn.Constants
+
 @{
+    ViewData["Title"] = "Đánh giá nhân viên";
+    var canTacNghiep = Model.Permissions.Contains(Permissions.DanhGiaNhanVien.DanhGia)
+                       || Model.Permissions.Contains(Permissions.DanhGiaNhanVien.Sua);
 }
+
+@section Styles
+{
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/filter.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/summary-cards.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/table.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/form.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/employee-stats.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/score-badge.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaNhanVien/empty-state.css" asp-append-version="true" />
+}
+
+<div class="danh-gia-nhan-vien-page">
+    <div class="dgnv-card">
+        <div class="page-head">
+            <h5 class="mb-1">Đánh giá nhân viên</h5>
+            <p class="text-muted mb-0">Đánh giá nhân viên theo phạm vi dự án.</p>
+        </div>
+
+        @await Html.PartialAsync("_Filter", Model)
+
+        @if (canTacNghiep && Model.MaDuAn.HasValue && Model.MaNhanVien.HasValue)
+        {
+            <div class="mb-3">
+                <a asp-action="Form"
+                   asp-route-maDuAn="@Model.MaDuAn"
+                   asp-route-maNhanVien="@Model.MaNhanVien"
+                   asp-route-tuKhoa="@Model.TuKhoa"
+                   class="btn btn-primary btn-sm">
+                    Đánh giá nhân viên đang lọc
+                </a>
+            </div>
+        }
+
+        @await Html.PartialAsync("_SummaryCards", Model)
+
+        @if (Model.Form != null)
+        {
+            @await Html.PartialAsync("_Form", Model.Form)
+        }
+
+        @if (Model.DanhSach.Any())
+        {
+            @await Html.PartialAsync("_Table", Model)
+        }
+        else
+        {
+            @await Html.PartialAsync("_EmptyState")
+        }
+    </div>
+</div>

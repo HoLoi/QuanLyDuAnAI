@@ -8,34 +8,42 @@
     var locTrangThai = Model.LocTrangThaiDuAn;
 }
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
-    <div class="col-md-4">
-        <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
-               placeholder="Tìm theo tên dự án, loại, quản lý..." />
-    </div>
+<form asp-action="Index" method="get" class="du-an-filter-form">
+    <div class="row g-3 align-items-end">
+        <div class="col-xl-4 col-lg-4 col-md-6">
+            <label class="form-label">Từ khóa</label>
+            <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
+                   placeholder="Tìm theo tên dự án, loại dự án, mô tả..." />
+        </div>
 
-    <div class="col-md-3">
-        <select name="locMaLoaiDuAn" class="form-select">
-            <option value="">-- Tất cả loại dự án --</option>
-            @foreach (var loai in danhSachLoaiDuAn)
-            {
-                <option value="@loai.MaLoaiDuAn" selected="@(Model.LocMaLoaiDuAn == loai.MaLoaiDuAn ? "selected" : null)">@loai.TenLoai</option>
-            }
-        </select>
-    </div>
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <label class="form-label">Loại dự án</label>
+            <select name="locMaLoaiDuAn" class="form-select">
+                <option value="">Tất cả loại dự án</option>
+                @foreach (var loai in danhSachLoaiDuAn)
+                {
+                    <option value="@loai.MaLoaiDuAn" selected="@(Model.LocMaLoaiDuAn == loai.MaLoaiDuAn ? "selected" : null)">@loai.TenLoai</option>
+                }
+            </select>
+        </div>
 
-    <div class="col-md-3">
-        <select name="locTrangThaiDuAn" class="form-select">
-            <option value="">-- Tất cả trạng thái --</option>
-            <option value="@TrangThai.KhoiTao" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.KhoiTao) ? "selected" : null)">@TrangThai.KhoiTaoHienThi</option>
-            <option value="@TrangThai.DangThucHien" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.DangThucHien) ? "selected" : null)">@TrangThai.DangThucHienHienThi</option>
-            <option value="@TrangThai.HoanThanh" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.HoanThanh) ? "selected" : null)">@TrangThai.HoanThanhHienThi</option>
-            <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.TamDung) ? "selected" : null)">@TrangThai.TamDungHienThi</option>
-        </select>
-    </div>
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <label class="form-label">Trạng thái</label>
+            <select name="locTrangThaiDuAn" class="form-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="@TrangThai.KhoiTao" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.KhoiTao) ? "selected" : null)">@TrangThai.KhoiTaoHienThi</option>
+                <option value="@TrangThai.DangThucHien" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.DangThucHien) ? "selected" : null)">@TrangThai.DangThucHienHienThi</option>
+                <option value="@TrangThai.ChoXacNhanHoanThanh" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.ChoXacNhanHoanThanh) ? "selected" : null)">@TrangThai.ChoXacNhanHoanThanhHienThi</option>
+                <option value="@TrangThai.HoanThanh" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.HoanThanh) ? "selected" : null)">@TrangThai.HoanThanhHienThi</option>
+                <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.TamDung) ? "selected" : null)">@TrangThai.TamDungHienThi</option>
+            </select>
+        </div>
 
-    <div class="col-md-2 d-flex gap-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
-        <a asp-action="Index" class="btn btn-outline-secondary w-100">Reset</a>
+        <div class="col-xl-2 col-lg-2 col-md-6">
+            <div class="du-an-filter-actions">
+                <button type="submit" class="btn du-an-filter-btn-primary">Lọc</button>
+                <a asp-action="Index" class="btn du-an-filter-btn-secondary">Làm mới</a>
+            </div>
+        </div>
     </div>
 </form>

@@ -8,27 +8,35 @@
 
 @if (canShowForm)
 {
-    <form asp-action="TaoDeXuat" method="post" class="border rounded p-3 mb-3">
+    <form asp-action="TaoDeXuat" method="post" class="dxns-form" novalidate>
         <input type="hidden" asp-for="LocMaDuAn" />
         <input type="hidden" asp-for="LocTrangThai" />
         <input type="hidden" asp-for="Form.MaDuAn" />
 
-        <div class="row g-2">
+        <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">Dự án</label>
                 <input class="form-control" value="@Model.TenDuAn" readonly />
                 <span asp-validation-for="Form.MaDuAn" class="text-danger"></span>
             </div>
             <div class="col-md-4">
-                <label asp-for="Form.NganSachDeXuat" class="form-label">Ngân sách đề xuất</label>
-                @* <input asp-for="Form.NganSachDeXuat" class="form-control" /> *@
+                <label asp-for="Form.NganSachDeXuat" class="form-label">Ngân sách đề xuất (VNĐ)</label>
                 <input asp-for="Form.NganSachDeXuat"
                        class="form-control"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
                 <span asp-validation-for="Form.NganSachDeXuat" class="text-danger"></span>
             </div>
             <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">Gửi đề xuất</button>
+                <div class="dxns-form-actions-inline">
+                    <button type="submit" class="dxns-action-btn dxns-action-primary">
+                        <i class="bi bi-send"></i>
+                        Tạo đề xuất
+                    </button>
+                    <a asp-action="Index" asp-route-locMaDuAn="@Model.LocMaDuAn" asp-route-locTrangThai="@Model.LocTrangThai" class="dxns-action-btn dxns-action-neutral">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                        Làm mới
+                    </a>
+                </div>
             </div>
             <div class="col-12">
                 <label asp-for="Form.LyDoDeXuat" class="form-label">Lý do đề xuất</label>
