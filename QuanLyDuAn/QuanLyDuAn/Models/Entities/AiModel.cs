@@ -6,8 +6,11 @@ public partial class AiModel
     public string? TenModel { get; set; }
     public int? SoLuongDuLieu { get; set; }
     public double? DoChinhXac { get; set; }
+    public int? TrainSize { get; set; }
+    public int? TestSize { get; set; }
     public DateTime? NgayTao { get; set; }
     public string? MoTaModel { get; set; }
+    public string? LoaiModel { get; set; }
     public bool? IsActive { get; set; }
     public bool? IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }

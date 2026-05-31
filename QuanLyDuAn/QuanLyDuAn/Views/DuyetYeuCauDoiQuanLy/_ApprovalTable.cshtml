@@ -1,0 +1,102 @@
+﻿@model QuanLyDuAn.ViewModels.DuyetYeuCauDoiQuanLy.DuyetYeuCauDoiQuanLyPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    var canApprove = permissions.Contains(Permissions.DuyetYeuCauDoiQuanLy.Duyet);
+
+    string GetStatusBadgeClass(string? status)
+    {
+        if (TrangThai.EqualsValue(status, TrangThai.ChoDuyet))
+        {
+            return "is-pending";
+        }
+        if (TrangThai.EqualsValue(status, TrangThai.DaDuyet))
+        {
+            return "is-approved";
+        }
+        if (TrangThai.EqualsValue(status, TrangThai.TuChoi))
+        {
+            return "is-rejected";
+        }
+        if (TrangThai.EqualsValue(status, TrangThai.DaHuy))
+        {
+            return "is-cancelled";
+        }
+
+        return "is-neutral";
+    }
+}
+
+@if (Model.DanhSachYeuCau.Count == 0)
+{
+    <div class="duyet-yeu-cau-empty-state">Không có yêu cầu nào phù hợp bộ lọc.</div>
+}
+else
+{
+    <div class="duyet-yeu-cau-table-scroll">
+        <table class="table duyet-yeu-cau-table">
+            <colgroup>
+                <col class="col-project" />
+                <col class="col-manager" />
+                <col class="col-manager" />
+                <col class="col-date" />
+                <col class="col-status" />
+                <col class="col-actions" />
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Dự án</th>
+                    <th>Quản lý hiện tại</th>
+                    <th>Quản lý đề xuất</th>
+                    <th>Ngày yêu cầu</th>
+                    <th>Trạng thái</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DanhSachYeuCau)
+                {
+                    <tr>
+                        <td>
+                            <div class="duyet-yeu-cau-cell-title">@item.TenDuAn</div>
+                        </td>
+                        <td>@item.TenQuanLyHienTai</td>
+                        <td>@item.TenQuanLyDeXuat</td>
+                        <td class="text-nowrap">@(item.NgayTaoYeuCauDoiQuanLy?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                        <td>
+                            <span class="duyet-yeu-cau-status-badge @GetStatusBadgeClass(item.TrangThaiYeuCauDoiQuanLy)">
+                                @TrangThai.ToDisplay(item.TrangThaiYeuCauDoiQuanLy)
+                            </span>
+                        </td>
+                        <td class="col-actions">
+                            <div class="duyet-yeu-cau-actions">
+                                <a asp-action="Details" asp-route-id="@item.MaYeuCauDoiQuanLy" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-neutral">Xem chi tiết</a>
+
+                                @if (canApprove && item.CoTheXuLy)
+                                {
+                                    <form asp-action="Approve" method="post" class="js-review-submit" data-confirm="Xác nhận duyệt yêu cầu này?">
+                                        <input type="hidden" name="id" value="@item.MaYeuCauDoiQuanLy" />
+                                        <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                        <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                        <button type="submit" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-primary">Duyệt</button>
+                                    </form>
+
+                                    <form asp-action="Reject" method="post" class="duyet-yeu-cau-reject-form js-review-submit" data-confirm="Xác nhận từ chối yêu cầu này?">
+                                        <input type="hidden" name="id" value="@item.MaYeuCauDoiQuanLy" />
+                                        <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                        <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                        <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                        <input type="text" name="lyDoTuChoi" class="form-control form-control-sm" placeholder="Lý do từ chối (nếu có)" />
+                                        <button type="submit" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-danger">Từ chối</button>
+                                    </form>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

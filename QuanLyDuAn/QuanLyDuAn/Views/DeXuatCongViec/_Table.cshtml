@@ -6,13 +6,15 @@
     bool canCancel = permissions.Contains(Permissions.DeXuatCongViec.Them);
     int? locMaDuAn = ViewBag.LocMaDuAn as int?;
     string? locTrangThai = ViewBag.LocTrangThai as string;
+    DateTime? tuNgay = ViewBag.TuNgay as DateTime?;
+    DateTime? denNgay = ViewBag.DenNgay as DateTime?;
+    string? locTheoNgay = ViewBag.LocTheoNgay as string;
 }
 
-<div class="dxcv-table-scroll">
+<div class="dxcv-table-scroll table-responsive-soft">
     <table class="table dxcv-table">
         <thead>
             <tr>
-                <th class="col-id">Mã</th>
                 <th>Công việc đề xuất</th>
                 <th>Người đề xuất</th>
                 <th>Chi phí</th>
@@ -25,7 +27,7 @@
             @if (Model.Count == 0)
             {
                 <tr>
-                    <td colspan="7">
+                    <td colspan="6">
                         <div class="dxcv-empty-state">Chưa có đề xuất công việc.</div>
                     </td>
                 </tr>
@@ -42,7 +44,6 @@
                     else if (TrangThai.EqualsValue(statusCode, TrangThai.DaHuy)) { badgeClass = "dxcv-status-canceled"; }
 
                     <tr>
-                        <td class="col-id">#@item.MaDeXuatCV</td>
                         <td>
                             <div class="dxcv-row-title">@item.TenCongViecDeXuat</div>
                             <div class="dxcv-row-subtitle">@item.NgayBatDauCongViecDeXuat?.ToString("dd/MM/yyyy") - @item.NgayKetThucCVDeXuatDuKien?.ToString("dd/MM/yyyy")</div>
@@ -53,8 +54,8 @@
                         <td>
                             <span class="dxcv-status-badge @badgeClass">@TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)</span>
                         </td>
-                        <td class="col-actions">
-                            <div class="dxcv-action-group">
+                        <td class="col-actions dxcv-table-actions">
+                            <div class="dxcv-action-group dxcv-table-action-group">
                                 <button type="button" class="dxcv-action-btn dxcv-action-neutral" data-bs-toggle="collapse" data-bs-target="#dxcv-detail-@item.MaDeXuatCV" aria-expanded="false" aria-controls="dxcv-detail-@item.MaDeXuatCV">
                                     <i class="bi bi-eye"></i>
                                     Xem chi tiết
@@ -65,6 +66,9 @@
                                         <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
                                         <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
                                         <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                                        <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
                                         <button type="submit" class="dxcv-action-btn dxcv-action-danger">
                                             <i class="bi bi-x-circle"></i>
                                             Hủy đề xuất
@@ -75,7 +79,7 @@
                         </td>
                     </tr>
                     <tr class="collapse" id="dxcv-detail-@item.MaDeXuatCV">
-                        <td colspan="7" class="dxcv-detail-cell">
+                        <td colspan="6" class="dxcv-detail-cell">
                             <div class="dxcv-detail-grid">
                                 <div>
                                     <span>Mô tả</span>

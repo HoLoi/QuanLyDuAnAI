@@ -8,6 +8,7 @@
     var pageTitle = ViewData["Title"]?.ToString();
     var resolvedPageTitle = string.IsNullOrWhiteSpace(pageTitle) ? "Hệ thống quản lý dự án" : pageTitle.Trim();
     var userName = User?.Identity?.Name ?? "Người dùng";
+    var userInitial = !string.IsNullOrWhiteSpace(userName) ? userName.Trim()[0].ToString().ToUpperInvariant() : "U";
     var isAdmin = User?.IsInRole("Admin") == true || User?.IsInRole("ADMIN") == true;
     var grantedPermissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -45,12 +46,13 @@
     // ===== AI =====
     var canAiDataset = grantedPermissions.Contains(Permissions.AI.Dataset);
     var canAiTrain = grantedPermissions.Contains(Permissions.AI.Train);
-    var canAiPredict = grantedPermissions.Contains(Permissions.AI.DuDoan);
+    var canAiAnalyzeReason = grantedPermissions.Contains(Permissions.AI.PhanTichNguyenNhan);
     var canAiDashboard = grantedPermissions.Contains(Permissions.AI.Dashboard);
 
     // ===== KHÁC =====
     var canDanhGiaDuAn = grantedPermissions.Contains(Permissions.DanhGiaDuAn.Xem);
     var canDanhGiaNhanVien = grantedPermissions.Contains(Permissions.DanhGiaNhanVien.Xem);
+    var canDanhGiaNhanVienDocLap = canDanhGiaNhanVien && !canDanhGiaDuAn;
     var canChat = grantedPermissions.Contains(Permissions.Chat.Xem);
     var canChatDuAn = canChat && !isAdmin;
     var canNhatKy = grantedPermissions.Contains(Permissions.NhatKy.Xem);
@@ -77,6 +79,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuanLyDuAn.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout/sidebar.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/TaiKhoanCaNhan/index.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="@(isAuthenticated ? "layout-authenticated" : "layout-guest")">
@@ -93,7 +96,7 @@
                 </a>
 
                 <nav class="side-nav sidebar-menu">
-                    @if (canDashboard || canNhanSu || canChucDanh || canNhom || canPhanQuyen || canDuyetDoiQuanLy)
+                    @if (canDashboard || canNhanSu || canChucDanh || canNhom || canPhanQuyen)
                     {
                         <div class="sidebar-section">
                             <div class="sidebar-section-title">HỆ THỐNG</div>
@@ -137,18 +140,10 @@
                                     <span class="sidebar-menu-text">Phân quyền</span>
                                 </a>
                             }
-
-                            @if (canDuyetDoiQuanLy)
-                            {
-                                <a asp-controller="DoiQuanLy" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DoiQuanLy") ? "active sidebar-active" : string.Empty)">
-                                    <span class="sidebar-menu-icon"><i class="bi bi-person-check"></i></span>
-                                    <span class="sidebar-menu-text">Duyệt đổi quản lý</span>
-                                </a>
-                            }
                         </div>
                     }
 
-                    @if (canDuAn)
+                    @if (canDuAn || canDuyetDoiQuanLy)
                     {
                         <div class="sidebar-section">
                             <div class="sidebar-section-title">DỰ ÁN</div>
@@ -158,6 +153,13 @@
                                 <a asp-controller="DuAn" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DuAn") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-kanban"></i></span>
                                     <span class="sidebar-menu-text">Dự án</span>
+                                </a>
+                            }
+                            @if (canDuyetDoiQuanLy)
+                            {
+                                <a asp-controller="DuyetYeuCauDoiQuanLy" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DuyetYeuCauDoiQuanLy") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-person-check"></i></span>
+                                    <span class="sidebar-menu-text">Duyệt yêu cầu đổi quản lý</span>
                                 </a>
                             }
                         </div>
@@ -225,7 +227,7 @@
                         </div>
                     }
 
-                    @if (canDanhGiaDuAn || canDanhGiaNhanVien)
+                    @if (canDanhGiaDuAn || canDanhGiaNhanVienDocLap)
                     {
                         <div class="sidebar-section">
                             <div class="sidebar-section-title">ĐÁNH GIÁ</div>
@@ -234,15 +236,15 @@
                             {
                                 <a asp-controller="DanhGiaDuAn" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DanhGiaDuAn") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-clipboard2-check"></i></span>
-                                    <span class="sidebar-menu-text">Danh gia du an</span>
+                                    <span class="sidebar-menu-text">Đánh giá dự án</span>
                                 </a>
                             }
 
-                            @if (canDanhGiaNhanVien)
+                            @if (canDanhGiaNhanVienDocLap)
                             {
                                 <a asp-controller="DanhGiaNhanVien" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("DanhGiaNhanVien") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-person-check"></i></span>
-                                    <span class="sidebar-menu-text">Danh gia nhan vien</span>
+                                    <span class="sidebar-menu-text">Đánh giá nhân viên</span>
                                 </a>
                             }
                         </div>
@@ -259,7 +261,7 @@
                         </div>
                     }
 
-                    @if (canAiDataset || canAiTrain || canAiPredict || canAiDashboard)
+                    @if (canAiDataset || canAiTrain || canAiAnalyzeReason || canAiDashboard)
                     {
                         <div class="sidebar-section">
                             <div class="sidebar-section-title">AI</div>
@@ -268,28 +270,32 @@
                             {
                                 <a asp-controller="AiDataset" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("AiDataset") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-database"></i></span>
-                                    <span class="sidebar-menu-text">Dataset</span>
+                                    <span class="sidebar-menu-text">Dữ liệu AI</span>
                                 </a>
                             }
                             @if (canAiTrain)
                             {
                                 <a asp-controller="Ai" asp-action="Train" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Train") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-cpu"></i></span>
-                                    <span class="sidebar-menu-text">Train</span>
+                                    <span class="sidebar-menu-text">Huấn luyện nguyên nhân trễ</span>
+                                </a>
+                                <a asp-controller="Ai" asp-action="Models" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Models") ? "active sidebar-active" : string.Empty)">
+                                    <span class="sidebar-menu-icon"><i class="bi bi-diagram-3"></i></span>
+                                    <span class="sidebar-menu-text">Model nguyên nhân</span>
                                 </a>
                             }
-                            @if (canAiPredict)
+                            @if (canAiAnalyzeReason)
                             {
                                 <a asp-controller="Ai" asp-action="Predict" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Predict") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-graph-up"></i></span>
-                                    <span class="sidebar-menu-text">Predict</span>
+                                    <span class="sidebar-menu-text">Phân tích nguyên nhân trễ</span>
                                 </a>
                             }
                             @if (canAiDashboard)
                             {
                                 <a asp-controller="Ai" asp-action="Dashboard" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Dashboard") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-speedometer2"></i></span>
-                                    <span class="sidebar-menu-text">Dashboard</span>
+                                    <span class="sidebar-menu-text">Tổng quan AI</span>
                                 </a>
                             }
                         </div>
@@ -314,14 +320,32 @@
                         <button type="button" class="sidebar-toggle d-lg-none" data-sidebar-toggle aria-label="Mở menu">
                             <i class="bi bi-list"></i>
                         </button>
-                        <span class="user-chip">
-                            <i class="bi bi-person-circle"></i>
-                            @userName
-                        </span>
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="mb-0">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Đăng xuất</button>
-                        </form>
+                        <div class="tai-khoan-dropdown" data-account-dropdown>
+                            <button type="button" class="tai-khoan-toggle" data-account-toggle aria-label="Mở menu tài khoản" aria-expanded="false">
+                                <span class="tai-khoan-avatar">@userInitial</span>
+                                <span class="tai-khoan-name">@userName</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+
+                            <div class="tai-khoan-menu" data-account-menu>
+                                <a asp-controller="TaiKhoanCaNhan" asp-action="Index" class="tai-khoan-menu-item">
+                                    <i class="bi bi-person-badge"></i>
+                                    Hồ sơ cá nhân
+                                </a>
+                                <a asp-controller="TaiKhoanCaNhan" asp-action="DoiMatKhau" class="tai-khoan-menu-item">
+                                    <i class="bi bi-key"></i>
+                                    Đổi mật khẩu
+                                </a>
+                                <div class="tai-khoan-menu-divider"></div>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="tai-khoan-menu-form">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="tai-khoan-menu-item danger">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        Đăng xuất
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     }
                     else
                     {
@@ -359,9 +383,20 @@
         (function () {
             var toggleButtons = document.querySelectorAll("[data-sidebar-toggle]");
             var dismissButtons = document.querySelectorAll("[data-sidebar-dismiss]");
+            var accountDropdown = document.querySelector("[data-account-dropdown]");
+            var accountToggle = document.querySelector("[data-account-toggle]");
 
             function setSidebarState(isOpen) {
                 document.body.classList.toggle("sidebar-open", isOpen);
+            }
+
+            function setAccountMenuState(isOpen) {
+                if (!accountDropdown || !accountToggle) {
+                    return;
+                }
+
+                accountDropdown.classList.toggle("open", isOpen);
+                accountToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
             }
 
             toggleButtons.forEach(function (button) {
@@ -376,9 +411,24 @@
                 });
             });
 
+            if (accountDropdown && accountToggle) {
+                accountToggle.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setAccountMenuState(!accountDropdown.classList.contains("open"));
+                });
+
+                document.addEventListener("click", function (event) {
+                    if (!accountDropdown.contains(event.target)) {
+                        setAccountMenuState(false);
+                    }
+                });
+            }
+
             document.addEventListener("keydown", function (event) {
                 if (event.key === "Escape") {
                     setSidebarState(false);
+                    setAccountMenuState(false);
                 }
             });
 

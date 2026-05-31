@@ -2,9 +2,9 @@
 @using QuanLyDuAn.Constants
 
 <tr class="collapse tien-do-extra-row" id="@Model.CollapseId">
-    <td colspan="7" class="update-collapse-cell">
+    <td colspan="5" class="update-collapse-cell">
         <div class="td-update-wrap">
-            <div class="update-title">Gửi báo cáo tiến độ</div>
+            <div class="update-title">G?i b�o c�o ti?n �?</div>
 
             <form asp-action="CapNhatTienDo" method="post" enctype="multipart/form-data" class="row g-3">
                 <input type="hidden" name="MaChiTietCV" value="@Model.Item.MaChiTietCV" />
@@ -12,9 +12,11 @@
                 <input type="hidden" name="locMaCongViec" value="@Model.Filter.LocMaCongViec" />
                 <input type="hidden" name="locMaChiTietCv" value="@Model.Filter.LocMaChiTietCv" />
                 <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
+                <input type="hidden" name="tuNgayBaoCao" value="@Model.Filter.TuNgayBaoCao?.ToString("yyyy-MM-dd")" />
+                <input type="hidden" name="denNgayBaoCao" value="@Model.Filter.DenNgayBaoCao?.ToString("yyyy-MM-dd")" />
 
                 <div class="col-12 col-lg-4">
-                    <label class="form-label">Trạng thái đề xuất chi tiết công việc</label>
+                    <label class="form-label">Tr?ng th�i �? xu?t chi ti?t c�ng vi?c</label>
                     <select class="form-select" name="TrangThaiCTCVMoi" required>
                         @if (!Model.Item.TrangThaiDeXuatOptions.Any())
                         {
@@ -31,17 +33,17 @@
                 </div>
 
                 <div class="col-12 col-lg-4">
-                    <label class="form-label">Ghi chú tiến độ</label>
-                    <input type="text" class="form-control" name="GhiChuTienDo" maxlength="255" placeholder="Mô tả ngắn tình hình hiện tại" />
+                    <label class="form-label">Ghi ch� ti?n �?</label>
+                    <input type="text" class="form-control" name="GhiChuTienDo" maxlength="255" placeholder="M� t? ng?n t?nh h?nh hi?n t?i" />
                 </div>
 
                 <div class="col-12 col-lg-4">
-                    <label class="form-label">Tệp minh chứng (có thể chọn nhiều)</label>
+                    <label class="form-label">T?p minh ch?ng (c� th? ch?n nhi?u)</label>
                     <input type="file" class="form-control" name="Files" multiple />
                 </div>
 
                 <div class="col-12 d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary">Gửi báo cáo</button>
+                    <button type="submit" class="btn-action btn-confirm">G?i b�o c�o</button>
                 </div>
             </form>
         </div>

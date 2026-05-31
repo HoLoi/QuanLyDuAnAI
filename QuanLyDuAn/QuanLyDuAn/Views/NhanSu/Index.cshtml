@@ -1,9 +1,13 @@
 ﻿@model QuanLyDuAn.ViewModels.NhanSu.NhanSuPageViewModel
 @using QuanLyDuAn.Constants
 
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 @{
+    ViewData["Title"] = "Nhân sự";
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.NhanSu.Them) || permissions.Contains(Permissions.NhanSu.Sua);
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
     ViewBag.Permissions = permissions;
     ViewBag.DanhSachChucDanh = Model.DanhSachChucDanh;
     ViewBag.DanhSachVaiTroHeThong = Model.DanhSachVaiTroHeThong;
@@ -12,20 +16,49 @@
     ViewBag.LocTrangThaiTaiKhoan = Model.LocTrangThaiTaiKhoan;
 }
 
-<div class="card p-3">
+@section Styles {
+    <link rel="stylesheet" href="~/css/NhanSu/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
+}
 
-    <h5>Quản lý nhân sự</h5>
+<section class="nhan-su-page">
+    <header class="nhan-su-header-card">
+        <div>
+            <h1 class="nhan-su-title">Nhân sự</h1>
+            <p class="nhan-su-subtitle">Quản lý hồ sơ nhân sự, tài khoản và vai trò hệ thống.</p>
+        </div>
+    </header>
 
-    @if (canShowForm)
-    {
-        <partial name="_Form" for="Form" />
+    <section class="nhan-su-section-card">
+        @if (canShowForm)
+        {
+            <partial name="_Form" for="Form" />
+            <hr />
+        }
 
-        <hr />
-    }
-
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
-</div>
+        <partial name="_Filter" model="Model" />
+        <div class="table-card-header nhan-su-list-header">
+            <div class="table-card-header-content">
+                <h2 class="nhan-su-list-title">Danh sách nhân sự</h2>
+            </div>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["tuKhoa"] = Model.TuKhoa,
+                        ["locMaChucDanh"] = Model.LocMaChucDanh?.ToString(),
+                        ["locTrangThaiTaiKhoan"] = Model.LocTrangThaiTaiKhoan
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
+        </div>
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

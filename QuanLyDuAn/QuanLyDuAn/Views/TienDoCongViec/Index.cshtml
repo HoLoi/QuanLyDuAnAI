@@ -1,6 +1,15 @@
 ﻿@model QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecPageViewModel
+@using QuanLyDuAn.Constants
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 @{
     ViewData["Title"] = "Tiến độ công việc";
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/TienDoCongViec/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
 <div class="tien-do-page">
@@ -11,6 +20,57 @@
         </div>
 
         @await Html.PartialAsync("_Filter", Model)
+        <div class="table-card-header td-list-header">
+            <div class="table-card-header-content">
+                <h6 class="mb-1">Danh sách tiến độ công việc</h6>
+                <p class="text-muted mb-0">Hiển thị tiến độ theo bộ lọc hiện tại.</p>
+            </div>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["locMaDuAn"] = Model.Filter.LocMaDuAn?.ToString(),
+                        ["locMaCongViec"] = Model.Filter.LocMaCongViec?.ToString(),
+                        ["locMaChiTietCv"] = Model.Filter.LocMaChiTietCv?.ToString(),
+                        ["tuKhoa"] = Model.Filter.TuKhoa,
+                        ["tuNgayBaoCao"] = Model.Filter.TuNgayBaoCao?.ToString("yyyy-MM-dd"),
+                        ["denNgayBaoCao"] = Model.Filter.DenNgayBaoCao?.ToString("yyyy-MM-dd")
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
+        </div>
         @await Html.PartialAsync("_Table", Model)
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var form = document.querySelector("[data-tien-do-filter]");
+            if (!form) {
+                return;
+            }
+
+            var keywordInput = form.querySelector("[data-filter-tu-khoa]");
+            var maChiTietInput = form.querySelector("[data-filter-ma-ctcv]");
+            if (!keywordInput || !maChiTietInput) {
+                return;
+            }
+
+            form.addEventListener("submit", function () {
+                var keyword = (keywordInput.value || "").trim();
+                if (/^\d+$/.test(keyword)) {
+                    maChiTietInput.value = keyword;
+                    keywordInput.value = "";
+                    return;
+                }
+
+                maChiTietInput.value = "";
+            });
+        })();
+    </script>
+}

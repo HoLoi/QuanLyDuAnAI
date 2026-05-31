@@ -1,5 +1,7 @@
 ﻿@inject QuanLyDuAn.Services.Interfaces.IPhanQuyenService PhanQuyenService
 @using QuanLyDuAn.Constants
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 @using QuanLyDuAn.ViewModels.Dashboard
 @using QuanLyDuAn.ViewModels.Ai
 @model DashboardViewModel
@@ -7,6 +9,9 @@
     ViewData["Title"] = "Thống kê tổng quan";
     var ai = ViewBag.AiDashboard as AiDashboardViewModel;
     var updatedAt = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+    var tuNgayText = Model.TuNgay?.ToString("yyyy-MM-dd");
+    var denNgayText = Model.DenNgay?.ToString("yyyy-MM-dd");
+    var locNhanh = (Model.LocNhanh ?? string.Empty).ToLowerInvariant();
 
     var grantedPermissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     if (User?.Identity?.IsAuthenticated == true)
@@ -24,6 +29,7 @@
     var canDuyetDeXuatCongViec = grantedPermissions.Contains(Permissions.DuyetDeXuatCongViec.Xem);
     var canDuyetDeXuatNganSach = grantedPermissions.Contains(Permissions.DuyetNganSach.Xem);
     var canDuyetDoiQuanLy = grantedPermissions.Contains(Permissions.DuyetYeuCauDoiQuanLy.Xem);
+    var canExport = await PermissionHelper.HasPermissionAsync(User!, Permissions.ThongKe.XuatFile);
 
     var tongDuAn = Math.Max(Model.TongDuAn, 0);
     var hasProgressChartData = Model.TenDuAn.Any() && Model.PhanTramTienDo.Any();
@@ -39,10 +45,18 @@
         var rate = (decimal)value * 100m / tongDuAn;
         return Math.Round(rate, 1, MidpointRounding.AwayFromZero).ToString("0.#");
     }
+
+    string QuickFilterClass(string value)
+    {
+        return string.Equals(locNhanh, value, StringComparison.OrdinalIgnoreCase)
+            ? "time-quick-btn active"
+            : "time-quick-btn";
+    }
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/Dashboard/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
 <div class="dashboard-overview-page">
@@ -55,6 +69,47 @@
             <i class="bi bi-clock-history"></i>
             <span>Cập nhật mới nhất: @updatedAt</span>
         </div>
+        @if (canExport)
+        {
+            var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+            {
+                Action = "XuatFile",
+                RouteValues = new Dictionary<string, string?>
+                {
+                    ["tuNgay"] = tuNgayText,
+                    ["denNgay"] = denNgayText,
+                    ["locNhanh"] = Model.LocNhanh
+                }
+            };
+            <partial name="_ExportDropdown" model="exportVm" />
+        }
+    </section>
+
+    <section class="dashboard-time-filter-card">
+        <form asp-action="Index" method="get" class="dashboard-time-filter-form">
+            <div class="time-filter-grid">
+                <div class="time-filter-field">
+                    <label class="form-label" for="tuNgay">Từ ngày</label>
+                    <input id="tuNgay" type="date" name="tuNgay" value="@tuNgayText" class="form-control" />
+                </div>
+                <div class="time-filter-field">
+                    <label class="form-label" for="denNgay">Đến ngày</label>
+                    <input id="denNgay" type="date" name="denNgay" value="@denNgayText" class="form-control" />
+                </div>
+                <div class="time-filter-actions">
+                    <button type="submit" class="dashboard-action-btn">Lọc dữ liệu</button>
+                    <a asp-action="Index" class="dashboard-action-btn">Làm mới</a>
+                </div>
+            </div>
+        </form>
+        <div class="time-quick-wrap">
+            <a asp-action="Index" asp-route-locNhanh="homnay" class="@QuickFilterClass("homnay")">Hôm nay</a>
+            <a asp-action="Index" asp-route-locNhanh="7ngay" class="@QuickFilterClass("7ngay")">7 ngày gần đây</a>
+            <a asp-action="Index" asp-route-locNhanh="thangnay" class="@QuickFilterClass("thangnay")">Tháng này</a>
+            <a asp-action="Index" asp-route-locNhanh="quynay" class="@QuickFilterClass("quynay")">Quý này</a>
+            <a asp-action="Index" asp-route-locNhanh="namnay" class="@QuickFilterClass("namnay")">Năm nay</a>
+            <a asp-action="Index" asp-route-locNhanh="tatca" class="@QuickFilterClass("tatca")">Tất cả</a>
+        </div>
     </section>
 
     <section class="overview-grid">
@@ -62,14 +117,21 @@
             <div class="overview-card-icon"><i class="bi bi-kanban-fill"></i></div>
             <div class="overview-card-label">Tổng dự án</div>
             <div class="overview-card-value">@Model.TongDuAn</div>
-            <div class="overview-card-note">Số dự án đang quản lý trong hệ thống.</div>
+            <div class="overview-card-note">Số dự án được tạo trong khoảng thời gian đã chọn.</div>
         </article>
 
         <article class="overview-card">
             <div class="overview-card-icon"><i class="bi bi-list-task"></i></div>
             <div class="overview-card-label">Tổng công việc</div>
             <div class="overview-card-value">@Model.TongCongViec</div>
-            <div class="overview-card-note">Tổng đầu việc của tất cả dự án.</div>
+            <div class="overview-card-note">Số công việc được tạo trong khoảng thời gian đã chọn.</div>
+        </article>
+
+        <article class="overview-card">
+            <div class="overview-card-icon"><i class="bi bi-clipboard2-check"></i></div>
+            <div class="overview-card-label">Tổng đề xuất</div>
+            <div class="overview-card-value">@Model.TongDeXuat</div>
+            <div class="overview-card-note">Đề xuất công việc + ngân sách trong khoảng thời gian đã chọn.</div>
         </article>
 
         <article class="overview-card">
@@ -90,7 +152,14 @@
             <div class="overview-card-icon"><i class="bi bi-cash-stack"></i></div>
             <div class="overview-card-label">Tổng chi phí đã chi</div>
             <div class="overview-card-value">@Model.TongChiPhi.ToString("N0")</div>
-            <div class="overview-card-note">Tổng chi phí thực tế đã ghi nhận.</div>
+            <div class="overview-card-note">Chi phí phát sinh theo ngày chi trong khoảng đã chọn.</div>
+        </article>
+
+        <article class="overview-card">
+            <div class="overview-card-icon"><i class="bi bi-check2-circle"></i></div>
+            <div class="overview-card-label">Dự án hoàn thành</div>
+            <div class="overview-card-value">@Model.DuAnHoanThanhTrongKy</div>
+            <div class="overview-card-note">Số dự án hoàn thành trong khoảng thời gian đã chọn.</div>
         </article>
 
         <article class="overview-card">
@@ -167,7 +236,18 @@
                 <div class="progress">
                     <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnHoanThanh)%"></div>
                 </div>
-                <small>@BuildRate(Model.DuAnHoanThanh)% tổng dự án</small>
+                <small>@Model.DuAnHoanThanhDungHan đúng hạn · @Model.DuAnHoanThanhTreHan trễ hạn</small>
+            </article>
+
+            <article class="status-pill-card">
+                <div class="status-header">
+                    <span>Lưu trữ</span>
+                    <strong>@Model.DuAnLuuTru</strong>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnLuuTru)%"></div>
+                </div>
+                <small>@BuildRate(Model.DuAnLuuTru)% tổng dự án</small>
             </article>
         </div>
     </section>

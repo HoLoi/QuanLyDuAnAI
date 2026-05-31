@@ -12,15 +12,21 @@
 
 <div class="project-stats card border-0 shadow-sm mb-3">
     <div class="card-body">
-        <h6 class="mb-3">Dữ liệu hỗ trợ đánh giá dự án</h6>
+        <h6 class="mb-3">Dữ liệu hỗ trợ</h6>
 
         @if (!hasData)
         {
-            <div class="empty-note">Chưa có dữ liệu hỗ trợ cho dự án này.</div>
+            <div class="empty-note">Chưa có dữ liệu hỗ trợ\.</div>
         }
         else
         {
             <div class="row g-2">
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngày bắt đầu dự án</span><strong>@(Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngày kết thúc dự kiến</span><strong>@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "Chưa có mốc kết thúc dự kiến")</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngày kết thúc thực tế</span><strong>@(Model.NgayKetThucThucTeDuAn?.ToString("dd/MM/yyyy") ?? "Chưa hoàn thành")</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Trạng thái thời hạn</span><strong>@(string.IsNullOrWhiteSpace(Model.TrangThaiThoiHanDuAn) ? "Chưa có dữ liệu" : Model.TrangThaiThoiHanDuAn)</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số ngày còn lại</span><strong>@(Model.SoNgayConLai.HasValue ? $"{Model.SoNgayConLai} ngày" : "Không áp dụng")</strong></div></div>
+                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số ngày quá hạn</span><strong>@(Model.SoNgayQuaHan.HasValue ? $"{Model.SoNgayQuaHan} ngày" : "Không áp dụng")</strong></div></div>
                 <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tổng công việc</span><strong>@Model.TongCongViec</strong></div></div>
                 <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Công việc hoàn thành</span><strong>@Model.CongViecHoanThanh</strong></div></div>
                 <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Công việc trễ hạn</span><strong>@Model.CongViecTreHan</strong></div></div>
@@ -37,3 +43,4 @@
         }
     </div>
 </div>
+

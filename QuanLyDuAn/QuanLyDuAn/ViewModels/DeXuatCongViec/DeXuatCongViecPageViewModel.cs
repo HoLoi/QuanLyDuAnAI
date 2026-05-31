@@ -14,6 +14,9 @@ namespace QuanLyDuAn.ViewModels.DeXuatCongViec
         public bool HasApprovedBudget { get; set; }
         public int? LocMaDuAn { get; set; }
         public string? LocTrangThai { get; set; }
+        public DateTime? TuNgay { get; set; }
+        public DateTime? DenNgay { get; set; }
+        public string? LocTheoNgay { get; set; }
         public HashSet<string> Permissions { get; set; } = new();
     }
 }

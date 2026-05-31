@@ -12,6 +12,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public bool IsInChoXacNhanHoanThanh { get; set; }
         public bool CanConfirmCompletion { get; set; }
         public bool CanReopen { get; set; }
+        public bool CanArchive { get; set; }
         public bool CanPause { get; set; }
         public bool CanDelete { get; set; }
         public bool IsCompleted { get; set; }

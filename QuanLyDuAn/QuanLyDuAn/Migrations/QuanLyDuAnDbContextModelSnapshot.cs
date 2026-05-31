@@ -39,13 +39,47 @@ namespace QuanLyDuAn.Migrations
                     b.Property<decimal?>("ChiPhiThucTe")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<bool?>("IsTre")
+                    b.Property<string>("GhiChuDataset")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool?>("LaDuAnTre")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("MaDMNguyenNhan")
+                        .HasColumnType("int");
 
                     b.Property<int>("MaDuAn")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("NgayTongHop")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("SoBaoCaoTienDoBiTuChoi")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoBaoCaoTienDoChoDuyet")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoBaoCaoTienDoYeuCauBoSung")
+                        .HasColumnType("int");
+
                     b.Property<int?>("SoCongViecTre")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoDeXuatCongViecBiTuChoi")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoDeXuatCongViecChoDuyet")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoDeXuatNganSachBiTuChoi")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoDeXuatNganSachChoDuyet")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoLanCapNhatTienDo")
                         .HasColumnType("int");
 
                     b.Property<int?>("SoLanThayDoiNhanSu")
@@ -54,22 +88,33 @@ namespace QuanLyDuAn.Migrations
                     b.Property<int?>("SoLanThayDoiQuanLy")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SoNgayChamCapNhatTienDo")
+                        .HasColumnType("int");
+
                     b.Property<int?>("SoNgayTreTienDo")
                         .HasColumnType("int");
 
                     b.Property<int?>("SoNhanVienDuAn")
                         .HasColumnType("int");
 
-                    b.Property<double?>("TongGioLam")
+                    b.Property<double?>("ThoiGianDuyetCongViecTrungBinh")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("ThoiGianDuyetNganSachTrungBinh")
                         .HasColumnType("float");
 
                     b.Property<int?>("TongSoCongViec")
                         .HasColumnType("int");
 
+                    b.Property<double?>("TyLeBaoCaoTienDoBiTuChoi")
+                        .HasColumnType("float");
+
                     b.Property<double?>("TyLeCongViecTre")
                         .HasColumnType("float");
 
                     b.HasKey("MaData");
+
+                    b.HasIndex("MaDMNguyenNhan");
 
                     b.HasIndex("MaDuAn");
 
@@ -83,6 +128,10 @@ namespace QuanLyDuAn.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaAiKetQua"));
+
+                    b.Property<string>("CanhBaoNguyenNhan")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<double?>("DoTinCayKetQua")
                         .HasColumnType("float");
@@ -98,6 +147,13 @@ namespace QuanLyDuAn.Migrations
 
                     b.Property<int>("MaModel")
                         .HasColumnType("int");
+
+                    b.Property<string>("NoiDungPhanTich")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReasonSource")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("ThoiGianDuDoanKetQua")
                         .HasColumnType("datetime2");
@@ -138,6 +194,10 @@ namespace QuanLyDuAn.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LoaiModel")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("MoTaModel")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
@@ -151,6 +211,12 @@ namespace QuanLyDuAn.Migrations
                     b.Property<string>("TenModel")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int?>("TestSize")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TrainSize")
+                        .HasColumnType("int");
 
                     b.HasKey("MaModel");
 
@@ -174,6 +240,10 @@ namespace QuanLyDuAn.Migrations
                     b.Property<double?>("DoTinCay")
                         .HasColumnType("float");
 
+                    b.Property<string>("GhiChuXacNhan")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -182,6 +252,12 @@ namespace QuanLyDuAn.Migrations
 
                     b.Property<int>("MaDuAn")
                         .HasColumnType("int");
+
+                    b.Property<int?>("MaNguoiDungXacNhan")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayXacNhan")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("MaAINguyenNhan");
 
@@ -597,16 +673,17 @@ namespace QuanLyDuAn.Migrations
                     b.Property<int>("MaDanhGiaDuAn")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MaTieuChi")
+                        .HasColumnType("int");
+
                     b.Property<string>("NhanXetDuAn")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TieuChi")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("MaChiTietDGDA");
 
                     b.HasIndex("MaDanhGiaDuAn");
+
+                    b.HasIndex("MaTieuChi");
 
                     b.ToTable("CT_DANH_GIA_DU_AN", (string)null);
                 });
@@ -631,10 +708,13 @@ namespace QuanLyDuAn.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("MaCongViec")
+                    b.Property<int?>("MaCongViec")
                         .HasColumnType("int");
 
                     b.Property<int>("MaDanhGiaNhanVien")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MaTieuChi")
                         .HasColumnType("int");
 
                     b.Property<string>("NoiDungDanhGiaNhanVien")
@@ -645,6 +725,8 @@ namespace QuanLyDuAn.Migrations
                     b.HasIndex("MaCongViec");
 
                     b.HasIndex("MaDanhGiaNhanVien");
+
+                    b.HasIndex("MaTieuChi");
 
                     b.ToTable("CT_DANH_GIA_NHAN_VIEN", (string)null);
                 });
@@ -669,18 +751,32 @@ namespace QuanLyDuAn.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LyDoTuChoiDanhGiaDA")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("MaDuAn")
                         .HasColumnType("int");
 
                     b.Property<int>("MaNguoiDung")
                         .HasColumnType("int");
 
+                    b.Property<int?>("MaNguoiDungDuyet")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("NgayDanhGiaDA")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayDuyetDanhGiaDA")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NhanXetTongDuAn")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("TrangThaiDanhGiaDA")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("MaDanhGiaDuAn");
 
@@ -689,6 +785,8 @@ namespace QuanLyDuAn.Migrations
                     b.HasIndex("MaDuAn");
 
                     b.HasIndex("MaNguoiDung");
+
+                    b.HasIndex("MaNguoiDungDuyet");
 
                     b.ToTable("DANH_GIA_DU_AN", (string)null);
                 });
@@ -713,6 +811,10 @@ namespace QuanLyDuAn.Migrations
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LyDoTuChoiDanhGiaNV")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("MaDuAn")
                         .HasColumnType("int");
 
@@ -722,11 +824,22 @@ namespace QuanLyDuAn.Migrations
                     b.Property<int>("MaNguoiDungDanhGia")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaTieuChi")
+                    b.Property<int?>("MaNguoiDungDuyet")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("NgayDanhGiaNV")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayDuyetDanhGiaNV")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NhanXetTongQuanNV")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TrangThaiDanhGiaNV")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("XepLoai")
                         .HasMaxLength(50)
@@ -742,7 +855,7 @@ namespace QuanLyDuAn.Migrations
 
                     b.HasIndex("MaNguoiDungDanhGia");
 
-                    b.HasIndex("MaTieuChi");
+                    b.HasIndex("MaNguoiDungDuyet");
 
                     b.ToTable("DANH_GIA_NHAN_VIEN", (string)null);
                 });
@@ -1022,6 +1135,9 @@ namespace QuanLyDuAn.Migrations
 
                     b.Property<DateTime?>("NgayKetThucDuAn")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayHoanThanhThucTeDuAn")
+                        .HasColumnType("datetime2(7)");
 
                     b.Property<DateTime?>("NgayTaoDuAn")
                         .HasColumnType("datetime2");
@@ -1989,6 +2105,12 @@ namespace QuanLyDuAn.Migrations
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.AiDataset", b =>
                 {
+                    b.HasOne("QuanLyDuAn.Models.Entities.DmNguyenNhan", null)
+                        .WithMany()
+                        .HasForeignKey("MaDMNguyenNhan")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_AI_DATASET_DM_NGUYEN_NHAN");
+
                     b.HasOne("QuanLyDuAn.Models.Entities.DuAn", null)
                         .WithMany()
                         .HasForeignKey("MaDuAn")
@@ -2194,6 +2316,12 @@ namespace QuanLyDuAn.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_CT_DGDA_CO_DANH_GIA");
+
+                    b.HasOne("QuanLyDuAn.Models.Entities.TieuChiDanhGia", null)
+                        .WithMany()
+                        .HasForeignKey("MaTieuChi")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_CT_DGDA_TIEU_CHI");
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.CtDanhGiaNhanVien", b =>
@@ -2202,7 +2330,6 @@ namespace QuanLyDuAn.Migrations
                         .WithMany()
                         .HasForeignKey("MaCongViec")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
                         .HasConstraintName("FK_CT_DANH__CO_CONG_VIE");
 
                     b.HasOne("QuanLyDuAn.Models.Entities.DanhGiaNhanVien", null)
@@ -2211,6 +2338,12 @@ namespace QuanLyDuAn.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_CT_DGNV_CO_DANH_GIA");
+
+                    b.HasOne("QuanLyDuAn.Models.Entities.TieuChiDanhGia", null)
+                        .WithMany()
+                        .HasForeignKey("MaTieuChi")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_CT_DGNV_TIEU_CHI");
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.DanhGiaDuAn", b =>
@@ -2234,6 +2367,12 @@ namespace QuanLyDuAn.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_DGDA_DANH_GIA_NGUOI_DU");
+
+                    b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
+                        .WithMany()
+                        .HasForeignKey("MaNguoiDungDuyet")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_DGDA_DUYET_NGUOI_DUNG");
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.DanhGiaNhanVien", b =>
@@ -2265,12 +2404,11 @@ namespace QuanLyDuAn.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_DGNV_DANH_GIA_NGUOI_DU");
 
-                    b.HasOne("QuanLyDuAn.Models.Entities.TieuChiDanhGia", null)
+                    b.HasOne("QuanLyDuAn.Models.Entities.NguoiDung", null)
                         .WithMany()
-                        .HasForeignKey("MaTieuChi")
+                        .HasForeignKey("MaNguoiDungDuyet")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_DANH_GIA_DUA VAO_TIEU_CHI");
+                        .HasConstraintName("FK_DGNV_DUYET_NGUOI_DUNG");
                 });
 
             modelBuilder.Entity("QuanLyDuAn.Models.Entities.DanhMucCongViec", b =>

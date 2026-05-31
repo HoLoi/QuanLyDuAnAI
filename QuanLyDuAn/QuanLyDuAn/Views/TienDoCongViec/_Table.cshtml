@@ -35,15 +35,13 @@
 
 <div class="tien-do-table-host">
     <div class="table-responsive tien-do-table-scroll">
-        <table class="table table-bordered table-sm app-data-table tien-do-table mb-0">
+        <table class="table workflow-table app-data-table tien-do-table mb-0">
             <thead>
                 <tr>
-                    <th>Công việc</th>
-                    <th>Chi tiết công việc</th>
-                    <th>Người thực hiện</th>
-                    <th class="col-progress">Tiến độ hiện tại</th>
-                    <th class="col-status">Trạng thái hiện tại</th>
-                    <th>Báo cáo mới nhất</th>
+                    <th class="col-work">Công việc / Dự án</th>
+                    <th class="col-detail">Chi tiết / Người thực hiện</th>
+                    <th class="col-progress-status">Tiến độ / Trạng thái</th>
+                    <th class="col-report">Báo cáo mới nhất</th>
                     <th class="col-action">Thao tác</th>
                 </tr>
             </thead>
@@ -51,7 +49,7 @@
                 @if (!Model.DanhSach.Any())
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted">Không có dữ liệu tiến độ công việc.</td>
+                        <td colspan="5" class="text-center text-muted">Không có dữ liệu tiến độ công việc.</td>
                     </tr>
                 }
                 else
@@ -68,10 +66,8 @@
                             LichSuCollapseId = $"lichsu-{item.MaChiTietCV}"
                         };
 
-                        var soFileMoiNhat = item.DanhSachFile.Count;
                         var coBaoCao = item.MaTienDoMoiNhat.HasValue;
                         var ghiChuTomTat = RutGonGhiChu(item.GhiChuBaoCaoGanNhat);
-                        var coTheXuLyBaoCao = canApprove && item.LichSuTienDo.Any(x => x.CoTheXuLyDuyet);
 
                         <tr class="tien-do-main-row">
                             <td data-label="Công việc">
@@ -80,21 +76,16 @@
                             </td>
                             <td data-label="Chi tiết công việc">
                                 <div class="td-cell-title">@item.TenChiTietCongViec</div>
-                                <div class="td-subline">Mã CTCV: #@item.MaChiTietCV</div>
+                                <div class="td-subline td-subline-wrap">Người thực hiện: @item.NguoiThucHien</div>
                             </td>
-                            <td data-label="Người thực hiện">
-                                <div class="td-cell-title">@item.NguoiThucHien</div>
-                            </td>
-                            <td data-label="Tiến độ hiện tại" class="col-progress">
+                            <td data-label="Tiến độ / Trạng thái" class="col-progress-status">
                                 <div class="td-progress-wrap">
                                     <div class="progress td-progress-track">
                                         <div class="progress-bar" role="progressbar" style="width: @item.PhanTramHienTai%;"></div>
                                     </div>
                                     <span class="badge td-progress-badge">@item.PhanTramHienTai%</span>
+                                    <span class="badge td-ctcv-badge @GetCtcvBadgeClass(item.TrangThaiCTCVCode)">@item.TrangThaiCTCV</span>
                                 </div>
-                            </td>
-                            <td data-label="Trạng thái hiện tại" class="col-status">
-                                <span class="badge td-ctcv-badge @GetCtcvBadgeClass(item.TrangThaiCTCVCode)">@item.TrangThaiCTCV</span>
                             </td>
                             <td data-label="Báo cáo mới nhất">
                                 @if (!coBaoCao)
@@ -103,11 +94,10 @@
                                 }
                                 else
                                 {
-                                    <div class="td-latest-report">
+                                    <div class="td-latest-report td-latest-report-card">
                                         <span class="badge td-report-badge @GetDuyetBadgeClass(item.TrangThaiDuyetBaoCaoGanNhatCode)">@item.TrangThaiDuyetBaoCaoGanNhat</span>
                                         <div class="td-meta-line"><span class="fw-semibold">Người báo cáo:</span> @item.TenNguoiBaoCaoGanNhat</div>
                                         <div class="td-meta-line"><span class="fw-semibold">Thời gian:</span> @item.ThoiGianBaoCaoGanNhat?.ToString("dd/MM/yyyy HH:mm")</div>
-                                        <div class="td-meta-line"><span class="fw-semibold">Tệp minh chứng:</span> @soFileMoiNhat</div>
                                         <div class="td-meta-line"><span class="fw-semibold">Đề xuất:</span> @item.TrangThaiCTCVDeXuatGanNhat</div>
                                         @if (!string.IsNullOrWhiteSpace(ghiChuTomTat))
                                         {
@@ -117,23 +107,17 @@
                                 }
                             </td>
                             <td data-label="Thao tác" class="col-action table-actions-cell">
-                                <div class="table-actions table-actions-stacked">
+                                <div class="table-actions table-actions-compact">
                                     @if (item.LichSuTienDo.Any())
                                     {
-                                        <button type="button" class="btn btn-outline-secondary btn-sm w-100" data-bs-toggle="collapse" data-bs-target="#@rowModel.LichSuCollapseId">
+                                        <button type="button" class="btn-action btn-subtle" data-bs-toggle="collapse" data-bs-target="#@rowModel.LichSuCollapseId">
                                             Lịch sử
                                         </button>
                                     }
-                                    @if (canUpdate && item.CoTheCapNhatTienDo)
+                                    else if (canUpdate && item.CoTheCapNhatTienDo)
                                     {
-                                        <button type="button" class="btn btn-outline-primary btn-sm w-100" data-bs-toggle="collapse" data-bs-target="#@rowModel.CollapseId">
+                                        <button type="button" class="btn-action btn-confirm" data-bs-toggle="collapse" data-bs-target="#@rowModel.CollapseId">
                                             Báo cáo
-                                        </button>
-                                    }
-                                    @if (coTheXuLyBaoCao)
-                                    {
-                                        <button type="button" class="btn btn-outline-warning btn-sm w-100" data-bs-toggle="collapse" data-bs-target="#@rowModel.LichSuCollapseId">
-                                            Xử lý
                                         </button>
                                     }
                                 </div>

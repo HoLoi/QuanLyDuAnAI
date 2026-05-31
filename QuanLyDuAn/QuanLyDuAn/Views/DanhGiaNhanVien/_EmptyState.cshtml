@@ -1,4 +1,29 @@
+﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienPageViewModel
+@using QuanLyDuAn.Constants
+@{
+    var canTacNghiep = Model.Permissions.Contains(Permissions.DanhGiaNhanVien.DanhGia)
+                       || Model.Permissions.Contains(Permissions.DanhGiaNhanVien.Sua);
+    var tuModuleDuAn = string.Equals(Model.Nguon, "du-an", StringComparison.OrdinalIgnoreCase);
+    var thongBao = canTacNghiep
+        ? "Không có nhân viên phù hợp với bộ lọc hiện tại."
+        : "Bạn chưa có quyền tạo hoặc sửa đánh giá nhân viên.";
+}
+
 <div class="empty-box">
     <div class="empty-icon"><i class="bi bi-person-x"></i></div>
-    <div class="empty-text">Không có bản ghi đánh giá nhân viên phù hợp bộ lọc.</div>
+    <div class="empty-title">Chưa có dữ liệu đánh giá nhân viên</div>
+    <div class="empty-text">@thongBao</div>
+
+    <div class="empty-actions">
+        <a asp-action="Index"
+           asp-route-maDuAn="@(tuModuleDuAn ? Model.MaDuAn : null)"
+           asp-route-nguon="@(tuModuleDuAn ? "du-an" : null)"
+           class="btn-action btn-subtle">
+            Làm mới
+        </a>
+        @if (tuModuleDuAn)
+        {
+            <a asp-controller="DanhGiaDuAn" asp-action="Index" class="btn-action btn-subtle">Về Đánh giá dự án</a>
+        }
+    </div>
 </div>

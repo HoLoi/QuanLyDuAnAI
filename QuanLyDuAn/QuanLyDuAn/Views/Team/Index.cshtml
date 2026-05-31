@@ -1,6 +1,7 @@
 ﻿@model QuanLyDuAn.ViewModels.Team.TeamPageViewModel
 @using QuanLyDuAn.Constants
 @{
+    ViewData["Title"] = "Team";
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.Nhom.Them) || permissions.Contains(Permissions.Nhom.Sua);
     ViewBag.Permissions = permissions;
@@ -8,21 +9,29 @@
     ViewBag.LocTrangThaiTeam = Model.LocTrangThaiTeam;
 }
 
-<div class="card p-3">
-    <h5>Quản lý team</h5>
+@section Styles {
+    <link rel="stylesheet" href="~/css/Team/index.css" asp-append-version="true" />
+}
 
-    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+<section class="team-page">
+    <header class="team-header-card">
+        <h1 class="team-title">Team</h1>
+        <p class="team-subtitle">Quản lý nhóm làm việc, trạng thái hoạt động và phân công thành viên.</p>
+    </header>
 
-    @if (canShowForm)
-    {
-        <partial name="_Form" for="Form" />
+    <section class="team-section-card">
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
 
-        <hr />
-    }
+        @if (canShowForm)
+        {
+            <partial name="_Form" for="Form" />
+            <hr />
+        }
 
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
-</div>
+        <partial name="_Filter" model="Model" />
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -1,0 +1,174 @@
+﻿@model QuanLyDuAn.ViewModels.TaiKhoanCaNhan.TaiKhoanCaNhanViewModel
+
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<section class="tai-khoan-ca-nhan-page">
+    <header class="tai-khoan-header-card">
+        <div>
+            <h1 class="tai-khoan-title">Hồ sơ cá nhân</h1>
+            <p class="tai-khoan-subtitle">Theo dõi thông tin cá nhân, thông tin tài khoản và trạng thái bảo mật của bạn.</p>
+        </div>
+        <div class="tai-khoan-header-actions">
+            <a asp-action="CapNhat" class="tai-khoan-btn tai-khoan-btn-primary">
+                <i class="bi bi-pencil-square"></i>
+                Cập nhật hồ sơ
+            </a>
+        </div>
+    </header>
+
+    <div class="tai-khoan-grid">
+        <article class="tai-khoan-card tai-khoan-card-ho-so">
+            <h2 class="tai-khoan-card-title">Hồ sơ</h2>
+
+            <div class="tai-khoan-profile-head">
+                <div class="tai-khoan-avatar-wrap">
+                    @if (!string.IsNullOrWhiteSpace(Model.AnhDaiDien))
+                    {
+                        <img src="@Model.AnhDaiDien" alt="Ảnh đại diện" class="tai-khoan-avatar-photo" />
+                        <span class="tai-khoan-avatar-camera">
+                            <i class="bi bi-camera-fill"></i>
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="tai-khoan-avatar-large">@Model.ChuCaiDau</span>
+                    }
+                </div>
+                <div class="tai-khoan-profile-main">
+                    <strong>@Model.HoTenNguoiDung</strong>
+                    <span>Mã người dùng: #@Model.MaNguoiDung</span>
+                </div>
+            </div>
+
+            <ul class="tai-khoan-info-lines">
+                <li>
+                    <i class="bi bi-calendar3"></i>
+                    <span class="label">Ngày sinh</span>
+                    <span class="value">@(Model.NgaySinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</span>
+                </li>
+                <li>
+                    <i class="bi bi-telephone"></i>
+                    <span class="label">Số điện thoại</span>
+                    <span class="value">@(string.IsNullOrWhiteSpace(Model.SdtNguoiDung) ? "Chưa cập nhật" : Model.SdtNguoiDung)</span>
+                </li>
+                <li>
+                    <i class="bi bi-envelope"></i>
+                    <span class="label">Email</span>
+                    <span class="value">@(string.IsNullOrWhiteSpace(Model.Email) ? "Chưa cập nhật" : Model.Email)</span>
+                </li>
+                <li>
+                    <i class="bi bi-geo-alt"></i>
+                    <span class="label">Địa chỉ</span>
+                    <span class="value">@(string.IsNullOrWhiteSpace(Model.DiaChiNguoiDung) ? "Chưa cập nhật" : Model.DiaChiNguoiDung)</span>
+                </li>
+            </ul>
+        </article>
+
+        <div class="tai-khoan-right-column">
+            <article class="tai-khoan-card tai-khoan-card-tai-khoan">
+                <h2 class="tai-khoan-card-title">Tài khoản</h2>
+
+                <div class="account-row-list">
+                    <div class="account-row-item">
+                        <span class="account-row-icon"><i class="bi bi-person-circle"></i></span>
+                        <span class="account-row-label">Tên đăng nhập</span>
+                        <span class="account-row-value">@Model.UserName</span>
+                    </div>
+
+                    <div class="account-row-item">
+                        <span class="account-row-icon"><i class="bi bi-shield-check"></i></span>
+                        <span class="account-row-label">Trạng thái tài khoản</span>
+                        <span class="account-row-value">
+                            <span class="tai-khoan-badge @(Model.TaiKhoanBiKhoa ? "danger" : "success")">
+                                @(Model.TaiKhoanBiKhoa ? "Đang bị khóa" : "Đang hoạt động")
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="account-row-item">
+                        <span class="account-row-icon"><i class="bi bi-award"></i></span>
+                        <span class="account-row-label">Chức danh</span>
+                        <span class="account-row-value">
+                            <span class="tai-khoan-badge neutral">@(string.IsNullOrWhiteSpace(Model.TenChucDanh) ? "Chưa cập nhật" : Model.TenChucDanh)</span>
+                        </span>
+                    </div>
+
+                    <div class="account-row-item">
+                        <span class="account-row-icon"><i class="bi bi-diagram-3"></i></span>
+                        <span class="account-row-label">Vai trò hệ thống</span>
+                        <div class="tai-khoan-badge-list account-row-value account-row-badges">
+                            @if (Model.VaiTroHeThong.Count == 0)
+                            {
+                                <span class="tai-khoan-badge neutral">Chưa có vai trò</span>
+                            }
+                            else
+                            {
+                                @foreach (var role in Model.VaiTroHeThong)
+                                {
+                                    <span class="tai-khoan-badge neutral">@role</span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="account-row-item">
+                        <span class="account-row-icon"><i class="bi bi-people"></i></span>
+                        <span class="account-row-label">Team hiện tại</span>
+                        <div class="tai-khoan-badge-list account-row-value account-row-badges">
+                            @if (Model.TeamHienTai.Count == 0)
+                            {
+                                <span class="tai-khoan-badge neutral">Chưa tham gia team</span>
+                            }
+                            else
+                            {
+                                @foreach (var team in Model.TeamHienTai)
+                                {
+                                    <span class="tai-khoan-badge neutral">@team</span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="account-row-item">
+                        <span class="account-row-icon"><i class="bi bi-person-check"></i></span>
+                        <span class="account-row-label">Quản lý hiện tại</span>
+                        <div class="tai-khoan-badge-list account-row-value account-row-badges">
+                            @if (Model.QuanLyHienTai.Count == 0)
+                            {
+                                <span class="tai-khoan-badge neutral">Chưa có dữ liệu</span>
+                            }
+                            else
+                            {
+                                @foreach (var manager in Model.QuanLyHienTai)
+                                {
+                                    <span class="tai-khoan-badge neutral">@manager</span>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="tai-khoan-card tai-khoan-card-bao-mat">
+                <h2 class="tai-khoan-card-title">Bảo mật</h2>
+
+                <div class="security-row compact">
+                    <span class="security-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </span>
+                    <div class="security-content">
+                        <h3>Mật khẩu</h3>
+                        <p>Nên đổi mật khẩu định kỳ để bảo vệ tài khoản.</p>
+                        <div class="tai-khoan-security-actions">
+                            <a asp-action="DoiMatKhau" class="tai-khoan-btn tai-khoan-btn-outline tai-khoan-btn-medium">
+                                Đổi mật khẩu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>

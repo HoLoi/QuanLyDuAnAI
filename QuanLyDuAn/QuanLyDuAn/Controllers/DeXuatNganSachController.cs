@@ -24,7 +24,12 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? locMaDuAn, string? locTrangThai)
+        public async Task<IActionResult> Index(
+            int? locMaDuAn,
+            string? locTrangThai,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DeXuatNganSach.Xem))
                 return Forbid();
@@ -37,7 +42,7 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai);
+                var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai, tuNgay, denNgay, locTheoNgay);
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View(vm);
             }
@@ -57,7 +62,7 @@ namespace QuanLyDuAn.Controllers
             if (!ModelState.IsValid)
             {
                 var selectedMaDuAn = vm.LocMaDuAn ?? vm.Form.MaDuAn;
-                var invalidVm = await _service.GetPageAsync(selectedMaDuAn, vm.LocTrangThai);
+                var invalidVm = await _service.GetPageAsync(selectedMaDuAn, vm.LocTrangThai, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay);
                 invalidVm.Form = vm.Form;
                 invalidVm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", invalidVm);
@@ -70,14 +75,17 @@ namespace QuanLyDuAn.Controllers
                 return RedirectToAction(nameof(Index), new
                 {
                     locMaDuAn = vm.LocMaDuAn ?? vm.Form.MaDuAn,
-                    locTrangThai = vm.LocTrangThai
+                    locTrangThai = vm.LocTrangThai,
+                    tuNgay = vm.TuNgay,
+                    denNgay = vm.DenNgay,
+                    locTheoNgay = vm.LocTheoNgay
                 });
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
                 var selectedMaDuAn = vm.LocMaDuAn ?? vm.Form.MaDuAn;
-                var failedVm = await _service.GetPageAsync(selectedMaDuAn, vm.LocTrangThai);
+                var failedVm = await _service.GetPageAsync(selectedMaDuAn, vm.LocTrangThai, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay);
                 failedVm.Form = vm.Form;
                 failedVm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", failedVm);
@@ -85,7 +93,13 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> HuyDeXuat(int maDeXuatNs, int? locMaDuAn, string? locTrangThai)
+        public async Task<IActionResult> HuyDeXuat(
+            int maDeXuatNs,
+            int? locMaDuAn,
+            string? locTrangThai,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DeXuatNganSach.Them))
                 return Forbid();
@@ -100,7 +114,7 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai, tuNgay, denNgay, locTheoNgay });
         }
     }
 }

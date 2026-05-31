@@ -1,0 +1,61 @@
+﻿@model QuanLyDuAn.ViewModels.Account.VerifyOtpViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xác nhận OTP - QuảnLýDựÁn AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap&subset=vietnamese" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/Account/login.css" asp-append-version="true" />
+</head>
+<body class="auth-page-body">
+    <main class="auth-shell">
+        <section class="auth-card card-soft">
+            <div class="auth-header-block">
+                <div class="auth-brand-mark">
+                    <i class="bi bi-rocket-takeoff-fill"></i>
+                </div>
+                <h1 class="auth-system-name">Hệ Thống Quản Lý Dự Án Tích Hợp AI</h1>
+            </div>
+
+            <div class="auth-form-block">
+                <h2 class="auth-card-title">Xác nhận OTP</h2>
+                <p class="auth-card-description">Nhập mã OTP gồm 6 chữ số.</p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ThongBao))
+                {
+                    <div class="alert alert-info">@Model.ThongBao</div>
+                }
+
+                <form asp-action="VerifyOtp" method="post" class="auth-form">
+                    @Html.AntiForgeryToken()
+                    <input asp-for="MaPhien" type="hidden" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger auth-validation-summary"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="MaOtp" class="form-label"></label>
+                        <input asp-for="MaOtp" class="form-control auth-input auth-otp-input" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="Nhập 6 chữ số" />
+                        <span asp-validation-for="MaOtp" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary auth-submit-btn">Xác nhận OTP</button>
+                    <a asp-action="ForgotPassword" class="auth-secondary-link">Nhập lại thông tin tài khoản</a>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

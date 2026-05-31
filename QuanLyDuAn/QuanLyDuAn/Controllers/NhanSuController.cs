@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.Constants;
+using QuanLyDuAn.Helpers;
+using QuanLyDuAn.Services.Exporting;
 using QuanLyDuAn.ViewModels.NhanSu;
 
 namespace QuanLyDuAn.Controllers
@@ -12,15 +14,18 @@ namespace QuanLyDuAn.Controllers
         private readonly INhanSuService _service;
         private readonly IPermissionHelper _permission;
         private readonly IPhanQuyenService _phanQuyenService;
+        private readonly IExportFileService _exportFileService;
 
         public NhanSuController(
             INhanSuService service,
             IPermissionHelper permission,
-            IPhanQuyenService phanQuyenService)
+            IPhanQuyenService phanQuyenService,
+            IExportFileService exportFileService)
         {
             _service = service;
             _permission = permission;
             _phanQuyenService = phanQuyenService;
+            _exportFileService = exportFileService;
         }
 
         [HttpGet]
@@ -182,6 +187,49 @@ namespace QuanLyDuAn.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> XuatFile(
+            string? format,
+            string? tuKhoa,
+            int? locMaChucDanh,
+            string? locTrangThaiTaiKhoan)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+                return Forbid();
+
+            var rows = (await _service.GetAllAsync(tuKhoa, locMaChucDanh, locTrangThaiTaiKhoan))
+                .Cast<object>()
+                .ToList();
+
+            var exportRequest = new ExportFileRequest
+            {
+                ReportTitle = "Danh sách nhân sự",
+                ExportedAt = DateTime.Now,
+                ExportedBy = ExportSupport.ResolveExporterName(User),
+                AppliedFiltersText = ExportSupport.BuildFiltersText(
+                    ("Từ khóa", tuKhoa),
+                    ("Mã chức danh", locMaChucDanh?.ToString()),
+                    ("Trạng thái tài khoản", TrangThai.ToDisplay(locTrangThaiTaiKhoan))),
+                FileNamePrefix = "nhan-su",
+                Format = _exportFileService.ParseFormat(format),
+                Columns = new List<ExportColumnDefinition>
+                {
+                    new() { Header = "Mã nhân sự", ValueSelector = row => ((NhanSuViewModel)row).MaNguoiDung.ToString() },
+                    new() { Header = "Họ tên", ValueSelector = row => ((NhanSuViewModel)row).HoTenNguoiDung },
+                    new() { Header = "Chức danh", ValueSelector = row => ((NhanSuViewModel)row).TenChucDanh },
+                    new() { Header = "Số điện thoại", ValueSelector = row => ((NhanSuViewModel)row).SdtNguoiDung ?? string.Empty },
+                    new() { Header = "Ngày sinh", ValueSelector = row => ExportSupport.FormatDate(((NhanSuViewModel)row).NgaySinh) },
+                    new() { Header = "Username", ValueSelector = row => ((NhanSuViewModel)row).UserName ?? string.Empty },
+                    new() { Header = "Email", ValueSelector = row => ((NhanSuViewModel)row).Email ?? string.Empty },
+                    new() { Header = "Trạng thái tài khoản", ValueSelector = row => ((NhanSuViewModel)row).TaiKhoanBiKhoa ? TrangThai.TaiKhoanKhoaHienThi : TrangThai.TaiKhoanHoatDongHienThi }
+                },
+                Rows = rows
+            };
+
+            var result = _exportFileService.Export(exportRequest);
+            return File(result.Content, result.ContentType, result.FileName);
         }
     }
 }

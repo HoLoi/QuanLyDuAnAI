@@ -1,38 +1,46 @@
 ﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnPageViewModel
 @using QuanLyDuAn.Constants
 
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 @{
     ViewData["Title"] = "Đánh giá dự án";
-    var canTacNghiep = Model.Permissions.Contains(Permissions.DanhGiaDuAn.DanhGia)
-                       || Model.Permissions.Contains(Permissions.DanhGiaDuAn.Sua);
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
 }
 
 @section Styles
 {
     <link rel="stylesheet" href="~/css/DanhGiaDuAn/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/DanhGiaDuAn/table.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
 <div class="danh-gia-du-an-page">
     <div class="danh-gia-card">
         <div class="page-head">
             <h5 class="mb-1">Đánh giá dự án</h5>
-            <p class="text-muted mb-0">Tổng hợp chất lượng dự án theo tiêu chí, số liệu hỗ trợ và luồng duyệt hiện tại.</p>
+            <p class="text-muted mb-0">Chọn dự án phụ trách để đánh giá.</p>
         </div>
 
-        @await Html.PartialAsync("_Filter", Model)
-
-        @if (canTacNghiep && Model.MaDuAn.HasValue)
+        @if (Model.Form == null)
         {
-            <div class="mb-3">
-                <a asp-action="Form"
-                   asp-route-maDuAn="@Model.MaDuAn"
-                   asp-route-tuKhoa="@Model.TuKhoa"
-                   asp-route-trangThai="@Model.TrangThai"
-                   class="btn btn-primary btn-sm">
-                    Đánh giá dự án đang lọc
-                </a>
+            var canTacNghiep = Model.Permissions.Contains(Permissions.DanhGiaDuAn.DanhGia)
+                               || Model.Permissions.Contains(Permissions.DanhGiaDuAn.Sua);
+            var tenDuAnDangChon = Model.DanhSachDuAn.Find(x => x.MaDuAn == Model.MaDuAn)?.TenDuAn;
+            <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
+                @if (canTacNghiep)
+                {
+                    <a href="#dgda-danh-sach" class="btn-action btn-confirm">Đến danh sách đánh giá</a>
+                }
+                @if (Model.MaDuAn.HasValue)
+                {
+                    <span class="text-muted small">Đang lọc theo dự án: <strong>@(string.IsNullOrWhiteSpace(tenDuAnDangChon) ? $"Dự án #{Model.MaDuAn}" : tenDuAnDangChon)</strong>.</span>
+                }
             </div>
+            <div class="text-muted small mt-1">Chỉ đánh giá tổng kết khi dự án đã đủ điều kiện.</div>
         }
+
+        @await Html.PartialAsync("_Filter", Model)
 
         @await Html.PartialAsync("_SummaryCards", Model)
 
@@ -41,13 +49,39 @@
             @await Html.PartialAsync("_Form", Model.Form)
         }
 
-        @if (Model.DanhSach.Any())
+        @if (Model.Form == null)
         {
-            @await Html.PartialAsync("_Table", Model)
-        }
-        else
-        {
-            @await Html.PartialAsync("_EmptyState")
+            <div class="table-card-header dgda-list-header" id="dgda-danh-sach">
+                <div class="table-card-header-content">
+                    <h6 class="mb-1">Danh sách dự án có thể đánh giá</h6>
+                    <p class="text-muted mb-0">Danh sách theo bộ lọc hiện tại.</p>
+                </div>
+                @if (canExport)
+                {
+                    var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                    {
+                        Action = "XuatFile",
+                        RouteValues = new Dictionary<string, string?>
+                        {
+                            ["tuKhoa"] = Model.TuKhoa,
+                            ["trangThai"] = Model.TrangThai,
+                            ["maDuAn"] = Model.MaDuAn?.ToString(),
+                            ["tuNgayDanhGia"] = Model.TuNgayDanhGia?.ToString("yyyy-MM-dd"),
+                            ["denNgayDanhGia"] = Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")
+                        }
+                    };
+                    <partial name="_ExportDropdown" model="exportVm" />
+                }
+            </div>
+
+            @if (Model.DanhSach.Any())
+            {
+                @await Html.PartialAsync("_Table", Model)
+            }
+            else
+            {
+                @await Html.PartialAsync("_EmptyState", Model)
+            }
         }
     </div>
 </div>

@@ -1,8 +1,9 @@
-namespace QuanLyDuAn.ViewModels.DanhGiaNhanVien
+﻿namespace QuanLyDuAn.ViewModels.DanhGiaNhanVien
 {
     public class DanhGiaNhanVienItemViewModel
     {
         public int MaDanhGiaNhanVien { get; set; }
+        public bool CoDanhGia { get; set; }
         public int MaDuAn { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public int MaNhanVien { get; set; }

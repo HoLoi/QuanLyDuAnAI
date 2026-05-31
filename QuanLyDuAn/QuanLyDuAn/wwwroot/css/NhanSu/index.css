@@ -1,0 +1,240 @@
+﻿.nhan-su-page {
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.45));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.15rem;
+}
+
+.nhan-su-header-card,
+.nhan-su-section-card {
+    background: #fff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+}
+
+.nhan-su-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-color: rgba(105, 108, 255, 0.2);
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+}
+
+.nhan-su-title {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.nhan-su-subtitle {
+    margin: 0.38rem 0 0;
+    color: #607792;
+    font-size: 0.92rem;
+}
+
+.nhan-su-section-card {
+    padding: 1rem;
+}
+
+.nhan-su-page form .form-control,
+.nhan-su-page form .form-select,
+.nhan-su-page textarea {
+    border-radius: 0.72rem;
+    border: 1px solid #d6e0ef;
+    box-shadow: none;
+}
+
+.nhan-su-page form .form-control:focus,
+.nhan-su-page form .form-select:focus,
+.nhan-su-page textarea:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.nhan-su-page .table {
+    border-color: #e1e8f5;
+}
+
+.nhan-su-page .table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.81rem;
+    font-weight: 700;
+}
+
+.nhan-su-page .table tbody tr {
+    transition: background-color 0.16s ease;
+}
+
+.nhan-su-page .table tbody tr:hover {
+    background: #f9fbff;
+}
+
+.nhan-su-page .table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.nhan-su-page .table-actions .btn {
+    border-radius: 0.58rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.nhan-su-page .badge {
+    border-radius: 999px;
+    font-size: 0.74rem;
+    padding: 0.32rem 0.62rem;
+}
+
+.nhan-su-page hr {
+    border-color: #e3ebf8;
+    margin: 1rem 0;
+}
+
+.nhan-su-list-header {
+    margin-top: 0.9rem;
+}
+
+.nhan-su-list-title {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #314866;
+}
+
+.nhan-su-page .workflow-filter {
+    display: grid;
+    gap: 0.72rem;
+}
+
+.nhan-su-page .workflow-filter-row {
+    display: grid;
+    gap: 0.72rem;
+}
+
+.nhan-su-page .workflow-filter-row-main {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.nhan-su-page .workflow-filter-row-time {
+    grid-template-columns: 1fr;
+}
+
+.nhan-su-page .filter-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.nhan-su-page .btn-filter-apply,
+.nhan-su-page .btn-filter-reset,
+.nhan-su-page .btn-action {
+    border: 1px solid transparent;
+    border-radius: 0.62rem;
+    padding: 0.42rem 0.72rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.nhan-su-page .btn-filter-apply,
+.nhan-su-page .btn-confirm {
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    border-color: rgba(105, 108, 255, 0.33);
+    color: #fff;
+}
+
+.nhan-su-page .btn-filter-reset,
+.nhan-su-page .btn-subtle {
+    background: #f6f9ff;
+    border-color: #ccd8ea;
+    color: #3f5877;
+}
+
+.nhan-su-page .btn-danger-soft {
+    background: #fff1f1;
+    border-color: #f6cfcf;
+    color: #b54141;
+}
+
+.nhan-su-page .workflow-table {
+    border-color: #e1e8f5;
+}
+
+.nhan-su-page .workflow-table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.81rem;
+    font-weight: 700;
+}
+
+.nhan-su-page .workflow-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.62rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.nhan-su-page .workflow-success {
+    background: #e9f8ee;
+    color: #1f7a3e;
+    border-color: rgba(31, 122, 62, 0.24);
+}
+
+.nhan-su-page .workflow-blocked {
+    background: #fdecea;
+    color: #a23a31;
+    border-color: #f3c7c3;
+}
+
+.nhan-su-page .workflow-idle {
+    background: #f3f5fa;
+    color: #607389;
+    border-color: rgba(96, 115, 137, 0.22);
+}
+
+@media (max-width: 767.98px) {
+    .nhan-su-page {
+        border-radius: 16px;
+        padding: 0.95rem;
+    }
+
+    .nhan-su-header-card {
+        border-radius: 14px;
+        padding: 0.9rem;
+    }
+
+    .nhan-su-title {
+        font-size: 1.28rem;
+    }
+
+    .nhan-su-page .workflow-filter-row-main {
+        grid-template-columns: 1fr;
+    }
+
+    .nhan-su-page .filter-actions {
+        justify-content: stretch;
+    }
+
+    .nhan-su-page .btn-filter-apply,
+    .nhan-su-page .btn-filter-reset {
+        width: 100%;
+    }
+}

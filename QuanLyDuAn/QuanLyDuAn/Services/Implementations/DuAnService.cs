@@ -26,10 +26,18 @@ namespace QuanLyDuAn.Services.Implementations
 
         #region CRUD Operations
 
-        public async Task<List<DuAnViewModel>> GetAllAsync(string? tuKhoa, int? maLoaiDuAn, string? trangThaiDuAn)
+        public async Task<List<DuAnViewModel>> GetAllAsync(
+            string? tuKhoa,
+            int? maLoaiDuAn,
+            string? trangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             var currentUserId = await GetCurrentUserIdAsync();
             var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgay, denNgay);
+            var locTheo = string.IsNullOrWhiteSpace(locTheoNgay) ? "NgayTao" : locTheoNgay.Trim();
 
             var query = from da in _context.DuAn
                         join loai in _context.LoaiDuAn on da.MaLoaiDuAn equals loai.MaLoaiDuAn
@@ -47,6 +55,7 @@ namespace QuanLyDuAn.Services.Implementations
                             NgayTaoDuAn = da.NgayTaoDuAn,
                             NgayBatDauDuAn = da.NgayBatDauDuAn,
                             NgayKetThucDuAn = da.NgayKetThucDuAn,
+                            NgayHoanThanhThucTeDuAn = da.NgayHoanThanhThucTeDuAn,
                             PhanTramHoanThanh = da.PhanTramHoanThanh ?? 0,
                             TrangThaiDuAn = da.TrangThaiDuAn ?? string.Empty,
                             SoLuongTeam = _context.TeamDuAn.Count(x => x.MaDuAn == da.MaDuAn),
@@ -91,6 +100,27 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            if (tuNgayLoc.HasValue)
+            {
+                query = locTheo switch
+                {
+                    "NgayBatDau" => query.Where(x => x.NgayBatDauDuAn.HasValue && x.NgayBatDauDuAn.Value >= tuNgayLoc.Value),
+                    "NgayKetThuc" => query.Where(x => x.NgayKetThucDuAn.HasValue && x.NgayKetThucDuAn.Value >= tuNgayLoc.Value),
+                    _ => query.Where(x => x.NgayTaoDuAn.HasValue && x.NgayTaoDuAn.Value >= tuNgayLoc.Value)
+                };
+            }
+
+            if (denNgayLoc.HasValue)
+            {
+                var denNgayDocQuyen = denNgayLoc.Value.AddDays(1);
+                query = locTheo switch
+                {
+                    "NgayBatDau" => query.Where(x => x.NgayBatDauDuAn.HasValue && x.NgayBatDauDuAn.Value < denNgayDocQuyen),
+                    "NgayKetThuc" => query.Where(x => x.NgayKetThucDuAn.HasValue && x.NgayKetThucDuAn.Value < denNgayDocQuyen),
+                    _ => query.Where(x => x.NgayTaoDuAn.HasValue && x.NgayTaoDuAn.Value < denNgayDocQuyen)
+                };
+            }
+
             return await query.ToListAsync();
         }
 
@@ -109,6 +139,7 @@ namespace QuanLyDuAn.Services.Implementations
                                   da.NgayTaoDuAn,
                                   da.NgayBatDauDuAn,
                                   da.NgayKetThucDuAn,
+                                  da.NgayHoanThanhThucTeDuAn,
                                   da.TrangThaiDuAn,
                                   da.PhanTramHoanThanh,
                                   da.GhiChuDuAn,
@@ -365,6 +396,52 @@ namespace QuanLyDuAn.Services.Implementations
                 .Take(5)
                 .ToList();
 
+            var coTheYeuCauDoiQuanLy = false;
+            string? lyDoKhongTheYeuCauDoiQuanLy = null;
+            var currentUserIdFromClaim = TryGetCurrentUserIdFromClaims();
+
+            if (!HasCurrentUserPermission(Permissions.YeuCauDoiQuanLy.Them))
+            {
+                lyDoKhongTheYeuCauDoiQuanLy = "Bạn chưa có quyền tạo yêu cầu đổi quản lý.";
+            }
+            else if (!currentUserIdFromClaim.HasValue || currentUserIdFromClaim.Value <= 0)
+            {
+                lyDoKhongTheYeuCauDoiQuanLy = "Không xác định được người dùng hiện tại.";
+            }
+            else if (IsCurrentUserInRole("Admin"))
+            {
+                lyDoKhongTheYeuCauDoiQuanLy = "Tài khoản Admin không được tạo yêu cầu đổi quản lý.";
+            }
+            else if (!IsCurrentUserInRole("Manager"))
+            {
+                lyDoKhongTheYeuCauDoiQuanLy = "Chỉ Manager mới được tạo yêu cầu đổi quản lý.";
+            }
+            else if (duAn.MaNguoiDung != currentUserIdFromClaim.Value)
+            {
+                lyDoKhongTheYeuCauDoiQuanLy = "Bạn không phải quản lý hiện tại của dự án.";
+            }
+            else if (!IsProjectStatusAllowedForManagerRequest(duAn.TrangThaiDuAn))
+            {
+                lyDoKhongTheYeuCauDoiQuanLy = "Dự án đang ở trạng thái không cho phép tạo yêu cầu đổi quản lý.";
+            }
+            else
+            {
+                var choDuyetStatuses = TrangThai.GetCommonStatusVariants(TrangThai.ChoDuyet);
+                var hasPendingRequest = await _context.YeuCauDoiQuanLy.AnyAsync(x =>
+                    x.IsDeleted != true
+                    && x.MaDuAn == id
+                    && choDuyetStatuses.Contains(x.TrangThaiYeuCauDoiQuanLy ?? string.Empty));
+
+                if (hasPendingRequest)
+                {
+                    lyDoKhongTheYeuCauDoiQuanLy = "Dự án đang có yêu cầu đổi quản lý chờ duyệt.";
+                }
+                else
+                {
+                    coTheYeuCauDoiQuanLy = true;
+                }
+            }
+
             return new DuAnChiTietViewModel
             {
                 MaDuAn = duAn.MaDuAn,
@@ -375,6 +452,7 @@ namespace QuanLyDuAn.Services.Implementations
                 NgayTaoDuAn = duAn.NgayTaoDuAn,
                 NgayBatDauDuAn = duAn.NgayBatDauDuAn,
                 NgayKetThucDuAn = duAn.NgayKetThucDuAn,
+                NgayHoanThanhThucTeDuAn = duAn.NgayHoanThanhThucTeDuAn,
                 TrangThaiDuAn = duAn.TrangThaiDuAn ?? string.Empty,
                 PhanTramHoanThanh = duAn.PhanTramHoanThanh ?? 0,
                 GhiChuDuAn = duAn.GhiChuDuAn,
@@ -420,7 +498,9 @@ namespace QuanLyDuAn.Services.Implementations
                 CongViecGanDay = congViecGanDay,
                 TepGanDay = tepGanDay,
                 ThanhVienNoiBat = thanhVienNoiBat,
-                HoatDongGanDay = hoatDongGanDay
+                HoatDongGanDay = hoatDongGanDay,
+                CoTheYeuCauDoiQuanLy = coTheYeuCauDoiQuanLy,
+                LyDoKhongTheYeuCauDoiQuanLy = lyDoKhongTheYeuCauDoiQuanLy
             };
         }
 
@@ -448,6 +528,7 @@ namespace QuanLyDuAn.Services.Implementations
                 MaLoaiDuAn = entity.MaLoaiDuAn,
                 NgayBatDauDuAn = entity.NgayBatDauDuAn,
                 NgayKetThucDuAn = entity.NgayKetThucDuAn,
+                NgayHoanThanhThucTeDuAn = entity.NgayHoanThanhThucTeDuAn,
                 TrangThaiDuAn = TrangThai.ToCode(entity.TrangThaiDuAn ?? TrangThai.KhoiTao),
                 GhiChuDuAn = entity.GhiChuDuAn
             };
@@ -514,8 +595,9 @@ namespace QuanLyDuAn.Services.Implementations
                     var currentUserId = await GetCurrentUserIdAsync();
                     await CheckManagerPermissionAsync(model.MaDuAn.Value, currentUserId);
 
-                    // Cannot edit if completed
-                    if (TrangThai.EqualsValue(existing.TrangThaiDuAn, TrangThai.HoanThanh))
+                    // Cannot edit if completed, except the explicit safe archive transition.
+                    if (TrangThai.EqualsValue(existing.TrangThaiDuAn, TrangThai.HoanThanh)
+                        && !TrangThai.EqualsValue(trangThai, TrangThai.LuuTru))
                         throw new Exception("Dự án đã hoàn thành, không thể chỉnh sửa.");
 
                     maNguoiDung = existing.MaNguoiDung;
@@ -579,6 +661,7 @@ namespace QuanLyDuAn.Services.Implementations
                     if (TrangThai.EqualsValue(trangThai, TrangThai.HoanThanh))
                     {
                         entity.PhanTramHoanThanh = 100;
+                        entity.NgayHoanThanhThucTeDuAn ??= DateTime.Now;
                     }
                 }
 
@@ -669,6 +752,11 @@ namespace QuanLyDuAn.Services.Implementations
                 if (!TrangThai.EqualsValue(trangThaiHienTai, TrangThai.HoanThanh))
                 {
                     throw new Exception("Chỉ có thể lưu trữ dự án đã hoàn thành.");
+                }
+
+                if (!DuAnHoanThanhDungHan(existing))
+                {
+                    throw new Exception("Chỉ có thể lưu trữ dự án hoàn thành đúng hạn và đã có ngày hoàn thành thực tế.");
                 }
 
                 return;
@@ -812,6 +900,7 @@ namespace QuanLyDuAn.Services.Implementations
             {
                 result.IsCompleted = true;
                 result.CanReopen = true;
+                result.CanArchive = DuAnHoanThanhDungHan(project);
                 result.CanDelete = false;
                 result.CanPause = false;
                 result.CanRequestCompletion = false;
@@ -1029,6 +1118,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             // Transition to completed
             project.TrangThaiDuAn = TrangThai.HoanThanh;
+            project.NgayHoanThanhThucTeDuAn = DateTime.Now;
             await _context.SaveChangesAsync();
         }
 
@@ -1050,6 +1140,7 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Chỉ có thể mở lại dự án khi dự án đang ở trạng thái hoàn thành.");
 
             project.TrangThaiDuAn = TrangThai.DangThucHien;
+            project.NgayHoanThanhThucTeDuAn = null;
             project.GhiChuDuAn = lyDo.Trim();
 
             _context.NhatKyQuanLyDuAn.Add(new NhatKyQuanLyDuAn
@@ -1109,6 +1200,60 @@ namespace QuanLyDuAn.Services.Implementations
             return currentUser;
         }
 
+        private int? TryGetCurrentUserIdFromClaims()
+        {
+            var claimValue = _httpContextAccessor.HttpContext?.User?.FindFirst("MaNguoiDung")?.Value;
+            if (int.TryParse(claimValue, out var currentUserId) && currentUserId > 0)
+            {
+                return currentUserId;
+            }
+
+            return null;
+        }
+
+        private bool HasCurrentUserPermission(string permission)
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated != true || string.IsNullOrWhiteSpace(permission))
+            {
+                return false;
+            }
+
+            foreach (var claim in user.Claims)
+            {
+                if (claim is null || string.IsNullOrWhiteSpace(claim.Value))
+                {
+                    continue;
+                }
+
+                var claimType = claim.Type ?? string.Empty;
+                if (!claimType.Contains(Permissions.ClaimTypesCustom.Permission, StringComparison.OrdinalIgnoreCase)
+                    && !claimType.Contains("claim", StringComparison.OrdinalIgnoreCase)
+                    && !claimType.Contains("quyen", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (string.Equals(claim.Value.Trim(), permission, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsCurrentUserInRole(string roleName)
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user?.Identity?.IsAuthenticated != true || string.IsNullOrWhiteSpace(roleName))
+            {
+                return false;
+            }
+
+            return user.IsInRole(roleName) || user.IsInRole(roleName.ToUpperInvariant());
+        }
+
         private string GetCurrentAspUserId()
         {
             var user = _httpContextAccessor.HttpContext?.User;
@@ -1137,6 +1282,39 @@ namespace QuanLyDuAn.Services.Implementations
                 .ToHashSet();
 
             return (normalizedRoles.Contains("MANAGER"), normalizedRoles.Contains("EMPLOYEE"));
+        }
+
+        private static (DateTime? TuNgay, DateTime? DenNgay) ChuanHoaKhoangNgay(DateTime? tuNgay, DateTime? denNgay)
+        {
+            var tu = tuNgay?.Date;
+            var den = denNgay?.Date;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
+        }
+
+        private static bool IsProjectStatusAllowedForManagerRequest(string? trangThaiDuAn)
+        {
+            if (TrangThai.LaHoanThanhCongViec(trangThaiDuAn)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.LuuTru))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool DuAnHoanThanhDungHan(DuAn duAn)
+        {
+            return TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn)
+                && duAn.NgayKetThucDuAn.HasValue
+                && duAn.NgayHoanThanhThucTeDuAn.HasValue
+                && duAn.NgayHoanThanhThucTeDuAn.Value.Date <= duAn.NgayKetThucDuAn.Value.Date;
         }
 
         private async Task<bool> CanDeleteNoRelatedDataAsync(int maDuAn)

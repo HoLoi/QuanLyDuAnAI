@@ -73,15 +73,25 @@ public partial class QuanLyDuAnDbContext : DbContext
             entity.Property(e => e.ChiPhiDuKien).HasColumnType("decimal(18,2)");
             entity.Property(e => e.ChiPhiThucTe).HasColumnType("decimal(18,2)");
             entity.Property(e => e.ChenhLechChiPhi).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.ThoiGianDuyetCongViecTrungBinh).HasColumnType("float");
+            entity.Property(e => e.ThoiGianDuyetNganSachTrungBinh).HasColumnType("float");
+            entity.Property(e => e.TyLeBaoCaoTienDoBiTuChoi).HasColumnType("float");
+            entity.Property(e => e.GhiChuDataset).HasMaxLength(500);
             entity.HasOne<DuAn>()
                 .WithMany()
                 .HasForeignKey(d => d.MaDuAn)
                 .HasConstraintName("FK_AI_DATAS_DU LIEU_DU_AN");
+            entity.HasOne<DmNguyenNhan>()
+                .WithMany()
+                .HasForeignKey(d => d.MaDMNguyenNhan)
+                .HasConstraintName("FK_AI_DATASET_DM_NGUYEN_NHAN");
         });
         modelBuilder.Entity<AiKetQua>(entity =>
         {
             entity.ToTable("AI_KET_QUA");
             entity.HasKey(e => e.MaAiKetQua);
+            entity.Property(e => e.ReasonSource).HasMaxLength(50);
+            entity.Property(e => e.CanhBaoNguyenNhan).HasMaxLength(500);
             entity.HasOne<DuAn>()
                 .WithMany()
                 .HasForeignKey(d => d.MaDuAn)
@@ -105,11 +115,13 @@ public partial class QuanLyDuAnDbContext : DbContext
             entity.HasKey(e => e.MaModel);
             entity.Property(e => e.TenModel).HasMaxLength(255);
             entity.Property(e => e.MoTaModel).HasMaxLength(255);
+            entity.Property(e => e.LoaiModel).HasMaxLength(50);
         });
         modelBuilder.Entity<AiNguyenNhan>(entity =>
         {
             entity.ToTable("AI_NGUYEN_NHAN");
             entity.HasKey(e => e.MaAINguyenNhan);
+            entity.Property(e => e.GhiChuXacNhan).HasMaxLength(500);
             entity.HasOne<DuAn>()
                 .WithMany()
                 .HasForeignKey(d => d.MaDuAn)
@@ -452,6 +464,7 @@ public partial class QuanLyDuAnDbContext : DbContext
             entity.Property(e => e.TenDuAn).HasMaxLength(255);
             entity.Property(e => e.TrangThaiDuAn).HasMaxLength(50);
             entity.Property(e => e.GhiChuDuAn).HasMaxLength(255);
+            entity.Property(e => e.NgayHoanThanhThucTeDuAn).HasColumnType("datetime2(7)");
             entity.HasOne<LoaiDuAn>()
                 .WithMany()
                 .HasForeignKey(d => d.MaLoaiDuAn)

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyDuAn.Constants;
+using QuanLyDuAn.Helpers;
+using QuanLyDuAn.Services.Exporting;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.DuAn;
 using System.Security.Claims;
@@ -15,21 +17,30 @@ namespace QuanLyDuAn.Controllers
         private readonly IFileDuAnService _fileDuAnService;
         private readonly IPermissionHelper _permission;
         private readonly IPhanQuyenService _phanQuyenService;
+        private readonly IExportFileService _exportFileService;
 
         public DuAnController(
             IDuAnService service,
             IFileDuAnService fileDuAnService,
             IPermissionHelper permission,
-            IPhanQuyenService phanQuyenService)
+            IPhanQuyenService phanQuyenService,
+            IExportFileService exportFileService)
         {
             _service = service;
             _fileDuAnService = fileDuAnService;
             _permission = permission;
             _phanQuyenService = phanQuyenService;
+            _exportFileService = exportFileService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> Index(
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
@@ -38,12 +49,15 @@ namespace QuanLyDuAn.Controllers
 
             var vm = new DuAnPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn),
+                DanhSach = await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay),
                 Form = new(),
                 DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync(),
                 TuKhoa = tuKhoa,
                 LocMaLoaiDuAn = locMaLoaiDuAn,
                 LocTrangThaiDuAn = locTrangThaiDuAn,
+                TuNgay = tuNgay,
+                DenNgay = denNgay,
+                LocTheoNgay = locTheoNgay,
                 Permissions = permissions
             };
 
@@ -51,7 +65,14 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Details(int id, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> Details(
+            int id,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
@@ -63,7 +84,10 @@ namespace QuanLyDuAn.Controllers
                 {
                     tuKhoa,
                     locMaLoaiDuAn,
-                    locTrangThaiDuAn
+                    locTrangThaiDuAn,
+                    tuNgay,
+                    denNgay,
+                    locTheoNgay
                 });
             }
 
@@ -75,13 +99,19 @@ namespace QuanLyDuAn.Controllers
                 {
                     tuKhoa,
                     locMaLoaiDuAn,
-                    locTrangThaiDuAn
+                    locTrangThaiDuAn,
+                    tuNgay,
+                    denNgay,
+                    locTheoNgay
                 });
             }
 
             vm.TuKhoa = tuKhoa;
             vm.LocMaLoaiDuAn = locMaLoaiDuAn;
             vm.LocTrangThaiDuAn = locTrangThaiDuAn;
+            vm.TuNgay = tuNgay;
+            vm.DenNgay = denNgay;
+            vm.LocTheoNgay = locTheoNgay;
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             vm.Permissions = permissions;
 
@@ -94,13 +124,28 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ChiTiet(int id, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> ChiTiet(
+            int id,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
-            return await Details(id, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn);
+            return await Details(id, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ThemFileDuAn(int maDuAn, IFormFile file, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> ThemFileDuAn(
+            int maDuAn,
+            IFormFile file,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -121,12 +166,23 @@ namespace QuanLyDuAn.Controllers
                 id = maDuAn,
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> XoaFileDuAn(int maFileDa, int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> XoaFileDuAn(
+            int maFileDa,
+            int maDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -147,12 +203,23 @@ namespace QuanLyDuAn.Controllers
                 id = maDuAn,
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
         }
 
         [HttpGet]
-        public async Task<IActionResult> TaiFileDuAn(int maFileDa, int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> TaiFileDuAn(
+            int maFileDa,
+            int maDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
@@ -173,13 +240,23 @@ namespace QuanLyDuAn.Controllers
                     id = maDuAn,
                     tuKhoa,
                     locMaLoaiDuAn,
-                    locTrangThaiDuAn
+                    locTrangThaiDuAn,
+                    tuNgay,
+                    denNgay,
+                    locTheoNgay
                 });
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> Sua(int id, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> Sua(
+            int id,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -195,12 +272,15 @@ namespace QuanLyDuAn.Controllers
 
             var vm = new DuAnPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn),
+                DanhSach = await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay),
                 Form = form,
                 DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync(),
                 TuKhoa = tuKhoa,
                 LocMaLoaiDuAn = locMaLoaiDuAn,
                 LocTrangThaiDuAn = locTrangThaiDuAn,
+                TuNgay = tuNgay,
+                DenNgay = denNgay,
+                LocTheoNgay = locTheoNgay,
                 Permissions = permissions
             };
 
@@ -214,7 +294,7 @@ namespace QuanLyDuAn.Controllers
 
             if (!ModelState.IsValid)
             {
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn);
+                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay);
                 vm.DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
@@ -239,13 +319,16 @@ namespace QuanLyDuAn.Controllers
                 {
                     tuKhoa = vm.TuKhoa,
                     locMaLoaiDuAn = vm.LocMaLoaiDuAn,
-                    locTrangThaiDuAn = vm.LocTrangThaiDuAn
+                    locTrangThaiDuAn = vm.LocTrangThaiDuAn,
+                    tuNgay = vm.TuNgay,
+                    denNgay = vm.DenNgay,
+                    locTheoNgay = vm.LocTheoNgay
                 });
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn);
+                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay);
                 vm.DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
@@ -253,7 +336,14 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> XoaDuAn(int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> XoaDuAn(
+            int maDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xoa))
                 return Forbid();
@@ -272,12 +362,22 @@ namespace QuanLyDuAn.Controllers
             {
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> BatDauDuAn(int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> BatDauDuAn(
+            int maDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -296,12 +396,22 @@ namespace QuanLyDuAn.Controllers
             {
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> XacNhanHoanThanh(int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> XacNhanHoanThanh(
+            int maDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -320,12 +430,23 @@ namespace QuanLyDuAn.Controllers
             {
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> MoLaiDuAn(int maDuAn, string lyDo, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> MoLaiDuAn(
+            int maDuAn,
+            string lyDo,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -344,12 +465,23 @@ namespace QuanLyDuAn.Controllers
             {
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> TamDungDuAn(int maDuAn, string ghiChuDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> TamDungDuAn(
+            int maDuAn,
+            string ghiChuDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -368,12 +500,22 @@ namespace QuanLyDuAn.Controllers
             {
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> YeuCauHoanThanh(int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> YeuCauHoanThanh(
+            int maDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -392,8 +534,63 @@ namespace QuanLyDuAn.Controllers
             {
                 tuKhoa,
                 locMaLoaiDuAn,
-                locTrangThaiDuAn
+                locTrangThaiDuAn,
+                tuNgay,
+                denNgay,
+                locTheoNgay
             });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> XuatFile(
+            string? format,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+                return Forbid();
+
+            var rows = (await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay))
+                .Cast<object>()
+                .ToList();
+
+            var exportRequest = new ExportFileRequest
+            {
+                ReportTitle = "Danh sách dự án",
+                ExportedAt = DateTime.Now,
+                ExportedBy = ExportSupport.ResolveExporterName(User),
+                AppliedFiltersText = ExportSupport.BuildFiltersText(
+                    ("Từ khóa", tuKhoa),
+                    ("Loại dự án", locMaLoaiDuAn?.ToString()),
+                    ("Trạng thái", TrangThai.ToDisplay(locTrangThaiDuAn)),
+                    ("Lọc theo ngày", ExportSupport.ResolveTextOrDefault(locTheoNgay, "Ngày tạo")),
+                    ("Từ ngày", ExportSupport.FormatDate(tuNgay)),
+                    ("Đến ngày", ExportSupport.FormatDate(denNgay))),
+                FileNamePrefix = "du-an",
+                Format = _exportFileService.ParseFormat(format),
+                Columns = new List<ExportColumnDefinition>
+                {
+                    new() { Header = "Mã dự án", ValueSelector = row => ((DuAnViewModel)row).MaDuAn.ToString() },
+                    new() { Header = "Tên dự án", ValueSelector = row => ((DuAnViewModel)row).TenDuAn },
+                    new() { Header = "Loại dự án", ValueSelector = row => ((DuAnViewModel)row).TenLoaiDuAn },
+                    new() { Header = "Quản lý", ValueSelector = row => ((DuAnViewModel)row).TenNguoiQuanLy },
+                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDate(((DuAnViewModel)row).NgayBatDauDuAn) },
+                    new() { Header = "Ngày kết thúc", ValueSelector = row => ExportSupport.FormatDate(((DuAnViewModel)row).NgayKetThucDuAn) },
+                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDate(((DuAnViewModel)row).NgayHoanThanhThucTeDuAn) },
+                    new() { Header = "Tiến độ", ValueSelector = row => $"{((DuAnViewModel)row).PhanTramHoanThanh}%" },
+                    new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((DuAnViewModel)row).TrangThaiDuAn) },
+                    new() { Header = "Số team", ValueSelector = row => ((DuAnViewModel)row).SoLuongTeam.ToString() },
+                    new() { Header = "Số thành viên", ValueSelector = row => ((DuAnViewModel)row).SoLuongThanhVien.ToString() }
+                },
+                Rows = rows
+            };
+
+            var result = _exportFileService.Export(exportRequest);
+            return File(result.Content, result.ContentType, result.FileName);
         }
 
         private int? TryGetCurrentUserId()

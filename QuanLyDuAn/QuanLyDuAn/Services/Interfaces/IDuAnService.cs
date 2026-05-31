@@ -4,7 +4,13 @@ namespace QuanLyDuAn.Services.Interfaces
 {
     public interface IDuAnService
     {
-        Task<List<DuAnViewModel>> GetAllAsync(string? tuKhoa, int? maLoaiDuAn, string? trangThaiDuAn);
+        Task<List<DuAnViewModel>> GetAllAsync(
+            string? tuKhoa,
+            int? maLoaiDuAn,
+            string? trangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay);
         Task<DuAnChiTietViewModel?> GetChiTietAsync(int id);
         Task<DuAnCreateUpdateViewModel?> GetByIdAsync(int id);
         Task<List<LoaiDuAnOptionViewModel>> GetLoaiDuAnOptionsAsync();

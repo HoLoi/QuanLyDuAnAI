@@ -1,14 +1,18 @@
 ﻿@model QuanLyDuAn.ViewModels.ChiTietCongViec.ChiTietCongViecPageViewModel
 @using QuanLyDuAn.Constants
 
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 @section Styles {
     <link rel="stylesheet" href="~/css/ChiTietCongViec/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
 @{
     ViewData["Title"] = "Chi tiết công việc";
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.ChiTietCongViec.Them) && Model.CoTheCapNhat;
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
     ViewBag.Permissions = permissions;
 
     string statusIcon = Model.CongViec.CssTrangThai switch
@@ -101,6 +105,18 @@
     <section class="dashboard-card">
         <header class="card-header-line">
             <h2>Danh sách chi tiết công việc</h2>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["maCongViec"] = Model.CongViec.MaCongViec.ToString()
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
         </header>
         <partial name="_Table" model="Model" />
     </section>

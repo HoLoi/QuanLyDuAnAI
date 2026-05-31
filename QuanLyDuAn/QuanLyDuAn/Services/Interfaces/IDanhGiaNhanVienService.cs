@@ -1,10 +1,16 @@
-using QuanLyDuAn.ViewModels.DanhGiaNhanVien;
+﻿using QuanLyDuAn.ViewModels.DanhGiaNhanVien;
 
 namespace QuanLyDuAn.Services.Interfaces
 {
     public interface IDanhGiaNhanVienService
     {
-        Task<DanhGiaNhanVienPageViewModel> GetPageAsync(int? maDuAn, int? maNhanVien, string? tuKhoa);
+        Task<DanhGiaNhanVienPageViewModel> GetPageAsync(
+            int? maDuAn,
+            int? maNhanVien,
+            string? tuKhoa,
+            string? trangThai,
+            DateTime? tuNgayDanhGia,
+            DateTime? denNgayDanhGia);
         Task<DanhGiaNhanVienFormViewModel> GetFormAsync(int maDuAn, int maNhanVien);
         Task LuuDanhGiaAsync(DanhGiaNhanVienFormViewModel form);
         Task GuiDuyetAsync(int maDanhGiaNhanVien);

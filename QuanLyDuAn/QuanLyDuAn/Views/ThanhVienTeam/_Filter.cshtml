@@ -4,12 +4,13 @@
     var locVaiTroLanhDao = (Model.LocVaiTroLanhDao ?? string.Empty).ToLowerInvariant();
 }
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
-    <div class="col-md-4">
+<form asp-action="Index" method="get" class="workflow-filter mb-3">
+    <div class="workflow-filter-row workflow-filter-row-main">
+        <div class="filter-field">
         <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
                placeholder="Tìm theo team, nhân sự, vai trò..." />
-    </div>
-    <div class="col-md-3">
+        </div>
+        <div class="filter-field">
         <select name="locMaTeam" class="form-select">
             <option value="">-- Tất cả team --</option>
             @foreach (var team in Model.DanhSachTeam)
@@ -24,16 +25,19 @@
                 }
             }
         </select>
-    </div>
-    <div class="col-md-3">
+        </div>
+        <div class="filter-field">
         <select name="locVaiTroLanhDao" class="form-select">
             <option value="">-- Tất cả vai trò --</option>
             <option value="truongnhom" selected="@(locVaiTroLanhDao == "truongnhom" ? "selected" : null)">Trưởng nhóm</option>
             <option value="thanhvien" selected="@(locVaiTroLanhDao == "thanhvien" ? "selected" : null)">Thành viên</option>
         </select>
     </div>
-    <div class="col-md-2 d-flex gap-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Lọc</button>
-        <a asp-action="Index" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+    <div class="workflow-filter-row workflow-filter-row-time">
+        <div class="filter-actions">
+            <button type="submit" class="btn-filter-apply">Lọc</button>
+            <a asp-action="Index" class="btn-filter-reset">Làm mới</a>
+        </div>
     </div>
 </form>

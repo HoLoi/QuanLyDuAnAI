@@ -30,11 +30,16 @@ namespace QuanLyDuAn.Services
             dichVu.AddScoped<IDanhGiaNhanVienService, DanhGiaNhanVienService>();
             dichVu.AddScoped<IDeXuatCongViecService, DeXuatCongViecService>();
             dichVu.AddScoped<IDuyetDeXuatCongViecService, DyetDeXuatCongViecService>();
+            dichVu.AddScoped<IYeuCauDoiQuanLyService, YeuCauDoiQuanLyService>();
+            dichVu.AddScoped<IDuyetYeuCauDoiQuanLyService, DuyetYeuCauDoiQuanLyService>();
             dichVu.AddScoped<INganSachService, NganSachService>();
             dichVu.AddScoped<IDeXuatNganSachService, DeXuatNganSachService>();
             dichVu.AddScoped<IDuyetDeXuatNganSachService, DuyetDeXuatNganSachService>();
             dichVu.AddScoped<IAccountService, AccountService>();
             dichVu.AddScoped<IDashboardService, DashboardService>();
+            dichVu.AddScoped<IAiService, AiService>();
+            dichVu.AddScoped<IAiDatasetService, AiDatasetService>();
+            dichVu.AddScoped<IExportFileService, ExportFileService>();
             dichVu.AddScoped<IEmailService, GmailEmailService>();
 
             return dichVu;

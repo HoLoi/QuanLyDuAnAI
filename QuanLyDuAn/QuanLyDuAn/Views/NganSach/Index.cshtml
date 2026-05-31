@@ -1,22 +1,26 @@
-@model QuanLyDuAn.ViewModels.NganSach.NganSachPageViewModel
+﻿@model QuanLyDuAn.ViewModels.NganSach.NganSachPageViewModel
 @using QuanLyDuAn.Constants
 
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 @{
     ViewData["Title"] = "Ngân sách";
     var permissions = Model.Permissions;
     var canApprove = permissions.Contains(Permissions.DuyetNganSach.Xem);
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
     ViewBag.Permissions = permissions;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/NganSach/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
 <section class="ngan-sach-page">
     <header class="ngan-sach-header-card">
         <div class="ngan-sach-header-content">
             <h1 class="ngan-sach-title">Ngân sách</h1>
-            <p class="ngan-sach-subtitle">Theo dõi ngân sách được duyệt, phiên bản ngân sách và tình hình sử dụng theo dự án</p>
+            <p class="ngan-sach-subtitle">Theo dõi ngân sách được duyệt, phiên bản ngân sách và tình hình sử dụng theo dự án.</p>
             <p class="ngan-sach-readonly-note">Màn hình chỉ phục vụ xem/theo dõi. Mọi thay đổi ngân sách thực hiện qua luồng Đề xuất và Duyệt đề xuất ngân sách.</p>
         </div>
         @if (canApprove)
@@ -54,6 +58,25 @@
     </section>
 
     <section class="ngan-sach-section-card">
+        <div class="table-card-header ngan-sach-list-header">
+            <div class="table-card-header-content">
+                <h2 class="ngan-sach-section-title">Danh sách ngân sách</h2>
+                <p class="ngan-sach-section-note">Hiển thị các phiên bản ngân sách theo dự án, trạng thái phê duyệt và hiệu lực sử dụng.</p>
+            </div>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["locMaDuAn"] = Model.LocMaDuAn?.ToString(),
+                        ["locTrangThai"] = Model.LocTrangThai
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
+        </div>
         <partial name="_Table" model="Model.DanhSach" />
     </section>
 </section>

@@ -1,0 +1,180 @@
+﻿@model QuanLyDuAn.ViewModels.Ai.AiDatasetPageViewModel
+@using QuanLyDuAn.Constants
+
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
+@{
+    ViewData["Title"] = "Dữ liệu AI";
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
+}
+
+<section class="ai-page">
+    <header class="ai-header-card">
+        <div>
+            <h1 class="ai-title">Quản lý dữ liệu AI</h1>
+            <p class="ai-subtitle">Tổng hợp AI_DATASET từ dữ liệu nghiệp vụ trước khi huấn luyện model.</p>
+        </div>
+    </header>
+
+    @if (Model.DangThieuDataset)
+    {
+        <div class="ai-warning-block">Hệ thống đang phát hiện thiếu dữ liệu AI_DATASET. Hãy tổng hợp dataset để có thể huấn luyện model.</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
+    {
+        <div class="ai-warning-block">@Model.CanhBao</div>
+    }
+
+    <div class="ai-grid ai-grid-3">
+        <article class="ai-stat-card">
+            <span class="ai-stat-label">Tổng số dòng AI_DATASET</span>
+            <strong class="ai-stat-value">@Model.TongSoDongDataset</strong>
+        </article>
+        <article class="ai-stat-card">
+            <span class="ai-stat-label">Số dòng trễ có nguyên nhân</span>
+            <strong class="ai-stat-value">@Model.SoDongDuLabel</strong>
+        </article>
+        <article class="ai-stat-card">
+            <span class="ai-stat-label">Số dòng chưa đủ nhãn train</span>
+            <strong class="ai-stat-value">@Model.SoDongThieuLabel</strong>
+        </article>
+    </div>
+
+    <article class="ai-panel-card">
+        <h2>Bộ feature tổng hợp hiện tại</h2>
+        <dl class="ai-dl">
+            <div><dt>SoNhanVienDuAn</dt><dd>Số nhân sự hiện có trong dự án (đếm phân biệt theo mã người dùng).</dd></div>
+            <div><dt>TongSoCongViec</dt><dd>Tổng số công việc chưa xóa mềm trong dự án.</dd></div>
+            <div><dt>SoCongViecTre</dt><dd>Số công việc trễ gồm: đã hoàn thành trễ hoặc chưa hoàn thành nhưng quá hạn dự kiến.</dd></div>
+            <div><dt>TyLeCongViecTre</dt><dd>Tỷ lệ phần trăm 0-100, công thức = SoCongViecTre / TongSoCongViec * 100.</dd></div>
+            <div><dt>ChiPhiDuKien</dt><dd>Tổng ngân sách active và đã duyệt của dự án.</dd></div>
+            <div><dt>ChiPhiThucTe</dt><dd>Tổng chi phí chưa xóa mềm của các ngân sách dự án.</dd></div>
+            <div><dt>ChenhLechChiPhi</dt><dd>ChiPhiThucTe - ChiPhiDuKien.</dd></div>
+            <div>
+                <dt><span title="Chỉ tính nhật ký phụ trách có hành động thêm/xóa/cập nhật phụ trách nhân sự hợp lệ, không phải toàn bộ dòng nhật ký.">SoLanThayDoiNhanSu</span></dt>
+                <dd>Số lần thay đổi nhân sự/phụ trách từ nhật ký hợp lệ.</dd>
+            </div>
+            <div>
+                <dt><span title="Chỉ tính yêu cầu đổi quản lý đã duyệt thực sự (Đã duyệt/DaDuyet), có thời điểm duyệt và có thay đổi quản lý.">SoLanThayDoiQuanLy</span></dt>
+                <dd>Số lần đổi quản lý đã được phê duyệt.</dd>
+            </div>
+            <div>
+                <dt><span title="Dự án đã hoàn thành ưu tiên so sánh ngày hoàn thành thực tế với ngày kết thúc dự kiến; dữ liệu cũ chưa có ngày này vẫn fallback theo max delay của công việc.">SoNgayTreTienDo</span></dt>
+                <dd>Số ngày trễ tiến độ theo ngày hoàn thành thực tế hoặc max delay công việc.</dd>
+            </div>
+            <div><dt>SoDeXuatCongViecChoDuyet</dt><dd>Số đề xuất công việc đang ở trạng thái chờ duyệt.</dd></div>
+            <div><dt>SoDeXuatCongViecBiTuChoi</dt><dd>Số đề xuất công việc bị từ chối.</dd></div>
+            <div><dt>ThoiGianDuyetCongViecTrungBinh</dt><dd>Thời gian duyệt đề xuất công việc trung bình (đơn vị: ngày).</dd></div>
+            <div><dt>SoDeXuatNganSachChoDuyet</dt><dd>Số đề xuất ngân sách đang ở trạng thái chờ duyệt.</dd></div>
+            <div><dt>SoDeXuatNganSachBiTuChoi</dt><dd>Số đề xuất ngân sách bị từ chối.</dd></div>
+            <div><dt>ThoiGianDuyetNganSachTrungBinh</dt><dd>Thời gian duyệt đề xuất ngân sách trung bình (đơn vị: ngày).</dd></div>
+            <div><dt>SoBaoCaoTienDoChoDuyet</dt><dd>Số báo cáo tiến độ đang ở trạng thái chờ duyệt.</dd></div>
+            <div><dt>SoBaoCaoTienDoBiTuChoi</dt><dd>Số báo cáo tiến độ bị từ chối.</dd></div>
+            <div><dt>SoBaoCaoTienDoYeuCauBoSung</dt><dd>Số báo cáo tiến độ ở trạng thái yêu cầu bổ sung.</dd></div>
+            <div><dt>TyLeBaoCaoTienDoBiTuChoi</dt><dd>Tỷ lệ phần trăm báo cáo tiến độ bị từ chối trên tổng số báo cáo.</dd></div>
+            <div><dt>SoLanCapNhatTienDo</dt><dd>Tổng số lần cập nhật/báo cáo tiến độ.</dd></div>
+            <div><dt>SoNgayChamCapNhatTienDo</dt><dd>Số ngày từ lần cập nhật tiến độ gần nhất đến ngày kết thúc dự án; nếu dự án không có ngày kết thúc thì dùng ngày hiện tại.</dd></div>
+        </dl>
+        <div class="ai-warning-soft">
+            Ghi chú: các chỉ số thay đổi nhân sự/quản lý chỉ tính từ hành động nhật ký hợp lệ của nghiệp vụ, không phải tổng số dòng nhật ký.
+        </div>
+    </article>
+
+    <article class="ai-panel-card">
+        <div class="table-card-header ai-panel-header">
+            <div class="table-card-header-content">
+                <h2>Tổng hợp AI_DATASET</h2>
+            </div>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["thieuDataset"] = Model.DangThieuDataset ? "true" : "false"
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
+        </div>
+        <div class="ai-inline-actions">
+            <form asp-action="TongHopDataset" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="ai-primary-btn">Tổng hợp dataset</button>
+            </form>
+            <form asp-action="TongHopDataset" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="ai-secondary-btn">Tổng hợp lại</button>
+            </form>
+            <form asp-action="KiemTraChatLuongDataset" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="ai-secondary-btn">Kiểm tra chất lượng dataset</button>
+            </form>
+        </div>
+
+        <form asp-action="TongHopDatasetChoDuAn" method="post" class="ai-form-grid mt-2">
+            @Html.AntiForgeryToken()
+            <div>
+                <label class="form-label" for="maDuAn">Tổng hợp theo dự án</label>
+                <select id="maDuAn" name="maDuAn" class="form-select">
+                    <option value="">Chọn dự án</option>
+                    @foreach (var duAn in Model.DanhSachDuAn)
+                    {
+                        <option value="@duAn.MaDuAn">@duAn.TenDuAn (@duAn.MaDuAn)</option>
+                    }
+                </select>
+            </div>
+            <div class="ai-form-actions">
+                <button type="submit" class="ai-secondary-btn">Tổng hợp theo dự án</button>
+            </div>
+        </form>
+    </article>
+
+    <article class="ai-panel-card">
+        <h2>Chất lượng dataset trong DB</h2>
+        @if (Model.ChatLuongDatasetDb == null)
+        {
+            <div class="ai-empty-state">Chưa có dữ liệu chất lượng dataset.</div>
+        }
+        else
+        {
+            <dl class="ai-dl">
+                <div><dt>Tổng số dòng</dt><dd>@Model.ChatLuongDatasetDb.TongSoDong</dd></div>
+                <div><dt>Dòng hợp lệ để huấn luyện</dt><dd>@Model.ChatLuongDatasetDb.SoDongHopLeTrain</dd></div>
+                <div><dt>Số dòng thiếu nhãn train</dt><dd>@Model.ChatLuongDatasetDb.SoDongThieuLabel</dd></div>
+                <div><dt>Số dự án được xác định trễ</dt><dd>@Model.ChatLuongDatasetDb.SoMauDuAnTre</dd></div>
+                <div><dt>Số dự án không trễ</dt><dd>@Model.ChatLuongDatasetDb.SoMauKhongTre</dd></div>
+                <div><dt>Số dòng có nguyên nhân xác nhận</dt><dd>@Model.ChatLuongDatasetDb.SoDongCoNguyenNhan</dd></div>
+                <div><dt>Số dòng huấn luyện tối thiểu</dt><dd>@Model.ChatLuongDatasetDb.MinTrainRows</dd></div>
+                <div><dt>Đủ điều kiện huấn luyện</dt><dd>@(Model.ChatLuongDatasetDb.DuDieuKienTrain ? "Có" : "Không")</dd></div>
+            </dl>
+
+            @if (Model.ChatLuongDatasetDb.LyDoKhongDat.Any())
+            {
+                <ul class="ai-alert-list ai-alert-danger">
+                    @foreach (var lyDo in Model.ChatLuongDatasetDb.LyDoKhongDat)
+                    {
+                        <li>@lyDo</li>
+                    }
+                </ul>
+            }
+
+            @if (Model.ChatLuongDatasetDb.GhiChuChatLuongDuLieu.Any())
+            {
+                <ul class="ai-alert-list ai-alert-warn">
+                    @foreach (var ghiChu in Model.ChatLuongDatasetDb.GhiChuChatLuongDuLieu)
+                    {
+                        <li>@ghiChu</li>
+                    }
+                </ul>
+            }
+        }
+    </article>
+</section>

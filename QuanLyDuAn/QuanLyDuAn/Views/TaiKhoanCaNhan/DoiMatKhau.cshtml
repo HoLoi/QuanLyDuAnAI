@@ -1,0 +1,52 @@
+﻿@model QuanLyDuAn.ViewModels.TaiKhoanCaNhan.DoiMatKhauViewModel
+
+@{
+    ViewData["Title"] = "Đổi mật khẩu";
+}
+
+<section class="tai-khoan-ca-nhan-page">
+    <header class="tai-khoan-header-card">
+        <div>
+            <h1 class="tai-khoan-title">Đổi mật khẩu</h1>
+            <p class="tai-khoan-subtitle">Mật khẩu mới cần tối thiểu 6 ký tự và nên kết hợp chữ hoa, chữ thường, số.</p>
+        </div>
+    </header>
+
+    <article class="tai-khoan-card tai-khoan-card-narrow">
+        <form asp-action="DoiMatKhau" method="post" class="tai-khoan-form">
+            @Html.AntiForgeryToken()
+
+            <div class="tai-khoan-form-grid single-column">
+                <div class="tai-khoan-form-field">
+                    <label asp-for="MatKhauHienTai"></label>
+                    <input asp-for="MatKhauHienTai" type="password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="MatKhauHienTai" class="text-danger"></span>
+                </div>
+
+                <div class="tai-khoan-form-field">
+                    <label asp-for="MatKhauMoi"></label>
+                    <input asp-for="MatKhauMoi" type="password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="MatKhauMoi" class="text-danger"></span>
+                </div>
+
+                <div class="tai-khoan-form-field">
+                    <label asp-for="XacNhanMatKhau"></label>
+                    <input asp-for="XacNhanMatKhau" type="password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="tai-khoan-form-actions">
+                <button type="submit" class="tai-khoan-btn tai-khoan-btn-primary tai-khoan-btn-medium">
+                    <i class="bi bi-shield-check"></i>
+                    Cập nhật mật khẩu
+                </button>
+                <a asp-action="Index" class="tai-khoan-btn tai-khoan-btn-outline">Quay lại hồ sơ</a>
+            </div>
+        </form>
+    </article>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -8,6 +8,9 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public string? TuKhoa { get; set; }
         public int? LocMaLoaiDuAn { get; set; }
         public string? LocTrangThaiDuAn { get; set; }
+        public DateTime? TuNgay { get; set; }
+        public DateTime? DenNgay { get; set; }
+        public string? LocTheoNgay { get; set; }
         public HashSet<string> Permissions { get; set; } = new();
     }
 }

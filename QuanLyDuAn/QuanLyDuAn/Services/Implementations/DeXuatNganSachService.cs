@@ -19,10 +19,17 @@ namespace QuanLyDuAn.Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<DeXuatNganSachPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai)
+        public async Task<DeXuatNganSachPageViewModel> GetPageAsync(
+            int? locMaDuAn,
+            string? locTrangThai,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             if (!locMaDuAn.HasValue)
                 throw new Exception("Vui lòng chọn dự án.");
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgay, denNgay);
+            var locTheoNgayResolved = string.IsNullOrWhiteSpace(locTheoNgay) ? "NgayDeXuat" : locTheoNgay.Trim();
 
             var currentUserId = await GetCurrentUserIdAsync();
             var projectOptions = await GetEligibleProjectOptionsAsync(currentUserId);
@@ -65,6 +72,21 @@ namespace QuanLyDuAn.Services.Implementations
                 {
                     query = query.Where(x => filterValues.Contains(x.TrangThaiDeXuat));
                 }
+            }
+
+            if (tuNgayLoc.HasValue)
+            {
+                query = locTheoNgayResolved == "NgayDuyet"
+                    ? query.Where(x => x.NgayDuyet.HasValue && x.NgayDuyet.Value >= tuNgayLoc.Value)
+                    : query.Where(x => x.NgayDeXuat.HasValue && x.NgayDeXuat.Value >= tuNgayLoc.Value);
+            }
+
+            if (denNgayLoc.HasValue)
+            {
+                var denNgayDocQuyen = denNgayLoc.Value.AddDays(1);
+                query = locTheoNgayResolved == "NgayDuyet"
+                    ? query.Where(x => x.NgayDuyet.HasValue && x.NgayDuyet.Value < denNgayDocQuyen)
+                    : query.Where(x => x.NgayDeXuat.HasValue && x.NgayDeXuat.Value < denNgayDocQuyen);
             }
 
             var nganSachHienTai = await _context.NganSach
@@ -110,7 +132,10 @@ namespace QuanLyDuAn.Services.Implementations
                     MaDuAn = selectedProject.MaDuAn
                 },
                 LocMaDuAn = locMaDuAn,
-                LocTrangThai = locTrangThai
+                LocTrangThai = locTrangThai,
+                TuNgay = tuNgayLoc,
+                DenNgay = denNgayLoc,
+                LocTheoNgay = locTheoNgayResolved
             };
         }
 
@@ -254,6 +279,19 @@ namespace QuanLyDuAn.Services.Implementations
             });
 
             await _context.SaveChangesAsync();
+        }
+
+        private static (DateTime? TuNgay, DateTime? DenNgay) ChuanHoaKhoangNgay(DateTime? tuNgay, DateTime? denNgay)
+        {
+            var tu = tuNgay?.Date;
+            var den = denNgay?.Date;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
         }
 
         private async Task<int> GetCurrentUserIdAsync()

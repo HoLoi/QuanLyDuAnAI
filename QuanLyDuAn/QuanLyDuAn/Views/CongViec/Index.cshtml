@@ -1,14 +1,18 @@
 ﻿@model QuanLyDuAn.ViewModels.CongViec.CongViecPageViewModel
 @using QuanLyDuAn.Constants
 
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 @section Styles {
     <link rel="stylesheet" href="~/css/CongViec/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
 @{
     ViewData["Title"] = "Công việc";
     var permissions = Model.Permissions;
     var canApprove = permissions.Contains(Permissions.DuyetDeXuatCongViec.Xem);
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
 
     var tongCongViec = Model.DanhSach.Count;
     var dangThucHien = Model.DanhSach.Count(x => TrangThai.EqualsValue(x.TrangThaiCongViec, TrangThai.DangThucHien));
@@ -20,9 +24,12 @@
     ViewBag.LocMaDuAn = Model.LocMaDuAn;
     ViewBag.LocTrangThai = Model.LocTrangThai;
     ViewBag.TuKhoa = Model.TuKhoa;
+    ViewBag.TuNgay = Model.TuNgay;
+    ViewBag.DenNgay = Model.DenNgay;
+    ViewBag.LocTheoNgay = Model.LocTheoNgay;
 }
 
-<div class="cong-viec-dashboard">
+<div class="cong-viec-page cong-viec-dashboard">
     <section class="dashboard-hero">
         <div>
             <p class="hero-kicker">Tổng quan công việc</p>
@@ -93,6 +100,23 @@
     <section class="dashboard-card">
         <header class="card-header-line">
             <h2>Danh sách công việc</h2>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["locMaDuAn"] = Model.LocMaDuAn?.ToString(),
+                        ["locTrangThai"] = Model.LocTrangThai,
+                        ["tuKhoa"] = Model.TuKhoa,
+                        ["tuNgay"] = Model.TuNgay?.ToString("yyyy-MM-dd"),
+                        ["denNgay"] = Model.DenNgay?.ToString("yyyy-MM-dd"),
+                        ["locTheoNgay"] = Model.LocTheoNgay
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
         </header>
         <partial name="_Table" model="Model.DanhSach" />
     </section>

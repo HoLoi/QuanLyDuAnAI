@@ -1,0 +1,45 @@
+﻿@model QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+@{
+    var routeExcel = new Dictionary<string, string?>(Model.RouteValues, StringComparer.OrdinalIgnoreCase)
+    {
+        ["format"] = "excel"
+    };
+    var routePdf = new Dictionary<string, string?>(Model.RouteValues, StringComparer.OrdinalIgnoreCase)
+    {
+        ["format"] = "pdf"
+    };
+    var routeCsv = new Dictionary<string, string?>(Model.RouteValues, StringComparer.OrdinalIgnoreCase)
+    {
+        ["format"] = "csv"
+    };
+}
+
+<div class="dropdown export-dropdown">
+    <button class="btn export-main-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-download"></i>
+        <span>Xuất file</span>
+    </button>
+    <ul class="dropdown-menu export-dropdown-menu dropdown-menu-end">
+        <li>
+            <a class="dropdown-item" asp-action="@Model.Action" asp-all-route-data="routeExcel">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Xuất Excel</span>
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item" asp-action="@Model.Action" asp-all-route-data="routePdf">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Xuất PDF</span>
+            </a>
+        </li>
+        @if (Model.HienThiCsv)
+        {
+            <li>
+                <a class="dropdown-item" asp-action="@Model.Action" asp-all-route-data="routeCsv">
+                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                    <span>Xuất CSV</span>
+                </a>
+            </li>
+        }
+    </ul>
+</div>

@@ -1,14 +1,22 @@
-namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
+﻿namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
 {
     public class DanhGiaDuAnItemViewModel
     {
         public int MaDanhGiaDuAn { get; set; }
+        public bool CoDanhGia { get; set; }
         public int MaDuAn { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public string TenNguoiQuanLy { get; set; } = string.Empty;
         public string TrangThaiDuAn { get; set; } = string.Empty;
+        public bool DuDieuKienDanhGia { get; set; }
         public string TrangThaiDanhGia { get; set; } = string.Empty;
         public int PhanTramHoanThanh { get; set; }
+        public int TongCongViec { get; set; }
+        public int CongViecTreHan { get; set; }
+        public string TrangThaiThoiHanDuAn { get; set; } = string.Empty;
+        public int? SoNgayQuaHan { get; set; }
+        public bool DuAnTreTienDo { get; set; }
+        public bool ChuaDuDuLieuTreTienDo { get; set; }
         public double DiemTongKet { get; set; }
         public string XepLoai { get; set; } = string.Empty;
         public string? NhanXet { get; set; }

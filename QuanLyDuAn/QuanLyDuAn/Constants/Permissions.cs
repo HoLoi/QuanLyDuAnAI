@@ -161,7 +161,8 @@
         {
             public const string Dataset = "AI.Dataset";
             public const string Train = "AI.Train";
-            public const string DuDoan = "AI.DuDoan";
+            public const string PhanTichNguyenNhan = "AI.PhanTichNguyenNhan";
+            public const string DuDoan = PhanTichNguyenNhan;
             public const string Dashboard = "AI.Dashboard";
             public const string XacNhan = "AI.XacNhan";
         }

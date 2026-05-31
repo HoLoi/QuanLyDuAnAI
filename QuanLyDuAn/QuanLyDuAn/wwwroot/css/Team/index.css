@@ -1,0 +1,196 @@
+﻿.team-page {
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.45));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.15rem;
+}
+
+.team-header-card,
+.team-section-card {
+    background: #fff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+}
+
+.team-header-card {
+    padding: 1rem 1.1rem;
+    border-color: rgba(105, 108, 255, 0.2);
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+}
+
+.team-title {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.team-subtitle {
+    margin: 0.38rem 0 0;
+    color: #607792;
+    font-size: 0.92rem;
+}
+
+.team-section-card {
+    padding: 1rem;
+}
+
+.team-page form .form-control,
+.team-page form .form-select,
+.team-page form textarea {
+    border-radius: 0.72rem;
+    border: 1px solid #d6e0ef;
+    box-shadow: none;
+}
+
+.team-page form .form-control:focus,
+.team-page form .form-select:focus,
+.team-page form textarea:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.team-page .table {
+    border-color: #e1e8f5;
+}
+
+.team-page .table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.81rem;
+    font-weight: 700;
+}
+
+.team-page .table tbody tr {
+    transition: background-color 0.16s ease;
+}
+
+.team-page .table tbody tr:hover {
+    background: #f9fbff;
+}
+
+.team-page .col-status {
+    font-weight: 700;
+    color: #2e4a69;
+}
+
+.team-page .col-count {
+    text-align: center;
+    font-weight: 700;
+}
+
+.team-page .table-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.team-page .table-actions .btn {
+    border-radius: 0.58rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.team-page hr {
+    border-color: #e3ebf8;
+    margin: 1rem 0;
+}
+
+.team-page .workflow-filter {
+    display: grid;
+    gap: 0.72rem;
+}
+
+.team-page .workflow-filter-row {
+    display: grid;
+    gap: 0.72rem;
+}
+
+.team-page .workflow-filter-row-main {
+    grid-template-columns: minmax(240px, 2fr) minmax(180px, 1fr);
+}
+
+.team-page .filter-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.team-page .btn-filter-apply,
+.team-page .btn-filter-reset,
+.team-page .btn-action {
+    border: 1px solid transparent;
+    border-radius: 0.62rem;
+    padding: 0.42rem 0.72rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.team-page .btn-filter-apply,
+.team-page .btn-confirm {
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    border-color: rgba(105, 108, 255, 0.33);
+    color: #fff;
+}
+
+.team-page .btn-filter-reset,
+.team-page .btn-subtle {
+    background: #f6f9ff;
+    border-color: #ccd8ea;
+    color: #3f5877;
+}
+
+.team-page .btn-danger-soft {
+    background: #fff1f1;
+    border-color: #f6cfcf;
+    color: #b54141;
+}
+
+.team-page .workflow-table {
+    border-color: #e1e8f5;
+}
+
+.team-page .workflow-table thead th {
+    background: #f7faff;
+    color: #5b7391;
+    border-bottom: 1px solid #dce6f3;
+    font-size: 0.81rem;
+    font-weight: 700;
+}
+
+@media (max-width: 767.98px) {
+    .team-page {
+        border-radius: 16px;
+        padding: 0.95rem;
+    }
+
+    .team-header-card {
+        border-radius: 14px;
+        padding: 0.9rem;
+    }
+
+    .team-title {
+        font-size: 1.28rem;
+    }
+
+    .team-page .workflow-filter-row-main {
+        grid-template-columns: 1fr;
+    }
+
+    .team-page .filter-actions {
+        justify-content: stretch;
+    }
+
+    .team-page .btn-filter-apply,
+    .team-page .btn-filter-reset {
+        width: 100%;
+    }
+}

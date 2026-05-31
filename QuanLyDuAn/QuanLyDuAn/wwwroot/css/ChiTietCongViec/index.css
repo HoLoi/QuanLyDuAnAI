@@ -21,19 +21,19 @@
     gap: 1rem;
 }
 
-.detail-hero,
-.overview-card,
-.dashboard-card,
-.workflow-banner,
-.chi-tiet-mobile-card,
-.empty-state {
+.chi-tiet-dashboard .detail-hero,
+.chi-tiet-dashboard .overview-card,
+.chi-tiet-dashboard .dashboard-card,
+.chi-tiet-dashboard .workflow-banner,
+.chi-tiet-dashboard .chi-tiet-mobile-card,
+.chi-tiet-dashboard .empty-state {
     background: var(--ct-surface);
     border: 1px solid var(--ct-border);
     border-radius: var(--ct-radius-lg);
     box-shadow: var(--ct-shadow);
 }
 
-.detail-hero {
+.chi-tiet-dashboard .detail-hero {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -41,27 +41,27 @@
     padding: 1rem 1.1rem;
 }
 
-.hero-kicker {
+.chi-tiet-dashboard .hero-kicker {
     margin: 0;
     color: var(--ct-muted);
     font-size: 0.82rem;
     font-weight: 600;
 }
 
-.hero-title {
+.chi-tiet-dashboard .hero-title {
     margin: 0.1rem 0;
     color: var(--ct-text);
     font-size: 1.25rem;
     font-weight: 700;
 }
 
-.hero-subtitle {
+.chi-tiet-dashboard .hero-subtitle {
     margin: 0;
     color: var(--ct-muted);
     font-size: 0.92rem;
 }
 
-.hero-back {
+.chi-tiet-dashboard .hero-back {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -76,25 +76,25 @@
     transition: all 0.18s ease;
 }
 
-.hero-back:hover {
+.chi-tiet-dashboard .hero-back:hover {
     background: #eef2f7;
     border-color: #cfd8e3;
 }
 
-.overview-grid {
+.chi-tiet-dashboard .overview-grid {
     display: grid;
     gap: 0.75rem;
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.overview-card {
+.chi-tiet-dashboard .overview-card {
     padding: 0.85rem 0.95rem;
     display: flex;
     gap: 0.7rem;
     align-items: flex-start;
 }
 
-.overview-icon {
+.chi-tiet-dashboard .overview-icon {
     width: 2.2rem;
     height: 2.2rem;
     border-radius: 999px;
@@ -106,23 +106,23 @@
     flex-shrink: 0;
 }
 
-.overview-content {
+.chi-tiet-dashboard .overview-content {
     min-width: 0;
 }
 
-.overview-label {
+.chi-tiet-dashboard .overview-label {
     display: block;
     color: var(--ct-muted);
     font-size: 0.8rem;
     margin-bottom: 0.38rem;
 }
 
-.overview-value {
+.chi-tiet-dashboard .overview-value {
     color: var(--ct-text);
     font-size: 1.2rem;
 }
 
-.progress-line {
+.chi-tiet-dashboard .progress-line {
     width: 100%;
     height: 0.45rem;
     border-radius: 999px;
@@ -131,12 +131,12 @@
     margin-bottom: 0.35rem;
 }
 
-.progress-line-fill {
+.chi-tiet-dashboard .chi-tiet-dashboard .progress-line-fill {
     height: 100%;
     background: #3b82f6;
 }
 
-.workflow-banner {
+.chi-tiet-dashboard .workflow-banner {
     padding: 0.75rem 0.9rem;
     display: flex;
     align-items: center;
@@ -144,48 +144,53 @@
     font-size: 0.88rem;
 }
 
-.workflow-banner p {
+.chi-tiet-dashboard .workflow-banner p {
     margin: 0;
 }
 
-.workflow-banner--success {
+.chi-tiet-dashboard .workflow-banner--success {
     background: var(--ct-success-soft);
     color: #166534;
     border-color: #bbf7d0;
 }
 
-.workflow-banner--pending {
+.chi-tiet-dashboard .workflow-banner--pending {
     background: var(--ct-warning-soft);
     color: #9a3412;
     border-color: #fed7aa;
 }
 
-.dashboard-card {
+.chi-tiet-dashboard .dashboard-card {
     padding: 1rem;
 }
 
-.card-header-line {
+.chi-tiet-dashboard .card-header-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
     margin-bottom: 0.85rem;
 }
 
-.card-header-line h2 {
+.chi-tiet-dashboard .card-header-line h2 {
     margin: 0;
     font-size: 1rem;
     color: var(--ct-text);
 }
 
-.detail-form-grid,
+.chi-tiet-dashboard .detail-form-grid,
 .edit-inline-form {
     display: grid;
     gap: 0.75rem;
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.form-field--wide {
+.chi-tiet-dashboard .form-field--wide {
     grid-column: span 2;
 }
 
-.form-field label {
+.chi-tiet-dashboard .form-field label {
     display: block;
     color: var(--ct-muted);
     font-size: 0.8rem;
@@ -198,7 +203,7 @@
     border: 1px solid var(--ct-border);
 }
 
-.form-actions {
+.chi-tiet-dashboard .form-actions {
     grid-column: 1 / -1;
     display: flex;
     gap: 0.5rem;
@@ -206,8 +211,8 @@
 
 .btn-form-primary,
 .btn-form-secondary,
-.btn-action,
-.btn-danger-soft {
+.chi-tiet-dashboard .btn-action,
+.chi-tiet-dashboard .btn-danger-soft {
     border: 1px solid transparent;
     border-radius: 9px;
     padding: 0.45rem 0.7rem;
@@ -242,23 +247,23 @@
     border-color: #cfd8e3;
 }
 
-.chi-tiet-table {
+.chi-tiet-dashboard .chi-tiet-table {
     margin: 0;
 }
 
-.chi-tiet-table thead th {
+.chi-tiet-dashboard .chi-tiet-table thead th {
     background: #f8fafc;
     color: #475569;
     border-color: #e2e8f0;
     white-space: nowrap;
 }
 
-.chi-tiet-table td {
+.chi-tiet-dashboard .chi-tiet-table td {
     border-color: #eef2f7;
     vertical-align: top;
 }
 
-.chi-tiet-table tbody tr:hover {
+.chi-tiet-dashboard .chi-tiet-table tbody tr:hover {
     background: #f8fbff;
 }
 
@@ -267,14 +272,14 @@
     width: 16.8rem;
 }
 
-.table-actions {
+.chi-tiet-dashboard .table-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.42rem;
     align-items: flex-start;
 }
 
-.workflow-badge {
+.chi-tiet-dashboard .workflow-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
@@ -293,25 +298,25 @@
 .workflow-idle { background: #f1f5f9; color: #64748b; }
 .workflow-active { background: var(--ct-primary-soft); color: #2563eb; }
 
-.btn-action {
+.chi-tiet-dashboard .btn-action {
     background: #f8fafc;
     border-color: #dbe3ef;
     color: #334155;
 }
 
-.btn-action:hover {
+.chi-tiet-dashboard .btn-action:hover {
     background: #eef2ff;
     border-color: #c7d2fe;
     color: #1e3a8a;
 }
 
-.btn-danger-soft {
+.chi-tiet-dashboard .btn-danger-soft {
     background: var(--ct-danger-soft);
     border-color: #fecaca;
     color: var(--ct-danger);
 }
 
-.btn-danger-soft:hover {
+.chi-tiet-dashboard .btn-danger-soft:hover {
     background: #fee2e2;
     border-color: #fca5a5;
 }
@@ -323,16 +328,16 @@
     padding: 0.8rem;
 }
 
-.edit-inline-form .form-field--wide {
+.edit-inline-form .chi-tiet-dashboard .form-field--wide {
     grid-column: span 2;
 }
 
-.chi-tiet-mobile-list {
+.chi-tiet-dashboard .chi-tiet-mobile-list {
     display: grid;
     gap: 0.75rem;
 }
 
-.chi-tiet-mobile-card {
+.chi-tiet-dashboard .chi-tiet-mobile-card {
     padding: 0.85rem;
 }
 
@@ -392,24 +397,24 @@
     border: 1px solid #e2e8f0;
 }
 
-.empty-state {
+.chi-tiet-dashboard .empty-state {
     padding: 1.1rem;
     text-align: center;
     color: var(--ct-muted);
 }
 
-.empty-state i {
+.chi-tiet-dashboard .empty-state i {
     font-size: 1.3rem;
     display: block;
     margin-bottom: 0.3rem;
 }
 
 @media (max-width: 1199.98px) {
-    .detail-form-grid {
+    .chi-tiet-dashboard .detail-form-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .form-field--wide {
+    .chi-tiet-dashboard .form-field--wide {
         grid-column: span 2;
     }
 
@@ -419,28 +424,28 @@
 }
 
 @media (max-width: 767.98px) {
-    .detail-hero {
+    .chi-tiet-dashboard .detail-hero {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .overview-grid {
+    .chi-tiet-dashboard .overview-grid {
         grid-template-columns: 1fr;
     }
 
-    .overview-card {
+    .chi-tiet-dashboard .overview-card {
         flex-direction: column;
     }
 
-    .detail-form-grid {
+    .chi-tiet-dashboard .detail-form-grid {
         grid-template-columns: 1fr;
     }
 
-    .form-field--wide {
+    .chi-tiet-dashboard .form-field--wide {
         grid-column: auto;
     }
 
-    .form-actions {
+    .chi-tiet-dashboard .form-actions {
         display: grid;
     }
 
@@ -453,3 +458,4 @@
         grid-template-columns: 1fr;
     }
 }
+

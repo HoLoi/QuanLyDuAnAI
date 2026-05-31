@@ -2,6 +2,7 @@
 @using QuanLyDuAn.Constants
 
 @{
+    ViewData["Title"] = "Thành viên team";
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.ThanhVienNhom.Them);
     ViewBag.Permissions = permissions;
@@ -13,21 +14,29 @@
     ViewBag.CheDoGanTruongNhom = Model.CheDoGanTruongNhom == true;
 }
 
-<div class="card p-3">
-    <h5>Quản lý thành viên team</h5>
+@section Styles {
+    <link rel="stylesheet" href="~/css/ThanhVienTeam/index.css" asp-append-version="true" />
+}
 
-    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+<section class="thanh-vien-team-page">
+    <header class="thanh-vien-team-header-card">
+        <h1 class="thanh-vien-team-title">Thành viên team</h1>
+        <p class="thanh-vien-team-subtitle">Quản lý thành viên nhóm, vai trò thực hiện và trưởng nhóm.</p>
+    </header>
 
-    @if (canShowForm)
-    {
-        <partial name="_Form" for="Form" />
+    <section class="thanh-vien-team-section-card">
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
 
-        <hr />
-    }
+        @if (canShowForm)
+        {
+            <partial name="_Form" for="Form" />
+            <hr />
+        }
 
-    <partial name="_Filter" model="Model" />
-    <partial name="_Table" model="Model.DanhSach" />
-</div>
+        <partial name="_Filter" model="Model" />
+        <partial name="_Table" model="Model.DanhSach" />
+    </section>
+</section>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

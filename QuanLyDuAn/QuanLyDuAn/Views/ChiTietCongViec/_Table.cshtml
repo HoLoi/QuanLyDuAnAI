@@ -43,7 +43,6 @@ else
         <table class="table app-data-table chi-tiet-table">
             <thead>
                 <tr>
-                    <th class="col-id">Mã</th>
                     <th>Tên CTCV</th>
                     <th>Nội dung</th>
                     <th class="col-date">Ngày bắt đầu</th>
@@ -58,7 +57,6 @@ else
                 {
                     var collapseId = $"edit-{item.MaChiTietCV}";
                     <tr>
-                        <td class="col-id">#@item.MaChiTietCV</td>
                         <td>@item.TenCTCV</td>
                         <td>@item.NoiDungChiTietCV</td>
                         <td class="col-date">@item.NgayBatDauCTCV?.ToString("dd/MM/yyyy")</td>
@@ -101,7 +99,7 @@ else
                     @if (canEdit)
                     {
                         <tr class="collapse-row">
-                            <td colspan="8" class="p-0 border-0">
+                            <td colspan="7" class="p-0 border-0">
                                 <div class="collapse" id="@collapseId">
                                     <form asp-action="Sua" method="post" class="edit-inline-form">
                                         <input type="hidden" name="MaChiTietCV" value="@item.MaChiTietCV" />

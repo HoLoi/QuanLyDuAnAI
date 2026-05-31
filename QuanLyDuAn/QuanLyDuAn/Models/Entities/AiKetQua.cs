@@ -9,4 +9,7 @@ public partial class AiKetQua
     public int MaDuAn { get; set; }
     public double? DoTinCayKetQua { get; set; }
     public DateTime? ThoiGianDuDoanKetQua { get; set; }
+    public string? ReasonSource { get; set; }
+    public string? CanhBaoNguyenNhan { get; set; }
+    public string? NoiDungPhanTich { get; set; }
 }

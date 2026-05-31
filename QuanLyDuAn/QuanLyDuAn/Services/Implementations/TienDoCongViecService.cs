@@ -34,10 +34,18 @@ namespace QuanLyDuAn.Services.Implementations
             _trangThaiWorkflowService = trangThaiWorkflowService;
         }
 
-        public async Task<TienDoCongViecPageViewModel> GetPageAsync(int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<TienDoCongViecPageViewModel> GetPageAsync(
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             var currentUserId = await GetCurrentUserIdAsync();
             var roleFlags = await GetCurrentUserRoleFlagsAsync();
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgayBaoCao, denNgayBaoCao);
+            var denNgayDocQuyen = denNgayLoc?.Date.AddDays(1);
             var accessibleDetailIds = roleFlags.IsAdmin
                 ? new List<int>()
                 : await GetAccessibleChiTietCongViecIdsAsync(currentUserId, roleFlags);
@@ -91,10 +99,19 @@ namespace QuanLyDuAn.Services.Implementations
                 .ToListAsync();
 
             var detailIds = detailRows.Select(x => x.MaChiTietCV).Distinct().ToList();
-            var detailById = detailRows.ToDictionary(x => x.MaChiTietCV, x => x);
 
-            var progressRows = await _context.TienDoCongViec
-                .Where(x => detailIds.Contains(x.MaChiTietCV))
+            var progressQuery = _context.TienDoCongViec
+                .Where(x => detailIds.Contains(x.MaChiTietCV));
+            if (tuNgayLoc.HasValue)
+            {
+                progressQuery = progressQuery.Where(x => x.ThoiGianCapNhat.HasValue && x.ThoiGianCapNhat.Value >= tuNgayLoc.Value);
+            }
+            if (denNgayDocQuyen.HasValue)
+            {
+                progressQuery = progressQuery.Where(x => x.ThoiGianCapNhat.HasValue && x.ThoiGianCapNhat.Value < denNgayDocQuyen.Value);
+            }
+
+            var progressRows = await progressQuery
                 .OrderByDescending(x => x.ThoiGianCapNhat ?? DateTime.MinValue)
                 .ThenByDescending(x => x.MaTienDo)
                 .ToListAsync();
@@ -102,6 +119,19 @@ namespace QuanLyDuAn.Services.Implementations
             var progressByDetail = progressRows
                 .GroupBy(x => x.MaChiTietCV)
                 .ToDictionary(x => x.Key, x => x.ToList());
+
+            if (tuNgayLoc.HasValue || denNgayLoc.HasValue)
+            {
+                detailRows = detailRows
+                    .Where(x => progressByDetail.ContainsKey(x.MaChiTietCV))
+                    .ToList();
+                detailIds = detailRows.Select(x => x.MaChiTietCV).Distinct().ToList();
+                progressByDetail = progressByDetail
+                    .Where(x => detailIds.Contains(x.Key))
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            var detailById = detailRows.ToDictionary(x => x.MaChiTietCV, x => x);
 
             var latestProgressByDetail = progressByDetail
                 .ToDictionary(x => x.Key, x => x.Value.FirstOrDefault());
@@ -339,7 +369,9 @@ namespace QuanLyDuAn.Services.Implementations
                     LocMaDuAn = locMaDuAn,
                     LocMaCongViec = locMaCongViec,
                     LocMaChiTietCv = locMaChiTietCv,
-                    TuKhoa = tuKhoa
+                    TuKhoa = tuKhoa,
+                    TuNgayBaoCao = tuNgayLoc,
+                    DenNgayBaoCao = denNgayLoc
                 },
                 DanhSach = danhSach,
                 DanhSachDuAn = duAnOptions,
@@ -970,6 +1002,19 @@ namespace QuanLyDuAn.Services.Implementations
         {
             if (roleFlags.IsAdmin)
                 throw new Exception("Tài khoản Admin không thao tác nghiệp vụ tiến độ.");
+        }
+
+        private static (DateTime? TuNgay, DateTime? DenNgay) ChuanHoaKhoangNgay(DateTime? tuNgay, DateTime? denNgay)
+        {
+            var tu = tuNgay?.Date;
+            var den = denNgay?.Date;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
         }
 
         private async Task<int> GetCurrentUserIdAsync()

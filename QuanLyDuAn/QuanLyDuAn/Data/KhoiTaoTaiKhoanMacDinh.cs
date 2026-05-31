@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Models.Entities;
@@ -112,8 +112,9 @@ public static class KhoiTaoTaiKhoanMacDinh
             // AI 
             Permissions.AI.Dataset,
             Permissions.AI.Train,
-            Permissions.AI.DuDoan,
-            Permissions.AI.Dashboard
+            Permissions.AI.PhanTichNguyenNhan,
+            Permissions.AI.Dashboard,
+            Permissions.AI.XacNhan
             
         });
         await DamBaoRoleClaimToiThieuAsync(dbContext, roleManager.Id, new[]
@@ -192,8 +193,9 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.DanhGiaNhanVien.Sua,
 
             //AI
-            Permissions.AI.DuDoan,
+            Permissions.AI.PhanTichNguyenNhan,
             Permissions.AI.Dashboard,
+            Permissions.AI.XacNhan,
 
             // Yêu cầu đổi quản lý
             Permissions.YeuCauDoiQuanLy.Xem,
@@ -476,24 +478,57 @@ public static class KhoiTaoTaiKhoanMacDinh
 
     private static async Task DamBaoDmNguyenNhanMacDinhAsync(QuanLyDuAnDbContext dbContext)
     {
-        var mau = new[]
+        var mappingChuanHoa = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            "Cham phe duyet",
-            "Thieu nhan su",
-            "Thay doi yeu cau lien tuc",
-            "Vuot ngan sach",
-            "Rui ro ky thuat"
+            ["Thieu nhan su"] = "Thiếu nhân sự",
+            ["Thay doi yeu cau lien tuc"] = "Thay đổi yêu cầu liên tục",
+            ["Cham phe duyet"] = "Chậm phê duyệt",
+            ["Vuot ngan sach"] = "Vượt ngân sách",
+            ["Rui ro ky thuat"] = "Rủi ro kỹ thuật",
+            ["Cong viec phu thuoc bi cham"] = "Công việc phụ thuộc bị chậm",
+            ["Thieu du lieu hoac tai lieu"] = "Thiếu dữ liệu hoặc tài liệu",
+            ["Uoc luong thoi gian chua chinh xac"] = "Ước lượng thời gian chưa chính xác",
+            ["Tien do cap nhat khong day du"] = "Tiến độ cập nhật không đầy đủ",
+            ["Khac"] = "Khác"
         };
 
-        var hienCo = await dbContext.DmNguyenNhan
-            .AsNoTracking()
-            .Where(x => x.TenNguyenNhan != null)
-            .Select(x => x.TenNguyenNhan!)
-            .ToListAsync();
-
-        foreach (var ten in mau)
+        var danhMucBatBuoc = new[]
         {
-            if (hienCo.Contains(ten, StringComparer.OrdinalIgnoreCase))
+            "Thiếu nhân sự",
+            "Thay đổi yêu cầu liên tục",
+            "Chậm phê duyệt",
+            "Vượt ngân sách",
+            "Rủi ro kỹ thuật",
+            "Công việc phụ thuộc bị chậm",
+            "Thiếu dữ liệu hoặc tài liệu",
+            "Ước lượng thời gian chưa chính xác",
+            "Tiến độ cập nhật không đầy đủ",
+            "Khác"
+        };
+
+        var rows = await dbContext.DmNguyenNhan.ToListAsync();
+        foreach (var row in rows)
+        {
+            if (string.IsNullOrWhiteSpace(row.TenNguyenNhan))
+            {
+                continue;
+            }
+
+            var tenGoc = row.TenNguyenNhan.Trim();
+            if (mappingChuanHoa.TryGetValue(tenGoc, out var tenChuan))
+            {
+                row.TenNguyenNhan = tenChuan;
+            }
+        }
+
+        var hienCo = rows
+            .Where(x => !string.IsNullOrWhiteSpace(x.TenNguyenNhan))
+            .Select(x => x.TenNguyenNhan!.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var ten in danhMucBatBuoc)
+        {
+            if (hienCo.Contains(ten))
             {
                 continue;
             }
@@ -502,6 +537,13 @@ public static class KhoiTaoTaiKhoanMacDinh
             {
                 TenNguyenNhan = ten
             });
+        }
+
+        var reasonKhongTre = await dbContext.DmNguyenNhan
+            .FirstOrDefaultAsync(x => x.TenNguyenNhan == "Không có nguyên nhân trễ");
+        if (reasonKhongTre != null)
+        {
+            dbContext.DmNguyenNhan.Remove(reasonKhongTre);
         }
 
         await dbContext.SaveChangesAsync();
@@ -514,7 +556,8 @@ public static class KhoiTaoTaiKhoanMacDinh
             // ===== DASHBOARD =====
             ["Dashboard"] = new[]
             {
-                Permissions.ThongKe.Xem
+                Permissions.ThongKe.Xem,
+                Permissions.ThongKe.XuatFile
             },
 
             // ===== HE THONG =====
@@ -683,7 +726,12 @@ public static class KhoiTaoTaiKhoanMacDinh
 
             ["AIPredict"] = new[]
             {
-                Permissions.AI.DuDoan
+                Permissions.AI.PhanTichNguyenNhan
+            },
+
+            ["AIXacNhan"] = new[]
+            {
+                Permissions.AI.XacNhan
             },
 
             ["AIDashboard"] = new[]
@@ -836,3 +884,4 @@ public static class KhoiTaoTaiKhoanMacDinh
         await dbContext.SaveChangesAsync();
     }
 }
+

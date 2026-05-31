@@ -23,12 +23,20 @@ namespace QuanLyDuAn.Services.Implementations
             _trangThaiWorkflowService = trangThaiWorkflowService;
         }
 
-        public async Task<CongViecPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai, string? tuKhoa)
+        public async Task<CongViecPageViewModel> GetPageAsync(
+            int? locMaDuAn,
+            string? locTrangThai,
+            string? tuKhoa,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay)
         {
             var currentUserId = await GetCurrentUserIdAsync();
             var (isAdmin, isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
             var allowedProjectIds = await GetAccessibleProjectIdsAsync();
             var projectOptions = await GetProjectOptionsAsync(allowedProjectIds);
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgay, denNgay);
+            var locTheoNgayResolved = string.IsNullOrWhiteSpace(locTheoNgay) ? "NgayTao" : locTheoNgay.Trim();
 
             var query =
                 from cv in _context.CongViec
@@ -85,6 +93,21 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            if (tuNgayLoc.HasValue)
+            {
+                query = locTheoNgayResolved == "HanCongViec"
+                    ? query.Where(x => x.NgayKetThucCVDuKien.HasValue && x.NgayKetThucCVDuKien.Value >= tuNgayLoc.Value)
+                    : query.Where(x => x.NgayTaoCongViec.HasValue && x.NgayTaoCongViec.Value >= tuNgayLoc.Value);
+            }
+
+            if (denNgayLoc.HasValue)
+            {
+                var denNgayDocQuyen = denNgayLoc.Value.AddDays(1);
+                query = locTheoNgayResolved == "HanCongViec"
+                    ? query.Where(x => x.NgayKetThucCVDuKien.HasValue && x.NgayKetThucCVDuKien.Value < denNgayDocQuyen)
+                    : query.Where(x => x.NgayTaoCongViec.HasValue && x.NgayTaoCongViec.Value < denNgayDocQuyen);
+            }
+
             if (isEmployee && !isManager && !isAdmin)
             {
                 var duAnIds = await query
@@ -126,7 +149,10 @@ namespace QuanLyDuAn.Services.Implementations
                 DanhSachDuAn = projectOptions,
                 LocMaDuAn = locMaDuAn,
                 LocTrangThai = locTrangThai,
-                TuKhoa = tuKhoa
+                TuKhoa = tuKhoa,
+                TuNgay = tuNgayLoc,
+                DenNgay = denNgayLoc,
+                LocTheoNgay = locTheoNgayResolved
             };
         }
 
@@ -435,6 +461,19 @@ namespace QuanLyDuAn.Services.Implementations
                 .ToHashSet();
 
             return (normalizedRoles.Contains("ADMIN"), normalizedRoles.Contains("MANAGER"), normalizedRoles.Contains("EMPLOYEE"));
+        }
+
+        private static (DateTime? TuNgay, DateTime? DenNgay) ChuanHoaKhoangNgay(DateTime? tuNgay, DateTime? denNgay)
+        {
+            var tu = tuNgay?.Date;
+            var den = denNgay?.Date;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
         }
 
         private async Task<(Models.Entities.CongViec CongViec, Models.Entities.DuAn DuAn)> LayThongTinCongViecVaDuAnAsync(int maCongViec)

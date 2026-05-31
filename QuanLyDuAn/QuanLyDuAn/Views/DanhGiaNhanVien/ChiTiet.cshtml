@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Chi tiết đánh giá nhân viên";
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+    var backUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Action("Index", "DanhGiaNhanVien");
 }
 
 @section Styles
@@ -14,7 +16,7 @@
 <div class="dgnv-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Chi tiết đánh giá nhân viên</h5>
-        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Quay lại</a>
+        <a href="@backUrl" class="btn-action btn-subtle">Trở lại</a>
     </div>
 
     @await Html.PartialAsync("_EmployeeStats", Model.ThongKe)
@@ -26,7 +28,7 @@
     </div>
 
     <div class="table-responsive">
-        <table class="table table-sm">
+        <table class="table workflow-table">
             <thead><tr><th>Tiêu chí</th><th>Điểm</th><th>Công việc</th><th>Nhận xét</th></tr></thead>
             <tbody>
             @foreach (var tc in Model.TieuChi)

@@ -37,7 +37,6 @@ else
         <table class="table duyet-de-xuat-ngan-sach-table">
             <thead>
                 <tr>
-                    <th>Mã</th>
                     <th>Dự án</th>
                     <th>Ngân sách cũ</th>
                     <th>Ngân sách đề xuất</th>
@@ -53,10 +52,8 @@ else
                     var detailRowId = $"dxns-detail-{item.MaDeXuatNS}";
                     var chenhLech = (item.NganSachDeXuat ?? 0) - (item.NganSachCu ?? 0);
                     <tr class="duyet-de-xuat-ngan-sach-main-row">
-                        <td class="text-nowrap">#@item.MaDeXuatNS</td>
                         <td>
                             <div class="duyet-de-xuat-ngan-sach-cell-title">@item.TenDuAn</div>
-                            <div class="duyet-de-xuat-ngan-sach-cell-sub">Mã dự án: @item.MaDuAn</div>
                         </td>
                         <td class="text-nowrap">
                             @if (item.NganSachCu.HasValue)
@@ -112,7 +109,7 @@ else
                         </td>
                     </tr>
                     <tr id="@detailRowId" class="duyet-de-xuat-ngan-sach-detail-row d-none">
-                        <td colspan="7">
+                        <td colspan="6">
                             <div class="duyet-de-xuat-ngan-sach-detail-card">
                                 <div class="duyet-de-xuat-ngan-sach-detail-grid">
                                     <div class="duyet-de-xuat-ngan-sach-detail-item">

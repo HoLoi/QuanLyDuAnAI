@@ -1,3 +1,90 @@
-﻿.dgnv-table-wrap { border: 1px solid #e5e9f2; border-radius: 12px; }
-.dgnv-table thead th { white-space: nowrap; font-size: .85rem; }
-.dgnv-table td { vertical-align: middle; }
+﻿.dgnv-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid #e1e8f5;
+    border-radius: 14px;
+}
+
+.dgnv-table {
+    margin: 0;
+    min-width: 960px;
+    border-color: #e1e8f5;
+}
+
+.dgnv-table thead th {
+    white-space: nowrap;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #5b7391;
+    background: #f7faff;
+    border-bottom: 1px solid #dce6f3;
+}
+
+.dgnv-table td {
+    vertical-align: middle;
+    color: #334e6f;
+    font-size: 0.88rem;
+}
+
+.dgnv-col-actions {
+    min-width: 240px;
+}
+
+.dgnv-col-project {
+    min-width: 220px;
+}
+
+.dgnv-col-employee {
+    min-width: 220px;
+}
+
+.dgnv-table-actions {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dgnv-table-actions .btn-action {
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 0.62rem;
+    padding: 0.38rem 0.68rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.dgnv-table-actions .btn-confirm {
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    border-color: rgba(105, 108, 255, 0.33);
+    color: #fff;
+}
+
+.dgnv-table-actions .btn-subtle {
+    background: #f6f9ff;
+    border-color: #ccd8ea;
+    color: #3f5877;
+}
+
+.dgnv-table-actions .btn-danger-soft {
+    background: #fff1f1;
+    border-color: #efcbc7;
+    color: #c0473f;
+}
+
+.dgnv-reject-form {
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.dgnv-reject-form .form-control {
+    min-width: 116px;
+}
+
+@media (max-width: 767.98px) {
+    .dgnv-table {
+        min-width: 840px;
+    }
+}

@@ -6,8 +6,10 @@
     else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-warning text-dark"; }
     else if (string.Equals(Model, "TuChoi", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-danger"; }
     else if (string.Equals(Model, "Nhap", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-info text-dark"; }
+    else if (string.Equals(Model, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-secondary"; }
 
     var text = Model;
+    if (string.Equals(Model, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase)) { text = "Chưa đánh giá"; }
     if (string.Equals(Model, "Nhap", StringComparison.OrdinalIgnoreCase)) { text = "Nháp"; }
     else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Chờ duyệt"; }
     else if (string.Equals(Model, "DaDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Đã duyệt"; }

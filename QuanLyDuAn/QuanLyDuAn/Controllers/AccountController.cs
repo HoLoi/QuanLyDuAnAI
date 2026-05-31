@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Account;
 using QuanLyDuAn.ViewModels.Auth;
 
 namespace QuanLyDuAn.Controllers
@@ -83,6 +84,135 @@ namespace QuanLyDuAn.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            return View(new ForgotPasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            string maPhien;
+            try
+            {
+                maPhien = await _accountService.KhoiTaoQuenMatKhauAsync(model.EmailHoacTenDangNhap);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+
+            return RedirectToAction(
+                nameof(VerifyOtp),
+                new
+                {
+                    maPhien,
+                    thongBao = "Nếu thông tin hợp lệ, hệ thống đã gửi mã OTP đến email đã đăng ký."
+                });
+        }
+
+        [HttpGet]
+        public IActionResult VerifyOtp(string? maPhien, string? thongBao = null)
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            if (string.IsNullOrWhiteSpace(maPhien))
+            {
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+
+            return View(new VerifyOtpViewModel
+            {
+                MaPhien = maPhien.Trim(),
+                ThongBao = thongBao
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyOtp(VerifyOtpViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var hopLe = await _accountService.XacNhanOtpDatLaiMatKhauAsync(model.MaPhien, model.MaOtp);
+            if (!hopLe)
+            {
+                ModelState.AddModelError(string.Empty, "Mã OTP không hợp lệ hoặc đã hết hạn.");
+                model.ThongBao = "Mã OTP có hiệu lực trong 3 phút.";
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(ResetPassword), new { maPhien = model.MaPhien });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string? maPhien)
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            if (string.IsNullOrWhiteSpace(maPhien))
+            {
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+
+            var hopLe = await _accountService.CoPhienDatLaiMatKhauHopLeAsync(maPhien);
+            if (!hopLe)
+            {
+                TempData["Error"] = "Phiên đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng thực hiện lại.";
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+
+            return View(new ResetPasswordViewModel
+            {
+                MaPhien = maPhien.Trim()
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                await _accountService.DatLaiMatKhauBangOtpAsync(model.MaPhien, model.MatKhauMoi);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+
+            TempData["Success"] = "Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.";
+            return RedirectToAction(nameof(Login));
         }
     }
 }

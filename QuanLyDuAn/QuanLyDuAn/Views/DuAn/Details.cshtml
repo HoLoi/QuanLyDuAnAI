@@ -34,6 +34,8 @@
     var canSeeDanhGiaNhanVien = permissions.Contains(Permissions.DanhGiaNhanVien.Xem);
     var canSeeActivity = permissions.Contains(Permissions.NhatKy.Xem);
     var canProposeBudget = permissions.Contains(Permissions.DeXuatNganSach.Them);
+    var canShowYeuCauDoiQuanLyButton = permissions.Contains(Permissions.YeuCauDoiQuanLy.Them)
+        && Model.CoTheYeuCauDoiQuanLy;
     var budgetSummary = Model.NganSachTongHop;
     var workSummary = Model.TienDoCongViec;
     var deadlineGanNhat = Model.DeadlineGanNhat;
@@ -68,6 +70,9 @@
                        asp-route-tuKhoa="@Model.TuKhoa"
                        asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
                        asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
+                       asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                       asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")"
+                       asp-route-locTheoNgay="@Model.LocTheoNgay"
                        class="btn detail-header-btn detail-header-btn-back">Quay lại danh sách</a>
                     @if (permissions.Contains(Permissions.DuAn.Sua))
                     {
@@ -76,7 +81,17 @@
                            asp-route-tuKhoa="@Model.TuKhoa"
                            asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
                            asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
+                           asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                           asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")"
+                           asp-route-locTheoNgay="@Model.LocTheoNgay"
                            class="btn detail-header-btn detail-header-btn-edit">Sửa dự án</a>
+                    }
+                    @if (canShowYeuCauDoiQuanLyButton)
+                    {
+                        <a asp-controller="YeuCauDoiQuanLy"
+                           asp-action="Create"
+                           asp-route-maDuAn="@Model.MaDuAn"
+                           class="btn detail-header-btn detail-header-btn-manager-request">Yêu cầu đổi quản lý</a>
                     }
                     @if (canShowConfirmCompletionButton)
                     {
@@ -88,6 +103,9 @@
                             <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                             <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
                             <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                            <input type="hidden" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
                             <button type="submit" class="btn detail-header-btn detail-header-btn-confirm">
                                 Xác nhận hoàn thành
                             </button>
@@ -127,6 +145,10 @@
                     <div class="info-item">
                         <div class="info-label">Ngày kết thúc</div>
                         <div class="info-value">@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "-")</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Ngày hoàn thành thực tế</div>
+                        <div class="info-value">@(Model.NgayHoanThanhThucTeDuAn?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">Người quản lý</div>
@@ -179,7 +201,7 @@
                                     <a asp-controller="CongViec"
                                        asp-action="Index"
                                        asp-route-locMaDuAn="@Model.MaDuAn"
-                                       class="btn btn-outline-primary btn-sm">Xem công việc</a>
+                                       class="btn-action btn-subtle">Xem công việc</a>
                                 }
                             </div>
                         }
@@ -211,7 +233,7 @@
                                 <div class="empty-state-text">Chưa có tệp nào được tải lên.</div>
                                 @if (canManageFiles)
                                 {
-                                    <a href="#tep-du-an" class="btn btn-outline-primary btn-sm">Tải lên tệp</a>
+                                    <a href="#tep-du-an" class="btn-action btn-subtle">Tải lên tệp</a>
                                 }
                             </div>
                         }
@@ -250,7 +272,7 @@
                                        asp-route-tuKhoa="@Model.TuKhoa"
                                        asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
                                        asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-                                       class="btn btn-outline-primary btn-sm">Xem thành viên</a>
+                                       class="btn-action btn-subtle">Xem thành viên</a>
                                 </div>
                             }
                         </div>
@@ -345,7 +367,7 @@
                         <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
                         <div class="d-flex flex-wrap gap-2 align-items-center">
                             <input class="form-control" type="file" name="file" id="file-upload-input" required />
-                            <button type="submit" class="btn btn-primary btn-sm">Tải lên tệp</button>
+                            <button type="submit" class="btn-action btn-confirm">Tải lên tệp</button>
                         </div>
                         <div class="upload-hint">Chỉ quản lý dự án mới có thể thêm hoặc xóa tệp.</div>
                     </form>
@@ -372,7 +394,7 @@
                                        asp-route-tuKhoa="@Model.TuKhoa"
                                        asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
                                        asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-                                       class="btn btn-outline-primary btn-sm">Tải về</a>
+                                       class="btn-action btn-subtle">Tải về</a>
                                     @if (canManageFiles)
                                     {
                                         <form asp-action="XoaFileDuAn" method="post" class="d-inline">
@@ -381,7 +403,7 @@
                                             <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                                             <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
                                             <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                                            <button type="submit" class="btn-action btn-danger-soft">Xóa</button>
                                         </form>
                                     }
                                 </div>
@@ -395,7 +417,7 @@
                             <div class="empty-state-text">Chưa có tệp dự án nào được tải lên.</div>
                             @if (canManageFiles)
                             {
-                                <label class="btn btn-primary btn-sm" for="file-upload-input">Tải tệp đầu tiên</label>
+                                <label class="btn-action btn-confirm" for="file-upload-input">Tải tệp đầu tiên</label>
                             }
                         </div>
                     }
@@ -451,7 +473,7 @@
                                 <a asp-controller="CongViec"
                                    asp-action="Index"
                                    asp-route-locMaDuAn="@Model.MaDuAn"
-                                   class="btn btn-outline-primary btn-sm">Xem danh sách công việc</a>
+                                   class="btn-action btn-subtle">Xem danh sách công việc</a>
                             }
                         </div>
                     }
@@ -502,7 +524,7 @@
                                     <a asp-controller="DeXuatNganSach"
                                        asp-action="Index"
                                        asp-route-locMaDuAn="@Model.MaDuAn"
-                                       class="btn btn-outline-primary btn-sm">Đề xuất ngân sách</a>
+                                       class="btn-action btn-subtle">Đề xuất ngân sách</a>
                                 }
                             </div>
                         }
@@ -798,13 +820,16 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-warning">Xác nhận mở lại</button>
+                        <button type="button" class="btn-action btn-subtle" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn-action btn-reopen">Xác nhận mở lại</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 }
+
+
+
 
 

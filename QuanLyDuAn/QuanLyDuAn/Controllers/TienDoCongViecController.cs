@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyDuAn.Constants;
+using QuanLyDuAn.Helpers;
+using QuanLyDuAn.Services.Exporting;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.TienDoCongViec;
 
@@ -13,28 +15,37 @@ namespace QuanLyDuAn.Controllers
         private readonly IFileTienDoCongViecService _fileService;
         private readonly IPermissionHelper _permission;
         private readonly IPhanQuyenService _phanQuyenService;
+        private readonly IExportFileService _exportFileService;
 
         public TienDoCongViecController(
             ITienDoCongViecService service,
             IFileTienDoCongViecService fileService,
             IPermissionHelper permission,
-            IPhanQuyenService phanQuyenService)
+            IPhanQuyenService phanQuyenService,
+            IExportFileService exportFileService)
         {
             _service = service;
             _fileService = fileService;
             _permission = permission;
             _phanQuyenService = phanQuyenService;
+            _exportFileService = exportFileService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> Index(
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.Xem))
                 return Forbid();
 
             try
             {
-                var vm = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa);
+                var vm = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao);
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View(vm);
             }
@@ -48,7 +59,9 @@ namespace QuanLyDuAn.Controllers
                         LocMaDuAn = locMaDuAn,
                         LocMaCongViec = locMaCongViec,
                         LocMaChiTietCv = locMaChiTietCv,
-                        TuKhoa = tuKhoa
+                        TuKhoa = tuKhoa,
+                        TuNgayBaoCao = tuNgayBaoCao,
+                        DenNgayBaoCao = denNgayBaoCao
                     },
                     Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User)
                 });
@@ -56,7 +69,14 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CapNhatTienDo(TienDoCongViecCapNhatViewModel form, int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> CapNhatTienDo(
+            TienDoCongViecCapNhatViewModel form,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.CapNhat))
                 return Forbid();
@@ -68,7 +88,7 @@ namespace QuanLyDuAn.Controllers
                     .Select(x => x.ErrorMessage)
                     .Where(x => !string.IsNullOrWhiteSpace(x)));
 
-                return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+                return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
             }
 
             try
@@ -81,11 +101,18 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
         }
 
         [HttpPost]
-        public async Task<IActionResult> DuyetBaoCaoTienDo(TienDoCongViecDuyetViewModel form, int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> DuyetBaoCaoTienDo(
+            TienDoCongViecDuyetViewModel form,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.Duyet))
                 return Forbid();
@@ -100,11 +127,18 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
         }
 
         [HttpPost]
-        public async Task<IActionResult> YeuCauBoSungBaoCaoTienDo(TienDoCongViecDuyetViewModel form, int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> YeuCauBoSungBaoCaoTienDo(
+            TienDoCongViecDuyetViewModel form,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.Duyet))
                 return Forbid();
@@ -119,11 +153,18 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
         }
 
         [HttpPost]
-        public async Task<IActionResult> TuChoiBaoCaoTienDo(TienDoCongViecDuyetViewModel form, int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> TuChoiBaoCaoTienDo(
+            TienDoCongViecDuyetViewModel form,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.Duyet))
                 return Forbid();
@@ -138,11 +179,68 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> XuatFile(
+            string? format,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+                return Forbid();
+
+            var page = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao);
+            var rows = page.DanhSach.Cast<object>().ToList();
+
+            var exportRequest = new ExportFileRequest
+            {
+                ReportTitle = "Báo cáo tiến độ công việc",
+                ExportedAt = DateTime.Now,
+                ExportedBy = ExportSupport.ResolveExporterName(User),
+                AppliedFiltersText = ExportSupport.BuildFiltersText(
+                    ("Từ khóa", tuKhoa),
+                    ("Mã dự án", locMaDuAn?.ToString()),
+                    ("Mã công việc", locMaCongViec?.ToString()),
+                    ("Mã chi tiết", locMaChiTietCv?.ToString()),
+                    ("Từ ngày báo cáo", ExportSupport.FormatDate(tuNgayBaoCao)),
+                    ("Đến ngày báo cáo", ExportSupport.FormatDate(denNgayBaoCao))),
+                FileNamePrefix = "tien-do-cong-viec",
+                Format = _exportFileService.ParseFormat(format),
+                Columns = new List<ExportColumnDefinition>
+                {
+                    new() { Header = "Mã chi tiết", ValueSelector = row => ((TienDoCongViecItemViewModel)row).MaChiTietCV.ToString() },
+                    new() { Header = "Dự án", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenDuAn },
+                    new() { Header = "Công việc", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenCongViec },
+                    new() { Header = "Chi tiết công việc", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenChiTietCongViec },
+                    new() { Header = "Người thực hiện", ValueSelector = row => ((TienDoCongViecItemViewModel)row).NguoiThucHien },
+                    new() { Header = "Tiến độ hiện tại", ValueSelector = row => $"{((TienDoCongViecItemViewModel)row).PhanTramHienTai}%" },
+                    new() { Header = "Trạng thái", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TrangThaiCTCV },
+                    new() { Header = "Báo cáo gần nhất", ValueSelector = row => ExportSupport.FormatDateTime(((TienDoCongViecItemViewModel)row).ThoiGianBaoCaoGanNhat) },
+                    new() { Header = "Trạng thái duyệt", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TrangThaiDuyetBaoCaoGanNhat ?? string.Empty }
+                },
+                Rows = rows
+            };
+
+            var result = _exportFileService.Export(exportRequest);
+            return File(result.Content, result.ContentType, result.FileName);
         }
 
         [HttpPost]
-        public async Task<IActionResult> ThemFileTienDo(int maChiTietCv, IFormFile file, int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> ThemFileTienDo(
+            int maChiTietCv,
+            IFormFile file,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.CapNhat))
                 return Forbid();
@@ -157,11 +255,18 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
         }
 
         [HttpGet]
-        public async Task<IActionResult> TaiFileTienDo(int maFileTdcv, int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> TaiFileTienDo(
+            int maFileTdcv,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.Xem))
                 return Forbid();
@@ -174,12 +279,19 @@ namespace QuanLyDuAn.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = ex.Message;
-                return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+                return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> XoaFileTienDo(int maFileTdcv, int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa)
+        public async Task<IActionResult> XoaFileTienDo(
+            int maFileTdcv,
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.CapNhat))
                 return Forbid();
@@ -194,7 +306,7 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao });
         }
     }
 }

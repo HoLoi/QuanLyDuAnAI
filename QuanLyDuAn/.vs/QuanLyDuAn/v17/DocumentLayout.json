@@ -1,50 +1,22 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\",
+  "WorkspaceRootPath": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\danhgiaduanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\implementations\\danhgiaduanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\duanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\implementations\\duanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\wwwroot\\css\\layout\\sidebar.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\wwwroot\\css\\layout\\sidebar.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\data\\khoitaotaikhoanmacdinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\data\\khoitaotaikhoanmacdinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl14\\quanlyduanai\\quanlyduan\\quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\constants\\permissions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\constants\\permissions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl14\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\duanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\implementations\\duanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\chatduanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\implementations\\chatduanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl14\\quanlyduanai\\quanlyduan\\quanlyduan\\controllers\\danhgiaduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\controllers\\danhgiaduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\views\\chatduan\\_chatheader.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\views\\chatduan\\_chatheader.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\interfaces\\ichatduanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\interfaces\\ichatduanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl8\\quanlyduanai\\quanlyduan\\quanlyduan\\controllers\\chatduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\controllers\\chatduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl14\\quanlyduanai\\quanlyduan\\quanlyduan\\migrations\\20260527125053_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\migrations\\20260527125053_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -54,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -82,138 +54,52 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "DanhGiaDuAnService.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DanhGiaDuAnService.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\DanhGiaDuAnService.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DanhGiaDuAnService.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Services\\Implementations\\DanhGiaDuAnService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAZAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "DuAnService.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAAQwJEEAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-11T08:45:55.626Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-28T15:58:35.272Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "DuAnService.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAA1AAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "TrangThai.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Constants\\TrangThai.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Constants\\TrangThai.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-11T03:38:45.36Z",
+              "WhenOpened": "2026-05-28T15:57:29.175Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "sidebar.css",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\layout\\sidebar.css",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\wwwroot\\css\\layout\\sidebar.css",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\layout\\sidebar.css",
-              "RelativeToolTip": "QuanLyDuAn\\wwwroot\\css\\layout\\sidebar.css",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAAAEoAAABUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-05-10T13:28:40.934Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Program.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Program.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Program.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Program.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Program.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Title": "DanhGiaDuAnController.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-10T08:07:16.139Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "TrangThai.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Constants\\TrangThai.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Constants\\TrangThai.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-10T07:56:28.571Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Permissions.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\Permissions.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Constants\\Permissions.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\Permissions.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Constants\\Permissions.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-10T07:56:26.203Z"
+              "WhenOpened": "2026-05-28T08:54:35.112Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "KhoiTaoTaiKhoanMacDinh.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
-              "ViewState": "AgIAAHIBAAAAAAAAAAAYwL0AAAAsAAAAAAAAAA==",
+              "Title": "20260527125053_Init.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl14\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-10T07:53:53.633Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "_ChatHeader.cshtml",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Views\\ChatDuAn\\_ChatHeader.cshtml",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Views\\ChatDuAn\\_ChatHeader.cshtml",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Views\\ChatDuAn\\_ChatHeader.cshtml",
-              "RelativeToolTip": "QuanLyDuAn\\Views\\ChatDuAn\\_ChatHeader.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAARAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-05-09T17:36:47.655Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "ChatDuAnService.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\ChatDuAnService.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\ChatDuAnService.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\ChatDuAnService.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Services\\Implementations\\ChatDuAnService.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAAAAACwAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-09T17:35:39.386Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "ChatDuAnController.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Controllers\\ChatDuAnController.cs",
-              "ViewState": "AgIAAFYAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-09T16:38:20.155Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "IChatDuAnService.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Interfaces\\IChatDuAnService.cs",
-              "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Interfaces\\IChatDuAnService.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl8\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Interfaces\\IChatDuAnService.cs",
-              "RelativeToolTip": "QuanLyDuAn\\Services\\Interfaces\\IChatDuAnService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-09T16:35:08.275Z"
+              "WhenOpened": "2026-05-27T12:50:53.678Z"
             }
           ]
         }

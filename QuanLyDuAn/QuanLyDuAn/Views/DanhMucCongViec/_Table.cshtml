@@ -23,7 +23,6 @@ else
         <table class="table table-bordered app-data-table danh-muc-table">
             <thead>
                 <tr>
-                    <th class="col-id">Mã</th>
                     <th>Tên danh mục</th>
                     <th>Mô tả</th>
                     <th class="col-date">Ngày tạo</th>
@@ -35,7 +34,6 @@ else
                 @foreach (var item in danhSach)
                 {
                     <tr>
-                        <td class="col-id">@item.MaDanhMucCV</td>
                         <td class="fw-semibold">@item.TenDanhMucCV</td>
                         <td>@item.MoTaDanhMucCV</td>
                         <td class="col-date">@item.NgayTaoDMCV?.ToString("dd/MM/yyyy")</td>

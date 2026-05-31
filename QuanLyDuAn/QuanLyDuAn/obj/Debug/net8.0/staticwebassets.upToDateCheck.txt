@@ -1,3 +1,5 @@
+wwwroot\css\Account\login.css
+wwwroot\css\AI\index.css
 wwwroot\css\ChatDuAn\chat-header.css
 wwwroot\css\ChatDuAn\empty-state.css
 wwwroot\css\ChatDuAn\index.css
@@ -6,6 +8,7 @@ wwwroot\css\ChatDuAn\message-item.css
 wwwroot\css\ChatDuAn\message-list.css
 wwwroot\css\ChatDuAn\room-list.css
 wwwroot\css\ChiTietCongViec\index.css
+wwwroot\css\ChucDanh\index.css
 wwwroot\css\CongViec\index.css
 wwwroot\css\DanhGiaDuAn\empty-state.css
 wwwroot\css\DanhGiaDuAn\filter.css
@@ -30,14 +33,24 @@ wwwroot\css\DuAn\details.css
 wwwroot\css\DuAn\index.css
 wwwroot\css\DuyetDeXuatCongViec\index.css
 wwwroot\css\DuyetDeXuatNganSach\index.css
+wwwroot\css\DuyetYeuCauDoiQuanLy\index.css
 wwwroot\css\layout\sidebar.css
 wwwroot\css\NganSach\index.css
+wwwroot\css\NhanSu\index.css
 wwwroot\css\PhanCongChiTietCongViec\index.css
 wwwroot\css\PhanCongCongViec\index.css
+wwwroot\css\PhanQuyen\index.css
+wwwroot\css\shared\export-dropdown.css
 wwwroot\css\site.css
+wwwroot\css\TaiKhoanCaNhan\index.css
+wwwroot\css\Team\index.css
 wwwroot\css\TeamDuAn\index.css
 wwwroot\css\ThanhVienDuAn\index.css
+wwwroot\css\ThanhVienTeam\index.css
+wwwroot\css\TienDoCongViec\index.css
+wwwroot\css\YeuCauDoiQuanLy\index.css
 wwwroot\favicon.ico
+wwwroot\js\ai\charts.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css
 wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
@@ -96,6 +109,7 @@ wwwroot\lib\jquery-validation\LICENSE.md
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
 wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+wwwroot\uploads\avatars\avatar_1_20260524190347_3da100e6698c4784b43b26034fc93ca7.jpg
 wwwroot\uploads\duan\2\2f7f4153823742128c08326eef7055ba.pdf
 wwwroot\uploads\duan\2\9cf1116bc5c2466299787cf51d7cde2f.pdf
 wwwroot\uploads\duan\2\b058cd1763c64c9294a047989b82a9a2.docx

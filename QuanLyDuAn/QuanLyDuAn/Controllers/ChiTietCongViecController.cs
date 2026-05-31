@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyDuAn.Constants;
+using QuanLyDuAn.Helpers;
+using QuanLyDuAn.Services.Exporting;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.ChiTietCongViec;
 
@@ -12,15 +14,18 @@ namespace QuanLyDuAn.Controllers
         private readonly IChiTietCongViecService _service;
         private readonly IPermissionHelper _permission;
         private readonly IPhanQuyenService _phanQuyenService;
+        private readonly IExportFileService _exportFileService;
 
         public ChiTietCongViecController(
             IChiTietCongViecService service,
             IPermissionHelper permission,
-            IPhanQuyenService phanQuyenService)
+            IPhanQuyenService phanQuyenService,
+            IExportFileService exportFileService)
         {
             _service = service;
             _permission = permission;
             _phanQuyenService = phanQuyenService;
+            _exportFileService = exportFileService;
         }
 
         [HttpGet]
@@ -115,6 +120,41 @@ namespace QuanLyDuAn.Controllers
             }
 
             return RedirectToAction(nameof(Index), new { maCongViec });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> XuatFile(string? format, int maCongViec)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+                return Forbid();
+
+            var page = await _service.GetPageAsync(maCongViec);
+            var rows = page.DanhSach.Cast<object>().ToList();
+
+            var exportRequest = new ExportFileRequest
+            {
+                ReportTitle = $"Danh sách chi tiết công việc #{maCongViec}",
+                ExportedAt = DateTime.Now,
+                ExportedBy = ExportSupport.ResolveExporterName(User),
+                AppliedFiltersText = ExportSupport.BuildFiltersText(
+                    ("Mã công việc", maCongViec.ToString()),
+                    ("Tên công việc", page.CongViec.TenCongViec)),
+                FileNamePrefix = "chi-tiet-cong-viec",
+                Format = _exportFileService.ParseFormat(format),
+                Columns = new List<ExportColumnDefinition>
+                {
+                    new() { Header = "Mã chi tiết", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).MaChiTietCV.ToString() },
+                    new() { Header = "Tên chi tiết", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TenCTCV },
+                    new() { Header = "Nội dung", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).NoiDungChiTietCV },
+                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDate(((ChiTietCongViecItemViewModel)row).NgayBatDauCTCV) },
+                    new() { Header = "Ngày kết thúc", ValueSelector = row => ExportSupport.FormatDate(((ChiTietCongViecItemViewModel)row).NgayKetThucCTCV) },
+                    new() { Header = "Trạng thái", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TrangThaiHienThi }
+                },
+                Rows = rows
+            };
+
+            var result = _exportFileService.Export(exportRequest);
+            return File(result.Content, result.ContentType, result.FileName);
         }
 
         private async Task<IActionResult> RenderIndexWithFormAsync(int maCongViec, ChiTietCongViecCreateUpdateViewModel form)

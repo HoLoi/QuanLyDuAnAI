@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Services;
+using QuanLyDuAn.Services.Implementations;
+using QuanLyDuAn.Services.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +32,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
+builder.Services.Configure<AiApiOptions>(builder.Configuration.GetSection(AiApiOptions.SectionName));
+
+builder.Services.AddHttpClient<IAiApiService, AiApiService>((serviceProvider, client) =>
+{
+    var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<AiApiOptions>>().Value;
+    client.BaseAddress = new Uri(options.BaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(Math.Max(1, options.TimeoutSeconds));
+});
 
 builder.Services.AddDbContext<QuanLyDuAnDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

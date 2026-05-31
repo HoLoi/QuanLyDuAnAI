@@ -1,6 +1,14 @@
 ﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienItemViewModel
 
 <span class="score-badge">
-    <strong>@Model.DiemTongKet.ToString("0.0")</strong>
-    <small>@Model.XepLoai</small>
+    @if (Model.CoDanhGia)
+    {
+        <strong>@Model.DiemTongKet.ToString("0.0")</strong>
+        <small>@Model.XepLoai</small>
+    }
+    else
+    {
+        <strong>-</strong>
+        <small>Chưa đánh giá</small>
+    }
 </span>

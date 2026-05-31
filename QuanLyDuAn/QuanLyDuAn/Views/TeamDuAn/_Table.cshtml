@@ -21,7 +21,6 @@ else
         <table class="table table-bordered app-data-table team-table">
             <thead>
                 <tr>
-                    <th>Mã nhóm</th>
                     <th>Tên nhóm</th>
                     <th>Ngày tham gia</th>
                     <th>Số thành viên phụ trách</th>
@@ -32,7 +31,6 @@ else
                 @foreach (var item in Model.DanhSachTeamPhuTrach)
                 {
                     <tr>
-                        <td>@item.MaTeam</td>
                         <td class="fw-semibold">@item.TenTeam</td>
                         <td>@item.NgayTeamThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td><span class="team-count-badge">@item.SoThanhVienPhuTrach thành viên</span></td>
@@ -45,7 +43,7 @@ else
                                    asp-route-tuKhoa="@Model.TuKhoa"
                                    asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
                                    asp-route-locTrangThaiDuAn="@Model.LocTrangThaiDuAn"
-                                   class="btn btn-sm team-action-btn team-action-warning">
+                                   class="btn btn-action btn-subtle team-action-btn team-action-warning">
                                     <i class="bi bi-people"></i>
                                     <span>Sửa thành viên</span>
                                 </a>
@@ -54,7 +52,7 @@ else
                             @if (canDelete)
                             {
                                 <button type="button"
-                                        class="btn btn-sm team-action-btn team-action-danger btn-mo-modal-xoa-team"
+                                        class="btn btn-action btn-danger-soft team-action-btn team-action-danger btn-mo-modal-xoa-team"
                                         data-ma-team="@item.MaTeam"
                                         data-ten-team="@item.TenTeam"
                                         data-so-nhan-vien="@item.SoThanhVienPhuTrach"

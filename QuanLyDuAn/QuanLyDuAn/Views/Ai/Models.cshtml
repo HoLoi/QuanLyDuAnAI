@@ -1,0 +1,368 @@
+﻿@model QuanLyDuAn.ViewModels.Ai.AiModelPageViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Model nguyên nhân trễ";
+    var chartLabels = Model.LichSuModelNguyenNhan.Select(x => x.CreatedAt == DateTime.MinValue ? x.TenModel : $"{x.CreatedAt:dd/MM HH:mm}").ToList();
+    var chartAccuracy = Model.LichSuModelNguyenNhan.Select(x => x.Accuracy.HasValue ? Math.Round(x.Accuracy.Value * 100d, 2) : (double?)null).ToList();
+    var chartPrecision = Model.LichSuModelNguyenNhan.Select(x => x.PrecisionMacro.HasValue ? Math.Round(x.PrecisionMacro.Value * 100d, 2) : (double?)null).ToList();
+    var chartRecall = Model.LichSuModelNguyenNhan.Select(x => x.RecallMacro.HasValue ? Math.Round(x.RecallMacro.Value * 100d, 2) : (double?)null).ToList();
+    var chartF1 = Model.LichSuModelNguyenNhan.Select(x => x.F1Macro.HasValue ? Math.Round(x.F1Macro.Value * 100d, 2) : (double?)null).ToList();
+    var chartTrainSize = Model.LichSuModelNguyenNhan.Select(x => x.TrainSize ?? 0).ToList();
+    var chartTestSize = Model.LichSuModelNguyenNhan.Select(x => x.TestSize ?? 0).ToList();
+    var totalModelCount = Model.LichSuModelNguyenNhan.Count;
+    var activeModelCount = Model.LichSuModelNguyenNhan.Count(x => x.IsActive);
+    var inactiveModelCount = Math.Max(0, totalModelCount - activeModelCount);
+    var chartActiveState = Model.LichSuModelNguyenNhan.Count == 0
+        ? new List<int> { 0, 0 }
+        : new List<int> { activeModelCount, inactiveModelCount };
+    var confusionLabelNames = new List<string>();
+    for (var i = 0; i < Model.ConfusionMatrixModelActive.Count; i++)
+    {
+        if (i < Model.ConfusionMatrixLabelsModelActive.Count)
+        {
+            var ma = Model.ConfusionMatrixLabelsModelActive[i];
+            confusionLabelNames.Add(Model.TenNguyenNhanTheoMa.TryGetValue(ma, out var ten) ? ten : $"Nguyên nhân {ma}");
+        }
+        else
+        {
+            confusionLabelNames.Add($"Nhóm {i + 1}");
+        }
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
+}
+
+<section class="ai-page">
+    <header class="ai-header-card">
+        <div>
+            <h1 class="ai-title">Model nguyên nhân trễ</h1>
+            <p class="ai-subtitle">Chỉ hiển thị các phiên bản model <code>NguyenNhan</code> và metadata phục vụ theo dõi chất lượng.</p>
+        </div>
+        <a asp-controller="Ai" asp-action="Train" class="ai-link-btn">Huấn luyện model</a>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
+    {
+        <div class="ai-warning-block">@Model.CanhBao</div>
+    }
+    @if (Model.CanhBaoChatLuongModel.Any())
+    {
+        <div class="ai-warning-soft">
+            <strong>Cảnh báo chất lượng model:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach (var item in Model.CanhBaoChatLuongModel)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <article class="ai-panel-card">
+        <h2>Model đang hoạt động</h2>
+        <div class="ai-stat-card">
+            <span class="ai-stat-label">Model active</span>
+            <strong class="ai-stat-value">@(string.IsNullOrWhiteSpace(Model.LoadedReasonModel) ? "Chưa có" : Model.LoadedReasonModel)</strong>
+        </div>
+        <div class="ai-grid ai-grid-4 mt-3">
+            <article class="ai-stat-card"><span class="ai-stat-label">Độ chính xác kiểm thử</span><strong class="ai-stat-value">@(Model.AccuracyModelActive.HasValue ? Model.AccuracyModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+            <article class="ai-stat-card"><span class="ai-stat-label">Precision macro</span><strong class="ai-stat-value">@(Model.PrecisionMacroModelActive.HasValue ? Model.PrecisionMacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+            <article class="ai-stat-card"><span class="ai-stat-label">Recall macro</span><strong class="ai-stat-value">@(Model.RecallMacroModelActive.HasValue ? Model.RecallMacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+            <article class="ai-stat-card"><span class="ai-stat-label">F1 macro</span><strong class="ai-stat-value">@(Model.F1MacroModelActive.HasValue ? Model.F1MacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+        </div>
+    </article>
+
+    <article class="ai-panel-card">
+        <h2>Danh sách phiên bản model</h2>
+        @if (!Model.DanhSachModel.Any())
+        {
+            <div class="ai-empty-state">Chưa có model local để hiển thị.</div>
+        }
+        else
+        {
+            <div class="ai-table-scroll">
+                <table class="table ai-table">
+                    <thead>
+                        <tr>
+                            <th>Tên model</th>
+                            <th>Ngày tạo</th>
+                            <th>Train</th>
+                            <th>Test</th>
+                            <th>Accuracy</th>
+                            <th>Precision macro</th>
+                            <th>Recall macro</th>
+                            <th>F1 macro</th>
+                            <th>Trạng thái</th>
+                            <th class="col-actions">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.DanhSachModel.OrderByDescending(x => x.CreatedAt))
+                    {
+                        var isActive = string.Equals(item.TenFile, Model.LoadedReasonModel, StringComparison.OrdinalIgnoreCase);
+                        <tr>
+                            <td>@item.TenFile</td>
+                            <td>@item.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@(item.TrainSize?.ToString() ?? "-")</td>
+                            <td>@(item.TestSize?.ToString() ?? "-")</td>
+                            <td>@(item.Accuracy.HasValue ? item.Accuracy.Value.ToString("P2") : "-")</td>
+                            <td>@(item.PrecisionMacro.HasValue ? item.PrecisionMacro.Value.ToString("P2") : "-")</td>
+                            <td>@(item.RecallMacro.HasValue ? item.RecallMacro.Value.ToString("P2") : "-")</td>
+                            <td>@(item.F1Macro.HasValue ? item.F1Macro.Value.ToString("P2") : "-")</td>
+                            <td>@(isActive ? "Đang active" : "Không active")</td>
+                            <td class="table-actions">
+                                <a asp-action="Models" asp-route-model="@item.TenFile" class="btn btn-action btn-subtle">Chi tiết</a>
+                                <form asp-action="SetActiveModel" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="modelFile" value="@item.TenFile" />
+                                    <input type="hidden" name="modelType" value="NguyenNhan" />
+                                    <button type="submit" class="btn btn-action btn-confirm" disabled="@(!item.CanActivate || isActive)">Kích hoạt</button>
+                                </form>
+                                <form asp-action="DeleteModel" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa model này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="modelFile" value="@item.TenFile" />
+                                    <input type="hidden" name="modelType" value="NguyenNhan" />
+                                    <button type="submit" class="btn btn-action btn-danger-soft" disabled="@isActive">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </article>
+
+    <div class="ai-grid ai-grid-2">
+        <article class="ai-panel-card">
+            <h2>Metrics theo phiên bản model</h2>
+            @if (Model.LichSuModelNguyenNhan.Any())
+            {
+                <div class="ai-chart-shell">
+                    <canvas id="accuracyByVersionChart"></canvas>
+                </div>
+            }
+            else
+            {
+                <div class="ai-empty-state">Chưa có dữ liệu metrics theo phiên bản.</div>
+            }
+        </article>
+        <article class="ai-panel-card">
+            <h2>Train/Test theo phiên bản model</h2>
+            @if (Model.LichSuModelNguyenNhan.Any())
+            {
+                <div class="ai-chart-shell">
+                    <canvas id="trainTestByVersionChart"></canvas>
+                </div>
+            }
+            else
+            {
+                <div class="ai-empty-state">Chưa có dữ liệu train/test theo phiên bản.</div>
+            }
+        </article>
+    </div>
+
+    <div class="ai-grid ai-grid-2">
+        <article class="ai-panel-card">
+            <h2>Trạng thái active/inactive</h2>
+            @if (Model.LichSuModelNguyenNhan.Count > 2)
+            {
+                <div class="ai-chart-shell">
+                    <canvas id="activeStateChart"></canvas>
+                </div>
+            }
+            else if (Model.LichSuModelNguyenNhan.Any())
+            {
+                <div class="ai-grid ai-grid-2">
+                    <article class="ai-stat-card">
+                        <span class="ai-stat-label">Model active</span>
+                        <strong class="ai-stat-value">@activeModelCount</strong>
+                    </article>
+                    <article class="ai-stat-card">
+                        <span class="ai-stat-label">Model không active</span>
+                        <strong class="ai-stat-value">@inactiveModelCount</strong>
+                    </article>
+                </div>
+            }
+            else
+            {
+                <div class="ai-empty-state">Không có dữ liệu trạng thái model.</div>
+            }
+        </article>
+        <article class="ai-panel-card">
+            <h2>Feature importance (@(Model.TenModelPhanTich ?? "model active"))</h2>
+            @if (Model.FeatureImportanceModelActive.Any())
+            {
+                <div class="ai-chart-shell ai-chart-shell-lg">
+                    <canvas id="activeFeatureImportanceChart"></canvas>
+                </div>
+            }
+            else
+            {
+                <div class="ai-empty-state">Không có metadata feature importance.</div>
+            }
+        </article>
+    </div>
+
+    <article class="ai-panel-card">
+        <h2>Ma trận nhầm lẫn (@(Model.TenModelPhanTich ?? "model active"))</h2>
+        @if (Model.ConfusionMatrixModelActive.Any())
+        {
+            <div class="text-muted mb-2">Hàng = nhãn thật, cột = nhãn dự đoán, đường chéo là dự đoán đúng.</div>
+            <div class="ai-table-scroll">
+                <table class="table ai-table">
+                    <thead>
+                        <tr>
+                            <th>Nhãn thật \ Nhãn dự đoán</th>
+                            @foreach (var label in confusionLabelNames)
+                            {
+                                <th>@label</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for (var i = 0; i < Model.ConfusionMatrixModelActive.Count; i++)
+                    {
+                        <tr>
+                            <th>@(i < confusionLabelNames.Count ? confusionLabelNames[i] : $"Nhóm {i + 1}")</th>
+                        @for (var j = 0; j < Model.ConfusionMatrixModelActive[i].Count; j++)
+                        {
+                            <td>@Model.ConfusionMatrixModelActive[i][j]</td>
+                        }
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="ai-empty-state">Chưa có confusion matrix cho model đang chọn.</div>
+        }
+    </article>
+
+    <article class="ai-panel-card">
+        <h2>Cây quyết định của model</h2>
+        @if (!string.IsNullOrWhiteSpace(Model.DecisionTreeTextModelActive))
+        {
+            <details class="ai-collapse">
+                <summary>Xem cây quyết định chi tiết</summary>
+                <p class="ai-collapse-note">Cây có thể dài, hệ thống hiển thị trong khung cuộn để tiện đối chiếu.</p>
+                <div class="ai-inline-actions mb-2">
+                    <button type="button" class="ai-secondary-btn" id="copyDecisionTreeBtn">Sao chép cây quyết định</button>
+                </div>
+                <div class="ai-json-box"><pre id="decisionTreeText">@Model.DecisionTreeTextModelActive</pre></div>
+            </details>
+        }
+        else
+        {
+            <div class="ai-empty-state">Chưa có dữ liệu cây quyết định cho model này.</div>
+        }
+    </article>
+
+    <article class="ai-panel-card">
+        <h2>Tải lại model active</h2>
+        <form asp-action="ReloadModel" method="post" class="ai-inline-actions">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="modelType" value="NguyenNhan" />
+            <button type="submit" class="ai-secondary-btn">Reload model NguyenNhan</button>
+        </form>
+    </article>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/ai/charts.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            if (window.__aiModelsInitialized__) {
+                return;
+            }
+            window.__aiModelsInitialized__ = true;
+
+            const renderChart = (canvasId, config) => {
+                if (!window.AiChartHelper) {
+                    return;
+                }
+                window.AiChartHelper.render(canvasId, config);
+            };
+
+            const labels = @Html.Raw(JsonSerializer.Serialize(chartLabels));
+            const accuracy = @Html.Raw(JsonSerializer.Serialize(chartAccuracy));
+            const precision = @Html.Raw(JsonSerializer.Serialize(chartPrecision));
+            const recall = @Html.Raw(JsonSerializer.Serialize(chartRecall));
+            const f1 = @Html.Raw(JsonSerializer.Serialize(chartF1));
+            const trainSize = @Html.Raw(JsonSerializer.Serialize(chartTrainSize));
+            const testSize = @Html.Raw(JsonSerializer.Serialize(chartTestSize));
+            const activeState = @Html.Raw(JsonSerializer.Serialize(chartActiveState));
+
+            if (labels.length > 0) {
+                renderChart('accuracyByVersionChart', {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Accuracy (%)', data: accuracy, borderColor: '#2f7fd2', backgroundColor: '#2f7fd2' },
+                            { label: 'Precision macro (%)', data: precision, borderColor: '#3aa675', backgroundColor: '#3aa675' },
+                            { label: 'Recall macro (%)', data: recall, borderColor: '#9a7ff0', backgroundColor: '#9a7ff0' },
+                            { label: 'F1 macro (%)', data: f1, borderColor: '#f2b84a', backgroundColor: '#f2b84a' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+                });
+
+                renderChart('trainTestByVersionChart', {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Train', data: trainSize, backgroundColor: '#3aa675' },
+                            { label: 'Test', data: testSize, backgroundColor: '#9ec9f0' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+                if (labels.length > 2) {
+                    renderChart('activeStateChart', {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Active', 'Không active'],
+                            datasets: [{ data: activeState, backgroundColor: ['#3aa675', '#c7d6eb'] }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            }
+
+            const featureImportance = @Html.Raw(JsonSerializer.Serialize(Model.FeatureImportanceModelActive));
+            const fiLabels = Object.keys(featureImportance || {});
+            if (fiLabels.length > 0) {
+                const fiValues = fiLabels.map(x => featureImportance[x]);
+                renderChart('activeFeatureImportanceChart', {
+                    type: 'bar',
+                    data: { labels: fiLabels.map(x => window.AiChartHelper?.mapFeatureLabel?.(x) ?? x), datasets: [{ label: 'Mức ảnh hưởng', data: fiValues, backgroundColor: '#7a8df5' }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            const copyBtn = document.getElementById('copyDecisionTreeBtn');
+            const decisionTreeNode = document.getElementById('decisionTreeText');
+            if (copyBtn && decisionTreeNode && navigator.clipboard) {
+                copyBtn.addEventListener('click', async function () {
+                    try {
+                        await navigator.clipboard.writeText(decisionTreeNode.textContent || '');
+                        copyBtn.textContent = 'Đã sao chép';
+                        setTimeout(() => copyBtn.textContent = 'Sao chép cây quyết định', 1200);
+                    } catch {
+                        copyBtn.textContent = 'Sao chép thất bại';
+                        setTimeout(() => copyBtn.textContent = 'Sao chép cây quyết định', 1200);
+                    }
+                });
+            }
+        })();
+    </script>
+}

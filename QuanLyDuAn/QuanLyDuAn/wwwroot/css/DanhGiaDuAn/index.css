@@ -1,4 +1,4 @@
-.danh-gia-du-an-page {
+﻿.danh-gia-du-an-page {
     display: grid;
     gap: 1rem;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
@@ -33,12 +33,187 @@
     font-size: 0.9rem;
 }
 
+.danh-gia-du-an-page .primary-cta-card {
+    margin-top: 0.85rem;
+    border: 1px solid #d7e3f6;
+    border-radius: 14px;
+    background: linear-gradient(120deg, rgba(105, 108, 255, 0.11), rgba(3, 195, 236, 0.1));
+    padding: 0.82rem 0.92rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.danh-gia-du-an-page .primary-cta-content h6 {
+    color: #314866;
+    font-size: 0.96rem;
+    font-weight: 700;
+}
+
+.danh-gia-du-an-page .primary-cta-content p {
+    color: #4f6786;
+    font-size: 0.84rem;
+}
+
+.danh-gia-du-an-page .primary-cta-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.danh-gia-du-an-page .flow-hint-card {
+    margin-top: 0.72rem;
+    border: 1px dashed #cfdcec;
+    border-radius: 12px;
+    background: #f7fbff;
+    color: #5f7794;
+    padding: 0.62rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.83rem;
+}
+
+.danh-gia-du-an-page .module-bridge-card {
+    margin: 0.8rem 0 0.4rem;
+    border: 1px solid #dbe5f4;
+    border-radius: 14px;
+    background: #f9fbff;
+    padding: 0.78rem 0.88rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+.danh-gia-du-an-page .module-bridge-content h6 {
+    color: #304766;
+    font-size: 0.94rem;
+    font-weight: 700;
+}
+
+.danh-gia-du-an-page .module-bridge-content p {
+    color: #607995;
+    font-size: 0.82rem;
+}
+
+.danh-gia-du-an-page .dgda-list-header {
+    margin: 0.85rem 0 0.75rem;
+}
+
+.danh-gia-du-an-page .dgda-list-header h6 {
+    color: #314866;
+    font-size: 0.98rem;
+    font-weight: 700;
+}
+
 .danh-gia-du-an-page .dgda-filter {
     margin: 0.9rem 0;
     padding: 0.85rem;
     border: 1px solid #dbe4f2;
     border-radius: 14px;
     background: #f7faff;
+}
+
+.danh-gia-du-an-page .dgda-filter-grid {
+    display: grid;
+    gap: 0.72rem;
+    align-items: end;
+}
+
+.danh-gia-du-an-page .dgda-filter-grid-main {
+    grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(150px, 1fr));
+}
+
+.danh-gia-du-an-page .dgda-filter-grid-time {
+    grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) auto;
+}
+
+.danh-gia-du-an-page .dgda-filter-field {
+    min-width: 0;
+}
+
+.danh-gia-du-an-page .dgda-filter-field-date .form-control {
+    min-width: 162px;
+}
+
+.danh-gia-du-an-page .dgda-filter-actions {
+    display: flex;
+    gap: 0.45rem;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.danh-gia-du-an-page .dgda-filter-actions .btn {
+    min-height: 40px;
+    border-radius: 0.72rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    min-width: 116px;
+}
+
+.danh-gia-du-an-page .btn-action,
+.danh-gia-du-an-page .btn-filter-apply,
+.danh-gia-du-an-page .btn-filter-reset {
+    border: 1px solid transparent;
+    border-radius: 0.72rem;
+    padding: 0.42rem 0.72rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.danh-gia-du-an-page .btn-filter-apply,
+.danh-gia-du-an-page .btn-confirm {
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    border-color: rgba(105, 108, 255, 0.33);
+    color: #fff;
+}
+
+.danh-gia-du-an-page .btn-filter-reset,
+.danh-gia-du-an-page .btn-subtle {
+    background: #f6f9ff;
+    border-color: #ccd8ea;
+    color: #3f5877;
+}
+
+.danh-gia-du-an-page .evaluation-form-toolbar {
+    display: flex;
+    align-items: center;
+}
+
+.danh-gia-du-an-page .dgda-form .dgda-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 40px;
+    border-radius: 0.85rem;
+    padding: 0.55rem 1rem;
+    border: 1px solid #bcd3f5;
+    background: #f8fbff;
+    color: #21456f;
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.danh-gia-du-an-page .dgda-form .dgda-back-btn:hover,
+.danh-gia-du-an-page .dgda-form .dgda-back-btn:focus {
+    color: #1d3d63;
+    background: #eff6ff;
+    border-color: #9fbef0;
+}
+
+.danh-gia-du-an-page .btn-danger-soft {
+    background: #fff1f1;
+    border-color: #efcbc7;
+    color: #c0473f;
 }
 
 .danh-gia-du-an-page .dgda-filter .form-label {
@@ -91,6 +266,7 @@
 
 .danh-gia-du-an-page .project-stats,
 .danh-gia-du-an-page .ai-insight-card,
+.danh-gia-du-an-page .ai-confirm-card,
 .danh-gia-du-an-page .dgda-form {
     border-radius: 16px;
     border: 1px solid #e4e9f3;
@@ -99,6 +275,7 @@
 
 .danh-gia-du-an-page .project-stats h6,
 .danh-gia-du-an-page .ai-insight-card h6,
+.danh-gia-du-an-page .ai-confirm-card h6,
 .danh-gia-du-an-page .dgda-form h6 {
     color: #314866;
     font-weight: 700;
@@ -146,6 +323,52 @@
     border-top: 1px dashed #d6e1ef;
     color: #5f7692;
     font-size: 0.84rem;
+}
+
+.danh-gia-du-an-page .badge-reference {
+    color: #304766;
+    background: #f6f9ff;
+    border: 1px solid #cdd8e8;
+}
+
+.danh-gia-du-an-page .ai-related-wrap {
+    margin-top: 0.72rem;
+    border: 1px solid #dfe8f5;
+    border-radius: 12px;
+    background: #fff;
+    padding: 0.62rem 0.72rem;
+}
+
+.danh-gia-du-an-page .ai-related-title {
+    color: #3f5877;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.danh-gia-du-an-page .ai-related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.34rem;
+}
+
+.danh-gia-du-an-page .ai-related-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.danh-gia-du-an-page .ai-related-name {
+    color: #2f4968;
+    font-weight: 600;
+}
+
+.danh-gia-du-an-page .ai-related-meta {
+    color: #607995;
+    font-size: 0.79rem;
 }
 
 .danh-gia-du-an-page .mini-stat {
@@ -294,6 +517,27 @@
     vertical-align: middle;
 }
 
+.danh-gia-du-an-page .dgda-col-actions {
+    min-width: 240px;
+}
+
+.danh-gia-du-an-page .dgda-table-actions .btn {
+    white-space: nowrap;
+}
+
+.danh-gia-du-an-page .dgda-table-actions .btn-action {
+    white-space: nowrap;
+}
+
+.danh-gia-du-an-page .dgda-reject-form {
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.danh-gia-du-an-page .dgda-reject-form .form-control {
+    min-width: 116px;
+}
+
 .danh-gia-du-an-page .dgda-table tbody tr {
     transition: background-color 0.16s ease;
 }
@@ -320,6 +564,21 @@
     margin-top: 0.3rem;
 }
 
+.danh-gia-du-an-page .empty-title {
+    color: #304866;
+    font-weight: 700;
+    margin-top: 0.36rem;
+}
+
+.danh-gia-du-an-page .empty-actions {
+    margin-top: 0.82rem;
+    display: flex;
+    gap: 0.46rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
 @media (max-width: 991.98px) {
     .danh-gia-du-an-page .danh-gia-card {
         padding: 0.85rem;
@@ -327,6 +586,28 @@
 
     .danh-gia-du-an-page .score-badge {
         min-width: 88px;
+    }
+
+    .danh-gia-du-an-page .primary-cta-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .danh-gia-du-an-page .dgda-filter-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .danh-gia-du-an-page .dgda-filter-grid-main {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .danh-gia-du-an-page .dgda-filter-grid-time {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .danh-gia-du-an-page .dgda-filter-actions {
+        grid-column: span 2;
+        justify-content: flex-start;
     }
 }
 
@@ -346,4 +627,39 @@
     .danh-gia-du-an-page .dgda-table {
         min-width: 860px;
     }
+
+    .danh-gia-du-an-page .dgda-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .danh-gia-du-an-page .dgda-filter-actions {
+        grid-column: auto;
+    }
+
+    .danh-gia-du-an-page .dgda-filter-actions {
+        display: grid;
+        width: 100%;
+    }
+
+    .danh-gia-du-an-page .dgda-filter-actions .btn {
+        width: 100%;
+    }
+
+    .danh-gia-du-an-page .primary-cta-card,
+    .danh-gia-du-an-page .module-bridge-card {
+        padding: 0.75rem 0.8rem;
+    }
+}
+
+.danh-gia-du-an-page .support-collapse {
+    border: 1px solid #dfe8f5;
+    border-radius: 12px;
+    background: #f9fbff;
+    padding: 0.55rem 0.7rem;
+}
+
+.danh-gia-du-an-page .support-collapse > summary {
+    cursor: pointer;
+    color: #3f5877;
+    font-weight: 700;
 }

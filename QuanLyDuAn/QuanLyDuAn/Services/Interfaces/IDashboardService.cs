@@ -4,5 +4,5 @@ namespace QuanLyDuAn.Services.Interfaces;
 
 public interface IDashboardService
 {
-    Task<DashboardViewModel> GetDashboardAsync();
+    Task<DashboardViewModel> GetDashboardAsync(DateTime? tuNgay, DateTime? denNgay, string? locNhanh);
 }

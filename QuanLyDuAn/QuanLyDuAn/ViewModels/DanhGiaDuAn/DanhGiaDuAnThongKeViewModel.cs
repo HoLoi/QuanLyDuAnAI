@@ -1,4 +1,4 @@
-namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
+﻿namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
 {
     public class DanhGiaDuAnThongKeViewModel
     {
@@ -7,6 +7,11 @@ namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
         public string TrangThaiDuAn { get; set; } = string.Empty;
         public DateTime? NgayBatDauDuAn { get; set; }
         public DateTime? NgayKetThucDuAn { get; set; }
+        public DateTime? NgayKetThucThucTeDuAn { get; set; }
+        public int? SoNgayConLai { get; set; }
+        public int? SoNgayQuaHan { get; set; }
+        public string TrangThaiThoiHanDuAn { get; set; } = string.Empty;
+        public bool ChuaCoMocKetThucDuKien { get; set; }
         public int PhanTramHoanThanh { get; set; }
 
         public int TongCongViec { get; set; }
@@ -24,12 +29,26 @@ namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
         public int SoFileDuAn { get; set; }
         public bool? CoDuLieuAi { get; set; }
         public bool? DuAnBiTreTheoAi { get; set; }
+        public int? MaDmNguyenNhanAiDuDoan { get; set; }
         public string? TenNguyenNhanAiDuDoan { get; set; }
+        public string? NguonNguyenNhanAi { get; set; }
+        public string? TenModelTreHanAi { get; set; }
+        public string? TenModelNguyenNhanAi { get; set; }
         public double? DoTinCayAi { get; set; }
+        public string? MucPhuHopAi { get; set; }
+        public List<DanhGiaDuAnRelatedReasonViewModel>? DanhSachNguyenNhanLienQuan { get; set; }
         public DateTime? ThoiGianDuDoanAi { get; set; }
+        public int? MaDmNguyenNhanManagerXacNhan { get; set; }
         public string? TenNguyenNhanManagerXacNhan { get; set; }
         public double? DoTinCayManagerXacNhan { get; set; }
+        public DateTime? ThoiGianManagerXacNhan { get; set; }
         public string? TrangThaiDuLieuAi { get; set; }
+        public bool KetQuaAiCoTheDaCu { get; set; }
+        public string? CanhBaoDuLieuAi { get; set; }
+        public bool CoThePhanTichAi { get; set; }
+        public bool CanPhanTichAi { get; set; }
+        public bool TuDongPhanTichAi { get; set; }
+        public string? LyDoCanPhanTichAi { get; set; }
 
         public DateTime? NgayBatDau
         {

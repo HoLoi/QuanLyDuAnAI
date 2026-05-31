@@ -37,7 +37,6 @@ else
         <table class="table duyet-de-xuat-cong-viec-table">
             <thead>
                 <tr>
-                    <th>Mã</th>
                     <th>Dự án</th>
                     <th>Công việc đề xuất</th>
                     <th>Chi phí đề xuất</th>
@@ -52,10 +51,8 @@ else
                     var isPending = TrangThai.EqualsValue(item.TrangThaiCongViecDeXuat, TrangThai.ChoDuyet);
                     var detailRowId = $"dxcv-detail-{item.MaDeXuatCV}";
                     <tr class="duyet-de-xuat-cong-viec-main-row">
-                        <td class="text-nowrap">#@item.MaDeXuatCV</td>
                         <td>
                             <div class="duyet-de-xuat-cong-viec-cell-title">@item.TenDuAn</div>
-                            <div class="duyet-de-xuat-cong-viec-cell-sub">Mã dự án: @item.MaDuAn</div>
                         </td>
                         <td>
                             <div class="duyet-de-xuat-cong-viec-cell-title">@item.TenCongViecDeXuat</div>
@@ -104,7 +101,7 @@ else
                         </td>
                     </tr>
                     <tr id="@detailRowId" class="duyet-de-xuat-cong-viec-detail-row d-none">
-                        <td colspan="7">
+                        <td colspan="6">
                             <div class="duyet-de-xuat-cong-viec-detail-card">
                                 <div class="duyet-de-xuat-cong-viec-detail-grid">
                                     <div class="duyet-de-xuat-cong-viec-detail-item">

@@ -10,6 +10,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public DateTime? NgayTaoDuAn { get; set; }
         public DateTime? NgayBatDauDuAn { get; set; }
         public DateTime? NgayKetThucDuAn { get; set; }
+        public DateTime? NgayHoanThanhThucTeDuAn { get; set; }
         public string TrangThaiDuAn { get; set; } = string.Empty;
         public int PhanTramHoanThanh { get; set; }
         public string? GhiChuDuAn { get; set; }
@@ -25,6 +26,8 @@ namespace QuanLyDuAn.ViewModels.DuAn
 
         public List<DuAnFileItemViewModel> DanhSachFile { get; set; } = new();
         public bool CoTheQuanLyFile { get; set; }
+        public bool CoTheYeuCauDoiQuanLy { get; set; }
+        public string? LyDoKhongTheYeuCauDoiQuanLy { get; set; }
 
         public ProjectStatusCheckViewModel? StatusCheck { get; set; }
         public bool HasApprovedBudget { get; set; }
@@ -43,6 +46,9 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public string? TuKhoa { get; set; }
         public int? LocMaLoaiDuAn { get; set; }
         public string? LocTrangThaiDuAn { get; set; }
+        public DateTime? TuNgay { get; set; }
+        public DateTime? DenNgay { get; set; }
+        public string? LocTheoNgay { get; set; }
 
         public HashSet<string> Permissions { get; set; } = new();
     }

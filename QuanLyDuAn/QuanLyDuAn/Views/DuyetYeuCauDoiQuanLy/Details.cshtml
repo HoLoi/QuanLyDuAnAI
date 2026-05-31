@@ -1,0 +1,99 @@
+﻿@model QuanLyDuAn.ViewModels.DuyetYeuCauDoiQuanLy.DuyetYeuCauDoiQuanLyDetailsViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    ViewData["Title"] = "Chi tiết yêu cầu đổi quản lý";
+    var canApprove = Model.Permissions.Contains(Permissions.DuyetYeuCauDoiQuanLy.Duyet);
+    var item = Model.YeuCau;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/DuyetYeuCauDoiQuanLy/index.css" asp-append-version="true" />
+}
+
+<section class="duyet-yeu-cau-doi-quan-ly-page">
+    <header class="duyet-yeu-cau-header-card">
+        <div class="duyet-yeu-cau-header-content">
+            <h1 class="duyet-yeu-cau-title">Chi tiết yêu cầu đổi quản lý</h1>
+            <p class="duyet-yeu-cau-subtitle">Mã yêu cầu: #@item.MaYeuCauDoiQuanLy</p>
+        </div>
+        <a asp-action="Index" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-neutral">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại danh sách
+        </a>
+    </header>
+
+    <section class="duyet-yeu-cau-section-card">
+        <div class="duyet-yeu-cau-detail-grid">
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Dự án</span>
+                <strong>@item.TenDuAn (#@item.MaDuAn)</strong>
+            </div>
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Người tạo</span>
+                <strong>@item.TenQuanLyHienTai</strong>
+            </div>
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Quản lý hiện tại</span>
+                <strong>@item.TenQuanLyHienTai</strong>
+            </div>
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Quản lý đề xuất</span>
+                <strong>@item.TenQuanLyDeXuat</strong>
+            </div>
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Ngày yêu cầu</span>
+                <strong>@(item.NgayTaoYeuCauDoiQuanLy?.ToString("dd/MM/yyyy HH:mm") ?? "-")</strong>
+            </div>
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Trạng thái</span>
+                <strong>@TrangThai.ToDisplay(item.TrangThaiYeuCauDoiQuanLy)</strong>
+            </div>
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Người duyệt</span>
+                <strong>@(string.IsNullOrWhiteSpace(item.TenNguoiDungDuyet) ? "Chưa duyệt" : item.TenNguoiDungDuyet)</strong>
+            </div>
+            <div class="duyet-yeu-cau-detail-item">
+                <span>Ngày duyệt</span>
+                <strong>@(item.NgayDuyetYeuCauDoiQuanLy?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa duyệt")</strong>
+            </div>
+        </div>
+    </section>
+
+    @if (canApprove && item.CoTheXuLy)
+    {
+        <section class="duyet-yeu-cau-section-card">
+            <div class="duyet-yeu-cau-section-head">
+                <h2 class="duyet-yeu-cau-section-title">Xử lý yêu cầu</h2>
+                <p class="duyet-yeu-cau-section-note">Thao tác duyệt hoặc từ chối chỉ áp dụng cho yêu cầu đang chờ duyệt.</p>
+            </div>
+            <div class="duyet-yeu-cau-actions">
+                <form asp-action="Approve" method="post" class="js-review-submit" data-confirm="Xác nhận duyệt yêu cầu này?">
+                    <input type="hidden" name="id" value="@item.MaYeuCauDoiQuanLy" />
+                    <button type="submit" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-primary">Duyệt yêu cầu</button>
+                </form>
+
+                <form asp-action="Reject" method="post" class="duyet-yeu-cau-reject-form js-review-submit" data-confirm="Xác nhận từ chối yêu cầu này?">
+                    <input type="hidden" name="id" value="@item.MaYeuCauDoiQuanLy" />
+                    <input type="text" name="lyDoTuChoi" class="form-control" placeholder="Nhập lý do từ chối (nếu có)" />
+                    <button type="submit" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-danger">Từ chối yêu cầu</button>
+                </form>
+            </div>
+        </section>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            document.querySelectorAll(".js-review-submit").forEach(function (form) {
+                form.addEventListener("submit", function (event) {
+                    var message = form.getAttribute("data-confirm");
+                    if (message && !window.confirm(message)) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        })();
+    </script>
+}

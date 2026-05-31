@@ -6,6 +6,9 @@
     int? locMaDuAn = ViewBag.LocMaDuAn as int?;
     string? locTrangThai = ViewBag.LocTrangThai as string;
     string? tuKhoa = ViewBag.TuKhoa as string;
+    DateTime? tuNgay = ViewBag.TuNgay as DateTime?;
+    DateTime? denNgay = ViewBag.DenNgay as DateTime?;
+    string? locTheoNgay = ViewBag.LocTheoNgay as string;
 
     bool canWorkflowMutate = permissions.Contains(Permissions.TienDo.Duyet)
                              || permissions.Contains(Permissions.DuyetDeXuatCongViec.Duyet);
@@ -34,17 +37,14 @@
 }
 else
 {
-    <div class="workflow-table-wrapper d-none d-lg-block">
+    <div class="workflow-table-wrapper table-responsive-soft d-none d-lg-block">
         <table class="table app-data-table workflow-table">
             <thead>
                 <tr>
-                    <th class="col-id">Mã</th>
-                    <th>Dự án</th>
-                    <th>Công việc</th>
-                    <th>Mức độ</th>
-                    <th>Chi phí</th>
-                    <th class="col-date">Bắt đầu</th>
-                    <th class="col-date">Kết thúc dự kiến</th>
+                    <th class="col-project">Dự án</th>
+                    <th class="col-task">Công việc</th>
+                    <th class="col-meta">Mức độ / Chi phí</th>
+                    <th class="col-time">Mốc thời gian</th>
                     <th class="col-status">Trạng thái</th>
                     <th class="col-actions">Thao tác</th>
                 </tr>
@@ -53,26 +53,41 @@ else
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td class="col-id">#@item.MaCongViec</td>
-                        <td>
+                        <td class="col-project">
                             <div class="fw-semibold">@item.TenDuAn</div>
-                            <small class="text-muted">@item.TenDanhMucCV</small>
+                            <small class="text-muted task-meta-compact">@item.TenDanhMucCV</small>
                         </td>
-                        <td>
+                        <td class="col-task">
                             <div class="fw-semibold">@item.TenCongViec</div>
-                            <small class="text-muted">@item.MoTaCongViec</small>
+                            <small class="text-muted task-desc-compact">@item.MoTaCongViec</small>
                         </td>
-                        <td>@item.TenMucDo</td>
-                        <td>@item.ChiPhiDaChi.ToString("N0")</td>
-                        <td class="col-date">@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</td>
-                        <td class="col-date">@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</td>
+                        <td class="col-meta">
+                            <div class="meta-line">
+                                <span class="meta-label">Mức độ:</span>
+                                <span>@item.TenMucDo</span>
+                            </div>
+                            <div class="meta-line">
+                                <span class="meta-label">Chi phí:</span>
+                                <span>@item.ChiPhiDaChi.ToString("N0")</span>
+                            </div>
+                        </td>
+                        <td class="col-time">
+                            <div class="meta-line">
+                                <span class="meta-label">Bắt đầu:</span>
+                                <span>@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="meta-line">
+                                <span class="meta-label">Kết thúc:</span>
+                                <span>@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </td>
                         <td class="col-status">
                             <span class="workflow-badge @item.CssTrangThai">
                                 <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
                                 @item.TrangThaiHienThi
                             </span>
                         </td>
-                        <td class="col-actions table-actions">
+                        <td class="col-actions table-actions task-actions-cell">
                             @if (permissions.Contains(Permissions.PhanCongCongViec.Xem) && item.CoThePhanCongCongViec)
                             {
                                 <a asp-controller="PhanCongCongViec" asp-action="Index" asp-route-maCongViec="@item.MaCongViec" class="btn btn-action btn-subtle">
@@ -94,6 +109,9 @@ else
                                     <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
                                     <input type="hidden" name="locTrangThai" value="@locTrangThai" />
                                     <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                                    <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
                                     <button type="submit" class="btn btn-action btn-confirm">
                                         <i class="bi bi-check2-circle"></i>
                                         Xác nhận hoàn thành
@@ -107,6 +125,9 @@ else
                                     <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
                                     <input type="hidden" name="locTrangThai" value="@locTrangThai" />
                                     <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                                    <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
                                     <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do mở lại" required />
                                     <button type="submit" class="btn btn-action btn-reopen">
                                         <i class="bi bi-arrow-counterclockwise"></i>
@@ -174,6 +195,9 @@ else
                             <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
                             <input type="hidden" name="locTrangThai" value="@locTrangThai" />
                             <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
                             <button type="submit" class="btn btn-action btn-confirm w-100">
                                 <i class="bi bi-check2-circle"></i>
                                 Xác nhận hoàn thành
@@ -187,6 +211,9 @@ else
                             <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
                             <input type="hidden" name="locTrangThai" value="@locTrangThai" />
                             <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+                            <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
                             <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do mở lại" required />
                             <button type="submit" class="btn btn-action btn-reopen w-100">
                                 <i class="bi bi-arrow-counterclockwise"></i>

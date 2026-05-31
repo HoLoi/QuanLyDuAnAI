@@ -1,11 +1,14 @@
 ﻿@model QuanLyDuAn.ViewModels.DuAn.DuAnPageViewModel
 @using QuanLyDuAn.Constants
+@using QuanLyDuAn.Services.Interfaces
+@inject IPermissionHelper PermissionHelper
 
 @{
     ViewData["Title"] = "Quản lý dự án";
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.DuAn.Them) || permissions.Contains(Permissions.DuAn.Sua);
     bool canCreate = permissions.Contains(Permissions.DuAn.Them);
+    var canExport = await PermissionHelper.HasPermissionAsync(User, Permissions.ThongKe.XuatFile);
     var hasValidationErrors = ViewData.ModelState.Values.Any(v => v.Errors.Count > 0);
     var danhSach = Model.DanhSach ?? new List<QuanLyDuAn.ViewModels.DuAn.DuAnViewModel>();
 
@@ -20,10 +23,14 @@
     ViewBag.TuKhoa = Model.TuKhoa;
     ViewBag.LocMaLoaiDuAn = Model.LocMaLoaiDuAn;
     ViewBag.LocTrangThaiDuAn = Model.LocTrangThaiDuAn;
+    ViewBag.TuNgay = Model.TuNgay;
+    ViewBag.DenNgay = Model.DenNgay;
+    ViewBag.LocTheoNgay = Model.LocTheoNgay;
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/DuAn/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
 <div class="du-an-page">
@@ -100,15 +107,34 @@
     <section class="du-an-section-card du-an-filter-card">
         <div class="du-an-section-head">
             <h3 class="du-an-section-title">Bộ lọc dự án</h3>
-            <p class="du-an-section-note">Lọc nhanh theo từ khóa, loại dự án và trạng thái.</p>
+            <p class="du-an-section-note">Lọc nhanh theo từ khóa, trạng thái và khoảng thời gian.</p>
         </div>
         <partial name="_Filter" model="Model" />
     </section>
 
     <section class="du-an-section-card du-an-table-card">
-        <div class="du-an-section-head">
-            <h3 class="du-an-section-title">Danh sách dự án</h3>
-            <p class="du-an-section-note">Theo dõi thông tin tổng quan và thao tác nhanh trên từng dự án.</p>
+        <div class="du-an-section-head list-card-header">
+            <div class="list-card-header-content">
+                <h3 class="du-an-section-title">Danh sách dự án</h3>
+                <p class="du-an-section-note">Theo dõi thông tin tổng quan và thao tác nhanh trên từng dự án.</p>
+            </div>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["tuKhoa"] = Model.TuKhoa,
+                        ["locMaLoaiDuAn"] = Model.LocMaLoaiDuAn?.ToString(),
+                        ["locTrangThaiDuAn"] = Model.LocTrangThaiDuAn,
+                        ["tuNgay"] = Model.TuNgay?.ToString("yyyy-MM-dd"),
+                        ["denNgay"] = Model.DenNgay?.ToString("yyyy-MM-dd"),
+                        ["locTheoNgay"] = Model.LocTheoNgay
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
         </div>
         <partial name="_Table" model="Model.DanhSach" />
     </section>

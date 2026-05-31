@@ -12,6 +12,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public DateTime? NgayTaoDuAn { get; set; }
         public DateTime? NgayBatDauDuAn { get; set; }
         public DateTime? NgayKetThucDuAn { get; set; }
+        public DateTime? NgayHoanThanhThucTeDuAn { get; set; }
         public int PhanTramHoanThanh { get; set; }
         public string TrangThaiDuAn { get; set; } = string.Empty;
         public int SoLuongTeam { get; set; }

@@ -9,7 +9,6 @@
 <table class="table table-bordered mt-3 app-data-table">
     <thead>
         <tr>
-            <th class="col-id">Mã</th>
             <th>Tên</th>
             <th>Mô tả</th>
             <th class="col-actions"></th>
@@ -19,20 +18,19 @@
         @foreach (var cd in Model)
         {
             <tr>
-                <td class="col-id">@cd.MaChucDanh</td>
                 <td>@cd.TenChucDanh</td>
                 <td>@cd.MoTaChucDanh</td>
                 <td class="col-actions table-actions">
                     @if (permissions.Contains(Permissions.ChucDanh.Sua))
                     {
-                        <a asp-action="Sua" asp-route-id="@cd.MaChucDanh" class="btn btn-outline-warning btn-sm">Sửa</a>
+                        <a asp-action="Sua" asp-route-id="@cd.MaChucDanh" class="btn btn-action btn-subtle">Sửa</a>
                     }
 
                     @if (permissions.Contains(Permissions.ChucDanh.Xoa))
                     {
                         <form asp-action="XoaChucDanh" method="post">
                             <input type="hidden" name="maChucDanh" value="@cd.MaChucDanh" />
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                            <button type="submit" class="btn btn-action btn-danger-soft">Xóa</button>
                         </form>
                     }
                 </td>

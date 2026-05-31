@@ -101,6 +101,10 @@
     gap: 0.2rem;
 }
 
+.ngan-sach-list-header {
+    margin-bottom: 0.3rem;
+}
+
 .ngan-sach-section-title {
     margin: 0;
     font-size: 1.03rem;

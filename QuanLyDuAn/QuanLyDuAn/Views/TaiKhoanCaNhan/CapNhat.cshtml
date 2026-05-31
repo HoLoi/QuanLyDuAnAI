@@ -1,0 +1,165 @@
+﻿@model QuanLyDuAn.ViewModels.TaiKhoanCaNhan.CapNhatTaiKhoanCaNhanViewModel
+
+@{
+    ViewData["Title"] = "Cập nhật hồ sơ cá nhân";
+}
+
+<section class="tai-khoan-ca-nhan-page">
+    <header class="tai-khoan-header-card">
+        <div>
+            <h1 class="tai-khoan-title">Cập nhật hồ sơ cá nhân</h1>
+            <p class="tai-khoan-subtitle">Bạn chỉ được chỉnh sửa thông tin liên hệ và hồ sơ cơ bản của chính mình.</p>
+        </div>
+    </header>
+
+    <article class="tai-khoan-card tai-khoan-card-form">
+        <form asp-action="CapNhat" method="post" enctype="multipart/form-data" class="tai-khoan-form">
+            @Html.AntiForgeryToken()
+
+            <section class="tai-khoan-avatar-editor">
+                <div class="tai-khoan-avatar-preview-wrap">
+                    @if (!string.IsNullOrWhiteSpace(Model.AnhDaiDienHienTai))
+                    {
+                        <img id="avatarPreview" src="@Model.AnhDaiDienHienTai" alt="Ảnh đại diện" class="tai-khoan-avatar-photo large" />
+                        <span id="avatarFallback" class="tai-khoan-avatar-large hidden">@Model.ChuCaiDau</span>
+                    }
+                    else
+                    {
+                        <img id="avatarPreview" src="" alt="Ảnh đại diện" class="tai-khoan-avatar-photo large hidden" />
+                        <span id="avatarFallback" class="tai-khoan-avatar-large">@Model.ChuCaiDau</span>
+                    }
+                </div>
+
+                <div class="tai-khoan-avatar-fields">
+                    <label asp-for="AnhDaiDienFile"></label>
+                    <input asp-for="AnhDaiDienFile" type="file" class="avatar-file-input" accept="image/png,image/jpeg,image/jpg,image/webp" id="avatarInput" />
+                    <label for="avatarInput" class="tai-khoan-btn tai-khoan-btn-outline tai-khoan-btn-medium avatar-file-trigger">
+                        <i class="bi bi-upload"></i>
+                        Chọn ảnh đại diện
+                    </label>
+                    <span id="avatarFileName" class="avatar-file-name">Chưa chọn tệp nào</span>
+                    <span asp-validation-for="AnhDaiDienFile" class="text-danger"></span>
+                    <p class="tai-khoan-field-note">Chọn ảnh JPG, PNG hoặc WEBP, tối đa 2MB.</p>
+                </div>
+            </section>
+
+            <div class="account-readonly-row">
+                <div class="tai-khoan-form-field">
+                    <label asp-for="UserName"></label>
+                    <input asp-for="UserName" class="form-control tai-khoan-readonly-input" readonly />
+                </div>
+
+                <div class="tai-khoan-form-field">
+                    <label asp-for="Email"></label>
+                    <input value="@Model.Email" class="form-control tai-khoan-readonly-input" readonly disabled />
+                </div>
+            </div>
+
+            <p class="account-email-note">Email dùng cho tài khoản đăng nhập. Vui lòng liên hệ quản trị viên nếu cần thay đổi.</p>
+
+            <div class="tai-khoan-form-grid">
+
+                <div class="tai-khoan-form-field">
+                    <label asp-for="HoTenNguoiDung"></label>
+                    <input asp-for="HoTenNguoiDung" class="form-control" />
+                    <span asp-validation-for="HoTenNguoiDung" class="text-danger"></span>
+                </div>
+
+                <div class="tai-khoan-form-field">
+                    <label asp-for="SdtNguoiDung"></label>
+                    <input asp-for="SdtNguoiDung" class="form-control" />
+                    <span asp-validation-for="SdtNguoiDung" class="text-danger"></span>
+                </div>
+
+                <div class="tai-khoan-form-field">
+                    <label asp-for="NgaySinh"></label>
+                    <input asp-for="NgaySinh" type="date" class="form-control" />
+                    <span asp-validation-for="NgaySinh" class="text-danger"></span>
+                </div>
+
+                <div class="tai-khoan-form-field full">
+                    <label asp-for="DiaChiNguoiDung"></label>
+                    <textarea asp-for="DiaChiNguoiDung" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="DiaChiNguoiDung" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="tai-khoan-readonly-grid">
+                <div>
+                    <span class="readonly-label">Chức danh hiện tại</span>
+                    <span class="tai-khoan-badge neutral">@(string.IsNullOrWhiteSpace(Model.TenChucDanh) ? "Chưa cập nhật" : Model.TenChucDanh)</span>
+                </div>
+                <div>
+                    <span class="readonly-label">Vai trò hệ thống</span>
+                    <div class="tai-khoan-badge-list">
+                        @if (Model.VaiTroHeThong.Count == 0)
+                        {
+                            <span class="tai-khoan-badge neutral">Chưa có vai trò</span>
+                        }
+                        else
+                        {
+                            @foreach (var role in Model.VaiTroHeThong)
+                            {
+                                <span class="tai-khoan-badge neutral">@role</span>
+                            }
+                        }
+                    </div>
+                </div>
+                <div>
+                    <span class="readonly-label">Team hiện tại</span>
+                    <div class="tai-khoan-badge-list">
+                        @if (Model.TeamHienTai.Count == 0)
+                        {
+                            <span class="tai-khoan-badge neutral">Chưa tham gia team</span>
+                        }
+                        else
+                        {
+                            @foreach (var team in Model.TeamHienTai)
+                            {
+                                <span class="tai-khoan-badge neutral">@team</span>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="tai-khoan-form-actions">
+                <button type="submit" class="tai-khoan-btn tai-khoan-btn-primary">
+                    <i class="bi bi-check2-circle"></i>
+                    Lưu thay đổi
+                </button>
+                <a asp-action="Index" class="tai-khoan-btn tai-khoan-btn-outline">Quay lại hồ sơ</a>
+            </div>
+        </form>
+    </article>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var input = document.getElementById("avatarInput");
+            var preview = document.getElementById("avatarPreview");
+            var fallback = document.getElementById("avatarFallback");
+            var fileName = document.getElementById("avatarFileName");
+
+            if (!input || !preview || !fallback || !fileName) {
+                return;
+            }
+
+            input.addEventListener("change", function () {
+                var file = input.files && input.files[0];
+                if (!file) {
+                    fileName.textContent = "Chưa chọn tệp nào";
+                    return;
+                }
+
+                fileName.textContent = file.name;
+                var objectUrl = URL.createObjectURL(file);
+                preview.src = objectUrl;
+                preview.classList.remove("hidden");
+                fallback.classList.add("hidden");
+            });
+        })();
+    </script>
+}

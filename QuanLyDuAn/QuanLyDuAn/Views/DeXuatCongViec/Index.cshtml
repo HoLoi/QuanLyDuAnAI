@@ -10,6 +10,9 @@
     ViewBag.Permissions = permissions;
     ViewBag.LocMaDuAn = Model.LocMaDuAn;
     ViewBag.LocTrangThai = Model.LocTrangThai;
+    ViewBag.TuNgay = Model.TuNgay;
+    ViewBag.DenNgay = Model.DenNgay;
+    ViewBag.LocTheoNgay = Model.LocTheoNgay;
 
     var nganSachConLai = (Model.NganSachDuAn ?? 0) - Model.TongChiPhiDaDung;
     if (nganSachConLai < 0)

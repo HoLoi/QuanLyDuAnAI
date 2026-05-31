@@ -1,3 +1,32 @@
-﻿.empty-box { border: 1px dashed #d8e0ee; border-radius: 12px; padding: 20px; text-align: center; background: #fbfcff; }
-.empty-icon { font-size: 1.4rem; color: #8fa1bd; }
-.empty-text { color: #6b7a90; }
+.empty-box {
+    border: 1px dashed #d8e0ee;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    background: #fbfcff;
+}
+
+.empty-icon {
+    font-size: 1.4rem;
+    color: #8fa1bd;
+}
+
+.empty-title {
+    color: #304866;
+    font-weight: 700;
+    margin-top: 0.36rem;
+}
+
+.empty-text {
+    color: #6b7a90;
+    margin-top: 0.3rem;
+}
+
+.empty-actions {
+    margin-top: 0.82rem;
+    display: flex;
+    gap: 0.46rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}

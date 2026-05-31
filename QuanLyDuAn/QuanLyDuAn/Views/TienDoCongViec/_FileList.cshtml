@@ -23,7 +23,9 @@ else
                    asp-route-locMaCongViec="@Model.Filter.LocMaCongViec"
                    asp-route-locMaChiTietCv="@Model.Filter.LocMaChiTietCv"
                    asp-route-tuKhoa="@Model.Filter.TuKhoa"
-                   class="btn btn-outline-secondary btn-sm td-file-download">Tải</a>
+                   asp-route-tuNgayBaoCao="@Model.Filter.TuNgayBaoCao?.ToString("yyyy-MM-dd")"
+                   asp-route-denNgayBaoCao="@Model.Filter.DenNgayBaoCao?.ToString("yyyy-MM-dd")"
+                   class="btn-action btn-subtle td-file-download">Tải</a>
             </div>
         }
     </div>

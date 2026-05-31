@@ -7,6 +7,9 @@
     string? tuKhoa = ViewBag.TuKhoa as string;
     int? locMaLoaiDuAn = ViewBag.LocMaLoaiDuAn as int?;
     string? locTrangThaiDuAn = ViewBag.LocTrangThaiDuAn as string;
+    DateTime? tuNgay = ViewBag.TuNgay as DateTime?;
+    DateTime? denNgay = ViewBag.DenNgay as DateTime?;
+    string? locTheoNgay = ViewBag.LocTheoNgay as string;
 
     var danhSach = Model ?? new List<QuanLyDuAn.ViewModels.DuAn.DuAnViewModel>();
 
@@ -40,10 +43,9 @@
 else
 {
     <div class="du-an-table-scroll">
-        <table class="table table-bordered app-data-table du-an-table">
+        <table class="table workflow-table app-data-table du-an-table">
             <thead>
                 <tr>
-                    <th class="col-id">Mã</th>
                     <th>Tên dự án</th>
                     <th>Loại</th>
                     <th class="col-date">Ngày tạo</th>
@@ -57,7 +59,6 @@ else
                 @foreach (var duAn in danhSach)
                 {
                     <tr>
-                        <td class="col-id">@duAn.MaDuAn</td>
                         <td>
                             <div class="fw-semibold">@duAn.TenDuAn</div>
                         </td>
@@ -90,7 +91,10 @@ else
                                    asp-route-tuKhoa="@tuKhoa"
                                    asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
                                    asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
-                                   class="btn btn-sm du-an-action-btn du-an-action-neutral">
+                                   asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-locTheoNgay="@locTheoNgay"
+                                   class="btn btn-action btn-subtle">
                                     <i class="bi bi-eye"></i>
                                     <span>Chi tiết</span>
                                 </a>
@@ -104,7 +108,10 @@ else
                                    asp-route-tuKhoa="@tuKhoa"
                                    asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
                                    asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
-                                   class="btn btn-sm du-an-action-btn du-an-action-info">
+                                   asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-locTheoNgay="@locTheoNgay"
+                                   class="btn btn-action btn-subtle">
                                     <i class="bi bi-diagram-3"></i>
                                     <span>Nhóm phụ trách</span>
                                 </a>
@@ -115,7 +122,7 @@ else
                                 <a asp-controller="DanhMucCongViec"
                                    asp-action="Index"
                                    asp-route-locMaDuAn="@duAn.MaDuAn"
-                                   class="btn btn-sm du-an-action-btn du-an-action-primary">
+                                   class="btn btn-action btn-subtle">
                                     <i class="bi bi-list-task"></i>
                                     <span>Danh mục công việc</span>
                                 </a>
@@ -129,7 +136,10 @@ else
                                    asp-route-tuKhoa="@tuKhoa"
                                    asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
                                    asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
-                                   class="btn btn-sm du-an-action-btn du-an-action-info">
+                                   asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-locTheoNgay="@locTheoNgay"
+                                   class="btn btn-action btn-subtle">
                                     <i class="bi bi-people"></i>
                                     <span>Thành viên</span>
                                 </a>
@@ -141,7 +151,7 @@ else
                                    data-has-budget="@duAn.HasApprovedBudget.ToString().ToLowerInvariant()"
                                    data-budget-url="@Url.Action("Index", "DeXuatNganSach", new { locMaDuAn = duAn.MaDuAn })"
                                    onclick="return handleDeXuatCongViecClick(this);"
-                                   class="btn btn-sm du-an-action-btn du-an-action-primary">
+                                   class="btn btn-action btn-subtle">
                                     <i class="bi bi-lightbulb"></i>
                                     <span>Đề xuất công việc</span>
                                 </a>
@@ -152,7 +162,7 @@ else
                                 <a asp-controller="DeXuatNganSach"
                                    asp-action="Index"
                                    asp-route-locMaDuAn="@duAn.MaDuAn"
-                                   class="btn btn-sm du-an-action-btn du-an-action-primary">
+                                   class="btn btn-action btn-subtle">
                                     <i class="bi bi-cash-coin"></i>
                                     <span>Đề xuất ngân sách</span>
                                 </a>
@@ -165,7 +175,10 @@ else
                                    asp-route-tuKhoa="@tuKhoa"
                                    asp-route-locMaLoaiDuAn="@locMaLoaiDuAn"
                                    asp-route-locTrangThaiDuAn="@locTrangThaiDuAn"
-                                   class="btn btn-sm du-an-action-btn du-an-action-warning">
+                                   asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
+                                   asp-route-locTheoNgay="@locTheoNgay"
+                                   class="btn btn-action btn-reopen">
                                     <i class="bi bi-pencil-square"></i>
                                     <span>Sửa</span>
                                 </a>
@@ -178,7 +191,10 @@ else
                                     <input type="hidden" name="tuKhoa" value="@tuKhoa" />
                                     <input type="hidden" name="locMaLoaiDuAn" value="@locMaLoaiDuAn" />
                                     <input type="hidden" name="locTrangThaiDuAn" value="@locTrangThaiDuAn" />
-                                    <button type="submit" class="btn btn-sm du-an-action-btn du-an-action-danger">
+                                    <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
+                                    <button type="submit" class="btn btn-action btn-danger-soft">
                                         <i class="bi bi-trash"></i>
                                         <span>Xóa</span>
                                     </button>

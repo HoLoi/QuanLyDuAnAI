@@ -1,0 +1,577 @@
+{
+  "model_file": "decision_tree_reason_20260528_061400.joblib",
+  "model_type": "DecisionTreeClassifier",
+  "algorithm": "DecisionTreeClassifier",
+  "model_category": "NguyenNhan",
+  "accuracy": 0.8695652173913043,
+  "train_time": "2026-05-28T06:14:00.532580Z",
+  "train_time_ms": 8,
+  "feature_list": [
+    "SoNhanVienDuAn",
+    "TongSoCongViec",
+    "SoCongViecTre",
+    "TyLeCongViecTre",
+    "ChiPhiDuKien",
+    "ChiPhiThucTe",
+    "ChenhLechChiPhi",
+    "SoLanThayDoiNhanSu",
+    "SoLanThayDoiQuanLy",
+    "SoNgayTreTienDo",
+    "SoDeXuatCongViecChoDuyet",
+    "SoDeXuatCongViecBiTuChoi",
+    "ThoiGianDuyetCongViecTrungBinh",
+    "SoDeXuatNganSachChoDuyet",
+    "SoDeXuatNganSachBiTuChoi",
+    "ThoiGianDuyetNganSachTrungBinh",
+    "SoBaoCaoTienDoChoDuyet",
+    "SoBaoCaoTienDoBiTuChoi",
+    "SoBaoCaoTienDoYeuCauBoSung",
+    "TyLeBaoCaoTienDoBiTuChoi",
+    "SoLanCapNhatTienDo",
+    "SoNgayChamCapNhatTienDo"
+  ],
+  "label_column": "MaDMNguyenNhan",
+  "class_distribution": {
+    "9": 47,
+    "8": 47,
+    "4": 47,
+    "13": 47,
+    "12": 47,
+    "5": 47,
+    "2": 47,
+    "11": 47,
+    "1": 47,
+    "10": 37
+  },
+  "feature_importance": {
+    "SoNhanVienDuAn": 0.03627272627765188,
+    "TongSoCongViec": 0.028777107848821565,
+    "SoCongViecTre": 0.02432495545390267,
+    "TyLeCongViecTre": 0.061921910370339096,
+    "ChiPhiDuKien": 0.2040704236156762,
+    "ChiPhiThucTe": 0.04071933781229301,
+    "ChenhLechChiPhi": 0.12785930334255705,
+    "SoLanThayDoiNhanSu": 0.05022987451462671,
+    "SoLanThayDoiQuanLy": 0.12355179585977298,
+    "SoNgayTreTienDo": 0.14603951120001796,
+    "SoDeXuatCongViecChoDuyet": 0.0,
+    "SoDeXuatCongViecBiTuChoi": 0.0,
+    "ThoiGianDuyetCongViecTrungBinh": 0.0,
+    "SoDeXuatNganSachChoDuyet": 0.0,
+    "SoDeXuatNganSachBiTuChoi": 0.0,
+    "ThoiGianDuyetNganSachTrungBinh": 0.0,
+    "SoBaoCaoTienDoChoDuyet": 0.0,
+    "SoBaoCaoTienDoBiTuChoi": 0.0,
+    "SoBaoCaoTienDoYeuCauBoSung": 0.0,
+    "TyLeBaoCaoTienDoBiTuChoi": 0.0,
+    "SoLanCapNhatTienDo": 0.0,
+    "SoNgayChamCapNhatTienDo": 0.15623305370434082
+  },
+  "classification_report": {
+    "1": {
+      "precision": 1.0,
+      "recall": 0.7777777777777778,
+      "f1-score": 0.875,
+      "support": 9.0
+    },
+    "2": {
+      "precision": 0.7272727272727273,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8,
+      "support": 9.0
+    },
+    "4": {
+      "precision": 0.8888888888888888,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8888888888888888,
+      "support": 9.0
+    },
+    "5": {
+      "precision": 0.8,
+      "recall": 0.8,
+      "f1-score": 0.8,
+      "support": 10.0
+    },
+    "8": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1-score": 0.9473684210526315,
+      "support": 10.0
+    },
+    "9": {
+      "precision": 0.8,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8421052631578947,
+      "support": 9.0
+    },
+    "10": {
+      "precision": 0.75,
+      "recall": 0.75,
+      "f1-score": 0.75,
+      "support": 8.0
+    },
+    "11": {
+      "precision": 0.8,
+      "recall": 0.8,
+      "f1-score": 0.8,
+      "support": 10.0
+    },
+    "12": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9.0
+    },
+    "13": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9.0
+    },
+    "accuracy": 0.8695652173913043,
+    "macro avg": {
+      "precision": 0.8766161616161616,
+      "recall": 0.8694444444444442,
+      "f1-score": 0.8703362573099416,
+      "support": 92.0
+    },
+    "weighted avg": {
+      "precision": 0.8776679841897234,
+      "recall": 0.8695652173913043,
+      "f1-score": 0.8709525171624712,
+      "support": 92.0
+    }
+  },
+  "precision_macro": 0.8766161616161616,
+  "recall_macro": 0.8694444444444442,
+  "f1_macro": 0.8703362573099416,
+  "precision_weighted": 0.8776679841897234,
+  "recall_weighted": 0.8695652173913043,
+  "f1_weighted": 0.8709525171624712,
+  "sklearn_version": "1.7.2",
+  "python_version": "3.10.11",
+  "train_size": 368,
+  "test_size": 92,
+  "confusion_matrix": [
+    [
+      7,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      8,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      8,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      8,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      8,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      6,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9
+    ]
+  ],
+  "confusion_matrix_labels": [
+    1,
+    2,
+    4,
+    5,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "decision_tree_text": "|--- SoLanThayDoiQuanLy <= 3.50\n|   |--- SoNgayChamCapNhatTienDo <= 5.50\n|   |   |--- ChiPhiDuKien <= 210600000.00\n|   |   |   |--- ChenhLechChiPhi <= 23027250.00\n|   |   |   |   |--- SoNgayChamCapNhatTienDo <= 4.50\n|   |   |   |   |   |--- SoNgayChamCapNhatTienDo <= 3.50\n|   |   |   |   |   |   |--- SoNgayTreTienDo <= 25.00\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu <= 4.50\n|   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 10717500.00\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 157021752.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayChamCapNhatTienDo <= 2.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayChamCapNhatTienDo >  2.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  157021752.00\n|   |   |   |   |   |   |   |   |   |   |--- TyLeCongViecTre <= 34.30\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 11\n|   |   |   |   |   |   |   |   |   |   |--- TyLeCongViecTre >  34.30\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 4\n|   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  10717500.00\n|   |   |   |   |   |   |   |   |   |--- SoCongViecTre <= 2.50\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 3\n|   |   |   |   |   |   |   |   |   |--- SoCongViecTre >  2.50\n|   |   |   |   |   |   |   |   |   |   |--- ChiPhiDuKien <= 164270000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- ChiPhiDuKien >  164270000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 11\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu >  4.50\n|   |   |   |   |   |   |   |   |--- TongSoCongViec <= 45.00\n|   |   |   |   |   |   |   |   |   |--- class: 1\n|   |   |   |   |   |   |   |   |--- TongSoCongViec >  45.00\n|   |   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |--- SoNgayTreTienDo >  25.00\n|   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |--- SoNgayChamCapNhatTienDo >  3.50\n|   |   |   |   |   |   |--- SoNgayTreTienDo <= 17.00\n|   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 7047500.00\n|   |   |   |   |   |   |   |   |--- class: 13\n|   |   |   |   |   |   |   |--- ChenhLechChiPhi >  7047500.00\n|   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 111420000.00\n|   |   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  111420000.00\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 10515000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 11.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  11.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 4\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  10515000.00\n|   |   |   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |--- SoNgayTreTienDo >  17.00\n|   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |--- SoNgayChamCapNhatTienDo >  4.50\n|   |   |   |   |   |--- class: 8\n|   |   |   |--- ChenhLechChiPhi >  23027250.00\n|   |   |   |   |--- ChiPhiDuKien <= 198585000.00\n|   |   |   |   |   |--- TongSoCongViec <= 47.00\n|   |   |   |   |   |   |--- TyLeCongViecTre <= 83.33\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu <= 4.50\n|   |   |   |   |   |   |   |   |--- TongSoCongViec <= 38.50\n|   |   |   |   |   |   |   |   |   |--- class: 4\n|   |   |   |   |   |   |   |   |--- TongSoCongViec >  38.50\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 34417000.00\n|   |   |   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  34417000.00\n|   |   |   |   |   |   |   |   |   |   |--- class: 4\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu >  4.50\n|   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |--- TyLeCongViecTre >  83.33\n|   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |--- TongSoCongViec >  47.00\n|   |   |   |   |   |   |--- class: 2\n|   |   |   |   |--- ChiPhiDuKien >  198585000.00\n|   |   |   |   |   |--- class: 5\n|   |   |--- ChiPhiDuKien >  210600000.00\n|   |   |   |--- ChiPhiDuKien <= 265995000.00\n|   |   |   |   |--- SoNhanVienDuAn <= 11.50\n|   |   |   |   |   |--- SoNgayTreTienDo <= 21.50\n|   |   |   |   |   |   |--- SoLanThayDoiQuanLy <= 0.50\n|   |   |   |   |   |   |   |--- ChiPhiDuKien <= 252725000.00\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu <= 0.50\n|   |   |   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu >  0.50\n|   |   |   |   |   |   |   |   |   |--- TongSoCongViec <= 49.50\n|   |   |   |   |   |   |   |   |   |   |--- class: 13\n|   |   |   |   |   |   |   |   |   |--- TongSoCongViec >  49.50\n|   |   |   |   |   |   |   |   |   |   |--- class: 12\n|   |   |   |   |   |   |   |--- ChiPhiDuKien >  252725000.00\n|   |   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |   |   |--- SoLanThayDoiQuanLy >  0.50\n|   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 13.00\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiQuanLy <= 1.50\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 229880000.00\n|   |   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= -18752000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  -18752000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  229880000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 3\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiQuanLy >  1.50\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 234500000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 8.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  8.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 13\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  234500000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 3.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 1\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  3.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |   |   |   |--- SoNgayTreTienDo >  13.00\n|   |   |   |   |   |   |   |   |--- class: 9\n|   |   |   |   |   |--- SoNgayTreTienDo >  21.50\n|   |   |   |   |   |   |--- ChiPhiDuKien <= 236065000.00\n|   |   |   |   |   |   |   |--- ChiPhiDuKien <= 225090000.00\n|   |   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |   |   |--- ChiPhiDuKien >  225090000.00\n|   |   |   |   |   |   |   |   |--- class: 12\n|   |   |   |   |   |   |--- ChiPhiDuKien >  236065000.00\n|   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |--- SoNhanVienDuAn >  11.50\n|   |   |   |   |   |--- ChiPhiDuKien <= 248730000.00\n|   |   |   |   |   |   |--- class: 12\n|   |   |   |   |   |--- ChiPhiDuKien >  248730000.00\n|   |   |   |   |   |   |--- class: 9\n|   |   |   |--- ChiPhiDuKien >  265995000.00\n|   |   |   |   |--- ChiPhiDuKien <= 280105008.00\n|   |   |   |   |   |--- class: 9\n|   |   |   |   |--- ChiPhiDuKien >  280105008.00\n|   |   |   |   |   |--- SoLanThayDoiQuanLy <= 2.50\n|   |   |   |   |   |   |--- SoCongViecTre <= 6.50\n|   |   |   |   |   |   |   |--- ChiPhiDuKien <= 287410016.00\n|   |   |   |   |   |   |   |   |--- class: 9\n|   |   |   |   |   |   |   |--- ChiPhiDuKien >  287410016.00\n|   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |--- SoCongViecTre >  6.50\n|   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |--- SoLanThayDoiQuanLy >  2.50\n|   |   |   |   |   |   |--- class: 9\n|   |--- SoNgayChamCapNhatTienDo >  5.50\n|   |   |--- TyLeCongViecTre <= 83.33\n|   |   |   |--- class: 9\n|   |   |--- TyLeCongViecTre >  83.33\n|   |   |   |--- class: 12\n|--- SoLanThayDoiQuanLy >  3.50\n|   |--- ChenhLechChiPhi <= 16158400.00\n|   |   |--- class: 11\n|   |--- ChenhLechChiPhi >  16158400.00\n|   |   |--- ChiPhiDuKien <= 171365000.00\n|   |   |   |--- class: 2\n|   |   |--- ChiPhiDuKien >  171365000.00\n|   |   |   |--- class: 11\n",
+  "requested_by_user_id": "0c8cfcc5571a4a7abcbd7ffc89e3a278",
+  "requested_by_user_name": "admin",
+  "train_note": "train lan 3",
+  "created_at": "2026-05-28T06:14:00.534657Z",
+  "modelType": "NguyenNhan",
+  "modelFile": "decision_tree_reason_20260528_061400.joblib",
+  "featureList": [
+    "SoNhanVienDuAn",
+    "TongSoCongViec",
+    "SoCongViecTre",
+    "TyLeCongViecTre",
+    "ChiPhiDuKien",
+    "ChiPhiThucTe",
+    "ChenhLechChiPhi",
+    "SoLanThayDoiNhanSu",
+    "SoLanThayDoiQuanLy",
+    "SoNgayTreTienDo",
+    "SoDeXuatCongViecChoDuyet",
+    "SoDeXuatCongViecBiTuChoi",
+    "ThoiGianDuyetCongViecTrungBinh",
+    "SoDeXuatNganSachChoDuyet",
+    "SoDeXuatNganSachBiTuChoi",
+    "ThoiGianDuyetNganSachTrungBinh",
+    "SoBaoCaoTienDoChoDuyet",
+    "SoBaoCaoTienDoBiTuChoi",
+    "SoBaoCaoTienDoYeuCauBoSung",
+    "TyLeBaoCaoTienDoBiTuChoi",
+    "SoLanCapNhatTienDo",
+    "SoNgayChamCapNhatTienDo"
+  ],
+  "labelColumn": "MaDMNguyenNhan",
+  "classDistribution": {
+    "9": 47,
+    "8": 47,
+    "4": 47,
+    "13": 47,
+    "12": 47,
+    "5": 47,
+    "2": 47,
+    "11": 47,
+    "1": 47,
+    "10": 37
+  },
+  "featureImportance": {
+    "SoNhanVienDuAn": 0.03627272627765188,
+    "TongSoCongViec": 0.028777107848821565,
+    "SoCongViecTre": 0.02432495545390267,
+    "TyLeCongViecTre": 0.061921910370339096,
+    "ChiPhiDuKien": 0.2040704236156762,
+    "ChiPhiThucTe": 0.04071933781229301,
+    "ChenhLechChiPhi": 0.12785930334255705,
+    "SoLanThayDoiNhanSu": 0.05022987451462671,
+    "SoLanThayDoiQuanLy": 0.12355179585977298,
+    "SoNgayTreTienDo": 0.14603951120001796,
+    "SoDeXuatCongViecChoDuyet": 0.0,
+    "SoDeXuatCongViecBiTuChoi": 0.0,
+    "ThoiGianDuyetCongViecTrungBinh": 0.0,
+    "SoDeXuatNganSachChoDuyet": 0.0,
+    "SoDeXuatNganSachBiTuChoi": 0.0,
+    "ThoiGianDuyetNganSachTrungBinh": 0.0,
+    "SoBaoCaoTienDoChoDuyet": 0.0,
+    "SoBaoCaoTienDoBiTuChoi": 0.0,
+    "SoBaoCaoTienDoYeuCauBoSung": 0.0,
+    "TyLeBaoCaoTienDoBiTuChoi": 0.0,
+    "SoLanCapNhatTienDo": 0.0,
+    "SoNgayChamCapNhatTienDo": 0.15623305370434082
+  },
+  "classificationReport": {
+    "1": {
+      "precision": 1.0,
+      "recall": 0.7777777777777778,
+      "f1-score": 0.875,
+      "support": 9.0
+    },
+    "2": {
+      "precision": 0.7272727272727273,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8,
+      "support": 9.0
+    },
+    "4": {
+      "precision": 0.8888888888888888,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8888888888888888,
+      "support": 9.0
+    },
+    "5": {
+      "precision": 0.8,
+      "recall": 0.8,
+      "f1-score": 0.8,
+      "support": 10.0
+    },
+    "8": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1-score": 0.9473684210526315,
+      "support": 10.0
+    },
+    "9": {
+      "precision": 0.8,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8421052631578947,
+      "support": 9.0
+    },
+    "10": {
+      "precision": 0.75,
+      "recall": 0.75,
+      "f1-score": 0.75,
+      "support": 8.0
+    },
+    "11": {
+      "precision": 0.8,
+      "recall": 0.8,
+      "f1-score": 0.8,
+      "support": 10.0
+    },
+    "12": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9.0
+    },
+    "13": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 9.0
+    },
+    "accuracy": 0.8695652173913043,
+    "macro avg": {
+      "precision": 0.8766161616161616,
+      "recall": 0.8694444444444442,
+      "f1-score": 0.8703362573099416,
+      "support": 92.0
+    },
+    "weighted avg": {
+      "precision": 0.8776679841897234,
+      "recall": 0.8695652173913043,
+      "f1-score": 0.8709525171624712,
+      "support": 92.0
+    }
+  },
+  "precisionMacro": 0.8766161616161616,
+  "recallMacro": 0.8694444444444442,
+  "f1Macro": 0.8703362573099416,
+  "precisionWeighted": 0.8776679841897234,
+  "recallWeighted": 0.8695652173913043,
+  "f1Weighted": 0.8709525171624712,
+  "trainSize": 368,
+  "testSize": 92,
+  "confusionMatrix": [
+    [
+      7,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      8,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      8,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      8,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      8,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      2,
+      6,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      8,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      9
+    ]
+  ],
+  "confusionMatrixLabels": [
+    1,
+    2,
+    4,
+    5,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "decisionTreeText": "|--- SoLanThayDoiQuanLy <= 3.50\n|   |--- SoNgayChamCapNhatTienDo <= 5.50\n|   |   |--- ChiPhiDuKien <= 210600000.00\n|   |   |   |--- ChenhLechChiPhi <= 23027250.00\n|   |   |   |   |--- SoNgayChamCapNhatTienDo <= 4.50\n|   |   |   |   |   |--- SoNgayChamCapNhatTienDo <= 3.50\n|   |   |   |   |   |   |--- SoNgayTreTienDo <= 25.00\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu <= 4.50\n|   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 10717500.00\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 157021752.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayChamCapNhatTienDo <= 2.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayChamCapNhatTienDo >  2.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  157021752.00\n|   |   |   |   |   |   |   |   |   |   |--- TyLeCongViecTre <= 34.30\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 11\n|   |   |   |   |   |   |   |   |   |   |--- TyLeCongViecTre >  34.30\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 4\n|   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  10717500.00\n|   |   |   |   |   |   |   |   |   |--- SoCongViecTre <= 2.50\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 3\n|   |   |   |   |   |   |   |   |   |--- SoCongViecTre >  2.50\n|   |   |   |   |   |   |   |   |   |   |--- ChiPhiDuKien <= 164270000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- ChiPhiDuKien >  164270000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 11\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu >  4.50\n|   |   |   |   |   |   |   |   |--- TongSoCongViec <= 45.00\n|   |   |   |   |   |   |   |   |   |--- class: 1\n|   |   |   |   |   |   |   |   |--- TongSoCongViec >  45.00\n|   |   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |--- SoNgayTreTienDo >  25.00\n|   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |--- SoNgayChamCapNhatTienDo >  3.50\n|   |   |   |   |   |   |--- SoNgayTreTienDo <= 17.00\n|   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 7047500.00\n|   |   |   |   |   |   |   |   |--- class: 13\n|   |   |   |   |   |   |   |--- ChenhLechChiPhi >  7047500.00\n|   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 111420000.00\n|   |   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  111420000.00\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 10515000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 11.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  11.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 4\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  10515000.00\n|   |   |   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |--- SoNgayTreTienDo >  17.00\n|   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |--- SoNgayChamCapNhatTienDo >  4.50\n|   |   |   |   |   |--- class: 8\n|   |   |   |--- ChenhLechChiPhi >  23027250.00\n|   |   |   |   |--- ChiPhiDuKien <= 198585000.00\n|   |   |   |   |   |--- TongSoCongViec <= 47.00\n|   |   |   |   |   |   |--- TyLeCongViecTre <= 83.33\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu <= 4.50\n|   |   |   |   |   |   |   |   |--- TongSoCongViec <= 38.50\n|   |   |   |   |   |   |   |   |   |--- class: 4\n|   |   |   |   |   |   |   |   |--- TongSoCongViec >  38.50\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= 34417000.00\n|   |   |   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  34417000.00\n|   |   |   |   |   |   |   |   |   |   |--- class: 4\n|   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu >  4.50\n|   |   |   |   |   |   |   |   |--- class: 2\n|   |   |   |   |   |   |--- TyLeCongViecTre >  83.33\n|   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |--- TongSoCongViec >  47.00\n|   |   |   |   |   |   |--- class: 2\n|   |   |   |   |--- ChiPhiDuKien >  198585000.00\n|   |   |   |   |   |--- class: 5\n|   |   |--- ChiPhiDuKien >  210600000.00\n|   |   |   |--- ChiPhiDuKien <= 265995000.00\n|   |   |   |   |--- SoNhanVienDuAn <= 11.50\n|   |   |   |   |   |--- SoNgayTreTienDo <= 21.50\n|   |   |   |   |   |   |--- SoLanThayDoiQuanLy <= 0.50\n|   |   |   |   |   |   |   |--- ChiPhiDuKien <= 252725000.00\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu <= 0.50\n|   |   |   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiNhanSu >  0.50\n|   |   |   |   |   |   |   |   |   |--- TongSoCongViec <= 49.50\n|   |   |   |   |   |   |   |   |   |   |--- class: 13\n|   |   |   |   |   |   |   |   |   |--- TongSoCongViec >  49.50\n|   |   |   |   |   |   |   |   |   |   |--- class: 12\n|   |   |   |   |   |   |   |--- ChiPhiDuKien >  252725000.00\n|   |   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |   |   |--- SoLanThayDoiQuanLy >  0.50\n|   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 13.00\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiQuanLy <= 1.50\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 229880000.00\n|   |   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi <= -18752000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |   |   |   |   |   |--- ChenhLechChiPhi >  -18752000.00\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  229880000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  5.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 3\n|   |   |   |   |   |   |   |   |--- SoLanThayDoiQuanLy >  1.50\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe <= 234500000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 8.50\n|   |   |   |   |   |   |   |   |   |   |   |--- truncated branch of depth 2\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  8.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 13\n|   |   |   |   |   |   |   |   |   |--- ChiPhiThucTe >  234500000.00\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo <= 3.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 1\n|   |   |   |   |   |   |   |   |   |   |--- SoNgayTreTienDo >  3.50\n|   |   |   |   |   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |   |   |   |--- SoNgayTreTienDo >  13.00\n|   |   |   |   |   |   |   |   |--- class: 9\n|   |   |   |   |   |--- SoNgayTreTienDo >  21.50\n|   |   |   |   |   |   |--- ChiPhiDuKien <= 236065000.00\n|   |   |   |   |   |   |   |--- ChiPhiDuKien <= 225090000.00\n|   |   |   |   |   |   |   |   |--- class: 5\n|   |   |   |   |   |   |   |--- ChiPhiDuKien >  225090000.00\n|   |   |   |   |   |   |   |   |--- class: 12\n|   |   |   |   |   |   |--- ChiPhiDuKien >  236065000.00\n|   |   |   |   |   |   |   |--- class: 8\n|   |   |   |   |--- SoNhanVienDuAn >  11.50\n|   |   |   |   |   |--- ChiPhiDuKien <= 248730000.00\n|   |   |   |   |   |   |--- class: 12\n|   |   |   |   |   |--- ChiPhiDuKien >  248730000.00\n|   |   |   |   |   |   |--- class: 9\n|   |   |   |--- ChiPhiDuKien >  265995000.00\n|   |   |   |   |--- ChiPhiDuKien <= 280105008.00\n|   |   |   |   |   |--- class: 9\n|   |   |   |   |--- ChiPhiDuKien >  280105008.00\n|   |   |   |   |   |--- SoLanThayDoiQuanLy <= 2.50\n|   |   |   |   |   |   |--- SoCongViecTre <= 6.50\n|   |   |   |   |   |   |   |--- ChiPhiDuKien <= 287410016.00\n|   |   |   |   |   |   |   |   |--- class: 9\n|   |   |   |   |   |   |   |--- ChiPhiDuKien >  287410016.00\n|   |   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |   |--- SoCongViecTre >  6.50\n|   |   |   |   |   |   |   |--- class: 10\n|   |   |   |   |   |--- SoLanThayDoiQuanLy >  2.50\n|   |   |   |   |   |   |--- class: 9\n|   |--- SoNgayChamCapNhatTienDo >  5.50\n|   |   |--- TyLeCongViecTre <= 83.33\n|   |   |   |--- class: 9\n|   |   |--- TyLeCongViecTre >  83.33\n|   |   |   |--- class: 12\n|--- SoLanThayDoiQuanLy >  3.50\n|   |--- ChenhLechChiPhi <= 16158400.00\n|   |   |--- class: 11\n|   |--- ChenhLechChiPhi >  16158400.00\n|   |   |--- ChiPhiDuKien <= 171365000.00\n|   |   |   |--- class: 2\n|   |   |--- ChiPhiDuKien >  171365000.00\n|   |   |   |--- class: 11\n",
+  "createdAt": "2026-05-28T06:14:00.534657Z",
+  "trainNote": "train lan 3"
+}

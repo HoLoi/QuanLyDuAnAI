@@ -1,10 +1,12 @@
-namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
+﻿namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
 {
     public class DanhGiaDuAnPageViewModel
     {
         public string? TuKhoa { get; set; }
         public string? TrangThai { get; set; }
         public int? MaDuAn { get; set; }
+        public DateTime? TuNgayDanhGia { get; set; }
+        public DateTime? DenNgayDanhGia { get; set; }
 
         public List<DanhGiaDuAnItemViewModel> DanhSach { get; set; } = new();
         public List<DanhGiaDuAnDuAnOptionViewModel> DanhSachDuAn { get; set; } = new();
@@ -12,6 +14,7 @@ namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
         public DanhGiaDuAnFormViewModel? Form { get; set; }
 
         public int TongSo { get; set; }
+        public int SoChuaDanhGia { get; set; }
         public int SoNhap { get; set; }
         public int SoChoDuyet { get; set; }
         public int SoDaDuyet { get; set; }

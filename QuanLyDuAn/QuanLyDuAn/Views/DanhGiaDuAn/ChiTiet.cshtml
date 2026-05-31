@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Chi tiết đánh giá dự án";
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+    var backUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Action("Index", "DanhGiaDuAn");
+    var duAnDangTre = Model.ThongKe?.DuAnBiTreTheoAi == true;
 }
 
 @section Styles
@@ -13,7 +16,7 @@
     <div class="danh-gia-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Chi tiết đánh giá dự án</h5>
-            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Quay lại</a>
+            <a href="@backUrl" class="btn-action btn-subtle">Trở lại</a>
         </div>
 
         <div class="row g-2 mb-3">
@@ -23,10 +26,17 @@
         </div>
 
         @await Html.PartialAsync("_ProjectStats", Model.ThongKe)
-        @await Html.PartialAsync("_AiInsightCard", Model.ThongKe)
+        @if (duAnDangTre)
+        {
+            @await Html.PartialAsync("_AiInsightCard", Model.ThongKe)
+        }
+        else
+        {
+            <div class="empty-note mb-3">Dự án không trễ nên không cần xác nhận nguyên nhân trễ.</div>
+        }
 
         <div class="table-responsive dgda-table-wrap">
-            <table class="table table-sm dgda-table">
+            <table class="table workflow-table dgda-table">
                 <thead><tr><th>Tiêu chí</th><th>Điểm</th><th>Nhận xét</th></tr></thead>
                 <tbody>
                 @foreach (var tc in Model.TieuChi)

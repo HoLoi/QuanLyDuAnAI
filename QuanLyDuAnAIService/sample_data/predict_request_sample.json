@@ -1,0 +1,53 @@
+﻿{
+  "maDuAn": "DA_TEST_001",
+  "feature": {
+    "SoNhanVienDuAn": 12,
+    "TongSoCongViec": 82,
+    "SoCongViecTre": 19,
+    "TyLeCongViecTre": 23,
+    "ChiPhiDuKien": 1300000000,
+    "ChiPhiThucTe": 1540000000,
+    "ChenhLechChiPhi": 240000000,
+    "SoLanThayDoiNhanSu": 4,
+    "SoLanThayDoiQuanLy": 1,
+    "SoNgayTreTienDo": 25,
+    "SoDeXuatCongViecChoDuyet": 3,
+    "SoDeXuatCongViecBiTuChoi": 1,
+    "ThoiGianDuyetCongViecTrungBinh": 6.5,
+    "SoDeXuatNganSachChoDuyet": 2,
+    "SoDeXuatNganSachBiTuChoi": 1,
+    "ThoiGianDuyetNganSachTrungBinh": 5.0,
+    "SoBaoCaoTienDoChoDuyet": 2,
+    "SoBaoCaoTienDoBiTuChoi": 4,
+    "SoBaoCaoTienDoYeuCauBoSung": 2,
+    "TyLeBaoCaoTienDoBiTuChoi": 25,
+    "SoLanCapNhatTienDo": 16,
+    "SoNgayChamCapNhatTienDo": 8
+  },
+  "danhMucNguyenNhan": [
+    {
+      "maDMNguyenNhan": 1,
+      "tenNguyenNhan": "Thiếu nhân sự"
+    },
+    {
+      "maDMNguyenNhan": 2,
+      "tenNguyenNhan": "Thay đổi yêu cầu liên tục"
+    },
+    {
+      "maDMNguyenNhan": 3,
+      "tenNguyenNhan": "Quy trình xử lý chậm"
+    },
+    {
+      "maDMNguyenNhan": 4,
+      "tenNguyenNhan": "Vượt ngân sách"
+    },
+    {
+      "maDMNguyenNhan": 6,
+      "tenNguyenNhan": "Phối hợp công việc chưa tốt"
+    },
+    {
+      "maDMNguyenNhan": 7,
+      "tenNguyenNhan": "Thông tin đầu vào chưa đầy đủ"
+    }
+  ]
+}

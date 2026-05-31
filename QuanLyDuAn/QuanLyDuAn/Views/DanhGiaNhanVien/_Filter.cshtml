@@ -1,12 +1,13 @@
 ﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienPageViewModel
 
-<form asp-action="Index" method="get" class="dgnv-filter">
-    <div class="row g-2 align-items-end">
-        <div class="col-lg-4 col-md-6">
+<form asp-action="Index" method="get" class="dgnv-filter" id="dgnv-filter">
+    <input type="hidden" name="nguon" value="@Model.Nguon" />
+    <div class="dgnv-filter-grid dgnv-filter-grid-main">
+        <div class="dgnv-filter-field dgnv-filter-field-wide">
             <label class="form-label">Từ khóa</label>
             <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên dự án, tên nhân viên..." />
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="dgnv-filter-field">
             <label class="form-label">Dự án</label>
             <select name="maDuAn" class="form-select">
                 <option value="">Tất cả</option>
@@ -16,7 +17,7 @@
                 }
             </select>
         </div>
-        <div class="col-lg-3 col-md-6">
+        <div class="dgnv-filter-field">
             <label class="form-label">Nhân viên</label>
             <select name="maNhanVien" class="form-select">
                 <option value="">Tất cả</option>
@@ -26,8 +27,36 @@
                 }
             </select>
         </div>
-        <div class="col-lg-2 col-md-6 d-grid">
-            <button type="submit" class="btn btn-primary">Lọc</button>
+        <div class="dgnv-filter-field">
+            <label class="form-label">Trạng thái đánh giá</label>
+            <select name="trangThai" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="ChuaDanhGia" selected="@(string.Equals(Model.TrangThai, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase))">Chưa đánh giá</option>
+                <option value="Nhap" selected="@(string.Equals(Model.TrangThai, "Nhap", StringComparison.OrdinalIgnoreCase))">Nháp</option>
+                <option value="ChoDuyet" selected="@(string.Equals(Model.TrangThai, "ChoDuyet", StringComparison.OrdinalIgnoreCase))">Chờ duyệt</option>
+                <option value="DaDuyet" selected="@(string.Equals(Model.TrangThai, "DaDuyet", StringComparison.OrdinalIgnoreCase))">Đã duyệt</option>
+                <option value="TuChoi" selected="@(string.Equals(Model.TrangThai, "TuChoi", StringComparison.OrdinalIgnoreCase))">Từ chối</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="dgnv-filter-grid dgnv-filter-grid-time">
+        <div class="dgnv-filter-field dgnv-filter-field-date">
+            <label class="form-label">Từ ngày đánh giá</label>
+            <input type="date" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="dgnv-filter-field dgnv-filter-field-date">
+            <label class="form-label">Đến ngày đánh giá</label>
+            <input type="date" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="dgnv-filter-actions">
+            <button type="submit" class="btn-filter-apply">Lọc dữ liệu</button>
+            <a asp-action="Index"
+               asp-route-maDuAn="@(string.Equals(Model.Nguon, "du-an", StringComparison.OrdinalIgnoreCase) ? Model.MaDuAn : null)"
+               asp-route-nguon="@(string.Equals(Model.Nguon, "du-an", StringComparison.OrdinalIgnoreCase) ? "du-an" : null)"
+               class="btn-filter-reset">
+                Làm mới
+            </a>
         </div>
     </div>
 </form>

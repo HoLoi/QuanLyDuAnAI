@@ -1,0 +1,85 @@
+﻿@model QuanLyDuAn.ViewModels.YeuCauDoiQuanLy.YeuCauDoiQuanLyPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    var permissions = Model.Permissions;
+    var canCancel = permissions.Contains(Permissions.YeuCauDoiQuanLy.Them);
+
+    string GetStatusBadgeClass(string? status)
+    {
+        if (TrangThai.EqualsValue(status, TrangThai.ChoDuyet))
+        {
+            return "is-pending";
+        }
+        if (TrangThai.EqualsValue(status, TrangThai.DaDuyet))
+        {
+            return "is-approved";
+        }
+        if (TrangThai.EqualsValue(status, TrangThai.TuChoi))
+        {
+            return "is-rejected";
+        }
+        if (TrangThai.EqualsValue(status, TrangThai.DaHuy))
+        {
+            return "is-cancelled";
+        }
+
+        return "is-neutral";
+    }
+}
+
+@if (Model.DanhSachYeuCau.Count == 0)
+{
+    <div class="yeu-cau-empty-state">Chưa có yêu cầu đổi quản lý nào.</div>
+}
+else
+{
+    <div class="yeu-cau-table-scroll">
+        <table class="table yeu-cau-table">
+            <thead>
+                <tr>
+                    <th>Dự án</th>
+                    <th>Quản lý hiện tại</th>
+                    <th>Quản lý đề xuất</th>
+                    <th>Ngày yêu cầu</th>
+                    <th>Trạng thái</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.DanhSachYeuCau)
+                {
+                    <tr>
+                        <td>
+                            <div class="yeu-cau-cell-title">@item.TenDuAn</div>
+                        </td>
+                        <td>@item.TenQuanLyHienTai</td>
+                        <td>@item.TenQuanLyDeXuat</td>
+                        <td class="text-nowrap">@(item.NgayTaoYeuCauDoiQuanLy?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                        <td>
+                            <span class="yeu-cau-status-badge @GetStatusBadgeClass(item.TrangThaiYeuCauDoiQuanLy)">
+                                @TrangThai.ToDisplay(item.TrangThaiYeuCauDoiQuanLy)
+                            </span>
+                        </td>
+                        <td class="col-actions">
+                            @if (canCancel && item.CoTheHuy)
+                            {
+                                <form asp-action="Cancel" method="post" class="yeu-cau-inline-form">
+                                    <input type="hidden" name="id" value="@item.MaYeuCauDoiQuanLy" />
+                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                                    <button type="submit" class="yeu-cau-action-btn yeu-cau-action-danger" onclick="return confirm('Bạn có chắc muốn hủy yêu cầu này?');">Hủy yêu cầu</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="yeu-cau-no-action">Không có thao tác</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

@@ -34,6 +34,13 @@ namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
         public string? TenNguyenNhanManagerXacNhan { get; set; }
         public double? DoTinCayManagerXacNhan { get; set; }
         public string? TrangThaiDuLieuAi { get; set; }
+        public int? MaDmNguyenNhanAiDuDoan { get; set; }
+        public int? MaDmNguyenNhanManagerXacNhan { get; set; }
+        public DateTime? ThoiGianManagerXacNhan { get; set; }
+        public bool CoTheXacNhanNguyenNhan { get; set; }
+        public bool HienThiKhuXacNhanNguyenNhan { get; set; }
+        public string? ThongBaoXacNhanNguyenNhan { get; set; }
+        public List<DanhGiaDuAnNguyenNhanOptionViewModel> DanhSachNguyenNhan { get; set; } = new();
 
         public List<DanhGiaDuAnTieuChiViewModel> TieuChi { get; set; } = new();
 
@@ -50,5 +57,11 @@ namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
         public bool CoTheTuChoi { get; set; }
 
         public DanhGiaDuAnThongKeViewModel ThongKe { get; set; } = new();
+    }
+
+    public class DanhGiaDuAnNguyenNhanOptionViewModel
+    {
+        public int MaDMNguyenNhan { get; set; }
+        public string TenNguyenNhan { get; set; } = string.Empty;
     }
 }

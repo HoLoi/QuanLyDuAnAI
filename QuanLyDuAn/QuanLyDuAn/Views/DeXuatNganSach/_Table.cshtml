@@ -6,13 +6,15 @@
     bool canCancel = permissions.Contains(Permissions.DeXuatNganSach.Them);
     int? locMaDuAn = ViewBag.LocMaDuAn as int?;
     string? locTrangThai = ViewBag.LocTrangThai as string;
+    DateTime? tuNgay = ViewBag.TuNgay as DateTime?;
+    DateTime? denNgay = ViewBag.DenNgay as DateTime?;
+    string? locTheoNgay = ViewBag.LocTheoNgay as string;
 }
 
-<div class="dxns-table-scroll">
+<div class="dxns-table-scroll table-responsive-soft">
     <table class="table dxns-table">
         <thead>
             <tr>
-                <th class="col-id">Mã</th>
                 <th>Ngân sách cũ</th>
                 <th>Ngân sách đề xuất</th>
                 <th>Người đề xuất</th>
@@ -25,7 +27,7 @@
             @if (Model.Count == 0)
             {
                 <tr>
-                    <td colspan="7">
+                    <td colspan="6">
                         <div class="dxns-empty-state">Chưa có đề xuất ngân sách.</div>
                     </td>
                 </tr>
@@ -42,7 +44,6 @@
                     else if (TrangThai.EqualsValue(statusCode, TrangThai.DaHuy)) { badgeClass = "dxns-status-canceled"; }
 
                     <tr>
-                        <td class="col-id">#@item.MaDeXuatNS</td>
                         <td class="text-nowrap">@(item.NganSachCu?.ToString("N0") ?? "-") VNĐ</td>
                         <td class="text-nowrap">@item.NganSachDeXuat?.ToString("N0") VNĐ</td>
                         <td>@item.NguoiDungDeXuat</td>
@@ -50,8 +51,8 @@
                         <td>
                             <span class="dxns-status-badge @badgeClass">@TrangThai.ToDisplay(item.TrangThaiDeXuat)</span>
                         </td>
-                        <td class="col-actions">
-                            <div class="dxns-action-group">
+                        <td class="col-actions dxns-table-actions">
+                            <div class="dxns-action-group dxns-table-action-group">
                                 <button type="button" class="dxns-action-btn dxns-action-neutral" data-bs-toggle="collapse" data-bs-target="#dxns-detail-@item.MaDeXuatNS" aria-expanded="false" aria-controls="dxns-detail-@item.MaDeXuatNS">
                                     <i class="bi bi-eye"></i>
                                     Xem chi tiết
@@ -62,6 +63,9 @@
                                         <input type="hidden" name="maDeXuatNs" value="@item.MaDeXuatNS" />
                                         <input type="hidden" name="locMaDuAn" value="@locMaDuAn" />
                                         <input type="hidden" name="locTrangThai" value="@locTrangThai" />
+                                        <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
                                         <button type="submit" class="dxns-action-btn dxns-action-danger">
                                             <i class="bi bi-x-circle"></i>
                                             Hủy đề xuất
@@ -72,7 +76,7 @@
                         </td>
                     </tr>
                     <tr class="collapse" id="dxns-detail-@item.MaDeXuatNS">
-                        <td colspan="7" class="dxns-detail-cell">
+                        <td colspan="6" class="dxns-detail-cell">
                             <div class="dxns-detail-grid">
                                 <div>
                                     <span>Lý do đề xuất</span>

@@ -2,8 +2,8 @@
 @using QuanLyDuAn.Constants
 
 <form asp-action="Index" method="get" class="dxns-filter-form">
-    <div class="row g-3">
-        <div class="col-md-6">
+    <div class="dxns-filter-grid dxns-filter-grid-main">
+        <div class="dxns-filter-field">
             <label class="form-label" for="locMaDuAn">Dự án</label>
             <select id="locMaDuAn" name="locMaDuAn" class="form-select">
                 @foreach (var duAn in Model.DanhSachDuAn)
@@ -19,7 +19,7 @@
                 }
             </select>
         </div>
-        <div class="col-md-6">
+        <div class="dxns-filter-field">
             <label class="form-label" for="locTrangThai">Trạng thái đề xuất</label>
             <select id="locTrangThai" name="locTrangThai" class="form-select">
                 <option value="">-- Tất cả trạng thái --</option>
@@ -31,14 +31,34 @@
         </div>
     </div>
 
-    <div class="dxns-filter-actions">
-        <button class="dxns-action-btn dxns-action-primary" type="submit">
-            <i class="bi bi-funnel"></i>
-            Lọc
-        </button>
-        <a asp-action="Index" asp-route-locMaDuAn="@Model.LocMaDuAn" class="dxns-action-btn dxns-action-neutral">
-            <i class="bi bi-x-circle"></i>
-            Bỏ lọc
-        </a>
+    <div class="dxns-filter-grid dxns-filter-grid-time">
+        <div class="dxns-filter-field">
+            <label class="form-label" for="locTheoNgay">Lọc theo ngày</label>
+            <select id="locTheoNgay" name="locTheoNgay" class="form-select">
+                <option value="NgayDeXuat" selected="@((Model.LocTheoNgay ?? "NgayDeXuat") == "NgayDeXuat")">Ngày đề xuất</option>
+                <option value="NgayDuyet" selected="@(Model.LocTheoNgay == "NgayDuyet")">Ngày duyệt</option>
+            </select>
+        </div>
+
+        <div class="dxns-filter-field dxns-filter-field-date">
+            <label class="form-label" for="tuNgay">Từ ngày</label>
+            <input id="tuNgay" type="date" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+
+        <div class="dxns-filter-field dxns-filter-field-date">
+            <label class="form-label" for="denNgay">Đến ngày</label>
+            <input id="denNgay" type="date" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+
+        <div class="dxns-filter-actions">
+            <button class="dxns-action-btn dxns-action-primary" type="submit">
+                <i class="bi bi-funnel"></i>
+                Lọc dữ liệu
+            </button>
+            <a asp-action="Index" asp-route-locMaDuAn="@Model.LocMaDuAn" class="dxns-action-btn dxns-action-neutral">
+                <i class="bi bi-x-circle"></i>
+                Làm mới
+            </a>
+        </div>
     </div>
 </form>

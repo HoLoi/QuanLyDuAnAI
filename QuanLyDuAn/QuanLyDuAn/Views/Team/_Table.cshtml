@@ -8,10 +8,9 @@
     string? locTrangThaiTeam = ViewBag.LocTrangThaiTeam as string;
 }
 
-<table class="table table-bordered mt-3 app-data-table">
+<table class="table workflow-table mt-3 app-data-table">
     <thead>
         <tr>
-            <th class="col-id">Mã</th>
             <th>Tên team</th>
             <th>Mô tả</th>
             <th class="col-date">Ngày lập</th>
@@ -24,7 +23,6 @@
         @foreach (var team in Model)
         {
             <tr>
-                <td class="col-id">@team.MaTeam</td>
                 <td>@team.TenTeam</td>
                 <td>@team.MoTaTeam</td>
                 <td class="col-date">@team.NgayLapTeam?.ToString("dd/MM/yyyy")</td>
@@ -34,7 +32,7 @@
                     <a asp-controller="ThanhVienTeam"
                        asp-action="Index"
                        asp-route-locMaTeam="@team.MaTeam"
-                       class="btn btn-outline-info btn-sm">Thành viên</a>
+                       class="btn-action btn-subtle">Thành viên</a>
 
                     @if (team.SoLuongThanhVien > 0 && !team.CoTruongNhom && permissions.Contains(Permissions.ThanhVienNhom.Them))
                     {
@@ -42,7 +40,7 @@
                            asp-action="Index"
                            asp-route-locMaTeam="@team.MaTeam"
                            asp-route-cheDoGanTruongNhom="true"
-                           class="btn btn-outline-primary btn-sm">Gán trưởng nhóm</a>
+                           class="btn-action btn-confirm">Gán trưởng nhóm</a>
                     }
 
                     @if (permissions.Contains(Permissions.Nhom.Sua))
@@ -51,7 +49,7 @@
                            asp-route-id="@team.MaTeam"
                            asp-route-tuKhoa="@tuKhoa"
                            asp-route-locTrangThaiTeam="@locTrangThaiTeam"
-                              class="btn btn-outline-warning btn-sm">Sửa</a>
+                              class="btn-action btn-subtle">Sửa</a>
                     }
 
                     @if (permissions.Contains(Permissions.Nhom.Xoa))
@@ -60,7 +58,7 @@
                             <input type="hidden" name="maTeam" value="@team.MaTeam" />
                             <input type="hidden" name="tuKhoa" value="@tuKhoa" />
                             <input type="hidden" name="locTrangThaiTeam" value="@locTrangThaiTeam" />
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                            <button type="submit" class="btn-action btn-danger-soft">Xóa</button>
                         </form>
                     }
                 </td>

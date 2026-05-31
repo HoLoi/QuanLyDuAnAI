@@ -21,7 +21,6 @@ else
         <table class="table table-bordered app-data-table thanh-vien-table">
             <thead>
                 <tr>
-                    <th>Mã NV</th>
                     <th>Họ tên</th>
                     <th>Vai trò trong dự án</th>
                     <th>Ngày tham gia</th>
@@ -33,7 +32,6 @@ else
                 @foreach (var item in Model.DanhSachNhanVienPhuTrach)
                 {
                     <tr>
-                        <td>@item.MaNguoiDung</td>
                         <td class="fw-semibold">@item.HoTenNguoiDung</td>
                         <td>
                             @if (canEdit)
@@ -54,7 +52,7 @@ else
                                             @TrangThai.VaiTroMemberHienThi
                                         </option>
                                     </select>
-                                    <button type="submit" class="btn btn-sm thanh-vien-action-btn thanh-vien-action-warning" disabled="@(!Model.CoTheChinhSua)">
+                                    <button type="submit" class="btn btn-action btn-confirm thanh-vien-action-btn thanh-vien-action-warning" disabled="@(!Model.CoTheChinhSua)">
                                         <i class="bi bi-save"></i>
                                         <span>Lưu</span>
                                     </button>
@@ -85,7 +83,7 @@ else
                                     <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                                     <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
                                     <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
-                                    <button type="submit" class="btn btn-sm thanh-vien-action-btn thanh-vien-action-danger" disabled="@(!Model.CoTheChinhSua)">
+                                    <button type="submit" class="btn btn-action btn-danger-soft thanh-vien-action-btn thanh-vien-action-danger" disabled="@(!Model.CoTheChinhSua)">
                                         <i class="bi bi-trash"></i>
                                         <span>Xóa</span>
                                     </button>

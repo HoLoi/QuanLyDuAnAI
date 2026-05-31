@@ -1,4 +1,4 @@
-@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienThongKeViewModel
+﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienThongKeViewModel
 
 @{
     var hasData = !string.IsNullOrWhiteSpace(Model.TenNhanVien)
@@ -9,7 +9,7 @@
 
 <div class="employee-stats card border-0 shadow-sm mb-3">
     <div class="card-body">
-        <h6 class="mb-3">Dữ liệu gợi ý đánh giá nhân viên</h6>
+        <h6 class="mb-3">Dữ liệu hỗ trợ</h6>
         @if (!hasData)
         {
             <div class="empty-note">Chưa có dữ liệu hỗ trợ.</div>

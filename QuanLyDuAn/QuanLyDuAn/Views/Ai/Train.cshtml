@@ -1,0 +1,146 @@
+﻿@model QuanLyDuAn.ViewModels.Ai.AiTrainPageViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Huấn luyện model nguyên nhân";
+    var phanBoKeys = Model.PhanBoNguyenNhanDataset.Keys.ToList();
+    var phanBoValues = Model.PhanBoNguyenNhanDataset.Values.ToList();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
+}
+
+<section class="ai-page">
+    <header class="ai-header-card">
+        <div>
+            <h1 class="ai-title">Huấn luyện model nguyên nhân trễ</h1>
+            <p class="ai-subtitle">FastAPI chia train/test trong RAM và chỉ train model loại <code>NguyenNhan</code>.</p>
+        </div>
+        <a asp-controller="Ai" asp-action="Models" class="ai-link-btn">Model nguyên nhân</a>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
+    {
+        <div class="ai-warning-block">@Model.CanhBao</div>
+    }
+    @if (Model.CanhBaoChatLuongModel.Any())
+    {
+        <div class="ai-warning-soft">
+            <strong>Cảnh báo chất lượng model:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach (var item in Model.CanhBaoChatLuongModel)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <article class="ai-panel-card">
+        <h2>Chất lượng dữ liệu trước train</h2>
+        <dl class="ai-dl">
+            <div><dt>Tổng dòng AI_DATASET</dt><dd>@Model.TongDongDataset</dd></div>
+            <div><dt>Dòng dự án trễ</dt><dd>@Model.TongDongDuAnTre</dd></div>
+            <div><dt>Dòng có nguyên nhân xác nhận</dt><dd>@Model.TongDongCoNguyenNhanXacNhan</dd></div>
+            <div><dt>Dòng hợp lệ để train</dt><dd>@Model.TongDongDatasetNguyenNhan</dd></div>
+            <div><dt>Đủ điều kiện train</dt><dd>@(Model.CoTheTrainNguyenNhan ? "Có" : "Không")</dd></div>
+        </dl>
+
+        <form asp-action="Train" method="post" class="ai-form-grid">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="modelType" value="NguyenNhan" />
+            <div class="form-check ai-form-check">
+                <input class="form-check-input" asp-for="ActivateAfterTrain" />
+                <label class="form-check-label" asp-for="ActivateAfterTrain">Kích hoạt model ngay sau train</label>
+            </div>
+            <div>
+                <label class="form-label" asp-for="TrainNote">Ghi chú train</label>
+                <textarea asp-for="TrainNote" class="form-control" rows="3" maxlength="255"></textarea>
+            </div>
+            <div>
+                <button type="submit" class="ai-primary-btn" disabled="@(!Model.CoTheTrainNguyenNhan)">Huấn luyện model nguyên nhân trễ</button>
+            </div>
+        </form>
+    </article>
+
+    <div class="ai-grid ai-grid-2">
+        <article class="ai-panel-card">
+            <h2>Phân bố nguyên nhân trong dataset</h2>
+            @if (Model.PhanBoNguyenNhanDataset.Any())
+            {
+                <div class="ai-chart-shell ai-chart-shell-sm">
+                    <canvas id="reasonDistributionChart"></canvas>
+                </div>
+            }
+            else
+            {
+                <div class="ai-empty-state">Chưa có dữ liệu phân bố nguyên nhân.</div>
+            }
+        </article>
+
+        <article class="ai-panel-card">
+            <h2>Kết quả train gần nhất</h2>
+            @if (Model.KetQuaTrain == null)
+            {
+                <div class="ai-empty-state">Chưa có metadata train gần nhất để hiển thị.</div>
+            }
+            else
+            {
+                <dl class="ai-dl">
+                    <div><dt>Model</dt><dd>@Model.KetQuaTrain.ModelFile</dd></div>
+                    <div><dt>Train size</dt><dd>@Model.KetQuaTrain.TrainSize</dd></div>
+                    <div><dt>Test size</dt><dd>@Model.KetQuaTrain.TestSize</dd></div>
+                    <div><dt>Độ chính xác kiểm thử</dt><dd>@Model.KetQuaTrain.DoChinhXac.ToString("P2")</dd></div>
+                    <div><dt>Precision macro</dt><dd>@(Model.KetQuaTrain.PrecisionMacro.HasValue ? Model.KetQuaTrain.PrecisionMacro.Value.ToString("P2") : "Chưa có dữ liệu")</dd></div>
+                    <div><dt>Recall macro</dt><dd>@(Model.KetQuaTrain.RecallMacro.HasValue ? Model.KetQuaTrain.RecallMacro.Value.ToString("P2") : "Chưa có dữ liệu")</dd></div>
+                    <div><dt>F1 macro</dt><dd>@(Model.KetQuaTrain.F1Macro.HasValue ? Model.KetQuaTrain.F1Macro.Value.ToString("P2") : "Chưa có dữ liệu")</dd></div>
+                </dl>
+                <div class="ai-warning-soft">Chi tiết confusion matrix, feature importance và cây quyết định được hiển thị tại màn hình Model để tránh trùng lặp.</div>
+                <a asp-controller="Ai" asp-action="Models" class="ai-link-btn mt-2">Xem chi tiết model</a>
+            }
+        </article>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/ai/charts.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            if (window.__aiTrainInitialized__) {
+                return;
+            }
+            window.__aiTrainInitialized__ = true;
+
+            const renderChart = (canvasId, config) => {
+                if (!window.AiChartHelper) {
+                    return;
+                }
+                window.AiChartHelper.render(canvasId, config);
+            };
+
+            const reasonLabels = @Html.Raw(JsonSerializer.Serialize(phanBoKeys));
+            const reasonValues = @Html.Raw(JsonSerializer.Serialize(phanBoValues));
+            if (reasonLabels.length > 0) {
+                renderChart('reasonDistributionChart', {
+                    type: 'bar',
+                    data: { labels: reasonLabels, datasets: [{ label: 'Số dòng', data: reasonValues, backgroundColor: '#2f7fd2' }] },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    title: (ctx) => ctx[0]?.label ?? ''
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+        })();
+    </script>
+}

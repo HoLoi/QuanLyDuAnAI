@@ -2,6 +2,42 @@
     display: block;
 }
 
+.project-details .btn-action {
+    border: 1px solid transparent;
+    border-radius: 0.72rem;
+    padding: 0.42rem 0.86rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.project-details .btn-confirm {
+    border-color: rgba(105, 108, 255, 0.35);
+    background: linear-gradient(135deg, #696cff, #03c3ec);
+    color: #fff;
+}
+
+.project-details .btn-subtle {
+    border-color: #cfdced;
+    background: #fff;
+    color: #3d5677;
+}
+
+.project-details .btn-reopen {
+    border-color: rgba(232, 182, 59, 0.42);
+    background: #fff5de;
+    color: #9a6700;
+}
+
+.project-details .btn-danger-soft {
+    background: #fff1f1;
+    border-color: #efcbc7;
+    color: #c0473f;
+}
+
 .project-hero {
     position: relative;
     padding: 1.5rem;
@@ -645,6 +681,19 @@
 .project-details .hero-actions .detail-header-btn-edit:focus {
     color: #fff;
     filter: brightness(1.03);
+}
+
+.project-details .hero-actions .detail-header-btn-manager-request {
+    border-color: rgba(18, 131, 202, 0.32);
+    background: linear-gradient(135deg, #1f9fe6, #5cc6f2);
+    color: #fff;
+}
+
+.project-details .hero-actions .detail-header-btn-manager-request:hover,
+.project-details .hero-actions .detail-header-btn-manager-request:focus {
+    color: #fff;
+    filter: brightness(1.04);
+    box-shadow: 0 0.45rem 1rem rgba(31, 159, 230, 0.25);
 }
 
 .project-details .hero-actions .detail-header-btn-confirm {

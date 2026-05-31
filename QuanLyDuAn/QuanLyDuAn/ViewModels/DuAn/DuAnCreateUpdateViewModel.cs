@@ -25,6 +25,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
 
         [Required(ErrorMessage = "Ngày kết thúc không được để trống")]
         public DateTime? NgayKetThucDuAn { get; set; }
+        public DateTime? NgayHoanThanhThucTeDuAn { get; set; }
 
         [MaxLength(50, ErrorMessage = "Tối đa 50 ký tự")]
         public string TrangThaiDuAn { get; set; } = TrangThai.KhoiTao;

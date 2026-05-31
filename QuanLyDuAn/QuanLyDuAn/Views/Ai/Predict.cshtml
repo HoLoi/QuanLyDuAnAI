@@ -1,0 +1,191 @@
+﻿@model QuanLyDuAn.ViewModels.Ai.AiPredictPageViewModel
+
+@{
+    ViewData["Title"] = "Phân tích nguyên nhân trễ";
+    var modelDuocChon = !string.IsNullOrWhiteSpace(Model.ModelTestDuocChon)
+        ? Model.ModelTestDuocChon
+        : Model.ModelNguyenNhanMacDinh;
+    var modelDangHoatDong = string.IsNullOrWhiteSpace(Model.ModelNguyenNhanMacDinh)
+        ? "Chưa có model"
+        : Model.ModelNguyenNhanMacDinh;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
+}
+
+<section class="ai-page">
+    <header class="ai-header-card">
+        <div>
+            <h1 class="ai-title">Phân tích nguyên nhân trễ dự án</h1>
+            <p class="ai-subtitle">AI chỉ phân tích nguyên nhân cho dự án đã được xác định trễ bởi quy tắc nghiệp vụ trong MVC.</p>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
+    {
+        <div class="ai-warning-block">@Model.CanhBao</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.LoiHeThong))
+    {
+        <div class="ai-warning-block">@Model.LoiHeThong</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ThongBaoModelNguyenNhan))
+    {
+        <div class="ai-warning-soft">@Model.ThongBaoModelNguyenNhan</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ThongBaoKhongPhanTich))
+    {
+        <div class="ai-warning-soft">@Model.ThongBaoKhongPhanTich</div>
+    }
+
+    <article class="ai-panel-card">
+        <h2>Dữ liệu đầu vào</h2>
+        <div class="ai-warning-soft mb-3">
+            <strong>Độ chính xác kiểm thử của model:</strong>
+            @(Model.DoChinhXacKiemThuModelNguyenNhan.HasValue ? Model.DoChinhXacKiemThuModelNguyenNhan.Value.ToString("P2") : "Chưa có dữ liệu")
+        </div>
+
+        <form asp-action="Predict" method="post" class="ai-form-grid ai-feature-grid">
+            @Html.AntiForgeryToken()
+
+            <div>
+                <label class="form-label" asp-for="MaDuAn">Dự án</label>
+                <select asp-for="MaDuAn" class="form-select" id="maDuAnSelect">
+                    <option value="0">Chọn dự án</option>
+                    @foreach (var item in Model.DanhSachDuAn)
+                    {
+                        <option value="@item.MaDuAn">@item.TenDuAn</option>
+                    }
+                </select>
+                <small class="text-muted">Khi chọn dự án, hệ thống nạp đặc trưng từ AI_DATASET mới nhất.</small>
+            </div>
+
+            <div><label class="form-label" asp-for="SoNhanVienDuAn">Số nhân viên dự án</label><input asp-for="SoNhanVienDuAn" class="form-control" /></div>
+            <div><label class="form-label" asp-for="TongSoCongViec">Tổng số công việc</label><input asp-for="TongSoCongViec" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoCongViecTre">Số công việc trễ</label><input asp-for="SoCongViecTre" class="form-control" /></div>
+            <div><label class="form-label" asp-for="TyLeCongViecTre">Tỷ lệ công việc trễ (0-1 hoặc 0-100)</label><input asp-for="TyLeCongViecTre" class="form-control" /></div>
+            <div><label class="form-label" asp-for="ChiPhiDuKien">Chi phí dự kiến</label><input asp-for="ChiPhiDuKien" class="form-control" /></div>
+            <div><label class="form-label" asp-for="ChiPhiThucTe">Chi phí thực tế</label><input asp-for="ChiPhiThucTe" class="form-control" /></div>
+            <div><label class="form-label" asp-for="ChenhLechChiPhi">Chênh lệch chi phí</label><input asp-for="ChenhLechChiPhi" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoLanThayDoiNhanSu">Số lần thay đổi nhân sự</label><input asp-for="SoLanThayDoiNhanSu" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoLanThayDoiQuanLy">Số lần thay đổi quản lý</label><input asp-for="SoLanThayDoiQuanLy" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoNgayTreTienDo">Số ngày trễ tiến độ</label><input asp-for="SoNgayTreTienDo" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoDeXuatCongViecChoDuyet">Số đề xuất công việc chờ duyệt</label><input asp-for="SoDeXuatCongViecChoDuyet" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoDeXuatCongViecBiTuChoi">Số đề xuất công việc bị từ chối</label><input asp-for="SoDeXuatCongViecBiTuChoi" class="form-control" /></div>
+            <div><label class="form-label" asp-for="ThoiGianDuyetCongViecTrungBinh">Thời gian duyệt công việc trung bình (ngày)</label><input asp-for="ThoiGianDuyetCongViecTrungBinh" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoDeXuatNganSachChoDuyet">Số đề xuất ngân sách chờ duyệt</label><input asp-for="SoDeXuatNganSachChoDuyet" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoDeXuatNganSachBiTuChoi">Số đề xuất ngân sách bị từ chối</label><input asp-for="SoDeXuatNganSachBiTuChoi" class="form-control" /></div>
+            <div><label class="form-label" asp-for="ThoiGianDuyetNganSachTrungBinh">Thời gian duyệt ngân sách trung bình (ngày)</label><input asp-for="ThoiGianDuyetNganSachTrungBinh" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoBaoCaoTienDoChoDuyet">Số báo cáo tiến độ chờ duyệt</label><input asp-for="SoBaoCaoTienDoChoDuyet" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoBaoCaoTienDoBiTuChoi">Số báo cáo tiến độ bị từ chối</label><input asp-for="SoBaoCaoTienDoBiTuChoi" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoBaoCaoTienDoYeuCauBoSung">Số báo cáo tiến độ yêu cầu bổ sung</label><input asp-for="SoBaoCaoTienDoYeuCauBoSung" class="form-control" /></div>
+            <div><label class="form-label" asp-for="TyLeBaoCaoTienDoBiTuChoi">Tỷ lệ báo cáo tiến độ bị từ chối (%)</label><input asp-for="TyLeBaoCaoTienDoBiTuChoi" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoLanCapNhatTienDo">Số lần cập nhật tiến độ</label><input asp-for="SoLanCapNhatTienDo" class="form-control" /></div>
+            <div><label class="form-label" asp-for="SoNgayChamCapNhatTienDo">Số ngày chậm cập nhật tiến độ</label><input asp-for="SoNgayChamCapNhatTienDo" class="form-control" /></div>
+
+            <div>
+                <label class="form-label" for="modelFile">Model nguyên nhân dùng để thử</label>
+                <select id="modelFile" class="form-select" name="modelFile" disabled="@(!Model.CoModelNguyenNhanHoatDongHopLe)">
+                    <option value="">Dùng model đang hoạt động (@modelDangHoatDong)</option>
+                    @foreach (var modelName in Model.DanhSachReasonModel)
+                    {
+                        <option value="@modelName" selected="@(string.Equals(modelName, modelDuocChon, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@modelName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="ai-form-actions d-flex gap-2">
+                <button type="submit" class="ai-primary-btn">Phân tích nguyên nhân trễ</button>
+                <button type="submit" class="ai-secondary-btn" formaction="@Url.Action("TestPredict", "Ai")" disabled="@(!Model.CoModelNguyenNhanHoatDongHopLe)">Phân tích thử</button>
+            </div>
+            <small class="text-muted">Phân tích thử chỉ để kiểm tra model, không ghi vào AI_KET_QUA.</small>
+        </form>
+    </article>
+
+    @if (Model.KetQuaPhanTich != null)
+    {
+        <article class="ai-panel-card">
+            <h2>Kết quả phân tích nguyên nhân trễ</h2>
+            <div class="ai-grid ai-grid-4">
+                <div class="ai-stat-card">
+                    <span class="ai-stat-label">Nguyên nhân gợi ý</span>
+                    <strong class="ai-stat-value">@(string.IsNullOrWhiteSpace(Model.KetQuaPhanTich.TenNguyenNhanDuDoan) ? "Chưa có" : Model.KetQuaPhanTich.TenNguyenNhanDuDoan)</strong>
+                </div>
+                <div class="ai-stat-card">
+                    <span class="ai-stat-label">Độ tin cậy dự đoán cho mẫu hiện tại</span>
+                    <strong class="ai-stat-value">@Model.KetQuaPhanTich.DoTinCayKetQua.ToString("P0")</strong>
+                </div>
+                <div class="ai-stat-card">
+                    <span class="ai-stat-label">Nguồn gợi ý</span>
+                    <strong class="ai-stat-value">@(Model.KetQuaPhanTich.ReasonSource == "NguyenNhanModel" ? "Model nguyên nhân" : "Luật gợi ý")</strong>
+                </div>
+                <div class="ai-stat-card">
+                    <span class="ai-stat-label">Model nguyên nhân</span>
+                    <strong class="ai-stat-value">@(string.IsNullOrWhiteSpace(Model.KetQuaPhanTich.ModelNguyenNhanUsed) ? "Không dùng model" : Model.KetQuaPhanTich.ModelNguyenNhanUsed)</strong>
+                </div>
+            </div>
+            <div class="ai-warning-soft">Độ tin cậy ở đây chỉ áp dụng cho mẫu hiện tại; độ chính xác kiểm thử của model được hiển thị riêng ở phần dữ liệu đầu vào.</div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.KetQuaPhanTich.NoiDungPhanTich))
+            {
+                <div class="ai-warning-soft"><strong>Phân tích:</strong> @Model.KetQuaPhanTich.NoiDungPhanTich</div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.KetQuaPhanTich.CanhBaoNguyenNhan))
+            {
+                <div class="ai-warning-soft">@Model.KetQuaPhanTich.CanhBaoNguyenNhan</div>
+            }
+
+            @if (Model.KetQuaPhanTich.MaDMNguyenNhanDuDoan.HasValue)
+            {
+                <form asp-action="XacNhanNguyenNhan" method="post" class="ai-inline-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                    <input type="hidden" name="maDmNguyenNhan" value="@Model.KetQuaPhanTich.MaDMNguyenNhanDuDoan.Value" />
+                    <input type="hidden" name="doTinCay" value="@Model.KetQuaPhanTich.DoTinCayKetQua.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                    <button type="submit" class="ai-secondary-btn">Manager xác nhận nguyên nhân này</button>
+                </form>
+            }
+        </article>
+    }
+
+    @if (Model.KetQuaTestPhanTich != null)
+    {
+        <article class="ai-panel-card">
+            <h2>Kết quả phân tích thử</h2>
+            <dl class="ai-dl">
+                <div><dt>Độ tin cậy dự đoán cho mẫu hiện tại</dt><dd>@Model.KetQuaTestPhanTich.Confidence.ToString("P0")</dd></div>
+                <div><dt>Nguyên nhân gợi ý</dt><dd>@Model.KetQuaTestPhanTich.SuggestedReason</dd></div>
+                <div><dt>Nguồn nguyên nhân</dt><dd>@(Model.KetQuaTestPhanTich.ReasonSource == "NguyenNhanModel" ? "Model nguyên nhân" : "Luật gợi ý")</dd></div>
+                <div><dt>Model dùng để thử</dt><dd>@Model.KetQuaTestPhanTich.ModelUsed</dd></div>
+                <div><dt>Độ chính xác kiểm thử của model</dt><dd>@(Model.DoChinhXacKiemThuModelNguyenNhan.HasValue ? Model.DoChinhXacKiemThuModelNguyenNhan.Value.ToString("P2") : "Chưa có dữ liệu")</dd></div>
+                <div><dt>Giải thích</dt><dd>@Model.KetQuaTestPhanTich.Explanation</dd></div>
+            </dl>
+            <div class="ai-warning-soft">Độ tin cậy ở kết quả thử chỉ áp dụng cho mẫu hiện tại và không thay thế độ chính xác kiểm thử tổng thể của model.</div>
+        </article>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+            const select = document.getElementById('maDuAnSelect');
+            if (!select) return;
+
+            select.addEventListener('change', function () {
+                const maDuAn = this.value;
+                const url = new URL(window.location.href);
+                if (!maDuAn || maDuAn === '0') {
+                    url.searchParams.delete('maDuAn');
+                } else {
+                    url.searchParams.set('maDuAn', maDuAn);
+                }
+                window.location.href = url.toString();
+            });
+        })();
+    </script>
+}

@@ -1,15 +1,55 @@
 ﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienFormViewModel
+@{
+    var tuKhoa = Context.Request.Query["tuKhoa"].ToString();
+    var trangThai = Context.Request.Query["trangThai"].ToString();
+    var nguon = Context.Request.Query["nguon"].ToString();
+    var tuNgayDanhGia = Context.Request.Query["tuNgayDanhGia"].ToString();
+    var denNgayDanhGia = Context.Request.Query["denNgayDanhGia"].ToString();
+    var returnUrl = Context.Request.Query["returnUrl"].ToString();
+    var formBackUrl = Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "DanhGiaNhanVien", new
+        {
+            maDuAn = Model.MaDuAn,
+            maNhanVien = Model.MaNhanVien,
+            tuKhoa,
+            trangThai,
+            nguon,
+            tuNgayDanhGia,
+            denNgayDanhGia
+        });
+    var daCoDanhGia = Model.MaDanhGiaNhanVien.HasValue && Model.TieuChi.Any(x => x.MaChiTietDGNV.HasValue);
+}
 
 <div class="dgnv-form card mb-3">
     <div class="card-body">
-        <h6 class="mb-3">Form đánh giá nhân viên: @Model.TenNhanVien</h6>
+        <div class="evaluation-form-toolbar mb-2">
+            <a href="@formBackUrl" class="btn-action dgnv-back-btn">← Trở lại</a>
+        </div>
+        <h6 class="mb-3">Đánh giá nhân viên: @Model.TenNhanVien</h6>
 
-        @await Html.PartialAsync("_EmployeeStats", Model.ThongKe)
+        <details class="support-collapse mb-3" open>
+            <summary>Dữ liệu hỗ trợ</summary>
+            <div class="mt-2">
+                @await Html.PartialAsync("_EmployeeStats", Model.ThongKe)
+            </div>
+        </details>
+
+        <div class="row g-2 mb-3">
+            <div class="col-md-6"><div class="mini-stat"><span>Điểm tổng kết</span><strong>@(daCoDanhGia ? Model.DiemTongKet.ToString("0.0") : "Chưa đánh giá")</strong></div></div>
+            <div class="col-md-6"><div class="mini-stat"><span>Xếp loại</span><strong>@(daCoDanhGia ? Model.XepLoai : "Chưa đánh giá")</strong></div></div>
+        </div>
 
         <form asp-action="Luu" method="post" class="vstack gap-2 mt-3">
             <input type="hidden" asp-for="MaDanhGiaNhanVien" />
             <input type="hidden" asp-for="MaDuAn" />
             <input type="hidden" asp-for="MaNhanVien" />
+            <input type="hidden" name="tuKhoa" value="@tuKhoa" />
+            <input type="hidden" name="trangThai" value="@trangThai" />
+            <input type="hidden" name="nguon" value="@nguon" />
+            <input type="hidden" name="tuNgayDanhGia" value="@tuNgayDanhGia" />
+            <input type="hidden" name="denNgayDanhGia" value="@denNgayDanhGia" />
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
 
             @for (var i = 0; i < Model.TieuChi.Count; i++)
             {
@@ -25,7 +65,7 @@
                             <input asp-for="TieuChi[i].DiemDanhGiaNV" class="form-control" min="1" max="10" />
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Công việc liên quan (tùy chọn)</label>
+                            <label class="form-label">Mã công việc (tùy chọn)</label>
                             <input asp-for="TieuChi[i].MaCongViec" class="form-control" />
                         </div>
                         <div class="col-md-6">
@@ -44,12 +84,12 @@
             <div class="d-flex flex-wrap gap-2">
                 @if (Model.CoTheLuu)
                 {
-                    <button type="submit" class="btn btn-primary">Lưu đánh giá</button>
+                    <button type="submit" class="btn-action btn-confirm">Lưu đánh giá</button>
                 }
                 @if (Model.CoTheGuiDuyet && Model.MaDanhGiaNhanVien.HasValue)
                 {
                     <button type="submit"
-                            class="btn btn-outline-primary"
+                            class="btn-action btn-subtle"
                             formaction="@Url.Action("GuiDuyet", "DanhGiaNhanVien")"
                             formmethod="post"
                             name="maDanhGiaNhanVien"

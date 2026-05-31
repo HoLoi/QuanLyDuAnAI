@@ -170,6 +170,33 @@
     color: #5d7592;
 }
 
+.dxcv-filter-form {
+    display: grid;
+    gap: 0.78rem;
+}
+
+.dxcv-filter-grid {
+    display: grid;
+    gap: 0.72rem;
+}
+
+.dxcv-filter-grid-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dxcv-filter-grid-time {
+    grid-template-columns: minmax(190px, 1.1fr) minmax(165px, 1fr) minmax(165px, 1fr) auto;
+    align-items: end;
+}
+
+.dxcv-filter-field {
+    min-width: 0;
+}
+
+.dxcv-filter-field-date .form-control {
+    min-width: 165px;
+}
+
 .dxcv-form .form-control,
 .dxcv-form .form-select,
 .dxcv-form textarea,
@@ -206,6 +233,15 @@
 .dxcv-form-actions,
 .dxcv-filter-actions {
     margin-top: 0.8rem;
+}
+
+.dxcv-filter-actions {
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.dxcv-filter-grid-time .dxcv-filter-actions {
+    margin-top: 0;
 }
 
 .dxcv-action-btn {
@@ -267,6 +303,11 @@
     margin: 0;
     min-width: 980px;
     border-color: #e7edf7;
+}
+
+.dxcv-table .col-actions {
+    width: 226px;
+    min-width: 226px;
 }
 
 .dxcv-table thead th {
@@ -347,6 +388,10 @@
     background: #fbfdff;
 }
 
+.dxcv-table-action-group .dxcv-action-btn {
+    white-space: nowrap;
+}
+
 .dxcv-detail-grid {
     display: grid;
     gap: 0.7rem;
@@ -383,6 +428,19 @@
     .dxcv-detail-grid {
         grid-template-columns: 1fr;
     }
+
+    .dxcv-filter-grid-main {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dxcv-filter-grid-time {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dxcv-filter-actions {
+        grid-column: span 2;
+        justify-content: flex-start;
+    }
 }
 
 @media (max-width: 991.98px) {
@@ -415,6 +473,14 @@
     .dxcv-filter-actions,
     .dxcv-action-group {
         width: 100%;
+    }
+
+    .dxcv-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dxcv-filter-actions {
+        grid-column: auto;
     }
 
     .dxcv-form-actions .dxcv-action-btn,

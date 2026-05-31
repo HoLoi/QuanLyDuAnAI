@@ -114,13 +114,13 @@
         }
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="table-actions">
         @if (permissions.Contains(Permissions.DuAn.Them) || permissions.Contains(Permissions.DuAn.Sua))
         {
-            <button type="submit" class="btn btn-primary">Lưu</button>
+            <button type="submit" class="btn-action btn-confirm">Lưu</button>
         }
 
-        <a asp-action="Index" class="btn btn-secondary">Làm mới</a>
+        <a asp-action="Index" class="btn-action btn-subtle">Làm mới</a>
     </div>
 </form>
 
@@ -142,7 +142,7 @@
                         <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
                         <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
                         <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
-                        <button type="submit" class="btn btn-success">Bắt đầu dự án</button>
+                        <button type="submit" class="btn-action btn-confirm">Bắt đầu dự án</button>
                     </form>
                 }
 
@@ -154,7 +154,7 @@
                         <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
                         <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
                         <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
-                        <button type="submit" class="btn btn-warning">Yêu cầu hoàn thành</button>
+                        <button type="submit" class="btn-action btn-reopen">Yêu cầu hoàn thành</button>
                     </form>
                 }
 
@@ -166,19 +166,37 @@
                         <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
                         <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
                         <input type="hidden" name="locTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
-                        <button type="submit" class="btn btn-success">Xác nhận hoàn thành</button>
+                        <button type="submit" class="btn-action btn-confirm">Xác nhận hoàn thành</button>
                     </form>
                 }
 
                 <!-- Button Tạm dừng -->
                 @if (Model.StatusCheck.CanPause && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.DangThucHien))
                 {
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#pauseModal">Tạm dừng dự án</button>
+                    <button type="button" class="btn-action btn-subtle" data-bs-toggle="modal" data-bs-target="#pauseModal">Tạm dừng dự án</button>
                 }
 
                 @if (Model.StatusCheck.CanReopen && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.HoanThanh))
                 {
-                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#reopenModal">Mở lại dự án</button>
+                    <button type="button" class="btn-action btn-reopen" data-bs-toggle="modal" data-bs-target="#reopenModal">Mở lại dự án</button>
+                }
+
+                @if (Model.StatusCheck.CanArchive && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.HoanThanh))
+                {
+                    <form asp-action="LuuDuAn" method="post" style="display:inline;">
+                        <input type="hidden" name="Form.MaDuAn" value="@Model.MaDuAn" />
+                        <input type="hidden" name="Form.TenDuAn" value="@Model.TenDuAn" />
+                        <input type="hidden" name="Form.MaLoaiDuAn" value="@Model.MaLoaiDuAn" />
+                        <input type="hidden" name="Form.NgayBatDauDuAn" value="@Model.NgayBatDauDuAn?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="Form.NgayKetThucDuAn" value="@Model.NgayKetThucDuAn?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="Form.TrangThaiDuAn" value="@TrangThai.LuuTru" />
+                        <input type="hidden" name="Form.MoTaDuAn" value="@Model.MoTaDuAn" />
+                        <input type="hidden" name="Form.GhiChuDuAn" value="@Model.GhiChuDuAn" />
+                        <input type="hidden" name="TuKhoa" value="@ViewBag.TuKhoa" />
+                        <input type="hidden" name="LocMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
+                        <input type="hidden" name="LocTrangThaiDuAn" value="@ViewBag.LocTrangThaiDuAn" />
+                        <button type="submit" class="btn-action btn-subtle" onclick="return confirm('Lưu trữ dự án hoàn thành đúng hạn này?');">Lưu trữ</button>
+                    </form>
                 }
             </div>
 
@@ -232,8 +250,8 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-warning">Mở lại</button>
+                    <button type="button" class="btn-action btn-subtle" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn-action btn-reopen">Mở lại</button>
                 </div>
             </form>
         </div>
@@ -262,8 +280,8 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-warning">Tạm dừng</button>
+                    <button type="button" class="btn-action btn-subtle" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn-action btn-reopen">Tạm dừng</button>
                 </div>
             </form>
         </div>

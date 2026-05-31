@@ -1,4 +1,18 @@
-﻿<div class="empty-box">
+﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnPageViewModel
+@using QuanLyDuAn.Constants
+@{
+    var canTacNghiep = Model.Permissions.Contains(Permissions.DanhGiaDuAn.DanhGia)
+                       || Model.Permissions.Contains(Permissions.DanhGiaDuAn.Sua);
+    var thongBao = canTacNghiep
+        ? "Không có dự án phù hợp với bộ lọc hiện tại."
+        : "Bạn chưa có quyền tạo hoặc sửa đánh giá dự án.";
+}
+
+<div class="empty-box">
     <div class="empty-icon"><i class="bi bi-clipboard-x"></i></div>
-    <div class="empty-text">Chưa có bản ghi đánh giá dự án phù hợp với bộ lọc hiện tại.</div>
+    <div class="empty-title">Chưa có dữ liệu đánh giá dự án</div>
+    <div class="empty-text">@thongBao</div>
+    <div class="empty-actions">
+        <a asp-action="Index" class="btn-action btn-subtle">Làm mới</a>
+    </div>
 </div>

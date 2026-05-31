@@ -1,0 +1,248 @@
+﻿@model QuanLyDuAn.ViewModels.Ai.AiDashboardPageViewModel
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Tổng quan AI";
+    var serviceStatus = string.IsNullOrWhiteSpace(Model.Health?.ServiceStatus) ? "Không xác định" : Model.Health!.ServiceStatus;
+    var reasonLabels = Model.NguyenNhanPhoBien.Select(x => x.NguyenNhan).ToList();
+    var reasonValues = Model.NguyenNhanPhoBien.Select(x => x.TyLePhanTram).ToList();
+    var modelLabels = Model.LichSuModelNguyenNhan.Select(x => x.CreatedAt == DateTime.MinValue ? x.TenModel : $"{x.CreatedAt:dd/MM HH:mm}").ToList();
+    var modelAccuracy = Model.LichSuModelNguyenNhan.Select(x => Math.Round((x.Accuracy ?? 0d) * 100d, 2)).ToList();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
+}
+
+<section class="ai-page">
+    <header class="ai-header-card">
+        <div>
+            <h1 class="ai-title">Tổng quan AI</h1>
+            <p class="ai-subtitle">AI chỉ hỗ trợ phân tích nguyên nhân trễ dự án. Quyết định nghiệp vụ cuối cùng vẫn do người quản lý.</p>
+        </div>
+        <a asp-controller="Ai" asp-action="Models" class="ai-link-btn">Xem chi tiết model</a>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
+    {
+        <div class="ai-warning-block">@Model.CanhBao</div>
+    }
+    @if (Model.CanhBaoChatLuongModel.Any())
+    {
+        <div class="ai-warning-soft">
+            <strong>Cảnh báo chất lượng model:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach (var item in Model.CanhBaoChatLuongModel)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <h2 class="ai-section-title">Hệ thống và model</h2>
+    <div class="ai-grid ai-grid-4">
+        <article class="ai-stat-card"><span class="ai-stat-label">Trạng thái service</span><strong class="ai-stat-value">@serviceStatus</strong></article>
+        <article class="ai-stat-card">
+            <span class="ai-stat-label">Model active</span>
+            <strong class="ai-stat-value ai-text-truncate-2">@(string.IsNullOrWhiteSpace(Model.ModelNguyenNhanDangHoatDong) ? "Chưa có" : Model.ModelNguyenNhanDangHoatDong)</strong>
+        </article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Tổng model nguyên nhân</span><strong class="ai-stat-value">@Model.TongModelTrongDb</strong></article>
+        <article class="ai-stat-card">
+            <span class="ai-stat-label">Tổng lượt phân tích AI</span>
+            <strong class="ai-stat-value">@Model.TongLanPhanTichTrongDb</strong>
+            @if (Model.TongLanPhanTichTrongDb == 0)
+            {
+                <small class="ai-stat-note">Chưa có dữ liệu.</small>
+            }
+        </article>
+    </div>
+
+    <h2 class="ai-section-title">Dataset</h2>
+    <div class="ai-grid ai-grid-4">
+        <article class="ai-stat-card"><span class="ai-stat-label">Tổng dòng dataset</span><strong class="ai-stat-value">@Model.TongDongDataset</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Dòng đủ điều kiện train</span><strong class="ai-stat-value">@Model.TongDongDatasetHopLeTrain</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Dự án trễ đã xác nhận</span><strong class="ai-stat-value">@Model.SoDuAnTreDaXacNhan</strong></article>
+        <article class="ai-stat-card">
+            <span class="ai-stat-label">Dự án trễ chưa xác nhận</span>
+            <strong class="ai-stat-value">@Model.SoDuAnTreChuaXacNhan</strong>
+            @if (Model.SoDuAnTreChuaXacNhan == 0)
+            {
+                <small class="ai-stat-note">Chưa có dữ liệu.</small>
+            }
+        </article>
+    </div>
+
+    <h2 class="ai-section-title">Chất lượng model active</h2>
+    <div class="ai-grid ai-grid-4">
+        <article class="ai-stat-card"><span class="ai-stat-label">Độ chính xác model active</span><strong class="ai-stat-value">@(Model.AccuracyModelActive.HasValue ? Model.AccuracyModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Precision macro</span><strong class="ai-stat-value">@(Model.PrecisionMacroModelActive.HasValue ? Model.PrecisionMacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Recall macro</span><strong class="ai-stat-value">@(Model.RecallMacroModelActive.HasValue ? Model.RecallMacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">F1 macro</span><strong class="ai-stat-value">@(Model.F1MacroModelActive.HasValue ? Model.F1MacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+    </div>
+
+    <div class="ai-grid ai-grid-2">
+        <article class="ai-panel-card">
+            <h2>Phân bố nguyên nhân đã xác nhận</h2>
+            @if (Model.NguyenNhanPhoBien.Any())
+            {
+                <div class="ai-chart-shell">
+                    <canvas id="reasonDistributionDashboardChart"></canvas>
+                </div>
+            }
+            else
+            {
+                <div class="ai-empty-state">Chưa có dữ liệu xác nhận nguyên nhân.</div>
+            }
+        </article>
+
+        <article class="ai-panel-card">
+            <h2>Dataset theo trạng thái train</h2>
+            <div class="ai-chart-shell">
+                <canvas id="datasetTrainStateChart"></canvas>
+            </div>
+        </article>
+    </div>
+
+    <article class="ai-panel-card">
+        <h2>Accuracy các phiên bản model nguyên nhân</h2>
+        @if (Model.LichSuModelNguyenNhan.Any())
+        {
+            <div class="ai-chart-shell">
+                <canvas id="accuracyByVersionDashboardChart"></canvas>
+            </div>
+        }
+        else
+        {
+            <div class="ai-empty-state">Chưa có dữ liệu accuracy theo phiên bản model.</div>
+        }
+    </article>
+
+    <article class="ai-panel-card">
+        <h2>Feature importance của model active</h2>
+        @if (Model.FeatureImportanceModelActive.Any())
+        {
+            <div class="ai-chart-shell ai-chart-shell-lg">
+                <canvas id="activeFeatureImportanceDashboardChart"></canvas>
+            </div>
+        }
+        else
+        {
+            <div class="ai-empty-state">Model active chưa có dữ liệu feature importance.</div>
+        }
+    </article>
+
+    <article class="ai-panel-card">
+        <h2>Cảnh báo dự án trễ theo AI</h2>
+        @if (!Model.CanhBaoDuAnQuanLy.Any())
+        {
+            <div class="ai-empty-state">Không có cảnh báo nào cho dự án đang trễ theo AI_DATASET.</div>
+        }
+        else
+        {
+            <div class="ai-table-scroll">
+                <table class="table ai-table">
+                    <thead>
+                        <tr>
+                            <th>Dự án</th>
+                            <th>Nguyên nhân gợi ý</th>
+                            <th>Độ tin cậy</th>
+                            <th>Nguồn</th>
+                            <th>Thời gian</th>
+                            <th>Trạng thái dữ liệu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model.CanhBaoDuAnQuanLy)
+                    {
+                        <tr>
+                            <td>@item.TenDuAn</td>
+                            <td>@item.TenNguyenNhan</td>
+                            <td>@item.DoTinCay.ToString("P0")</td>
+                            <td>@item.NguonGoiY</td>
+                            <td>@(item.ThoiGianDuDoan?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                            <td>
+                                @if (item.KetQuaAiCoTheDaCu)
+                                {
+                                    <span class="text-warning">Kết quả AI có thể đã cũ</span>
+                                }
+                                else
+                                {
+                                    <span class="text-success">Đang khớp AI_DATASET mới nhất</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </article>
+</section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/ai/charts.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            if (window.__aiDashboardInitialized__) {
+                return;
+            }
+            window.__aiDashboardInitialized__ = true;
+
+            const renderChart = (canvasId, config) => {
+                if (!window.AiChartHelper) {
+                    return;
+                }
+                window.AiChartHelper.render(canvasId, config);
+            };
+
+            const reasonLabels = @Html.Raw(JsonSerializer.Serialize(reasonLabels));
+            const reasonValues = @Html.Raw(JsonSerializer.Serialize(reasonValues));
+            if (reasonLabels.length > 0) {
+                renderChart('reasonDistributionDashboardChart', {
+                    type: 'pie',
+                    data: {
+                        labels: reasonLabels,
+                        datasets: [{ data: reasonValues, backgroundColor: ['#2f7fd2', '#3aa675', '#7a8df5', '#f2b84a', '#7bc4c9', '#91c27d'] }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            renderChart('datasetTrainStateChart', {
+                type: 'bar',
+                data: {
+                    labels: ['Đủ điều kiện train', 'Chưa đủ điều kiện train'],
+                    datasets: [{
+                        label: 'Số dòng',
+                        data: [@Model.TongDongDatasetHopLeTrain, Math.max(@Model.TongDongDataset - @Model.TongDongDatasetHopLeTrain, 0)],
+                        backgroundColor: ['#3aa675', '#c7d6eb']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const modelLabels = @Html.Raw(JsonSerializer.Serialize(modelLabels));
+            const modelAccuracy = @Html.Raw(JsonSerializer.Serialize(modelAccuracy));
+            if (modelLabels.length > 0) {
+                renderChart('accuracyByVersionDashboardChart', {
+                    type: 'line',
+                    data: { labels: modelLabels, datasets: [{ label: 'Accuracy (%)', data: modelAccuracy, borderColor: '#2f7fd2', backgroundColor: '#2f7fd2' }] },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+                });
+            }
+
+            const featureImportance = @Html.Raw(JsonSerializer.Serialize(Model.FeatureImportanceModelActive));
+            const fiLabels = Object.keys(featureImportance || {});
+            if (fiLabels.length > 0) {
+                const fiValues = fiLabels.map(x => featureImportance[x]);
+                renderChart('activeFeatureImportanceDashboardChart', {
+                    type: 'bar',
+                    data: { labels: fiLabels.map(x => window.AiChartHelper?.mapFeatureLabel?.(x) ?? x), datasets: [{ label: 'Mức ảnh hưởng', data: fiValues, backgroundColor: '#7a8df5' }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+                });
+            }
+        })();
+    </script>
+}

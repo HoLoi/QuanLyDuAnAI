@@ -1,70 +1,135 @@
 ﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnPageViewModel
-@using QuanLyDuAn.Constants
+@{
+    var currentUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+}
 
 <div class="table-responsive dgda-table-wrap">
-    <table class="table table-hover align-middle dgda-table">
+    <table class="table workflow-table align-middle dgda-table">
         <thead>
             <tr>
-                <th>Dự án</th>
+                <th class="dgda-col-project">Dự án</th>
                 <th>Quản lý</th>
                 <th>Trạng thái dự án</th>
-                <th>Đánh giá</th>
-                <th>Điểm</th>
-                <th>Người đánh giá</th>
-                <th>Ngày đánh giá</th>
+                <th>% hoàn thành</th>
+                <th>Số công việc</th>
+                <th>Số công việc trễ</th>
+                <th>Trạng thái đánh giá</th>
                 <th class="text-end">Thao tác</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model.DanhSach)
             {
-                <tr>
-                    <td>
+                <tr class="@(item.DuAnTreTienDo ? "dgda-row-late" : null)">
+                    <td class="dgda-col-project">
                         <div class="fw-semibold">@item.TenDuAn</div>
-                        <div class="text-muted small">Mã dự án: @item.MaDuAn | Hoàn thành: @item.PhanTramHoanThanh%</div>
                     </td>
                     <td>@item.TenNguoiQuanLy</td>
-                    <td>@item.TrangThaiDuAn</td>
+                    <td>
+                        <div>@item.TrangThaiDuAn</div>
+                        @if (item.DuAnTreTienDo)
+                        {
+                            <div class="mt-1">
+                                <span class="dgda-late-badge">Trễ tiến độ</span>
+                                @if (item.SoNgayQuaHan.HasValue && item.SoNgayQuaHan.Value > 0)
+                                {
+                                    <span class="text-muted small ms-1">Quá hạn @item.SoNgayQuaHan ngày</span>
+                                }
+                            </div>
+                        }
+                        @if (!item.DuDieuKienDanhGia)
+                        {
+                            <div class="text-muted small">Chưa đủ điều kiện.</div>
+                        }
+                    </td>
+                    <td>@item.PhanTramHoanThanh%</td>
+                    <td>@item.TongCongViec</td>
+                    <td>@item.CongViecTreHan</td>
                     <td>@await Html.PartialAsync("_TrangThaiDanhGiaBadge", item.TrangThaiDanhGia)</td>
-                    <td>@await Html.PartialAsync("_ScoreBadge", item)</td>
-                    <td>@item.TenNguoiDanhGia</td>
-                    <td>@(item.NgayDanhGia?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
-                    <td class="text-end">
-                        <div class="d-flex gap-1 justify-content-end flex-wrap">
-                            <a asp-action="ChiTiet" asp-route-maDanhGiaDuAn="@item.MaDanhGiaDuAn" class="btn btn-sm btn-outline-secondary">Xem chi tiết</a>
-                            @if (item.CoTheSua)
+                    <td class="text-end dgda-col-actions">
+                        <div class="table-actions dgda-table-actions">
+                            <a asp-controller="DanhGiaNhanVien"
+                               asp-action="Index"
+                               asp-route-maDuAn="@item.MaDuAn"
+                               asp-route-nguon="du-an"
+                               asp-route-returnUrl="@currentUrl"
+                               class="btn-action btn-subtle">
+                                Đánh giá nhân viên
+                            </a>
+
+                            @if (!item.CoDanhGia && item.CoTheDanhGia)
                             {
-                                <a asp-action="Form" asp-route-maDuAn="@item.MaDuAn" class="btn btn-sm btn-warning">Sửa</a>
+                                <a asp-action="Form"
+                                   asp-route-maDuAn="@item.MaDuAn"
+                                   asp-route-tuKhoa="@Model.TuKhoa"
+                                   asp-route-trangThai="@Model.TrangThai"
+                                   asp-route-returnUrl="@currentUrl"
+                                   asp-route-tuNgayDanhGia="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")"
+                                   asp-route-denNgayDanhGia="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")"
+                                   class="btn-action btn-confirm">
+                                    Đánh giá
+                                </a>
                             }
-                            @if (item.CoTheGuiDuyet)
+                            else if (item.CoDanhGia && item.CoTheSua)
+                            {
+                                <a asp-action="Form"
+                                   asp-route-maDuAn="@item.MaDuAn"
+                                   asp-route-tuKhoa="@Model.TuKhoa"
+                                   asp-route-trangThai="@Model.TrangThai"
+                                   asp-route-returnUrl="@currentUrl"
+                                   asp-route-tuNgayDanhGia="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")"
+                                   asp-route-denNgayDanhGia="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")"
+                                   class="btn-action btn-confirm">
+                                    Sửa đánh giá
+                                </a>
+                            }
+                            else if (item.CoDanhGia)
+                            {
+                                <a asp-action="ChiTiet" asp-route-maDanhGiaDuAn="@item.MaDanhGiaDuAn" asp-route-returnUrl="@currentUrl" class="btn-action btn-subtle">Xem đánh giá</a>
+                            }
+                            else if (!item.DuDieuKienDanhGia)
+                            {
+                                <span class="text-muted small">Chờ dự án hoàn thành/lưu trữ.</span>
+                            }
+
+                            @if (item.CoDanhGia && item.CoTheGuiDuyet)
                             {
                                 <form asp-action="GuiDuyet" method="post">
                                     <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
-                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="maDuAn" value="@item.MaDuAn" />
                                     <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                                     <input type="hidden" name="trangThai" value="@Model.TrangThai" />
-                                    <button type="submit" class="btn btn-sm btn-primary">Gửi duyệt</button>
+                                    <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                    <input type="hidden" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn-action btn-confirm">Gửi duyệt</button>
                                 </form>
                             }
-                            @if (item.CoTheDuyet)
+                            @if (item.CoDanhGia && item.CoTheDuyet)
                             {
                                 <form asp-action="Duyet" method="post">
                                     <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
-                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="maDuAn" value="@item.MaDuAn" />
                                     <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                                     <input type="hidden" name="trangThai" value="@Model.TrangThai" />
-                                    <button type="submit" class="btn btn-sm btn-success">Duyệt</button>
+                                    <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                    <input type="hidden" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn-action btn-confirm">Duyệt</button>
                                 </form>
                             }
-                            @if (item.CoTheTuChoi)
+                            @if (item.CoDanhGia && item.CoTheTuChoi)
                             {
-                                <form asp-action="TuChoi" method="post" class="d-flex gap-1">
+                                <form asp-action="TuChoi" method="post" class="d-flex gap-1 dgda-reject-form">
                                     <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
-                                    <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                                    <input type="hidden" name="maDuAn" value="@item.MaDuAn" />
                                     <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                                     <input type="hidden" name="trangThai" value="@Model.TrangThai" />
-                                    <input type="text" name="lyDoTuChoi" class="form-control form-control-sm" placeholder="Lý do" required />
-                                    <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
+                                    <input type="hidden" name="returnUrl" value="@currentUrl" />
+                                    <input type="hidden" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" />
+                                    <input type="hidden" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" />
+                                    <input type="text" name="lyDoTuChoi" class="form-control" placeholder="Lý do" required />
+                                    <button type="submit" class="btn-action btn-danger-soft">Từ chối</button>
                                 </form>
                             }
                         </div>
@@ -74,3 +139,4 @@
         </tbody>
     </table>
 </div>
+

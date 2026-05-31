@@ -1,0 +1,151 @@
+﻿@model QuanLyDuAn.ViewModels.YeuCauDoiQuanLy.YeuCauDoiQuanLyPageViewModel
+@using QuanLyDuAn.Constants
+
+@{
+    ViewData["Title"] = "Yêu cầu đổi quản lý";
+    var permissions = Model.Permissions;
+    var canCreatePermission = permissions.Contains(Permissions.YeuCauDoiQuanLy.Them);
+    var hasModelErrors = ViewData.ModelState.Values.Any(v => v.Errors.Count > 0);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/YeuCauDoiQuanLy/index.css" asp-append-version="true" />
+}
+
+<section class="yeu-cau-doi-quan-ly-page">
+    <header class="yeu-cau-header-card">
+        <div class="yeu-cau-header-content">
+            <h1 class="yeu-cau-title">Yêu cầu đổi quản lý</h1>
+            <p class="yeu-cau-subtitle">Tạo và theo dõi yêu cầu thay đổi quản lý phụ trách dự án.</p>
+        </div>
+        <div class="yeu-cau-header-actions">
+            <a asp-action="Index" asp-route-maDuAn="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-neutral">
+                <i class="bi bi-list-task"></i>
+                Xem danh sách
+            </a>
+            @if (Model.MaDuAn.HasValue)
+            {
+                <a asp-controller="DuAn" asp-action="Details" asp-route-id="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-neutral">
+                    <i class="bi bi-arrow-left"></i>
+                    Về chi tiết dự án
+                </a>
+            }
+        </div>
+    </header>
+
+    <section class="yeu-cau-section-card">
+        <div class="yeu-cau-section-head">
+            <h2 class="yeu-cau-section-title">Thông tin dự án</h2>
+            <p class="yeu-cau-section-note">Chỉ quản lý hiện tại của dự án mới được tạo yêu cầu đổi quản lý.</p>
+        </div>
+        <div class="yeu-cau-project-grid">
+            <div class="yeu-cau-project-item">
+                <span>Dự án</span>
+                <strong>@Model.TenDuAn</strong>
+            </div>
+            <div class="yeu-cau-project-item">
+                <span>Mã dự án</span>
+                <strong>#@Model.MaDuAn</strong>
+            </div>
+            <div class="yeu-cau-project-item">
+                <span>Quản lý hiện tại</span>
+                <strong>@Model.TenQuanLyHienTai</strong>
+            </div>
+            <div class="yeu-cau-project-item">
+                <span>Trạng thái dự án</span>
+                <strong>@TrangThai.ToDisplay(Model.TrangThaiDuAn)</strong>
+            </div>
+        </div>
+    </section>
+
+    @if (hasModelErrors)
+    {
+        <div asp-validation-summary="All" class="yeu-cau-validation-summary text-danger"></div>
+    }
+
+    <section class="yeu-cau-section-card">
+        <div class="yeu-cau-section-head">
+            <h2 class="yeu-cau-section-title">Tạo yêu cầu mới</h2>
+            <p class="yeu-cau-section-note">Quản lý đề xuất cần là nhân sự có role/chức danh quản lý.</p>
+        </div>
+
+        @if (!canCreatePermission)
+        {
+            <div class="yeu-cau-note-box is-warning">Bạn chưa có quyền tạo yêu cầu đổi quản lý.</div>
+        }
+        else if (!Model.CoTheTaoYeuCauMoi)
+        {
+            <div class="yeu-cau-note-box is-warning">
+                @(string.IsNullOrWhiteSpace(Model.LyDoKhongTheTaoYeuCau)
+                    ? "Dự án hiện chưa đủ điều kiện để tạo yêu cầu đổi quản lý."
+                    : Model.LyDoKhongTheTaoYeuCau)
+            </div>
+        }
+        else
+        {
+            <form asp-action="Create" method="post" class="yeu-cau-form-grid">
+                <input type="hidden" asp-for="Form.MaDuAn" />
+                <input type="hidden" name="trangThai" value="@Model.TrangThai" />
+                <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+
+                <div>
+                    <label asp-for="Form.MaQuanLyDeXuat" class="form-label">Quản lý đề xuất mới</label>
+                    <select asp-for="Form.MaQuanLyDeXuat" class="form-select">
+                        <option value="">-- Chọn quản lý --</option>
+                        @foreach (var item in Model.DanhSachQuanLy)
+                        {
+                            <option value="@item.MaNguoiDung">@item.TenNguoiDung (@item.TenChucDanh)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="Form.MaQuanLyDeXuat" class="text-danger"></span>
+                </div>
+
+                <div class="yeu-cau-form-wide">
+                    <label asp-for="Form.LyDoYeuCau" class="form-label">Lý do yêu cầu</label>
+                    <textarea asp-for="Form.LyDoYeuCau" class="form-control" rows="3" placeholder="Nhập lý do đề xuất đổi quản lý (nếu có)"></textarea>
+                    <span asp-validation-for="Form.LyDoYeuCau" class="text-danger"></span>
+                </div>
+
+                <div class="yeu-cau-form-actions">
+                    <button type="submit" class="yeu-cau-action-btn yeu-cau-action-primary">Gửi yêu cầu</button>
+                    <a asp-action="Create" asp-route-maDuAn="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-neutral">Làm mới</a>
+                </div>
+            </form>
+        }
+    </section>
+
+    <section class="yeu-cau-section-card">
+        <div class="yeu-cau-section-head">
+            <h2 class="yeu-cau-section-title">Danh sách yêu cầu đã tạo</h2>
+            <p class="yeu-cau-section-note">Theo dõi tiến trình xử lý và hủy yêu cầu khi còn ở trạng thái chờ duyệt.</p>
+        </div>
+
+        <form asp-action="Create" method="get" class="yeu-cau-filter-form">
+            <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+            <div>
+                <label for="tuKhoa" class="form-label">Từ khóa</label>
+                <input id="tuKhoa" type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên dự án hoặc quản lý" />
+            </div>
+            <div>
+                <label for="trangThai" class="form-label">Trạng thái</label>
+                <select id="trangThai" name="trangThai" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="@TrangThai.ChoDuyet" selected="@(TrangThai.EqualsValue(Model.TrangThai, TrangThai.ChoDuyet))">@TrangThai.ChoDuyetHienThi</option>
+                    <option value="@TrangThai.DaDuyet" selected="@(TrangThai.EqualsValue(Model.TrangThai, TrangThai.DaDuyet))">@TrangThai.DaDuyetHienThi</option>
+                    <option value="@TrangThai.TuChoi" selected="@(TrangThai.EqualsValue(Model.TrangThai, TrangThai.TuChoi))">@TrangThai.TuChoiHienThi</option>
+                    <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.TrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
+                </select>
+            </div>
+            <div class="yeu-cau-filter-actions">
+                <button type="submit" class="yeu-cau-action-btn yeu-cau-action-primary">Lọc dữ liệu</button>
+                <a asp-action="Create" asp-route-maDuAn="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-neutral">Làm mới</a>
+            </div>
+        </form>
+
+        <partial name="_RequestTable" model="Model" />
+    </section>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

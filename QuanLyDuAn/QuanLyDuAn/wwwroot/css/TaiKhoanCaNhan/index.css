@@ -1,0 +1,754 @@
+﻿.tai-khoan-dropdown {
+    position: relative;
+}
+
+.tai-khoan-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.35rem;
+    border: 1px solid #d8e3f2;
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem 0.2rem 0.25rem;
+    background: #ffffff;
+    color: #3f5879;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.tai-khoan-toggle:hover,
+.tai-khoan-toggle:focus-visible {
+    border-color: #bfd1e9;
+    box-shadow: 0 10px 22px rgba(56, 83, 118, 0.12);
+    background: #fdfefe;
+}
+
+.tai-khoan-toggle i {
+    font-size: 0.82rem;
+    color: #6e86a5;
+    transition: transform 0.2s ease;
+}
+
+.tai-khoan-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(135deg, #5f73f5, #04b5df);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.tai-khoan-name {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tai-khoan-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.48rem);
+    z-index: 1200;
+    min-width: 230px;
+    padding: 0.42rem;
+    border-radius: 14px;
+    border: 1px solid #dae4f3;
+    background: #fff;
+    box-shadow: 0 20px 36px rgba(43, 66, 99, 0.16);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.tai-khoan-dropdown.open .tai-khoan-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.tai-khoan-dropdown.open .tai-khoan-toggle i {
+    transform: rotate(180deg);
+}
+
+.tai-khoan-menu-item {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.62rem 0.75rem;
+    color: #355174;
+    background: transparent;
+    text-decoration: none;
+    font-size: 0.87rem;
+    font-weight: 600;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.tai-khoan-menu-item:hover,
+.tai-khoan-menu-item:focus-visible {
+    color: #2f4d73;
+    background: #edf4ff;
+}
+
+.tai-khoan-menu-item.danger {
+    color: #b13c45;
+}
+
+.tai-khoan-menu-item.danger:hover,
+.tai-khoan-menu-item.danger:focus-visible {
+    background: #fff3f3;
+    color: #9f2d36;
+}
+
+.tai-khoan-menu-divider {
+    margin: 0.32rem 0;
+    border-top: 1px solid #e6edf7;
+}
+
+.tai-khoan-menu-form {
+    margin: 0;
+}
+
+.tai-khoan-ca-nhan-page {
+    display: grid;
+    gap: 1rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.48));
+    border: 1px solid #e4e9f3;
+    border-radius: 20px;
+    padding: 1.1rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-header-card,
+.tai-khoan-ca-nhan-page .tai-khoan-card {
+    background: #ffffff;
+    border: 1px solid #e4e9f3;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-header-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-color: rgba(105, 108, 255, 0.2);
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-title {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #304766;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-subtitle {
+    margin: 0.38rem 0 0;
+    color: #607792;
+    font-size: 0.92rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-header-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 0.9rem;
+    align-items: start;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-right-column {
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-card {
+    padding: 1rem;
+    display: grid;
+    gap: 0.8rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-card-ho-so {
+    gap: 0.55rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-card-form {
+    padding: 1.15rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-card-narrow {
+    max-width: 720px;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-card-title {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #314866;
+    font-weight: 700;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-profile-head {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 0.08rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-large {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(135deg, #5f73f5, #04b5df);
+    font-weight: 700;
+    font-size: 1.12rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-photo {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 3px solid #e2ebf8;
+    background: #f6f9ff;
+    box-shadow: 0 8px 16px rgba(53, 81, 116, 0.12);
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-camera {
+    position: absolute;
+    right: 0.05rem;
+    bottom: 0.05rem;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    border: 2px solid #fff;
+    background: linear-gradient(140deg, #5f73f5, #04b5df);
+    box-shadow: 0 6px 12px rgba(49, 77, 114, 0.2);
+    font-size: 0.65rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-photo.large {
+    width: 6.3rem;
+    height: 6.3rem;
+    border-radius: 16px;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-profile-main {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-profile-main strong {
+    color: #2f4767;
+    font-size: 1.06rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-profile-main span {
+    color: #748aa3;
+    font-size: 0.82rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.44rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-lines li {
+    display: grid;
+    grid-template-columns: 1.2rem 115px minmax(0, 1fr);
+    gap: 0.48rem;
+    align-items: center;
+    border: 1px solid #e8eef9;
+    border-radius: 11px;
+    padding: 0.38rem 0.56rem;
+    background: #fbfdff;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-lines i {
+    color: #5f7ba2;
+    font-size: 0.94rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-lines .label {
+    color: #5f7794;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-lines .value {
+    color: #355173;
+    font-size: 0.88rem;
+    word-break: break-word;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-list {
+    display: grid;
+    gap: 0.62rem;
+    margin: 0;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-list div {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-list dt {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #8ca0bc;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-list dd {
+    margin: 0;
+    color: #395679;
+    font-size: 0.9rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-info-list.compact {
+    gap: 0.5rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-group {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-group h3 {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #5a7190;
+    font-weight: 700;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-badge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.24rem 0.58rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-badge.success {
+    background: #ebf9e8;
+    color: #2d9153;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-badge.danger {
+    background: #ffeceb;
+    color: #c1413d;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-badge.neutral {
+    background: #f2f6fd;
+    color: #47617f;
+}
+
+.tai-khoan-ca-nhan-page .account-row-list {
+    display: grid;
+}
+
+.tai-khoan-ca-nhan-page .account-row-item {
+    display: grid;
+    grid-template-columns: 1.9rem minmax(0, 1fr) minmax(120px, auto);
+    align-items: center;
+    gap: 0.56rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #edf2fa;
+}
+
+.tai-khoan-ca-nhan-page .account-row-item:last-child {
+    border-bottom: 0;
+    padding-bottom: 0.1rem;
+}
+
+.tai-khoan-ca-nhan-page .account-row-icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dbe7f8;
+    color: #53709c;
+    background: linear-gradient(145deg, #f7faff, #edf4ff);
+    font-size: 0.84rem;
+}
+
+.tai-khoan-ca-nhan-page .account-row-label {
+    color: #5a7393;
+    font-size: 0.83rem;
+    font-weight: 700;
+}
+
+.tai-khoan-ca-nhan-page .account-row-value {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.34rem;
+    flex-wrap: wrap;
+    color: #395679;
+    font-size: 0.86rem;
+    font-weight: 600;
+    text-align: right;
+}
+
+.tai-khoan-ca-nhan-page .account-row-badges .tai-khoan-badge {
+    font-size: 0.72rem;
+    padding: 0.22rem 0.52rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-security-note {
+    margin: 0;
+    color: #5f7794;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.tai-khoan-ca-nhan-page .security-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.74rem;
+    align-items: flex-start;
+}
+
+.tai-khoan-ca-nhan-page .security-row.compact {
+    padding: 0.1rem 0;
+}
+
+.tai-khoan-ca-nhan-page .security-icon {
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #eaf1ff, #dff6ff);
+    color: #49679a;
+    border: 1px solid #d5e3f8;
+    font-size: 1rem;
+}
+
+.tai-khoan-ca-nhan-page .security-content {
+    min-width: 0;
+}
+
+.tai-khoan-ca-nhan-page .security-content h3 {
+    margin: 0;
+    font-size: 0.94rem;
+    color: #334e71;
+    font-weight: 700;
+}
+
+.tai-khoan-ca-nhan-page .security-content p {
+    margin: 0.24rem 0 0;
+    color: #607896;
+    font-size: 0.84rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-security-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 0.52rem;
+}
+
+.tai-khoan-btn {
+    border: 1px solid transparent;
+    border-radius: 11px;
+    padding: 0.54rem 0.86rem;
+    font-size: 0.84rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.tai-khoan-btn:hover,
+.tai-khoan-btn:focus-visible {
+    transform: translateY(-1px);
+}
+
+.tai-khoan-btn-primary {
+    color: #fff;
+    border-color: rgba(83, 104, 219, 0.5);
+    background: linear-gradient(132deg, #5f73f5, #04b5df);
+    box-shadow: 0 10px 22px rgba(63, 91, 184, 0.24);
+}
+
+.tai-khoan-btn-primary:hover,
+.tai-khoan-btn-primary:focus-visible {
+    color: #fff;
+    box-shadow: 0 12px 22px rgba(63, 91, 184, 0.3);
+}
+
+.tai-khoan-btn-outline {
+    color: #3d5879;
+    background: #fff;
+    border-color: #cddced;
+}
+
+.tai-khoan-btn-outline:hover,
+.tai-khoan-btn-outline:focus-visible {
+    color: #2f4c73;
+    background: #edf4ff;
+}
+
+.tai-khoan-btn-medium {
+    padding: 0.45rem 0.78rem;
+    font-size: 0.8rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-editor {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+    border: 1px solid #e5edf9;
+    border-radius: 14px;
+    padding: 0.8rem;
+    background: linear-gradient(180deg, #ffffff, #f9fbff);
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-preview-wrap {
+    width: 6.3rem;
+    height: 6.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-avatar-fields {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.tai-khoan-ca-nhan-page .avatar-file-input {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tai-khoan-ca-nhan-page .avatar-file-trigger {
+    width: fit-content;
+}
+
+.tai-khoan-ca-nhan-page .avatar-file-name {
+    font-size: 0.8rem;
+    color: #607896;
+    word-break: break-word;
+}
+
+.tai-khoan-ca-nhan-page .account-readonly-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.tai-khoan-ca-nhan-page .account-readonly-row .tai-khoan-form-field {
+    align-content: start;
+}
+
+.tai-khoan-ca-nhan-page .account-readonly-row .form-control {
+    min-height: 2.62rem;
+}
+
+.tai-khoan-ca-nhan-page .account-email-note {
+    margin: -0.2rem 0 0.1rem;
+    font-size: 0.8rem;
+    color: #6f86a3;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form-grid.single-column {
+    grid-template-columns: 1fr;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form-field {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form-field.full {
+    grid-column: 1 / -1;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form-field label {
+    font-size: 0.84rem;
+    color: #56708f;
+    font-weight: 700;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form .form-control {
+    border-radius: 0.72rem;
+    border: 1px solid #d6e0ef;
+    box-shadow: none;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form .form-control:focus {
+    border-color: #9cb2d8;
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-readonly-input {
+    background: #f3f6fb;
+    color: #5f7691;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-readonly-input:focus {
+    box-shadow: none;
+    border-color: #d6e0ef;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-field-note {
+    margin: 0;
+    font-size: 0.79rem;
+    color: #6f86a3;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-readonly-grid {
+    display: grid;
+    gap: 0.7rem;
+    border-top: 1px solid #e5edf9;
+    padding-top: 0.9rem;
+}
+
+.tai-khoan-ca-nhan-page .readonly-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+    color: #8ca0bc;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.tai-khoan-ca-nhan-page .tai-khoan-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.tai-khoan-ca-nhan-page .hidden {
+    display: none;
+}
+
+@media (max-width: 1199.98px) {
+    .tai-khoan-ca-nhan-page .tai-khoan-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .tai-khoan-name {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .tai-khoan-ca-nhan-page {
+        border-radius: 16px;
+        padding: 0.95rem;
+    }
+
+    .tai-khoan-ca-nhan-page .tai-khoan-header-card {
+        border-radius: 14px;
+        padding: 0.9rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tai-khoan-ca-nhan-page .tai-khoan-title {
+        font-size: 1.28rem;
+    }
+
+    .tai-khoan-ca-nhan-page .tai-khoan-grid,
+    .tai-khoan-ca-nhan-page .tai-khoan-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tai-khoan-ca-nhan-page .account-row-item {
+        grid-template-columns: 1.85rem minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .tai-khoan-ca-nhan-page .account-row-value {
+        grid-column: 2;
+        justify-content: flex-start;
+        text-align: left;
+    }
+
+    .tai-khoan-ca-nhan-page .account-readonly-row {
+        grid-template-columns: 1fr;
+    }
+
+    .tai-khoan-ca-nhan-page .tai-khoan-avatar-editor {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+    }
+
+    .tai-khoan-ca-nhan-page .tai-khoan-form-field.full {
+        grid-column: auto;
+    }
+
+    .tai-khoan-ca-nhan-page .tai-khoan-info-lines li {
+        grid-template-columns: 1.2rem 1fr;
+    }
+
+    .tai-khoan-ca-nhan-page .tai-khoan-info-lines .value {
+        grid-column: 2;
+    }
+}

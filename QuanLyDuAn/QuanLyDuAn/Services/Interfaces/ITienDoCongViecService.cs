@@ -4,7 +4,13 @@ namespace QuanLyDuAn.Services.Interfaces
 {
     public interface ITienDoCongViecService
     {
-        Task<TienDoCongViecPageViewModel> GetPageAsync(int? locMaDuAn, int? locMaCongViec, int? locMaChiTietCv, string? tuKhoa);
+        Task<TienDoCongViecPageViewModel> GetPageAsync(
+            int? locMaDuAn,
+            int? locMaCongViec,
+            int? locMaChiTietCv,
+            string? tuKhoa,
+            DateTime? tuNgayBaoCao,
+            DateTime? denNgayBaoCao);
 
         Task CapNhatTienDoAsync(TienDoCongViecCapNhatViewModel form);
         Task DuyetBaoCaoTienDoAsync(TienDoCongViecDuyetViewModel form);

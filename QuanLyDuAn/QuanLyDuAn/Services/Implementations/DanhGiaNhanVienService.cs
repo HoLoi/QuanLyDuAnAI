@@ -11,6 +11,7 @@ namespace QuanLyDuAn.Services.Implementations
     public class DanhGiaNhanVienService : IDanhGiaNhanVienService
     {
         private const string TrangThaiNhap = "Nhap";
+        private const string TrangThaiChuaDanhGia = "ChuaDanhGia";
         private const int DiemToiThieu = 1;
         private const int DiemToiDa = 10;
         private const int DoDaiNhanXetToiDa = 500;
@@ -26,64 +27,83 @@ namespace QuanLyDuAn.Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<DanhGiaNhanVienPageViewModel> GetPageAsync(int? maDuAn, int? maNhanVien, string? tuKhoa)
+        private static (DateTime? TuNgay, DateTime? DenNgay) ChuanHoaKhoangNgay(DateTime? tuNgay, DateTime? denNgay)
+        {
+            var tu = tuNgay?.Date;
+            var den = denNgay?.Date;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
+        }
+
+        public async Task<DanhGiaNhanVienPageViewModel> GetPageAsync(
+            int? maDuAn,
+            int? maNhanVien,
+            string? tuKhoa,
+            string? trangThai,
+            DateTime? tuNgayDanhGia,
+            DateTime? denNgayDanhGia)
         {
             KiemTraQuyenTheoClaim(Permissions.DanhGiaNhanVien.Xem);
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgayDanhGia, denNgayDanhGia);
+            var denNgayDocQuyen = denNgayLoc?.AddDays(1);
 
             var currentUserId = await GetCurrentUserIdAsync();
             var roleFlags = await GetCurrentUserRoleFlagsAsync();
             var leaderTeamIds = await LayDanhSachTeamLeaderAsync(currentUserId);
             var leaderProjectIds = await LayDanhSachDuAnLeaderScopeAsync(currentUserId, leaderTeamIds);
 
+            var danhSachDuAn = await LayDanhSachDuAnTheoScopeAsync(currentUserId, roleFlags, leaderProjectIds);
+            var duAnTheoScope = danhSachDuAn.Select(x => x.MaDuAn).ToHashSet();
+            if (duAnTheoScope.Count == 0)
+            {
+                return new DanhGiaNhanVienPageViewModel
+                {
+                    MaDuAn = maDuAn,
+                    MaNhanVien = maNhanVien,
+                    TuKhoa = tuKhoa,
+                    TrangThai = trangThai,
+                    TuNgayDanhGia = tuNgayLoc,
+                    DenNgayDanhGia = denNgayLoc,
+                    DanhSachDuAn = danhSachDuAn
+                };
+            }
+
             var query =
-                from dg in _context.DanhGiaNhanVien
-                join da in _context.DuAn on dg.MaDuAn equals da.MaDuAn
-                join nv in _context.NguoiDung on dg.MaNguoiDung equals nv.MaNguoiDung
-                join ngDanhGia in _context.NguoiDung on dg.MaNguoiDungDanhGia equals ngDanhGia.MaNguoiDung
-                join ngDuyet in _context.NguoiDung on dg.MaNguoiDungDuyet equals ngDuyet.MaNguoiDung into reviewJoin
-                from ngDuyet in reviewJoin.DefaultIfEmpty()
-                join nvda in _context.NhanVienDuAn on new { dg.MaDuAn, MaNguoiDung = dg.MaNguoiDung }
-                    equals new { nvda.MaDuAn, nvda.MaNguoiDung } into projectRoleJoin
-                from projectRole in projectRoleJoin.DefaultIfEmpty()
-                where dg.IsDeleted != true
-                      && da.IsDeleted != true
-                      && nv.IsDeleted != true
+                from nvda in _context.NhanVienDuAn
+                join da in _context.DuAn on nvda.MaDuAn equals da.MaDuAn
+                join nd in _context.NguoiDung on nvda.MaNguoiDung equals nd.MaNguoiDung
+                where da.IsDeleted != true
+                      && nd.IsDeleted != true
+                      && duAnTheoScope.Contains(nvda.MaDuAn)
                 select new
                 {
-                    dg.MaDanhGiaNhanVien,
-                    dg.MaDuAn,
+                    nvda.MaDuAn,
                     TenDuAn = da.TenDuAn,
                     MaNguoiQuanLy = da.MaNguoiDung,
-                    dg.MaNguoiDung,
-                    TenNhanVien = nv.HoTenNguoiDung,
-                    VaiTroTrongDuAn = projectRole.VaiTroTrongDuAn,
-                    TrangThaiDanhGia = dg.TrangThaiDanhGiaNV,
-                    dg.DiemTongDanhGiaNV,
-                    dg.XepLoai,
-                    NhanXetTongQuan = dg.NhanXetTongQuanNV,
-                    dg.NgayDanhGiaNV,
-                    dg.MaNguoiDungDanhGia,
-                    TenNguoiDanhGia = ngDanhGia.HoTenNguoiDung,
-                    TenNguoiDuyet = ngDuyet.HoTenNguoiDung,
-                    NgayDuyet = dg.NgayDuyetDanhGiaNV,
-                    LyDoTuChoi = dg.LyDoTuChoiDanhGiaNV
+                    MaNhanVien = nvda.MaNguoiDung,
+                    TenNhanVien = nd.HoTenNguoiDung,
+                    nvda.VaiTroTrongDuAn
                 };
 
-            if (!roleFlags.IsAdmin)
+            if (roleFlags.IsManager && !roleFlags.IsAdmin)
             {
-                if (roleFlags.IsManager)
-                {
-                    query = query.Where(x => x.MaNguoiQuanLy == currentUserId);
-                }
-                else
-                {
-                    query = query.Where(x =>
-                        x.MaNguoiDung == currentUserId
-                        || x.MaNguoiDungDanhGia == currentUserId
-                        || (leaderProjectIds.Contains(x.MaDuAn)
-                            && _context.TeamDuAn.Any(td => td.MaDuAn == x.MaDuAn && leaderTeamIds.Contains(td.MaTeam))
-                            && _context.NhanVienTeam.Any(nt => nt.MaNguoiDung == x.MaNguoiDung && leaderTeamIds.Contains(nt.MaTeam))));
-                }
+                query = query.Where(x => x.MaNguoiQuanLy == currentUserId);
+            }
+            else if (!roleFlags.IsAdmin)
+            {
+                query = query.Where(x =>
+                    leaderProjectIds.Contains(x.MaDuAn)
+                    && _context.TeamDuAn.Any(td => td.MaDuAn == x.MaDuAn && leaderTeamIds.Contains(td.MaTeam))
+                    && _context.NhanVienTeam.Any(nt => nt.MaNguoiDung == x.MaNhanVien && leaderTeamIds.Contains(nt.MaTeam)));
+            }
+            else
+            {
+                query = query.Where(x => false);
             }
 
             if (maDuAn.HasValue)
@@ -93,7 +113,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             if (maNhanVien.HasValue)
             {
-                query = query.Where(x => x.MaNguoiDung == maNhanVien.Value);
+                query = query.Where(x => x.MaNhanVien == maNhanVien.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(tuKhoa))
@@ -101,50 +121,134 @@ namespace QuanLyDuAn.Services.Implementations
                 var keyword = tuKhoa.Trim().ToLower();
                 query = query.Where(x =>
                     (x.TenDuAn ?? string.Empty).ToLower().Contains(keyword)
-                    || (x.TenNhanVien ?? string.Empty).ToLower().Contains(keyword)
-                    || (x.NhanXetTongQuan ?? string.Empty).ToLower().Contains(keyword));
+                    || (x.TenNhanVien ?? string.Empty).ToLower().Contains(keyword));
             }
 
-            var rows = await query
-                .OrderByDescending(x => x.NgayDanhGiaNV ?? DateTime.MinValue)
-                .ThenByDescending(x => x.MaDanhGiaNhanVien)
+            var candidateRows = await query
+                .OrderBy(x => x.TenDuAn)
+                .ThenBy(x => x.TenNhanVien)
+                .ThenBy(x => x.MaNhanVien)
                 .ToListAsync();
 
-            var danhGiaIds = rows.Select(x => x.MaDanhGiaNhanVien).ToList();
-            var statsByDanhGia = await XayDungThongKeNhanVienTheoDanhGiaAsync(danhGiaIds);
+            candidateRows = candidateRows
+                .Where(x => CoQuyenTaoDanhGiaNhanVien(
+                    roleFlags,
+                    currentUserId,
+                    x.MaNguoiQuanLy,
+                    x.MaDuAn,
+                    x.MaNhanVien,
+                    leaderTeamIds,
+                    leaderProjectIds))
+                .ToList();
 
-            var items = rows.Select(x =>
+            var pairKeys = candidateRows
+                .Select(x => (x.MaDuAn, x.MaNhanVien))
+                .Distinct()
+                .ToList();
+
+            var duAnIds = pairKeys.Select(x => x.MaDuAn).Distinct().ToList();
+            var nhanVienIds = pairKeys.Select(x => x.MaNhanVien).Distinct().ToList();
+
+            var danhGiaRows = await (
+                from dg in _context.DanhGiaNhanVien
+                join ngDanhGia in _context.NguoiDung on dg.MaNguoiDungDanhGia equals ngDanhGia.MaNguoiDung
+                join ngDuyet in _context.NguoiDung on dg.MaNguoiDungDuyet equals ngDuyet.MaNguoiDung into reviewJoin
+                from ngDuyet in reviewJoin.DefaultIfEmpty()
+                where dg.IsDeleted != true
+                      && duAnIds.Contains(dg.MaDuAn)
+                      && nhanVienIds.Contains(dg.MaNguoiDung)
+                orderby dg.NgayDanhGiaNV descending, dg.MaDanhGiaNhanVien descending
+                select new
+                {
+                    dg.MaDanhGiaNhanVien,
+                    dg.MaDuAn,
+                    MaNhanVien = dg.MaNguoiDung,
+                    dg.MaNguoiDungDanhGia,
+                    dg.TrangThaiDanhGiaNV,
+                    dg.DiemTongDanhGiaNV,
+                    dg.XepLoai,
+                    dg.NhanXetTongQuanNV,
+                    dg.NgayDanhGiaNV,
+                    TenNguoiDanhGia = ngDanhGia.HoTenNguoiDung,
+                    TenNguoiDuyet = ngDuyet.HoTenNguoiDung,
+                    NgayDuyet = dg.NgayDuyetDanhGiaNV,
+                    LyDoTuChoi = dg.LyDoTuChoiDanhGiaNV
+                }).ToListAsync();
+
+            var danhGiaMoiNhatTheoCap = danhGiaRows
+                .GroupBy(x => new { x.MaDuAn, x.MaNhanVien })
+                .ToDictionary(g => (g.Key.MaDuAn, g.Key.MaNhanVien), g => g.First());
+
+            var thongKeTheoCap = new Dictionary<(int MaDuAn, int MaNhanVien), DanhGiaNhanVienThongKeViewModel>();
+            foreach (var pair in pairKeys)
             {
-                var trangThaiDanhGia = ChuanHoaTrangThaiDanhGia(x.TrangThaiDanhGia);
-                statsByDanhGia.TryGetValue(x.MaDanhGiaNhanVien, out var thongKe);
+                thongKeTheoCap[pair] = await XayDungThongKeNhanVienAsync(pair.MaDuAn, pair.MaNhanVien);
+            }
 
-                var coTheSua = CoQuyenSuaDanhGiaNhanVien(roleFlags, currentUserId, x.MaNguoiDungDanhGia, trangThaiDanhGia);
+            var items = candidateRows.Select(x =>
+            {
+                var pair = (x.MaDuAn, x.MaNhanVien);
+                thongKeTheoCap.TryGetValue(pair, out var thongKe);
+                var coTheDanhGia = CoQuyenTaoDanhGiaNhanVien(
+                    roleFlags,
+                    currentUserId,
+                    x.MaNguoiQuanLy,
+                    x.MaDuAn,
+                    x.MaNhanVien,
+                    leaderTeamIds,
+                    leaderProjectIds);
+
+                if (!danhGiaMoiNhatTheoCap.TryGetValue(pair, out var dg))
+                {
+                    return new DanhGiaNhanVienItemViewModel
+                    {
+                        CoDanhGia = false,
+                        MaDanhGiaNhanVien = 0,
+                        MaDuAn = x.MaDuAn,
+                        TenDuAn = x.TenDuAn ?? $"Du an {x.MaDuAn}",
+                        MaNhanVien = x.MaNhanVien,
+                        TenNhanVien = x.TenNhanVien ?? $"Nguoi dung {x.MaNhanVien}",
+                        VaiTroTrongDuAn = TrangThai.ToDisplayVaiTroTrongDuAn(x.VaiTroTrongDuAn),
+                        TrangThaiDanhGia = TrangThaiChuaDanhGia,
+                        DiemTongKet = 0,
+                        XepLoai = "-",
+                        TongChiTietDuocGiao = thongKe?.TongChiTietDuocGiao ?? 0,
+                        ChiTietHoanThanh = thongKe?.ChiTietHoanThanh ?? 0,
+                        ChiTietTreHan = thongKe?.ChiTietTreHan ?? 0,
+                        TyLeHoanThanh = thongKe?.TyLeHoanThanh ?? 0,
+                        CoTheDanhGia = coTheDanhGia
+                    };
+                }
+
+                var trangThaiDanhGia = ChuanHoaTrangThaiDanhGia(dg.TrangThaiDanhGiaNV);
+                var coTheSua = CoQuyenSuaDanhGiaNhanVien(roleFlags, currentUserId, dg.MaNguoiDungDanhGia, trangThaiDanhGia);
                 var coTheGuiDuyet = coTheSua && !roleFlags.IsManager;
                 var coTheDuyet = CoQuyenDuyetDanhGiaNhanVien(roleFlags, currentUserId, x.MaNguoiQuanLy, trangThaiDanhGia);
+                var diemTong = dg.DiemTongDanhGiaNV ?? 0;
 
-                var diemTong = x.DiemTongDanhGiaNV ?? 0;
                 return new DanhGiaNhanVienItemViewModel
                 {
-                    MaDanhGiaNhanVien = x.MaDanhGiaNhanVien,
+                    CoDanhGia = true,
+                    MaDanhGiaNhanVien = dg.MaDanhGiaNhanVien,
                     MaDuAn = x.MaDuAn,
                     TenDuAn = x.TenDuAn ?? $"Du an {x.MaDuAn}",
-                    MaNhanVien = x.MaNguoiDung,
-                    TenNhanVien = x.TenNhanVien ?? $"Nguoi dung {x.MaNguoiDung}",
+                    MaNhanVien = x.MaNhanVien,
+                    TenNhanVien = x.TenNhanVien ?? $"Nguoi dung {x.MaNhanVien}",
                     VaiTroTrongDuAn = TrangThai.ToDisplayVaiTroTrongDuAn(x.VaiTroTrongDuAn),
                     TrangThaiDanhGia = trangThaiDanhGia,
                     DiemTongKet = diemTong,
-                    XepLoai = !string.IsNullOrWhiteSpace(x.XepLoai) ? x.XepLoai! : TinhXepLoai(diemTong),
-                    NhanXet = x.NhanXetTongQuan,
-                    NgayDanhGia = x.NgayDanhGiaNV,
-                    TenNguoiDanhGia = x.TenNguoiDanhGia ?? $"Nguoi dung {x.MaNguoiDungDanhGia}",
-                    TenNguoiDuyet = x.TenNguoiDuyet,
-                    NgayDuyet = x.NgayDuyet,
-                    LyDoTuChoi = x.LyDoTuChoi,
+                    XepLoai = !string.IsNullOrWhiteSpace(dg.XepLoai) ? dg.XepLoai! : TinhXepLoai(diemTong),
+                    NhanXet = dg.NhanXetTongQuanNV,
+                    NgayDanhGia = dg.NgayDanhGiaNV,
+                    TenNguoiDanhGia = dg.TenNguoiDanhGia ?? $"Nguoi dung {dg.MaNguoiDungDanhGia}",
+                    TenNguoiDuyet = dg.TenNguoiDuyet,
+                    NgayDuyet = dg.NgayDuyet,
+                    LyDoTuChoi = dg.LyDoTuChoi,
                     TongChiTietDuocGiao = thongKe?.TongChiTietDuocGiao ?? 0,
                     ChiTietHoanThanh = thongKe?.ChiTietHoanThanh ?? 0,
                     ChiTietTreHan = thongKe?.ChiTietTreHan ?? 0,
                     TyLeHoanThanh = thongKe?.TyLeHoanThanh ?? 0,
-                    CoTheDanhGia = CoQuyenTaoDanhGiaNhanVien(roleFlags, currentUserId, x.MaNguoiQuanLy, x.MaDuAn, x.MaNguoiDung, leaderTeamIds, leaderProjectIds),
+                    CoTheDanhGia = coTheDanhGia,
                     CoTheSua = coTheSua,
                     CoTheGuiDuyet = coTheGuiDuyet,
                     CoTheDuyet = coTheDuyet,
@@ -152,19 +256,40 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }).ToList();
 
+            if (tuNgayLoc.HasValue)
+            {
+                items = items
+                    .Where(x => x.NgayDanhGia.HasValue && x.NgayDanhGia.Value >= tuNgayLoc.Value)
+                    .ToList();
+            }
+
+            if (denNgayDocQuyen.HasValue)
+            {
+                items = items
+                    .Where(x => x.NgayDanhGia.HasValue && x.NgayDanhGia.Value < denNgayDocQuyen.Value)
+                    .ToList();
+            }
+
             return new DanhGiaNhanVienPageViewModel
             {
                 MaDuAn = maDuAn,
                 MaNhanVien = maNhanVien,
                 TuKhoa = tuKhoa,
-                DanhSach = items,
-                DanhSachDuAn = await LayDanhSachDuAnTheoScopeAsync(currentUserId, roleFlags, leaderProjectIds),
+                TrangThai = trangThai,
+                TuNgayDanhGia = tuNgayLoc,
+                DenNgayDanhGia = denNgayLoc,
+                DanhSach = items.Where(x => string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai)).ToList(),
+                DanhSachDuAn = danhSachDuAn,
                 DanhSachNhanVien = await LayDanhSachNhanVienTheoScopeAsync(currentUserId, roleFlags, maDuAn, leaderProjectIds, leaderTeamIds),
-                TongSo = items.Count,
-                SoNhap = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiNhap)),
-                SoChoDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.ChoDuyet)),
-                SoDaDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.DaDuyet)),
-                SoTuChoi = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.TuChoi))
+                TongSo = items.Count(x => string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai)),
+                SoChuaDanhGia = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiChuaDanhGia) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
+                SoNhap = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiNhap) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
+                SoChoDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.ChoDuyet) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
+                SoDaDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.DaDuyet) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
+                SoTuChoi = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.TuChoi) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
+                TenDuAnDangLoc = maDuAn.HasValue
+                    ? danhSachDuAn.FirstOrDefault(x => x.MaDuAn == maDuAn.Value)?.TenDuAn
+                    : null
             };
         }
 
@@ -879,20 +1004,20 @@ namespace QuanLyDuAn.Services.Implementations
             (bool IsAdmin, bool IsManager, bool IsEmployee) roleFlags,
             List<int> leaderProjectIds)
         {
+            if (roleFlags.IsAdmin)
+            {
+                return new List<DanhGiaNhanVienDuAnOptionViewModel>();
+            }
+
             IQueryable<DuAn> query = _context.DuAn.Where(x => x.IsDeleted != true);
 
-            if (!roleFlags.IsAdmin)
+            if (roleFlags.IsManager)
             {
-                if (roleFlags.IsManager)
-                {
-                    query = query.Where(x => x.MaNguoiDung == currentUserId);
-                }
-                else
-                {
-                    query = query.Where(x =>
-                        leaderProjectIds.Contains(x.MaDuAn)
-                        || _context.NhanVienDuAn.Any(nv => nv.MaDuAn == x.MaDuAn && nv.MaNguoiDung == currentUserId));
-                }
+                query = query.Where(x => x.MaNguoiDung == currentUserId);
+            }
+            else
+            {
+                query = query.Where(x => leaderProjectIds.Contains(x.MaDuAn));
             }
 
             return await query
@@ -911,6 +1036,11 @@ namespace QuanLyDuAn.Services.Implementations
             List<int> leaderProjectIds,
             List<int> leaderTeamIds)
         {
+            if (roleFlags.IsAdmin)
+            {
+                return new List<DanhGiaNhanVienNhanVienOptionViewModel>();
+            }
+
             var query =
                 from nvda in _context.NhanVienDuAn
                 join nd in _context.NguoiDung on nvda.MaNguoiDung equals nd.MaNguoiDung
@@ -927,20 +1057,16 @@ namespace QuanLyDuAn.Services.Implementations
                 query = query.Where(x => x.MaDuAn == maDuAn.Value);
             }
 
-            if (!roleFlags.IsAdmin)
+            if (roleFlags.IsManager)
             {
-                if (roleFlags.IsManager)
-                {
-                    query = query.Where(x => _context.DuAn.Any(da => da.MaDuAn == x.MaDuAn && da.MaNguoiDung == currentUserId && da.IsDeleted != true));
-                }
-                else
-                {
-                    query = query.Where(x =>
-                        leaderProjectIds.Contains(x.MaDuAn)
-                        && _context.TeamDuAn.Any(td => td.MaDuAn == x.MaDuAn && leaderTeamIds.Contains(td.MaTeam))
-                        && _context.NhanVienTeam.Any(nt => nt.MaNguoiDung == x.MaNguoiDung && leaderTeamIds.Contains(nt.MaTeam))
-                        || x.MaNguoiDung == currentUserId);
-                }
+                query = query.Where(x => _context.DuAn.Any(da => da.MaDuAn == x.MaDuAn && da.MaNguoiDung == currentUserId && da.IsDeleted != true));
+            }
+            else
+            {
+                query = query.Where(x =>
+                    leaderProjectIds.Contains(x.MaDuAn)
+                    && _context.TeamDuAn.Any(td => td.MaDuAn == x.MaDuAn && leaderTeamIds.Contains(td.MaTeam))
+                    && _context.NhanVienTeam.Any(nt => nt.MaNguoiDung == x.MaNguoiDung && leaderTeamIds.Contains(nt.MaTeam)));
             }
 
             var rows = await query

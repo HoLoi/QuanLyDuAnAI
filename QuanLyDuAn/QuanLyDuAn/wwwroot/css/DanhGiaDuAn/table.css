@@ -1,3 +1,54 @@
-﻿.dgda-table-wrap { border: 1px solid #e5e9f2; border-radius: 12px; }
-.dgda-table thead th { white-space: nowrap; font-size: .85rem; }
-.dgda-table td { vertical-align: middle; }
+﻿.dgda-table-wrap {
+    border: 1px solid #e5e9f2;
+    border-radius: 12px;
+}
+
+.dgda-table thead th {
+    white-space: nowrap;
+    font-size: .85rem;
+}
+
+.dgda-table td {
+    vertical-align: middle;
+}
+
+.dgda-col-project {
+    min-width: 220px;
+}
+
+.dgda-col-actions {
+    min-width: 240px;
+}
+
+.dgda-table-actions {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dgda-table-actions .btn-action {
+    white-space: nowrap;
+}
+
+.danh-gia-du-an-page .dgda-table tbody tr.dgda-row-late > td {
+    background: #fff8f4;
+}
+
+.danh-gia-du-an-page .dgda-table tbody tr.dgda-row-late:hover > td {
+    background: #fff2eb;
+}
+
+.danh-gia-du-an-page .dgda-late-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.14rem 0.55rem;
+    border: 1px solid #f1ccb7;
+    background: #fff1e8;
+    color: #b35d32;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}

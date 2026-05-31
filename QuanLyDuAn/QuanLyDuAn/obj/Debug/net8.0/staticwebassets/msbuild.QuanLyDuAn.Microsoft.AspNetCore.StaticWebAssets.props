@@ -1,5 +1,41 @@
 ﻿<Project>
   <ItemGroup>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\Account\login.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/Account/login.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>blvx0g1vdg</Fingerprint>
+      <Integrity>Ly6oHFFdmAt7PoxcZ4JdnS1qjNlQUxhnZoczAzaUL9c=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\Account\login.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\AI\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/AI/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>46qub2domt</Fingerprint>
+      <Integrity>/OLY9G4Rym1xbzCI60a5waaoEdNg1unFL+Q8nuO0aEQ=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\AI\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\chat-header.css'))">
       <SourceType>Package</SourceType>
       <SourceId>QuanLyDuAn</SourceId>
@@ -138,11 +174,29 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>3i3qkwa3so</Fingerprint>
-      <Integrity>xfdKeT03SPDjt4UeUyAJaUayep0x991f3SxKLw1jgn8=</Integrity>
+      <Fingerprint>0g1xtxcfb3</Fingerprint>
+      <Integrity>cJkQFJeeTzObp2WZxdJOjHIeQdeRHWtR4y246+bXh+w=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChiTietCongViec\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChucDanh\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/ChucDanh/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>y81fopqjz0</Fingerprint>
+      <Integrity>EjAFQ+/IULMp2Y4OJ0YBWQcP0k/zEM2PyNtqfLan/Xs=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChucDanh\index.css'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\CongViec\index.css'))">
       <SourceType>Package</SourceType>
@@ -156,8 +210,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>jz773ughwg</Fingerprint>
-      <Integrity>L3+UxX6t9F4kiOVTpQjzBys5abnHBQc6vEBxpDTAJrQ=</Integrity>
+      <Fingerprint>3u8wwq5dkm</Fingerprint>
+      <Integrity>u0yAUESYiRgkwz+/+OR2XA/a6PU+lL6mHzmazABAVkE=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\CongViec\index.css'))</OriginalItemSpec>
@@ -228,8 +282,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>40k1roms6f</Fingerprint>
-      <Integrity>hNawAaZ2WjBJfv4a+SEWiwHfgUJI8n1R3ocnZ2eliTY=</Integrity>
+      <Fingerprint>ix9os6kbob</Fingerprint>
+      <Integrity>RrzMxf2DMTRH/mMWvc0ZajVBDVUz/KOg6jaNGNer8Uc=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaDuAn\index.css'))</OriginalItemSpec>
@@ -282,8 +336,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>ffvazg551v</Fingerprint>
-      <Integrity>ZW/NxSISFyTUKrvNshOJdPmidgEUW28IzF6oRWUJWMk=</Integrity>
+      <Fingerprint>nafk2gqnyp</Fingerprint>
+      <Integrity>kZMekjdy1GrrQyxejUlPQwh+HdX8IeY6CQ+ioBsYkuc=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaDuAn\table.css'))</OriginalItemSpec>
@@ -318,8 +372,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>tfm1bz009t</Fingerprint>
-      <Integrity>J4FzCMSIHtbsKzE+5cC/ndDyuC56RyPsIUkPOpzZUrM=</Integrity>
+      <Fingerprint>owinhalqwz</Fingerprint>
+      <Integrity>eKhJO+lDpdUY/l4FTvANZAEwiEp+1VGbgIHxdgcpIKk=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaNhanVien\empty-state.css'))</OriginalItemSpec>
@@ -336,8 +390,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>z9ilw9j8go</Fingerprint>
-      <Integrity>OZxMDrOgtyCBqnVsIJDUqFYS2zrYR3j/sEl+KsXRiF4=</Integrity>
+      <Fingerprint>0xyz2s39fq</Fingerprint>
+      <Integrity>hD37PlOLWdBb/h7/q5hUmGJaNqz/g/SIfmypUwpDNSE=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaNhanVien\filter.css'))</OriginalItemSpec>
@@ -354,8 +408,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>byxb45io8h</Fingerprint>
-      <Integrity>XaeqdqNU4RerVu2RtxpMzfQN3cbhWw3wEngFKckKxlo=</Integrity>
+      <Fingerprint>4uuqdcg3ow</Fingerprint>
+      <Integrity>ZESsVEw87/f6LzMp1UXZ2jiBDuJG+m/3TmBVOqlkooQ=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaNhanVien\form.css'))</OriginalItemSpec>
@@ -372,8 +426,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>4xel2c0ftq</Fingerprint>
-      <Integrity>OA8D+2bKJHLoFAsminwNgvm2YoNJZT1TH/fIDhwKxLU=</Integrity>
+      <Fingerprint>tujbyytyb2</Fingerprint>
+      <Integrity>u0zKStSTWg3exzZxm+7QkDh0KQJ25jv9fNmjOhx037I=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaNhanVien\index.css'))</OriginalItemSpec>
@@ -426,8 +480,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>d0c427w07y</Fingerprint>
-      <Integrity>zdNBgyJVj7h6OUvDnGw7j5ntmIrL8gx1KFI3xOb9VBM=</Integrity>
+      <Fingerprint>m8w23px4xo</Fingerprint>
+      <Integrity>tga0D55+sbUC8m6vBVgUUFGqZwn6qrNrNe8N6mRUKRQ=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaNhanVien\table.css'))</OriginalItemSpec>
@@ -462,8 +516,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>9zhftwz46o</Fingerprint>
-      <Integrity>OwoLyTrApX/bbhwnEP/8W5M+MPJ7iaXMbVz49P+OcTg=</Integrity>
+      <Fingerprint>w9pfzl3aw6</Fingerprint>
+      <Integrity>TKuQrMV2z6/CPoSrlM81W1qyu2UTZ0QUE6oUQvkol4U=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\Dashboard\index.css'))</OriginalItemSpec>
@@ -480,8 +534,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>q2d5xm2p3g</Fingerprint>
-      <Integrity>jvXObcieZsqTeOa06RXe7NEqCOmH9/z65xIzaKd/Jok=</Integrity>
+      <Fingerprint>ezqijwysoq</Fingerprint>
+      <Integrity>Guy3ElVeR1VfQPbosoxWOv/jv2U+Kno8sJz4PlTSZUQ=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DeXuatCongViec\index.css'))</OriginalItemSpec>
@@ -498,8 +552,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>nds9cjtnv2</Fingerprint>
-      <Integrity>6z8YRUsQ4fwnKVPYA4n3Pxc2wyGmKQyin31MGh+Rnxc=</Integrity>
+      <Fingerprint>aqsxfazvbi</Fingerprint>
+      <Integrity>stbuD2/HISAQc5f+Cdv88vHfxsPQdKayuYhHsOEcvoQ=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DeXuatNganSach\index.css'))</OriginalItemSpec>
@@ -516,8 +570,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>p8m9dvu3e7</Fingerprint>
-      <Integrity>J36p96LqCLLu1Jo04g/XkiCAOGQygEeJrwArp9r3DAA=</Integrity>
+      <Fingerprint>02p8cqtfmw</Fingerprint>
+      <Integrity>KAuRduvmhifSEuBowzs70/M2GpetHSE9aYrj0vhgTDE=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuAn\details.css'))</OriginalItemSpec>
@@ -534,8 +588,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>l88bhvmztd</Fingerprint>
-      <Integrity>i1RrO8cQZAjVKl+ept1x+8zuYDtGwglr8K3SoolxSTc=</Integrity>
+      <Fingerprint>zij3v9g3t1</Fingerprint>
+      <Integrity>ZXfGqTVcugjz8x7rCY8QEVb4ne0rc4woCktcj/zgQ/Q=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuAn\index.css'))</OriginalItemSpec>
@@ -576,6 +630,24 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuyetDeXuatNganSach\index.css'))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuyetYeuCauDoiQuanLy\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/DuyetYeuCauDoiQuanLy/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>7w63n3egey</Fingerprint>
+      <Integrity>p4hs8GzgrGFpjMvPQ+cG/zYkrHOYdfZkE7uMEYXhHsw=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuyetYeuCauDoiQuanLy\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\layout\sidebar.css'))">
       <SourceType>Package</SourceType>
       <SourceId>QuanLyDuAn</SourceId>
@@ -606,11 +678,29 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>y9r3cdyckn</Fingerprint>
-      <Integrity>KlNEOqO/kWviDX0TAz8WSQP7Ng8PLDTDZ0B+slTcf5M=</Integrity>
+      <Fingerprint>twauk8tdf6</Fingerprint>
+      <Integrity>vVYwPoW1aE0E16WImemM1v7CNqp2baX/xbrrxGpHIac=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\NganSach\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\NhanSu\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/NhanSu/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>vbvukyczoy</Fingerprint>
+      <Integrity>G9YXZ0BXYzJF3lbNGISO3dD/bCAtu2pSshL4FQinJhI=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\NhanSu\index.css'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\PhanCongChiTietCongViec\index.css'))">
       <SourceType>Package</SourceType>
@@ -648,6 +738,42 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\PhanCongCongViec\index.css'))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\PhanQuyen\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/PhanQuyen/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>zwh68rj2ki</Fingerprint>
+      <Integrity>M6QngR06tjtZ8tZzhJobNRFaybxIUDXJOdTBfu/dn1w=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\PhanQuyen\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\shared\export-dropdown.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/shared/export-dropdown.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>8jd4g05x4f</Fingerprint>
+      <Integrity>hL2O/mJdp00pN6ZKsfqKM4VytQyyo6QbGigf1TFBBfo=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\shared\export-dropdown.css'))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))">
       <SourceType>Package</SourceType>
       <SourceId>QuanLyDuAn</SourceId>
@@ -660,11 +786,47 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>od5eg3rn4d</Fingerprint>
-      <Integrity>RIH17RUb1rrdtjes0qdR1Hd4N9P6SQPHgzN0i9eVIz4=</Integrity>
+      <Fingerprint>fzrdv4i5gs</Fingerprint>
+      <Integrity>FcJ6mVlJ7Ob73W6Bk/Vp8ecFmF9ybIgAtNEKiBHCPRI=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\TaiKhoanCaNhan\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/TaiKhoanCaNhan/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>l0nzjro192</Fingerprint>
+      <Integrity>RV44CtSJkotYWC3nsjV0znr4LlOiSykozKGL0lEE+9Q=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\TaiKhoanCaNhan\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\Team\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/Team/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>umfnzxs12g</Fingerprint>
+      <Integrity>5tW2ts43pjAjxaJwv7bo96oy1f6A8OjseiopYCAZB0w=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\Team\index.css'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\TeamDuAn\index.css'))">
       <SourceType>Package</SourceType>
@@ -702,6 +864,60 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ThanhVienDuAn\index.css'))</OriginalItemSpec>
     </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ThanhVienTeam\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/ThanhVienTeam/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>4hf3cfa4cn</Fingerprint>
+      <Integrity>6MaiNi64my3lXTc6T/RkXQZjnmHx7y/e85f1WA4XvL8=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ThanhVienTeam\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\TienDoCongViec\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/TienDoCongViec/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>mosgoqwkx5</Fingerprint>
+      <Integrity>ykrk+z9soOHA25avPicAcigR1llbiQMiG0CPnzgQqCQ=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\TienDoCongViec\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\YeuCauDoiQuanLy\index.css'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>css/YeuCauDoiQuanLy/index.css</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>buhf59yust</Fingerprint>
+      <Integrity>7W5pTg+yRIr2gwnpYuvkPWH8zualDgkMsphYT1N7DRw=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\YeuCauDoiQuanLy\index.css'))</OriginalItemSpec>
+    </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\favicon.ico'))">
       <SourceType>Package</SourceType>
       <SourceId>QuanLyDuAn</SourceId>
@@ -719,6 +935,24 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\favicon.ico'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\ai\charts.js'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>js/ai/charts.js</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>qmkb4w6fq8</Fingerprint>
+      <Integrity>MmGts0T1X45dsJfXz2k+ykA27reCeg550a1FYRAUmFg=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\ai\charts.js'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\site.js'))">
       <SourceType>Package</SourceType>
@@ -1764,23 +1998,41 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\lib\jquery\LICENSE.txt'))</OriginalItemSpec>
     </StaticWebAsset>
-    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\QuanLyDuAn.badawas98u.bundle.scp.css'))">
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\QuanLyDuAn.0tp7zig6ys.bundle.scp.css'))">
       <SourceType>Package</SourceType>
       <SourceId>QuanLyDuAn</SourceId>
       <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
       <BasePath>_content/QuanLyDuAn</BasePath>
-      <RelativePath>QuanLyDuAn.badawas98u.bundle.scp.css</RelativePath>
+      <RelativePath>QuanLyDuAn.0tp7zig6ys.bundle.scp.css</RelativePath>
       <AssetKind>All</AssetKind>
       <AssetMode>Reference</AssetMode>
       <AssetRole>Primary</AssetRole>
       <RelatedAsset></RelatedAsset>
       <AssetTraitName>ScopedCss</AssetTraitName>
       <AssetTraitValue>ProjectBundle</AssetTraitValue>
-      <Fingerprint>badawas98u</Fingerprint>
-      <Integrity>w+kr0ytVBRhyUpNC37wJyPnCkpn0BnIpHVt9noArj2k=</Integrity>
+      <Fingerprint>0tp7zig6ys</Fingerprint>
+      <Integrity>nHaR79kGM6bomLD9Jjs2hbq/hvXmcsi+tQ/hWyqNnr4=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\QuanLyDuAn.badawas98u.bundle.scp.css'))</OriginalItemSpec>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\QuanLyDuAn.0tp7zig6ys.bundle.scp.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\avatars\avatar_1_20260524190347_3da100e6698c4784b43b26034fc93ca7.jpg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>uploads/avatars/avatar_1_20260524190347_3da100e6698c4784b43b26034fc93ca7.jpg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>pxox2dacmo</Fingerprint>
+      <Integrity>g81CmDFOWraLDTwg+BWPbxQQ4GedYe/Vh6f9QGaQudY=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\avatars\avatar_1_20260524190347_3da100e6698c4784b43b26034fc93ca7.jpg'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\duan\2\2f7f4153823742128c08326eef7055ba.pdf'))">
       <SourceType>Package</SourceType>

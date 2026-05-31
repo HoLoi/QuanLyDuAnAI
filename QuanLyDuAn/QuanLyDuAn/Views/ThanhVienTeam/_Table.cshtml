@@ -11,7 +11,7 @@
     bool cheDoGanTruongNhom = ViewBag.CheDoGanTruongNhom is bool value && value;
 }
 
-<table class="table table-bordered mt-3 app-data-table">
+<table class="table workflow-table mt-3 app-data-table">
     <thead>
         <tr>
             <th>Team</th>
@@ -33,11 +33,11 @@
                 <td class="col-status">
                     @if (item.IsLeader)
                     {
-                        <span class="badge bg-success">Có</span>
+                        <span class="workflow-badge workflow-success">Có</span>
                     }
                     else
                     {
-                        <span class="badge bg-secondary">Không</span>
+                        <span class="workflow-badge workflow-idle">Không</span>
                     }
                 </td>
                 <td class="col-actions table-actions">
@@ -50,7 +50,7 @@
                            asp-route-locMaTeam="@locMaTeam"
                            asp-route-locVaiTroLanhDao="@locVaiTroLanhDao"
                            asp-route-cheDoGanTruongNhom="@cheDoGanTruongNhom"
-                           class="btn btn-outline-warning btn-sm">Sửa</a>
+                           class="btn-action btn-subtle">Sửa</a>
                     }
 
                     @if (permissions.Contains(Permissions.ThanhVienNhom.Them) && !item.IsLeader && !item.TeamDaCoTruongNhom)
@@ -62,7 +62,7 @@
                             <input type="hidden" name="locMaTeam" value="@locMaTeam" />
                             <input type="hidden" name="locVaiTroLanhDao" value="@locVaiTroLanhDao" />
                             <input type="hidden" name="cheDoGanTruongNhom" value="@cheDoGanTruongNhom" />
-                            <button type="submit" class="btn btn-outline-primary btn-sm">Gán trưởng nhóm</button>
+                            <button type="submit" class="btn-action btn-confirm">Gán trưởng nhóm</button>
                         </form>
                     }
 
@@ -75,7 +75,7 @@
                             <input type="hidden" name="locMaTeam" value="@locMaTeam" />
                             <input type="hidden" name="locVaiTroLanhDao" value="@locVaiTroLanhDao" />
                             <input type="hidden" name="cheDoGanTruongNhom" value="@cheDoGanTruongNhom" />
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                            <button type="submit" class="btn-action btn-danger-soft">Xóa</button>
                         </form>
                     }
                 </td>

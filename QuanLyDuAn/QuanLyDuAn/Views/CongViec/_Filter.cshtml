@@ -2,49 +2,82 @@
 @using QuanLyDuAn.Constants
 
 <form asp-action="Index" method="get" class="workflow-filter">
-    <div class="filter-field filter-field--wide">
-        <label for="tuKhoa">Từ khóa</label>
-        <input id="tuKhoa"
-               type="text"
-               name="tuKhoa"
-               value="@Model.TuKhoa"
-               class="form-control"
-               placeholder="Tên công việc, danh mục, mô tả..." />
+    <div class="workflow-filter-head">
+        <h6 class="mb-1">Bộ lọc công việc</h6>
+        <p class="mb-0">Lọc theo dự án, trạng thái và khoảng thời gian xử lý công việc.</p>
     </div>
 
-    <div class="filter-field">
-        <label for="locMaDuAn">Dự án</label>
-        <select id="locMaDuAn" name="locMaDuAn" class="form-select">
-            <option value="">Tất cả dự án</option>
-            @foreach (var item in Model.DanhSachDuAn)
-            {
-                <option value="@item.MaDuAn" selected="@(Model.LocMaDuAn == item.MaDuAn)">@item.TenDuAn</option>
-            }
-        </select>
+    <div class="workflow-filter-row workflow-filter-row-main">
+        <div class="filter-field filter-field--wide">
+            <label for="tuKhoa">Từ khóa</label>
+            <input id="tuKhoa"
+                   type="text"
+                   name="tuKhoa"
+                   value="@Model.TuKhoa"
+                   class="form-control"
+                   placeholder="Tên công việc, danh mục, mô tả..." />
+        </div>
+
+        <div class="filter-field">
+            <label for="locMaDuAn">Dự án</label>
+            <select id="locMaDuAn" name="locMaDuAn" class="form-select">
+                <option value="">Tất cả dự án</option>
+                @foreach (var item in Model.DanhSachDuAn)
+                {
+                    <option value="@item.MaDuAn" selected="@(Model.LocMaDuAn == item.MaDuAn)">@item.TenDuAn</option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="locTrangThai">Trạng thái</label>
+            <select id="locTrangThai" name="locTrangThai" class="form-select">
+                <option value="">Tất cả trạng thái</option>
+                <option value="@TrangThai.ChuaBatDau" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChuaBatDau))">@TrangThai.ChuaBatDauHienThi</option>
+                <option value="@TrangThai.DangThucHien" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DangThucHien))">@TrangThai.DangThucHienHienThi</option>
+                <option value="@TrangThai.ChoXacNhanHoanThanh" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoXacNhanHoanThanh))">@TrangThai.ChoXacNhanHoanThanhHienThi</option>
+                <option value="@TrangThai.HoanThanh" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.HoanThanh))">@TrangThai.HoanThanhHienThi</option>
+                <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TamDung))">@TrangThai.TamDungHienThi</option>
+                <option value="@TrangThai.BiCanCan" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.BiCanCan))">@TrangThai.BiCanCanHienThi</option>
+                <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
+            </select>
+        </div>
     </div>
 
-    <div class="filter-field">
-        <label for="locTrangThai">Trạng thái</label>
-        <select id="locTrangThai" name="locTrangThai" class="form-select">
-            <option value="">Tất cả trạng thái</option>
-            <option value="@TrangThai.ChuaBatDau" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChuaBatDau))">@TrangThai.ChuaBatDauHienThi</option>
-            <option value="@TrangThai.DangThucHien" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DangThucHien))">@TrangThai.DangThucHienHienThi</option>
-            <option value="@TrangThai.ChoXacNhanHoanThanh" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.ChoXacNhanHoanThanh))">@TrangThai.ChoXacNhanHoanThanhHienThi</option>
-            <option value="@TrangThai.HoanThanh" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.HoanThanh))">@TrangThai.HoanThanhHienThi</option>
-            <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TamDung))">@TrangThai.TamDungHienThi</option>
-            <option value="@TrangThai.BiCanCan" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.BiCanCan))">@TrangThai.BiCanCanHienThi</option>
-            <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
-        </select>
-    </div>
+    <div class="workflow-filter-row workflow-filter-row-time">
+        <div class="filter-field">
+            <label for="locTheoNgay">Lọc theo ngày</label>
+            <select id="locTheoNgay" name="locTheoNgay" class="form-select">
+                <option value="NgayTao" selected="@((Model.LocTheoNgay ?? "NgayTao") == "NgayTao")">Ngày tạo</option>
+                <option value="HanCongViec" selected="@(Model.LocTheoNgay == "HanCongViec")">Hạn công việc</option>
+            </select>
+        </div>
 
-    <div class="filter-actions">
-        <button type="submit" class="btn btn-filter-apply">
-            <i class="bi bi-funnel"></i>
-            Lọc
-        </button>
-        <a asp-action="Index" class="btn btn-filter-reset">
-            <i class="bi bi-arrow-counterclockwise"></i>
-            Bỏ lọc
-        </a>
+        <div class="filter-field">
+            <label for="tuNgay">Từ ngày</label>
+            <input id="tuNgay"
+                   type="date"
+                   name="tuNgay"
+                   value="@Model.TuNgay?.ToString("yyyy-MM-dd")"
+                   class="form-control filter-date-input" />
+        </div>
+
+        <div class="filter-field">
+            <label for="denNgay">Đến ngày</label>
+            <input id="denNgay"
+                   type="date"
+                   name="denNgay"
+                   value="@Model.DenNgay?.ToString("yyyy-MM-dd")"
+                   class="form-control filter-date-input" />
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn-filter-apply">
+                Lọc dữ liệu
+            </button>
+            <a asp-action="Index" class="btn-filter-reset">
+                Làm mới
+            </a>
+        </div>
     </div>
 </form>
