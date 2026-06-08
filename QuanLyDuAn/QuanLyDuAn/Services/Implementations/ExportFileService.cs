@@ -68,11 +68,11 @@ namespace QuanLyDuAn.Services.Implementations
             worksheet.Cell(1, 1).Value = request.ReportTitle;
             worksheet.Range(1, 1, 1, totalColumns).Merge().Style.Font.SetBold().Font.SetFontSize(14);
 
-            worksheet.Cell(2, 1).Value = $"Ngay xuat: {request.ExportedAt:dd/MM/yyyy HH:mm}";
+            worksheet.Cell(2, 1).Value = $"Ngày xuất: {request.ExportedAt:dd/MM/yyyy HH:mm}";
             worksheet.Range(2, 1, 2, totalColumns).Merge();
-            worksheet.Cell(3, 1).Value = $"Nguoi xuat: {(string.IsNullOrWhiteSpace(request.ExportedBy) ? "Khong xac dinh" : request.ExportedBy)}";
+            worksheet.Cell(3, 1).Value = $"Người xuất: {(string.IsNullOrWhiteSpace(request.ExportedBy) ? "Không xác định" : request.ExportedBy)}";
             worksheet.Range(3, 1, 3, totalColumns).Merge();
-            worksheet.Cell(4, 1).Value = $"Bo loc: {BuildAppliedFiltersText(request.AppliedFiltersText)}";
+            worksheet.Cell(4, 1).Value = $"Bộ lọc: {BuildAppliedFiltersText(request.AppliedFiltersText)}";
             worksheet.Range(4, 1, 4, totalColumns).Merge();
             worksheet.Range(2, 1, 4, totalColumns).Style.Font.SetFontColor(XLColor.DimGray);
 
@@ -117,9 +117,9 @@ namespace QuanLyDuAn.Services.Implementations
                     {
                         column.Spacing(8);
                         column.Item().Text(request.ReportTitle).Bold().FontSize(15);
-                        column.Item().Text($"Ngay xuat: {request.ExportedAt:dd/MM/yyyy HH:mm}");
-                        column.Item().Text($"Nguoi xuat: {(string.IsNullOrWhiteSpace(request.ExportedBy) ? "Khong xac dinh" : request.ExportedBy)}");
-                        column.Item().Text($"Bo loc: {BuildAppliedFiltersText(request.AppliedFiltersText)}");
+                        column.Item().Text($"Ngày xuất: {request.ExportedAt:dd/MM/yyyy HH:mm}");
+                        column.Item().Text($"Người xuất: {(string.IsNullOrWhiteSpace(request.ExportedBy) ? "Không xác định" : request.ExportedBy)}");
+                        column.Item().Text($"Bộ lọc: {BuildAppliedFiltersText(request.AppliedFiltersText)}");
 
                         column.Item().Table(table =>
                         {
@@ -156,10 +156,10 @@ namespace QuanLyDuAn.Services.Implementations
         private static byte[] BuildCsv(ExportFileRequest request)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"Tieu de,{EscapeCsv(request.ReportTitle)}");
-            sb.AppendLine($"Ngay xuat,{EscapeCsv(request.ExportedAt.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))}");
-            sb.AppendLine($"Nguoi xuat,{EscapeCsv(string.IsNullOrWhiteSpace(request.ExportedBy) ? "Khong xac dinh" : request.ExportedBy)}");
-            sb.AppendLine($"Bo loc,{EscapeCsv(BuildAppliedFiltersText(request.AppliedFiltersText))}");
+            sb.AppendLine($"Tiêu đề,{EscapeCsv(request.ReportTitle)}");
+            sb.AppendLine($"Ngày xuất,{EscapeCsv(request.ExportedAt.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))}");
+            sb.AppendLine($"Người xuất,{EscapeCsv(string.IsNullOrWhiteSpace(request.ExportedBy) ? "Không xác định" : request.ExportedBy)}");
+            sb.AppendLine($"Bộ lọc,{EscapeCsv(BuildAppliedFiltersText(request.AppliedFiltersText))}");
             sb.AppendLine();
             sb.AppendLine(string.Join(",", request.Columns.Select(x => EscapeCsv(x.Header))));
 
@@ -179,7 +179,7 @@ namespace QuanLyDuAn.Services.Implementations
 
         private static string BuildAppliedFiltersText(string? filters)
         {
-            return string.IsNullOrWhiteSpace(filters) ? "Khong ap dung bo loc" : filters.Trim();
+            return string.IsNullOrWhiteSpace(filters) ? "Không áp dụng bộ lọc" : filters.Trim();
         }
 
         private static string EscapeCsv(string? value)

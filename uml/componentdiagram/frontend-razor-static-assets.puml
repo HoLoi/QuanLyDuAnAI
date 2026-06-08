@@ -1,0 +1,50 @@
+@startuml
+title Component Diagram - Frontend Razor Views và static assets
+
+skinparam componentStyle rectangle
+
+actor "Người dùng" as User
+
+package "Razor UI" {
+  component "Views/Shared/_Layout.cshtml" as Layout
+  component "Views/Shared/_ExportDropdown.cshtml" as ExportDropdown
+  component "Module Views\nDashboard, DuAn, CongViec,\nTienDo, DanhGia, AI, Chat" as ModuleViews
+  component "Partial Views\n_Filter, _Table, _Form,\n_History, _MessageList" as Partials
+  component "Validation Partial\n_ValidationScriptsPartial" as ValidationPartial
+}
+
+package "Static files - wwwroot" {
+  component "site.css" as SiteCss
+  component "module CSS\nwwwroot/css/<Module>/index.css" as ModuleCss
+  component "shared CSS\nexport-dropdown.css, layout/sidebar.css" as SharedCss
+  component "site.js" as SiteJs
+  component "AI charts.js\nwwwroot/js/ai/charts.js" as AiCharts
+  component "Bootstrap / jQuery /\nvalidation unobtrusive" as ClientLib
+  artifact "uploads\navatars, duan, tiendocongviec" as Uploads
+}
+
+package "MVC Server" {
+  component "Controllers" as Controllers
+  component "ViewModels" as ViewModels
+  component "File Services\nFileDuAnService,\nFileTienDoCongViecService" as FileServices
+}
+
+User --> ModuleViews : xem và nhập form
+ModuleViews --> Layout : dùng layout chung
+ModuleViews --> Partials : chia nhỏ bảng, form, bộ lọc
+ModuleViews --> ExportDropdown : dùng dropdown xuất file
+ModuleViews --> ViewModels : hiển thị dữ liệu đã map
+ModuleViews --> Controllers : GET/POST theo route MVC
+
+Layout --> SiteCss : nạp CSS chung
+Layout --> SharedCss : nạp layout/sidebar
+ModuleViews --> ModuleCss : nạp CSS theo module
+ModuleViews --> SiteJs : script chung
+ModuleViews --> AiCharts : biểu đồ màn AI
+ValidationPartial --> ClientLib : validate phía client
+
+Controllers --> ViewModels : trả model cho Razor
+Controllers --> FileServices : xử lý upload/download
+FileServices --> Uploads : lưu file vật lý
+ModuleViews --> Uploads : hiển thị/tải file qua action MVC
+@enduml

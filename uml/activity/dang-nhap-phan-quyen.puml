@@ -1,0 +1,59 @@
+@startuml
+' title Đăng nhập và phân quyền theo vai trò, claim và phạm vi dữ liệu
+
+start
+partition "Người dùng" {
+  :Mở màn hình đăng nhập;
+  :Nhập tên đăng nhập và mật khẩu;
+}
+
+partition "Hệ thống MVC" {
+  :Validate dữ liệu đăng nhập;
+  if (Dữ liệu hợp lệ?) then (Có)
+    :Gọi AccountService.AuthenticateAsync;
+  else (Không)
+    :Trả lỗi validation về giao diện;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Tìm tài khoản, trạng thái tài khoản;
+  :Đối chiếu mật khẩu;
+  :Nạp role, role claim và user claim;
+}
+
+partition "Hệ thống MVC" {
+  if (Tài khoản hợp lệ và đang hoạt động?) then (Có)
+    :Tạo ClaimsPrincipal;
+    :Gắn ClaimTypes.Role, claim "role", "IsLeader";
+    :Gắn claim permission từ role/user với type "permission";
+    :Đăng nhập cookie;
+    :Điều hướng về Dashboard;
+  else (Không)
+    :Trả thông báo đăng nhập thất bại;
+    stop
+  endif
+}
+
+partition "Người dùng" {
+  :Truy cập chức năng nghiệp vụ;
+}
+
+partition "Hệ thống MVC" {
+  :Controller kiểm tra [Authorize];
+  :IPermissionHelper kiểm tra Permissions.*;
+  if (Có permission claim?) then (Có)
+    :Service kiểm tra phạm vi dữ liệu dự án/team/công việc;
+    if (Đúng phạm vi?) then (Có)
+      :Cho phép xem hoặc thao tác;
+    else (Không)
+      :Từ chối do ngoài phạm vi dữ liệu;
+    endif
+  else (Không)
+    :Chuyển AccessDenied hoặc trả lỗi quyền;
+  endif
+}
+
+stop
+@enduml

@@ -1,0 +1,62 @@
+@startuml
+' title Đề xuất và duyệt ngân sách
+
+start
+partition "Leader" {
+  :Mở màn hình đề xuất ngân sách;
+  :Chọn dự án và nhập số tiền/lý do đề xuất;
+  :Gửi đề xuất;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.DeXuatNganSach.Them;
+  :Kiểm tra Leader thuộc phạm vi dự án;
+  :Kiểm tra dự án còn cho phép đề xuất;
+  :Validate dữ liệu đầu vào;
+  if (Hợp lệ?) then (Có)
+    :Tạo đề xuất trạng thái Chờ duyệt;
+  else (Không)
+    :Trả lỗi về giao diện;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Thêm DE_XUAT_NGAN_SACH;
+  :Ghi nhật ký ngân sách/dự án nếu có;
+}
+
+partition "Quản lý dự án" {
+  :Mở màn hình duyệt ngân sách;
+  :Chọn duyệt hoặc từ chối;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra Permissions.DuyetNganSach.Duyet;
+  :Kiểm tra người duyệt là quản lý dự án;
+  :Kiểm tra đề xuất còn Chờ duyệt;
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Duyệt đề xuất?) then (Có)
+    :Kiểm tra dự án chưa hoàn thành/lưu trữ/đã hủy;
+    :Đánh dấu ngân sách cũ là Đã thay thế nếu có;
+    :Thêm bản ghi NGAN_SACH mới trạng thái Đã duyệt;
+    :Cập nhật DE_XUAT_NGAN_SACH = Đã duyệt;
+    :Ghi nhật ký ngân sách và nhật ký dự án;
+  elseif (Từ chối?) then (Có)
+    :Cập nhật DE_XUAT_NGAN_SACH = Từ chối;
+    :Không tạo NGAN_SACH mới;
+    :Ghi nhật ký ngân sách/dự án;
+  else (Lỗi)
+    :Không thay đổi dữ liệu chính;
+  endif
+}
+
+partition "Hệ thống MVC" {
+  :Trả kết quả về màn hình duyệt;
+}
+
+stop
+@enduml

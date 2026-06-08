@@ -8,8 +8,8 @@
         : currentUrl;
 }
 
-<div class="table-responsive dgnv-table-wrap">
-    <table class="table workflow-table align-middle dgnv-table">
+<div class="table-responsive dgnv-table-wrap app-table-scroll evaluation-table-wrap">
+    <table class="table workflow-table align-middle dgnv-table app-data-table evaluation-table">
         <thead>
             <tr>
                 <th class="dgnv-col-project">Dự án</th>
@@ -34,7 +34,7 @@
                     </td>
                     <td>@await Html.PartialAsync("_TrangThaiDanhGiaBadge", item.TrangThaiDanhGia)</td>
                     <td class="text-end dgnv-col-actions">
-                        <div class="table-actions dgnv-table-actions">
+                        <div class="table-actions dgnv-table-actions evaluation-table-actions">
                             @if (!item.CoDanhGia && item.CoTheDanhGia)
                             {
                                 <a asp-action="Form"

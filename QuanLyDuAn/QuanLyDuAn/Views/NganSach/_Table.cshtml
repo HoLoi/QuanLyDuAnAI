@@ -17,14 +17,14 @@
 
 @if (Model.Count == 0)
 {
-    <div class="ngan-sach-empty-state">
+    <div class="ngan-sach-empty-state app-empty-state">
         <p class="ngan-sach-empty-title">Chưa có ngân sách.</p>
     </div>
 }
 else
 {
-    <div class="ngan-sach-table-scroll">
-        <table class="table ngan-sach-table">
+    <div class="ngan-sach-table-scroll app-table-scroll">
+        <table class="table ngan-sach-table app-data-table">
             <thead>
                 <tr>
                     <th>Dự án</th>
@@ -46,18 +46,18 @@ else
                         <td class="text-nowrap">@($"{item.SoTienNganSach ?? 0:N0} VNĐ")</td>
                         <td class="text-nowrap">v@(item.Version ?? 0)</td>
                         <td>
-                            <span class="ngan-sach-status-badge @GetStatusBadgeClass(item.TrangThaiNganSach)">
+                            <span class="ngan-sach-status-badge status-badge @GetStatusBadgeClass(item.TrangThaiNganSach)">
                                 @TrangThai.ToDisplay(item.TrangThaiNganSach)
                             </span>
                         </td>
                         <td>
                             @if (item.IsActive)
                             {
-                                <span class="ngan-sach-status-badge is-active">Đang hiệu lực</span>
+                                <span class="ngan-sach-status-badge status-badge status-active is-active">Đang hiệu lực</span>
                             }
                             else
                             {
-                                <span class="ngan-sach-status-badge is-inactive">Không hiệu lực</span>
+                                <span class="ngan-sach-status-badge status-badge status-neutral is-inactive">Không hiệu lực</span>
                             }
                         </td>
                         <td>

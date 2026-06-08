@@ -1,0 +1,86 @@
+@startuml
+title Component Diagram - Module đề xuất công việc, ngân sách và phê duyệt
+
+skinparam componentStyle rectangle
+
+actor "Leader" as Leader
+actor "Quản lý dự án" as Manager
+
+package "Views" {
+  component "DeXuatCongViec Views" as WorkProposalViews
+  component "DuyetDeXuatCongViec Views" as ApproveWorkProposalViews
+  component "DeXuatNganSach Views" as BudgetProposalViews
+  component "DuyetDeXuatNganSach Views" as ApproveBudgetProposalViews
+  component "NganSach Views" as BudgetViews
+}
+
+package "Controllers" {
+  component "DeXuatCongViecController" as WorkProposalController
+  component "DuyetDeXuatCongViecController" as ApproveWorkProposalController
+  component "DeXuatNganSachController" as BudgetProposalController
+  component "DuyetDeXuatNganSachController" as ApproveBudgetProposalController
+  component "NganSachController" as BudgetController
+}
+
+package "Services" {
+  component "IDeXuatCongViecService\nDeXuatCongViecService" as WorkProposalService
+  component "IDuyetDeXuatCongViecService\nDyetDeXuatCongViecService" as ApproveWorkProposalService
+  component "IDeXuatNganSachService\nDeXuatNganSachService" as BudgetProposalService
+  component "IDuyetDeXuatNganSachService\nDuyetDeXuatNganSachService" as ApproveBudgetProposalService
+  component "INganSachService\nNganSachService" as BudgetService
+  component "IPermissionHelper" as PermissionHelper
+}
+
+package "Data" {
+  component "QuanLyDuAnDbContext" as DbContext
+  database "SQL Server" as Sql
+  component "DE_XUAT_CONG_VIEC" as WorkProposalTable
+  component "DE_XUAT_NGAN_SACH" as BudgetProposalTable
+  component "CONG_VIEC" as WorkTable
+  component "CHI_PHI" as CostTable
+  component "NGAN_SACH" as BudgetTable
+  component "NHAT_KY_CHI_PHI,\nNHAT_KY_NGAN_SACH,\nNHAT_KY_QUAN_LY_DU_AN" as LogTables
+}
+
+Leader --> WorkProposalViews
+Leader --> BudgetProposalViews
+Manager --> ApproveWorkProposalViews
+Manager --> ApproveBudgetProposalViews
+Manager --> BudgetViews
+
+WorkProposalViews --> WorkProposalController
+ApproveWorkProposalViews --> ApproveWorkProposalController
+BudgetProposalViews --> BudgetProposalController
+ApproveBudgetProposalViews --> ApproveBudgetProposalController
+BudgetViews --> BudgetController
+
+WorkProposalController --> PermissionHelper : Permissions.DeXuatCongViec.*
+WorkProposalController --> WorkProposalService
+ApproveWorkProposalController --> PermissionHelper : Permissions.DuyetDeXuatCongViec.*
+ApproveWorkProposalController --> ApproveWorkProposalService
+BudgetProposalController --> PermissionHelper : Permissions.DeXuatNganSach.*
+BudgetProposalController --> BudgetProposalService
+ApproveBudgetProposalController --> PermissionHelper : Permissions.DuyetNganSach.*
+ApproveBudgetProposalController --> ApproveBudgetProposalService
+BudgetController --> PermissionHelper : Permissions.NganSach.Xem
+BudgetController --> BudgetService
+
+WorkProposalService --> DbContext : tạo/hủy đề xuất công việc
+ApproveWorkProposalService --> DbContext : duyệt/từ chối, tạo CONG_VIEC và CHI_PHI
+BudgetProposalService --> DbContext : tạo/hủy đề xuất ngân sách
+ApproveBudgetProposalService --> DbContext : duyệt/từ chối, tạo version NGAN_SACH mới
+BudgetService --> DbContext : xem ngân sách
+
+DbContext --> WorkProposalTable
+DbContext --> BudgetProposalTable
+DbContext --> WorkTable
+DbContext --> CostTable
+DbContext --> BudgetTable
+DbContext --> LogTables
+WorkProposalTable --> Sql
+BudgetProposalTable --> Sql
+WorkTable --> Sql
+CostTable --> Sql
+BudgetTable --> Sql
+LogTables --> Sql
+@enduml

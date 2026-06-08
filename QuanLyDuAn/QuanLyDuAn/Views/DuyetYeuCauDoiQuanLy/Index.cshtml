@@ -8,29 +8,30 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/shared/approval.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/DuyetYeuCauDoiQuanLy/index.css" asp-append-version="true" />
 }
 
-<section class="duyet-yeu-cau-doi-quan-ly-page">
-    <header class="duyet-yeu-cau-header-card">
+<section class="duyet-yeu-cau-doi-quan-ly-page app-page approval-page">
+    <header class="duyet-yeu-cau-header-card app-page-header approval-header-card">
         <div class="duyet-yeu-cau-header-content">
-            <h1 class="duyet-yeu-cau-title">Duyệt yêu cầu đổi quản lý</h1>
-            <p class="duyet-yeu-cau-subtitle">Xem xét và xử lý các yêu cầu thay đổi quản lý phụ trách dự án.</p>
+            <h1 class="duyet-yeu-cau-title app-page-title">Duyệt yêu cầu đổi quản lý</h1>
+            <p class="duyet-yeu-cau-subtitle app-page-subtitle">Xem xét và xử lý các yêu cầu thay đổi quản lý phụ trách dự án.</p>
         </div>
     </header>
 
-    <section class="duyet-yeu-cau-section-card">
-        <div class="duyet-yeu-cau-section-head">
-            <h2 class="duyet-yeu-cau-section-title">Bộ lọc yêu cầu</h2>
-            <p class="duyet-yeu-cau-section-note">Lọc theo dự án, trạng thái hoặc từ khóa để xử lý nhanh.</p>
+    <section class="duyet-yeu-cau-section-card app-section-card approval-section-card">
+        <div class="duyet-yeu-cau-section-head approval-section-head">
+            <h2 class="duyet-yeu-cau-section-title approval-section-title">Bộ lọc yêu cầu</h2>
+            <p class="duyet-yeu-cau-section-note approval-section-note">Lọc theo dự án, trạng thái hoặc từ khóa để xử lý nhanh.</p>
         </div>
 
-        <form asp-action="Index" method="get" class="duyet-yeu-cau-filter-form">
-            <div>
+        <form asp-action="Index" method="get" class="duyet-yeu-cau-filter-form app-filter">
+            <div class="app-filter-field">
                 <label for="maDuAn" class="form-label">Mã dự án</label>
                 <input id="maDuAn" type="number" name="maDuAn" value="@Model.MaDuAn" class="form-control" placeholder="Nhập mã dự án" />
             </div>
-            <div>
+            <div class="app-filter-field">
                 <label for="trangThai" class="form-label">Trạng thái</label>
                 <select id="trangThai" name="trangThai" class="form-select">
                     <option value="">Tất cả trạng thái</option>
@@ -40,46 +41,26 @@
                     <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.TrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
                 </select>
             </div>
-            <div>
+            <div class="app-filter-field">
                 <label for="tuKhoa" class="form-label">Từ khóa</label>
                 <input id="tuKhoa" type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Dự án hoặc quản lý" />
             </div>
             <div class="duyet-yeu-cau-filter-actions">
-                <button type="submit" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-primary">Lọc dữ liệu</button>
-                <a asp-action="Index" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-neutral">Làm mới</a>
+                <button type="submit" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-primary btn-action btn-filter-apply approval-action-btn">Lọc dữ liệu</button>
+                <a asp-action="Index" class="duyet-yeu-cau-action-btn duyet-yeu-cau-action-neutral btn-action btn-filter-reset approval-action-btn">Làm mới</a>
             </div>
         </form>
     </section>
 
-    <section class="duyet-yeu-cau-section-card">
-        <div class="duyet-yeu-cau-section-head">
-            <h2 class="duyet-yeu-cau-section-title">Danh sách yêu cầu</h2>
-            <p class="duyet-yeu-cau-section-note">Theo dõi trạng thái và xử lý các yêu cầu đang chờ duyệt.</p>
+    <section class="duyet-yeu-cau-section-card app-section-card approval-section-card">
+        <div class="duyet-yeu-cau-section-head approval-section-head">
+            <h2 class="duyet-yeu-cau-section-title approval-section-title">Danh sách yêu cầu</h2>
+            <p class="duyet-yeu-cau-section-note approval-section-note">Theo dõi trạng thái và xử lý các yêu cầu đang chờ duyệt.</p>
         </div>
         <partial name="_ApprovalTable" model="Model" />
     </section>
 </section>
 
 @section Scripts {
-    <script>
-        (function () {
-            function disableSubmit(button) {
-                if (!button) return;
-                button.disabled = true;
-                button.classList.add("is-submitting");
-            }
-
-            document.querySelectorAll(".js-review-submit").forEach(function (form) {
-                form.addEventListener("submit", function (event) {
-                    var message = form.getAttribute("data-confirm");
-                    if (message && !window.confirm(message)) {
-                        event.preventDefault();
-                        return;
-                    }
-
-                    disableSubmit(form.querySelector("button[type='submit']"));
-                });
-            });
-        })();
-    </script>
+    <script src="~/js/approval/index.js" asp-append-version="true"></script>
 }

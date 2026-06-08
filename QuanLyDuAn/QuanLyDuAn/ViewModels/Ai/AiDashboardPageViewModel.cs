@@ -22,7 +22,11 @@ namespace QuanLyDuAn.ViewModels.Ai
         public int TongDongDataset { get; set; }
         public int TongDongDatasetHopLeTrain { get; set; }
         public int SoDuAnTreDaXacNhan { get; set; }
+        public double TyLeXacNhanAi { get; set; }
+        public List<AiTimelineItemViewModel> LuotPhanTichTheoThang { get; set; } = [];
         public List<NguyenNhanThongKeItemViewModel> NguyenNhanPhoBien { get; set; } = [];
+        public List<AiReasonGroupItemViewModel> NguyenNhanTheoQuanLy { get; set; } = [];
+        public List<AiReasonGroupItemViewModel> NguyenNhanTheoTeam { get; set; } = [];
         public List<AiManagerRiskItemViewModel> CanhBaoDuAnQuanLy { get; set; } = [];
         public List<string> CanhBaoChatLuongModel { get; set; } = [];
         public List<AiModelVersionMetricViewModel> LichSuModelNguyenNhan { get; set; } = [];
@@ -49,5 +53,19 @@ namespace QuanLyDuAn.ViewModels.Ai
         public string NguonGoiY { get; set; } = "RuleFallback";
         public bool KetQuaAiCoTheDaCu { get; set; }
         public string? CanhBao { get; set; }
+    }
+
+    public class AiTimelineItemViewModel
+    {
+        public string Label { get; set; } = string.Empty;
+        public int SoLuotPhanTich { get; set; }
+        public int SoXacNhan { get; set; }
+    }
+
+    public class AiReasonGroupItemViewModel
+    {
+        public string Nhom { get; set; } = string.Empty;
+        public string NguyenNhan { get; set; } = string.Empty;
+        public int SoLan { get; set; }
     }
 }

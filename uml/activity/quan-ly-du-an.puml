@@ -1,0 +1,69 @@
+@startuml
+' title Quản lý dự án và chuyển trạng thái dự án
+
+start
+partition "Quản lý dự án" {
+  :Mở danh sách hoặc chi tiết dự án;
+  :Tạo, cập nhật, xóa hoặc chuyển trạng thái dự án;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.DuAn.*;
+  :Kiểm tra người dùng có quản lý dự án hoặc đúng phạm vi;
+  if (Có quyền và đúng phạm vi?) then (Có)
+    :Validate dữ liệu dự án;
+  else (Không)
+    :Trả lỗi quyền/phạm vi;
+    stop
+  endif
+
+  if (Dữ liệu hợp lệ?) then (Có)
+    :Áp dụng nghiệp vụ trạng thái;
+  else (Không)
+    :Trả lỗi validation về giao diện;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Tạo dự án mới?) then (Có)
+    :Thêm DU_AN trạng thái Khởi tạo;
+  elseif (Cập nhật dự án?) then (Có)
+    :Cập nhật thông tin DU_AN;
+  elseif (Xóa dự án?) then (Có)
+    :Chỉ cho xóa khi dự án còn Khởi tạo;
+    :Xóa DU_AN nếu hợp lệ;
+  else (Chuyển trạng thái)
+    :Cập nhật TrangThaiDuAn theo workflow;
+    :Ghi nhật ký quản lý dự án nếu có;
+  endif
+}
+
+partition "Hệ thống MVC" {
+  if (Cần tự chuyển Khởi tạo sang Đang thực hiện?) then (Có)
+    :Kiểm tra đủ thành viên, danh mục, công việc;
+    if (Đủ điều kiện?) then (Có)
+      :Cập nhật DU_AN sang Đang thực hiện trong cơ sở dữ liệu;
+    endif
+  endif
+
+  if (Yêu cầu hoàn thành?) then (Có)
+    :Validate toàn bộ công việc hoàn tất, không còn đang làm/bị cản;
+    :Cập nhật DU_AN sang Chờ xác nhận hoàn thành trong cơ sở dữ liệu;
+  elseif (Xác nhận hoàn thành?) then (Có)
+    :Validate lại điều kiện hoàn thành;
+    :Cập nhật DU_AN sang Hoàn thành trong cơ sở dữ liệu;
+  elseif (Mở lại?) then (Có)
+    :Bắt buộc nhập lý do;
+    :Cập nhật DU_AN sang Đang thực hiện và ghi nhật ký mở lại;
+  elseif (Tạm dừng?) then (Có)
+    :Không cho tạm dừng dự án đã hoàn thành;
+    :Cập nhật DU_AN sang Tạm dừng trong cơ sở dữ liệu;
+  endif
+
+  :Trả kết quả về danh sách/chi tiết dự án;
+}
+
+stop
+@enduml

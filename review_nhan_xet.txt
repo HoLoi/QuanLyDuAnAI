@@ -1,0 +1,243 @@
+1. Nhận xét tổng quan ngắn gọn
+
+Bài báo đã có ý tưởng đúng hướng: kết hợp hệ thống quản lý dự án với AI giải thích được để hỗ trợ phân tích nguyên nhân trễ bằng Decision Tree. Tuy nhiên, nếu đánh giá như một bài Springer/LNCS hoặc bài công bố quốc tế mạnh, bài hiện tại chưa đạt chuẩn nghiên cứu vững. Lý do chính là bài vẫn thiên nhiều về mô tả hệ thống phần mềm, trong khi phần Methodology, Dataset, Experimental Setup, Baseline Comparison, Threats to Validity còn yếu hoặc thiếu.
+
+Điểm nghiêm trọng nhất là: bài có kết quả Accuracy 86.96%, Macro F1-score 87.03%, 368 mẫu train và 92 mẫu test, nhưng chưa trình bày rõ nguồn dữ liệu, cách gán nhãn, phân bố 10 lớp, cách chia dữ liệu, baseline, confusion matrix, cross-validation và kiểm soát overfitting . Ngoài ra, phần References phụ thuộc rất nhiều vào arXiv, trong đó có nhiều tài liệu rất mới 2025–2026; arXiv là preprint server, không phải nguồn đã peer-review đầy đủ, nên nếu dùng quá nhiều sẽ làm bài yếu khi phản biện học thuật .
+
+2. Bảng chấm điểm từng tiêu chí
+Tiêu chí	Điểm /10	Nhận xét ngắn
+Springer formatting readiness	5.5	Có form gần giống LNCS, nhưng affiliation, ORCID, caption, numbering, references còn lỗi rõ.
+Research gap clarity	6.5	Có nêu gap prediction vs delay cause analysis, nhưng chưa phân biệt mạnh prediction, diagnosis, RCA, decision support.
+SOTA coverage	5.0	Có Related Work nhưng còn nông, lệ thuộc arXiv, thiếu công trình nền tảng về project delay, RCA, process mining, XAI/HITL.
+Novelty	5.5	Điểm mới hiện tại chủ yếu là tích hợp hệ thống + Decision Tree, chưa đủ mạnh nếu không chứng minh pipeline dữ liệu/HITL.
+Methodological rigor	4.5	Thiếu mô tả dataset, labeling, preprocessing, split, hyperparameter, imbalance, baseline.
+Dataset quality	4.0	Có số mẫu train/test nhưng không rõ nguồn, tính thật/giả lập, phân bố lớp, chất lượng nhãn.
+Experimental evaluation	4.5	Có metric tổng quát nhưng thiếu confusion matrix, per-class metric, baseline, ablation, cross-validation.
+Explainability and HITL design	6.0	Ý tưởng tốt, nhưng mới mô tả quy trình, chưa có đánh giá người dùng/case study/chứng cứ xác nhận thật.
+Writing quality	6.0	Văn phong tiếng Anh khá ổn nhưng có nhiều câu quảng bá, khẳng định mạnh, lỗi ngắt dòng/hyphenation.
+Overall publication readiness	5.0	Phù hợp mức nghiên cứu sinh viên/cấp trường sau khi chỉnh; chưa đủ mức workshop quốc tế tốt.
+3. Các lỗi nghiêm trọng cần sửa trước tiên
+
+Thứ nhất, affiliation có vấn đề rất lớn. Trang đầu ghi tác giả thứ hai thuộc “Springer Heidelberg, Tiergartenstr. 17, 69121 Heidelberg, Germany”, trong khi email lại là vvphuc@nctu.edu.vn . Đây là lỗi rất nhạy cảm. Với reviewer, chi tiết này dễ bị xem là giữ nguyên template Springer hoặc giả lập affiliation. Cần sửa ngay thành đúng đơn vị của giảng viên, ví dụ Faculty of Information Technology, Nam Can Tho University.
+
+Thứ hai, ORCID đang giống dữ liệu mẫu. Hai ORCID [0000-1111-2222-3333] và [1111-2222-3333-4444] trông như placeholder, không nên để nếu không phải ORCID thật. Nếu chưa có ORCID thật, nên bỏ.
+
+Thứ ba, bảng đánh số sai. Bài có Table 1, Table 2, sau đó nhảy sang Table 4; không thấy Table 3. Sau đó Table 5 được dùng hai lần: một lần cho “Top Features Influencing Delay Cause Analysis”, một lần cho “Performance of the Decision Tree Delay Cause Analysis Model” . Đây là lỗi định dạng nghiêm trọng theo chuẩn Springer.
+
+Thứ tư, Evaluation chưa đủ chuẩn khoa học. Bài chỉ nêu Accuracy, Macro Precision, Macro Recall, Macro F1, Weighted F1, số mẫu train/test và số lớp . Với bài AI/ML, như vậy chưa đủ. Cần có confusion matrix, per-class precision/recall/F1 cho 10 nguyên nhân, baseline comparison, cross-validation hoặc repeated split.
+
+Thứ năm, nguồn dữ liệu chưa rõ. Bài nói dữ liệu được tổng hợp từ hệ thống vận hành và chỉ dùng project delayed có manager-confirmed cause, nhưng chưa nói dữ liệu là thật, mô phỏng, demo, synthetic hay internal dataset . Đây là điểm reviewer sẽ hỏi đầu tiên.
+
+Thứ sáu, References quá lệ thuộc arXiv. Một số tài liệu arXiv 2025–2026 có thể có thật, ví dụ bài về workflow management và bài process mining-based software workflow đều xuất hiện trên arXiv/search results . Tuy nhiên, arXiv không phải peer-reviewed venue; dùng quá nhiều preprint làm nền tảng chính sẽ khiến Related Work yếu .
+
+4. Các điểm mạnh có thể giữ lại
+
+Bài có một hướng nghiên cứu hợp lý: không chỉ dự đoán trễ mà tập trung vào delay cause analysis. Đây là hướng có tiềm năng vì project manager thường cần biết “vì sao trễ” hơn là chỉ biết “có trễ”.
+
+Kiến trúc tách ASP.NET Core MVC, SQL Server và FastAPI AI service là hợp lý về mặt hệ thống. Bài cũng nhấn mạnh AI service không ghi trực tiếp vào operational database, điều này tốt cho separation of concerns và an toàn dữ liệu .
+
+Ý tưởng Human-in-the-Loop là điểm đáng giữ. Việc manager xác nhận nguyên nhân trước khi đưa vào dataset là hướng tốt để tránh dùng prediction thô làm ground truth .
+
+Decision Tree là lựa chọn phù hợp nếu mục tiêu chính là explainability. Với đề tài sinh viên hoặc hệ thống quyết định hỗ trợ quản lý, Decision Tree dễ giải thích hơn neural network hoặc ensemble phức tạp.
+
+5. Các điểm yếu làm bài chưa đạt chuẩn công bố mạnh
+
+Bài hiện chưa chứng minh được novelty khoa học đủ mạnh. “Xây dựng hệ thống quản lý dự án tích hợp AI” là contribution dạng engineering artifact, chưa đủ nếu không có mô hình dữ liệu, pipeline, phương pháp đánh giá và bằng chứng thực nghiệm rõ.
+
+Phần Related Work chưa đạt SOTA. Table 1 chỉ so sánh vài công trình theo các cột khá đơn giản: domain, method, explainable AI focus, delay/root cause analysis . Bảng này chưa cho thấy bài của bạn hơn hoặc khác các nghiên cứu trước ở đâu về dataset, label source, HITL, evaluation, real deployment, causal reasoning.
+
+Table 2 so sánh Trello, Jira, Odoo với Proposed System có tính marketing nhiều hơn học thuật . So sánh sản phẩm có thể giữ ở phần motivation, nhưng không nên dùng như bằng chứng SOTA chính.
+
+Phần Evaluation hiện tại thiên về “system discussion” hơn là “experimental evaluation”. Đoạn mở đầu Section 5 nói nhiều về lợi ích kiến trúc, centralized tracking, strict workflows, data foundation, nhưng chưa đi thẳng vào thiết kế thí nghiệm, dữ liệu, baseline và phân tích lỗi .
+
+6. Đánh giá chi tiết từng phần của bài báo
+6.1. Title
+
+Tiêu đề hiện tại: “AI-Integrated Project Management System for Delay Cause Analysis Using Decision Tree”.
+
+Tiêu đề rõ, đúng trọng tâm, nhưng hơi giống tên đồ án phần mềm. Cụm “Project Management System” làm bài nghiêng về hệ thống triển khai. Nếu muốn học thuật hơn, nên nhấn vào phương pháp và decision support.
+
+Gợi ý tốt hơn:
+
+“Explainable Decision Tree-Based Delay Cause Analysis in Project Management: A Human-in-the-Loop Decision Support Framework”
+
+Hoặc ngắn hơn:
+
+“Human-in-the-Loop Delay Cause Analysis for Project Management Using Explainable Decision Trees”
+
+Tên này học thuật hơn vì nhấn vào Explainable Decision Trees, Human-in-the-Loop, Decision Support Framework, thay vì chỉ nhấn “system”.
+
+6.2. Authors and affiliation
+
+Lỗi lớn nhất là affiliation của tác giả thứ hai. “Springer Heidelberg…” không phù hợp với bài của sinh viên/giảng viên tại Nam Can Tho University và rất giống template LNCS chưa sửa hết .
+
+Nên sửa thành:
+
+HO Phuoc-Loi¹ and VO Van-Phuc¹
+¹ Faculty of Information Technology, Nam Can Tho University, Can Tho City, Viet Nam
+{loi224453@student.nctu.edu.vn, vvphuc@nctu.edu.vn}
+
+ORCID chỉ nên giữ nếu là ORCID thật. Không dùng chuỗi mẫu.
+
+6.3. Abstract
+
+Abstract hiện tại có đủ bối cảnh, vấn đề, gap, phương pháp và contribution, nhưng có ba điểm yếu.
+
+Một là quá dài và mô tả hệ thống nhiều. Abstract nhắc ASP.NET Core MVC, SQL Server, FastAPI, project management, task management, progress tracking, resource management, cost management… làm abstract giống mô tả phần mềm hơn là tóm tắt nghiên cứu.
+
+Hai là thiếu kết quả định lượng. Trong bài có Accuracy 86.96% và Macro F1-score 87.03%, nhưng Abstract không nêu. Với bài AI, đây là thiếu sót.
+
+Ba là contribution chưa sắc. Câu “development of an integrated project management platform” nghe giống đồ án. Nên viết contribution theo hướng dataset pipeline, HITL labeling, explainable decision-support architecture.
+
+6.4. Keywords
+
+Keywords hiện tại: Project Management System, Delay Cause Analysis, Decision Tree, Explainable AI, Decision Support .
+
+Có thể giữ, nhưng nên chỉnh học thuật hơn:
+
+Project Management; Delay Cause Analysis; Root Cause Analysis; Decision Tree; Explainable AI; Human-in-the-Loop; Decision Support System
+
+Nên thêm Root Cause Analysis và Human-in-the-Loop vì đây là hai điểm chính của bài.
+
+6.5. Cấu trúc bài báo
+
+Cấu trúc hiện tại gồm Introduction, Project Management and Delay Management, Design of the AI-Integrated Project Management System, Delay Cause Analysis Using Decision Tree, System Evaluation and Discussion, Conclusion .
+
+Cấu trúc này chưa thật giống bài AI/SE mạnh. Nên đổi thành:
+
+Introduction
+Related Work
+Proposed Human-in-the-Loop Decision Support Framework
+Dataset Construction and Labeling Methodology
+Decision Tree-Based Delay Cause Analysis
+Experimental Setup
+Results and Discussion
+Threats to Validity
+Conclusion and Future Work
+
+Quan trọng nhất là phải tách Dataset Construction, Experimental Setup, Results, Threats to Validity. Hiện tại các phần này bị trộn vào mô tả hệ thống.
+
+6.6. Hình, bảng, công thức
+
+Bảng đang lỗi nặng về numbering. Table 4 xuất hiện sau Table 2, thiếu Table 3. Table 5 bị dùng lại hai lần . Đây là lỗi phải sửa trước khi nộp.
+
+Fig. 1 chỉ thấy caption mô tả kiến trúc, nhưng trong bản parsed không thể hiện rõ hình thật. Cần kiểm tra lại PDF/Word xem hình có bị mất, quá nhỏ hoặc chỉ còn caption không. Nếu hình kiến trúc không rõ, reviewer sẽ đánh giá bài thiếu minh họa kỹ thuật.
+
+Fig. 2 workflow ở trang 11 quá đơn giản, giống sơ đồ minh họa hơn là workflow học thuật. Nên bổ sung các bước rõ hơn: data extraction, feature validation, label availability check, model inference, confidence threshold, fallback rule, manager validation, confirmed label storage, retraining trigger.
+
+Công thức Entropy và Information Gain đúng ý tưởng chung, nhưng phần giải thích ký hiệu bị lỗi: “where is the proportion of samples belonging to class” thiếu p_i và class i . Cần sửa thành:
+
+“where p
+i
+	​
+
+ denotes the proportion of samples belonging to class i, and c is the number of classes.”
+
+6.7. References
+
+References chưa chuẩn Springer. Hiện tại nhiều mục dùng dấu ngoặc kép kiểu văn bản thường, có URL arXiv, ngày tháng, “arXiv.Org”, không đồng nhất format . Springer/LNCS thường cần format thống nhất: authors, title, venue/preprint, volume/pages/year, DOI.
+
+Vấn đề học thuật lớn hơn là nguồn quá lệ thuộc arXiv. Một số bài mới có tồn tại trên arXiv, nhưng arXiv là kho preprint và không bảo đảm peer review . Nên bổ sung nguồn peer-reviewed về:
+
+project delay / software project delay prediction,
+software effort estimation,
+root cause analysis,
+process mining của van der Aalst,
+Explainable AI nền tảng,
+Human-in-the-Loop decision support,
+decision tree / interpretable ML,
+empirical software engineering evaluation.
+7. Gợi ý chỉnh sửa cấu trúc bài báo
+
+Nên viết lại theo cấu trúc sau:
+
+1. Introduction
+Nêu vấn đề project delay, vì sao chỉ prediction là chưa đủ, vì sao cần cause analysis, vì sao cần explainability và HITL.
+
+2. Related Work
+Chia thành 4 nhóm: AI in Project Management, Delay Prediction and Effort Estimation, Root Cause Analysis and Process Mining, Explainable AI and HITL.
+
+3. Proposed Framework
+Trình bày kiến trúc decision support, không mô tả quá nhiều module CRUD.
+
+4. Dataset Construction and Labeling
+Mô tả nguồn dữ liệu, 22 features, 10 labels, điều kiện chọn mẫu, manager-confirmed label, train/test split, class distribution.
+
+5. Decision Tree Methodology
+Trình bày thuật toán, entropy/information gain, hyperparameters, confidence score, fallback rule.
+
+6. Experimental Setup
+Nêu environment, split ratio, baseline models, metrics, validation strategy.
+
+7. Results and Discussion
+Nêu overall metrics, per-class metrics, confusion matrix, feature importance, decision path examples, error analysis.
+
+8. Threats to Validity
+Nêu internal, external, construct, conclusion validity.
+
+9. Conclusion
+Kết luận thận trọng, không khẳng định quá mức.
+
+8. Gợi ý bổ sung thực nghiệm để bài mạnh hơn
+
+Bắt buộc nên có ít nhất 5 nhóm thực nghiệm sau:
+
+Baseline comparison
+So sánh Decision Tree với Rule-based baseline, Logistic Regression, Random Forest, XGBoost hoặc Gradient Boosting, Naive Bayes, SVM. Nếu Decision Tree không cao nhất, vẫn có thể biện minh bằng explainability.
+Confusion matrix
+Vì có 10 lớp nguyên nhân, phải cho biết model hay nhầm lớp nào với lớp nào.
+Per-class precision/recall/F1
+Macro F1 tốt nhưng chưa đủ. Nếu một số lớp ít mẫu bị dự đoán kém, macro/weighted trung bình có thể che giấu vấn đề.
+Cross-validation
+Với 460 mẫu tổng cộng, một lần split 368/92 là chưa ổn. Nên dùng 5-fold hoặc 10-fold cross-validation.
+Decision path explanation case study
+Chọn 1–2 dự án trễ và minh họa đường quyết định: feature nào dẫn đến “Approval/Process Delay” hoặc “Lack of Personnel”. Đây là phần giúp bài thực sự có Explainable AI.
+9. Gợi ý viết lại contribution
+
+Contribution hiện tại nên tránh viết kiểu “we developed a system”. Nên viết lại như sau:
+
+The contributions of this study are threefold. First, we propose a Human-in-the-Loop decision-support framework that integrates operational project management data with explainable delay cause analysis. Second, we design a project-level feature engineering and labeling pipeline that transforms task, progress, cost, resource, and workflow records into structured samples labeled by manager-confirmed delay causes. Third, we evaluate an interpretable Decision Tree classifier for multi-class delay cause analysis and analyze its predictive performance, feature importance, and explanation capability in an internal project management dataset.
+
+Bản này mạnh hơn vì nhấn vào framework, data pipeline, labeling, evaluation, explainability.
+
+10. Gợi ý viết lại Abstract
+
+Có thể viết lại như sau:
+
+Abstract. Project delays remain a persistent challenge in software and organizational project management, leading to cost overruns, resource inefficiency, and reduced delivery quality. While existing AI-based studies in project management mainly focus on delay prediction, effort estimation, and risk forecasting, less attention has been given to explainable delay cause analysis that can support managerial decision-making. This paper proposes a Human-in-the-Loop decision-support framework for delay cause analysis in an AI-integrated project management system. The framework aggregates operational data from project, task, progress, resource, cost, and workflow modules into project-level feature vectors and uses manager-confirmed delay causes as validated labels. A Decision Tree classifier is employed to provide interpretable multi-class delay cause analysis across ten predefined cause categories. In an internal dataset consisting of 460 labeled project samples, the model achieved an accuracy of 86.96% and a Macro F1-score of 87.03%. The results suggest that interpretable tree-based models can provide useful diagnostic support for project managers while preserving transparency and human control. However, the current evaluation is limited by the internal dataset size and requires further validation using larger and more diverse project data. The study contributes a decision-support architecture, a manager-validated labeling pipeline, and an explainable AI approach for delay cause analysis in project management.
+
+Bản này tốt hơn vì có đủ: context, gap, method, dataset, result, contribution, limitation.
+
+11. Danh sách việc cần sửa theo thứ tự ưu tiên
+Bắt buộc sửa
+Sửa affiliation “Springer Heidelberg…” và ORCID placeholder.
+Sửa toàn bộ đánh số Table/Figure, đặc biệt lỗi thiếu Table 3 và trùng Table 5.
+Bổ sung Dataset section: nguồn dữ liệu, số mẫu, cách sinh/gán nhãn, 10 lớp, phân bố lớp.
+Bổ sung Experimental Setup: train/test split, random seed, hyperparameters, metrics, environment.
+Bổ sung baseline comparison.
+Bổ sung confusion matrix và per-class precision/recall/F1.
+Sửa công thức Entropy/Information Gain và giải thích ký hiệu.
+Giảm các câu khẳng định mạnh như “enterprise-grade”, “strict”, “reliable foundation”, “highly accurate” nếu chưa có bằng chứng.
+Chuẩn hóa References theo format Springer và giảm phụ thuộc vào arXiv.
+Nên sửa
+Đổi Section 2 thành Related Work đúng nghĩa.
+Tách Section 5 thành Experimental Evaluation và Discussion.
+Thêm Threats to Validity.
+Viết lại Table 1 theo tiêu chí học thuật hơn: task, dataset, method, explanation, HITL, evaluation, limitation.
+Đưa Table 2 Trello/Jira/Odoo xuống phần motivation hoặc bỏ nếu bài cần học thuật hơn.
+Nâng cấp Fig. 2 thành workflow có đầy đủ decision points và data feedback loop.
+Có thể cải thiện thêm
+Thêm ablation study: bỏ nhóm feature cost/resource/workflow/progress để xem ảnh hưởng.
+Thêm user study nhỏ: manager đánh giá AI suggestion có hữu ích không.
+Thêm case study một dự án trễ cụ thể.
+Thêm ví dụ rule từ Decision Tree.
+Thêm discussion về label noise và bias từ manager-confirmed labels.
+12. Kết luận cuối cùng
+
+Bài hiện tại chưa đạt mức hội nghị/tạp chí quốc tế mạnh. Nếu giữ nguyên, bài phù hợp nhất ở mức:
+
+Hội nghị sinh viên / nghiên cứu khoa học cấp trường đến cấp quốc gia, hoặc workshop nội bộ, sau khi sửa các lỗi định dạng nghiêm trọng.
+
+Nếu muốn nâng lên mức workshop quốc tế, cần sửa mạnh phần Dataset, Methodology, Experimental Evaluation, Related Work và References. Nếu muốn đạt mức Springer/LNCS nghiêm túc, bài phải chứng minh được đóng góp nghiên cứu rõ hơn: không chỉ “xây dựng hệ thống”, mà là Human-in-the-Loop explainable decision-support framework for delay cause analysis, có dữ liệu, thực nghiệm, baseline và phân tích validity đầy đủ.
+
+Nói thẳng: nền tảng bài có tiềm năng, nhưng hiện tại reviewer mạnh sẽ xem đây là bài mô tả hệ thống có thêm mô hình Decision Tree, chưa phải một bài nghiên cứu AI/Software Engineering đủ chặt. Điểm cần nâng cấp lớn nhất là biến bài từ “system implementation paper” thành “empirical decision-support and explainable AI paper”.

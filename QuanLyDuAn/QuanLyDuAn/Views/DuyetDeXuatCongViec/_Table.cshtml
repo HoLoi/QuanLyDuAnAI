@@ -20,21 +20,21 @@
     }
 }
 
-<div class="duyet-de-xuat-cong-viec-section-head">
-    <h2 class="duyet-de-xuat-cong-viec-section-title">Danh sách đề xuất</h2>
-    <p class="duyet-de-xuat-cong-viec-section-note">Bảng rút gọn theo thông tin chính, bấm xem chi tiết để mở thông tin đầy đủ.</p>
+<div class="duyet-de-xuat-cong-viec-section-head approval-section-head">
+    <h2 class="duyet-de-xuat-cong-viec-section-title approval-section-title">Danh sách đề xuất</h2>
+    <p class="duyet-de-xuat-cong-viec-section-note approval-section-note">Bảng rút gọn theo thông tin chính, bấm xem chi tiết để mở thông tin đầy đủ.</p>
 </div>
 
 @if (Model.DanhSach.Count == 0)
 {
-    <div class="duyet-de-xuat-cong-viec-empty-state">
+    <div class="duyet-de-xuat-cong-viec-empty-state app-empty-state">
         <p class="duyet-de-xuat-cong-viec-empty-title">Chưa có đề xuất cần xử lý.</p>
     </div>
 }
 else
 {
-    <div class="duyet-de-xuat-cong-viec-table-scroll">
-        <table class="table duyet-de-xuat-cong-viec-table">
+    <div class="duyet-de-xuat-cong-viec-table-scroll app-table-scroll approval-table-scroll">
+        <table class="table duyet-de-xuat-cong-viec-table app-data-table approval-table">
             <thead>
                 <tr>
                     <th>Dự án</th>
@@ -69,30 +69,30 @@ else
                         </td>
                         <td class="text-nowrap">@item.NgayDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
-                            <span class="duyet-de-xuat-cong-viec-status-badge @GetStatusBadgeClass(item.TrangThaiCongViecDeXuat)">
+                            <span class="duyet-de-xuat-cong-viec-status-badge status-badge @GetStatusBadgeClass(item.TrangThaiCongViecDeXuat)">
                                 @TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)
                             </span>
                         </td>
                         <td class="col-actions">
-                            <div class="duyet-de-xuat-cong-viec-table-actions">
+                            <div class="duyet-de-xuat-cong-viec-table-actions approval-table-actions table-actions">
                                 @if (canApprove && isPending)
                                 {
                                     <form asp-action="Duyet" method="post" class="js-confirm-submit" data-confirm="Xác nhận duyệt đề xuất này?">
                                         <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
                                         <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
                                         <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
-                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-approve">Duyệt</button>
+                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-approve btn-action btn-confirm approval-action-btn">Duyệt</button>
                                     </form>
                                     <form asp-action="TuChoi" method="post" class="js-confirm-submit" data-confirm="Xác nhận từ chối đề xuất này?">
                                         <input type="hidden" name="maDeXuatCv" value="@item.MaDeXuatCV" />
                                         <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
                                         <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
                                         <input type="hidden" name="lyDo" value="" />
-                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-reject">Từ chối</button>
+                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-reject btn-action btn-danger-soft approval-action-btn">Từ chối</button>
                                     </form>
                                 }
                                 <button type="button"
-                                        class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-detail js-toggle-detail"
+                                        class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-detail btn-action btn-subtle approval-action-btn js-toggle-detail"
                                         data-target="@detailRowId"
                                         aria-expanded="false">
                                     Xem chi tiết
@@ -102,15 +102,15 @@ else
                     </tr>
                     <tr id="@detailRowId" class="duyet-de-xuat-cong-viec-detail-row d-none">
                         <td colspan="6">
-                            <div class="duyet-de-xuat-cong-viec-detail-card">
-                                <div class="duyet-de-xuat-cong-viec-detail-grid">
-                                    <div class="duyet-de-xuat-cong-viec-detail-item">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Người đề xuất</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">@item.NguoiDungDeXuat</span>
+                            <div class="duyet-de-xuat-cong-viec-detail-card approval-detail-card">
+                                <div class="duyet-de-xuat-cong-viec-detail-grid approval-detail-grid">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item approval-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Người đề xuất</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">@item.NguoiDungDeXuat</span>
                                     </div>
-                                    <div class="duyet-de-xuat-cong-viec-detail-item">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Thời gian dự kiến</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item approval-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Thời gian dự kiến</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">
                                             @if (item.NgayBatDauCongViecDeXuat.HasValue || item.NgayKetThucCVDeXuatDuKien.HasValue)
                                             {
                                                 @($"{item.NgayBatDauCongViecDeXuat:dd/MM/yyyy HH:mm} đến {item.NgayKetThucCVDeXuatDuKien:dd/MM/yyyy HH:mm}")
@@ -121,9 +121,9 @@ else
                                             }
                                         </span>
                                     </div>
-                                    <div class="duyet-de-xuat-cong-viec-detail-item duyet-de-xuat-cong-viec-detail-item-wide">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Mô tả công việc</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item duyet-de-xuat-cong-viec-detail-item-wide approval-detail-item approval-detail-item-wide">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Mô tả công việc</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">
                                             @if (!string.IsNullOrWhiteSpace(item.MoTaCongViecDeXuat))
                                             {
                                                 @item.MoTaCongViecDeXuat
@@ -134,9 +134,9 @@ else
                                             }
                                         </span>
                                     </div>
-                                    <div class="duyet-de-xuat-cong-viec-detail-item">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Danh mục công việc</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item approval-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Danh mục công việc</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">
                                             @if (!string.IsNullOrWhiteSpace(item.TenDanhMucCongViec))
                                             {
                                                 @item.TenDanhMucCongViec
@@ -147,9 +147,9 @@ else
                                             }
                                         </span>
                                     </div>
-                                    <div class="duyet-de-xuat-cong-viec-detail-item">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Mức độ ưu tiên</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item approval-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Mức độ ưu tiên</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">
                                             @if (!string.IsNullOrWhiteSpace(item.TenMucDoUuTien))
                                             {
                                                 @item.TenMucDoUuTien
@@ -160,9 +160,9 @@ else
                                             }
                                         </span>
                                     </div>
-                                    <div class="duyet-de-xuat-cong-viec-detail-item">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Người duyệt</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item approval-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Người duyệt</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">
                                             @if (!string.IsNullOrWhiteSpace(item.NguoiDungDuyet))
                                             {
                                                 @item.NguoiDungDuyet
@@ -173,15 +173,15 @@ else
                                             }
                                         </span>
                                     </div>
-                                    <div class="duyet-de-xuat-cong-viec-detail-item">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Ngày duyệt</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">
+                                    <div class="duyet-de-xuat-cong-viec-detail-item approval-detail-item">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Ngày duyệt</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">
                                             @(item.NgayDuyetDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa duyệt")
                                         </span>
                                     </div>
-                                    <div class="duyet-de-xuat-cong-viec-detail-item duyet-de-xuat-cong-viec-detail-item-wide">
-                                        <span class="duyet-de-xuat-cong-viec-detail-label">Lý do từ chối / ghi chú</span>
-                                        <span class="duyet-de-xuat-cong-viec-detail-value">Không có</span>
+                                    <div class="duyet-de-xuat-cong-viec-detail-item duyet-de-xuat-cong-viec-detail-item-wide approval-detail-item approval-detail-item-wide">
+                                        <span class="duyet-de-xuat-cong-viec-detail-label approval-detail-label">Lý do từ chối / ghi chú</span>
+                                        <span class="duyet-de-xuat-cong-viec-detail-value approval-detail-value">Không có</span>
                                     </div>
                                 </div>
                                 @if (canApprove && isPending)
@@ -191,7 +191,7 @@ else
                                         <input type="hidden" name="locMaDuAn" value="@Model.LocMaDuAn" />
                                         <input type="hidden" name="locTrangThai" value="@Model.LocTrangThai" />
                                         <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Nhập lý do từ chối (nếu có)" />
-                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-reject">Gửi từ chối kèm lý do</button>
+                                        <button type="submit" class="duyet-de-xuat-cong-viec-action-btn duyet-de-xuat-cong-viec-action-reject btn-action btn-danger-soft approval-action-btn">Gửi từ chối kèm lý do</button>
                                     </form>
                                 }
                             </div>

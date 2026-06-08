@@ -159,6 +159,7 @@
 
         public static class AI
         {
+            public const string Xem = "AI.Xem";
             public const string Dataset = "AI.Dataset";
             public const string Train = "AI.Train";
             public const string PhanTichNguyenNhan = "AI.PhanTichNguyenNhan";

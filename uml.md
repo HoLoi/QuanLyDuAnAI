@@ -677,61 +677,65 @@ QL --> B
 | Quy trĂ¬nh chuáº©n             | 1) Náº¡p sá»‘ liá»‡u dá»± Ă¡n/cĂ´ng viá»‡c/ngĂ¢n sĂ¡ch/chi phĂ­. 2) TĂ­nh chá»‰ sá»‘ cáº£nh bĂ¡o. 3) Hiá»ƒn thá»‹ biá»ƒu Ä‘á»“ vĂ  danh sĂ¡ch gá»£i Ă½. |
 | Quy trĂ¬nh thay tháº¿          | 1) KhĂ´ng cĂ³ dá»¯ liá»‡u. 2) Hiá»ƒn thá»‹ tráº¡ng thĂ¡i rá»—ng. |
 
-### 30) Äá»“ng bá»™ dá»¯ liá»‡u AI
-| Má»¥c                         | Ná»™i dung |
-| --------------------------- | -------- |
-| TĂªn                         | Äá»“ng bá»™ dá»¯ liá»‡u AI |
-| MĂ´ táº£ ngáº¯n gá»n              | Tá»•ng há»£p dá»¯ liá»‡u nghiá»‡p vá»¥ vĂ o `AI_DATASET` vĂ  Ä‘Ă¡nh giĂ¡ cháº¥t lÆ°á»£ng train. |
-| Äiá»u kiá»‡n tiĂªn quyáº¿t        | ÄÄƒng nháº­p, cĂ³ permission `AI.Dataset`. |
-| Äiá»u kiá»‡n háº­u               | `AI_DATASET` Ä‘Æ°á»£c táº¡o má»›i/cáº­p nháº­t theo dá»± Ă¡n. |
-| TĂ¬nh huá»‘ng lá»—i              | KhĂ´ng cĂ³ dá»± Ă¡n há»£p lá»‡ hoáº·c thiáº¿u dá»¯ liá»‡u nguá»“n. |
-| Tráº¡ng thĂ¡i há»‡ thá»‘ng khi lá»—i | Dataset khĂ´ng thay Ä‘á»•i. |
-| CĂ¡c Actor giao tiáº¿p         | NhĂ¢n viĂªn, Quáº£n lĂ½ |
-| Trigger                     | Báº¥m tá»•ng há»£p dataset AI. |
-| Quy trĂ¬nh chuáº©n             | 1) Thu tháº­p sá»‘ liá»‡u dá»± Ă¡n/cĂ´ng viá»‡c/ngĂ¢n sĂ¡ch/nhĂ¢n sá»±. 2) Chuáº©n hĂ³a feature vĂ  label. 3) LÆ°u `AI_DATASET` vĂ  bĂ¡o cĂ¡o cháº¥t lÆ°á»£ng. |
-| Quy trĂ¬nh thay tháº¿          | 1) Dá»¯ liá»‡u chÆ°a Ä‘áº¡t Ä‘iá»u kiá»‡n train. 2) Tráº£ danh sĂ¡ch cáº£nh bĂ¡o. |
+### 30) Đồng bộ dữ liệu AI
 
-### 31) Huáº¥n luyá»‡n model AI
-| Má»¥c                         | Ná»™i dung |
-| --------------------------- | -------- |
-| TĂªn                         | Huáº¥n luyá»‡n model AI |
-| MĂ´ táº£ ngáº¯n gá»n              | Gá»­i yĂªu cáº§u train model `TreHan` hoáº·c `NguyenNhan`. |
-| Äiá»u kiá»‡n tiĂªn quyáº¿t        | ÄÄƒng nháº­p, cĂ³ `AI.Train`, dataset Ä‘áº¡t chuáº©n tá»‘i thiá»ƒu. |
-| Äiá»u kiá»‡n háº­u               | Cáº­p nháº­t `AI_MODEL`, cĂ³ thá»ƒ Ä‘áº·t active model theo loáº¡i. |
-| TĂ¬nh huá»‘ng lá»—i              | Dataset thiáº¿u dĂ²ng, thiáº¿u nhĂ£n, khĂ´ng Ä‘á»§ lá»›p, API train lá»—i. |
-| Tráº¡ng thĂ¡i há»‡ thá»‘ng khi lá»—i | KhĂ´ng ghi model active má»›i. |
-| CĂ¡c Actor giao tiáº¿p         | NhĂ¢n viĂªn, Quáº£n lĂ½ |
-| Trigger                     | Báº¥m train model trĂªn mĂ n hĂ¬nh AI. |
-| Quy trĂ¬nh chuáº©n             | 1) Kiá»ƒm tra cháº¥t lÆ°á»£ng dataset. 2) Gá»i FastAPI train. 3) LÆ°u metadata model vĂ  tráº¡ng thĂ¡i active. |
-| Quy trĂ¬nh thay tháº¿          | 1) Cháº¥t lÆ°á»£ng dataset khĂ´ng Ä‘áº¡t. 2) Cháº·n train vĂ  hiá»ƒn thá»‹ lĂ½ do. |
+| Mục | Nội dung |
+|------|----------|
+| Tên | Đồng bộ dữ liệu AI |
+| Mô tả ngắn gọn | Tổng hợp dữ liệu nghiệp vụ vào `AI_DATASET` và đánh giá chất lượng train. |
+| Điều kiện tiên quyết | Đăng nhập, có permission `AI.Dataset`. |
+| Điều kiện hậu | `AI_DATASET` được tạo mới/cập nhật theo dự án. |
+| Tình huống lỗi | Không có dự án hợp lệ hoặc thiếu dữ liệu nguồn. |
+| Trạng thái hệ thống khi lỗi | Dataset không thay đổi. |
+| Các Actor giao tiếp | Nhân viên, Quản lý |
+| Trigger | Bấm tổng hợp dataset AI. |
+| Quy trình chuẩn | 1) Thu thập số liệu dự án/công việc/ngân sách/nhân sự. 2) Chuẩn hóa feature và label. 3) Lưu `AI_DATASET` và báo cáo chất lượng. |
+| Quy trình thay thế | 1) Dữ liệu chưa đạt điều kiện train. 2) Trả danh sách cảnh báo. |
 
-### 32) Dá»± Ä‘oĂ¡n AI
-| Má»¥c                         | Ná»™i dung |
-| --------------------------- | -------- |
-| TĂªn                         | Dá»± Ä‘oĂ¡n AI |
-| MĂ´ táº£ ngáº¯n gá»n              | Dá»± Ä‘oĂ¡n trá»… háº¡n/nguyĂªn nhĂ¢n cho dá»± Ă¡n vĂ  lÆ°u káº¿t quáº£ tham chiáº¿u. |
-| Äiá»u kiá»‡n tiĂªn quyáº¿t        | ÄÄƒng nháº­p, cĂ³ permission `AI.DuDoan`, dá»¯ liá»‡u Ä‘áº§u vĂ o há»£p lá»‡. |
-| Äiá»u kiá»‡n háº­u               | LÆ°u `AI_KET_QUA` (náº¿u map dá»¯ liá»‡u há»£p lá»‡) vĂ  hiá»ƒn thá»‹ káº¿t quáº£. |
-| TĂ¬nh huá»‘ng lá»—i              | Lá»—i schema/payload AI, thiáº¿u danh má»¥c nguyĂªn nhĂ¢n fallback. |
-| Tráº¡ng thĂ¡i há»‡ thá»‘ng khi lá»—i | KhĂ´ng lÆ°u káº¿t quáº£ dá»± Ä‘oĂ¡n vĂ o DB. |
-| CĂ¡c Actor giao tiáº¿p         | NhĂ¢n viĂªn, Quáº£n lĂ½ |
-| Trigger                     | Gá»­i yĂªu cáº§u dá»± Ä‘oĂ¡n AI theo dá»± Ă¡n. |
-| Quy trĂ¬nh chuáº©n             | 1) Chuáº©n hĂ³a feature gá»­i FastAPI. 2) Nháº­n káº¿t quáº£ dá»± Ä‘oĂ¡n. 3) Map nguyĂªn nhĂ¢n vĂ  lÆ°u `AI_KET_QUA`. |
-| Quy trĂ¬nh thay tháº¿          | 1) KhĂ´ng cĂ³ model nguyĂªn nhĂ¢n há»£p lá»‡. 2) Fallback rule vĂ  cáº£nh bĂ¡o. |
+### 31) Huấn luyện model AI
 
-### 33) XĂ¡c nháº­n nguyĂªn nhĂ¢n AI
-| Má»¥c                         | Ná»™i dung |
-| --------------------------- | -------- |
-| TĂªn                         | XĂ¡c nháº­n nguyĂªn nhĂ¢n AI |
-| MĂ´ táº£ ngáº¯n gá»n              | Quáº£n lĂ½ xĂ¡c nháº­n nguyĂªn nhĂ¢n cuá»‘i cĂ¹ng cho dá»± Ă¡n. |
-| Äiá»u kiá»‡n tiĂªn quyáº¿t        | ÄÄƒng nháº­p, lĂ  Manager hoáº·c cĂ³ claim `AI.XacNhan`. |
-| Äiá»u kiá»‡n háº­u               | Cáº­p nháº­t/ghi má»›i `AI_NGUYEN_NHAN`. |
-| TĂ¬nh huá»‘ng lá»—i              | MĂ£ nguyĂªn nhĂ¢n khĂ´ng há»£p lá»‡ hoáº·c khĂ´ng cĂ³ quyá»n xĂ¡c nháº­n. |
-| Tráº¡ng thĂ¡i há»‡ thá»‘ng khi lá»—i | Dá»¯ liá»‡u xĂ¡c nháº­n nguyĂªn nhĂ¢n khĂ´ng Ä‘á»•i. |
-| CĂ¡c Actor giao tiáº¿p         | Quáº£n lĂ½ |
-| Trigger                     | Chá»n xĂ¡c nháº­n nguyĂªn nhĂ¢n trĂªn mĂ n hĂ¬nh AI hoáº·c Ä‘Ă¡nh giĂ¡ dá»± Ă¡n. |
-| Quy trĂ¬nh chuáº©n             | 1) Chá»n dá»± Ă¡n vĂ  nguyĂªn nhĂ¢n. 2) Kiá»ƒm tra quyá»n + danh má»¥c nguyĂªn nhĂ¢n. 3) LÆ°u `AI_NGUYEN_NHAN`. |
-| Quy trĂ¬nh thay tháº¿          | 1) KhĂ´ng Ä‘á»§ quyá»n. 2) Tráº£ lá»—i vĂ  dá»«ng thao tĂ¡c. |
+| Mục | Nội dung |
+|------|----------|
+| Tên | Huấn luyện model AI |
+| Mô tả ngắn gọn | Gửi yêu cầu train model `TreHan` hoặc `NguyenNhan`. |
+| Điều kiện tiên quyết | Đăng nhập, có `AI.Train`, dataset đạt chuẩn tối thiểu. |
+| Điều kiện hậu | Cập nhật `AI_MODEL`, có thể đặt active model theo loại. |
+| Tình huống lỗi | Dataset thiếu dòng, thiếu nhãn, không đủ lớp, API train lỗi. |
+| Trạng thái hệ thống khi lỗi | Không ghi model active mới. |
+| Các Actor giao tiếp | Nhân viên, Quản lý |
+| Trigger | Bấm train model trên màn hình AI. |
+| Quy trình chuẩn | 1) Kiểm tra chất lượng dataset. 2) Gọi FastAPI train. 3) Lưu metadata model và trạng thái active. |
+| Quy trình thay thế | 1) Chất lượng dataset không đạt. 2) Chặn train và hiển thị lý do. |
+
+### 32) Dự đoán AI
+
+| Mục | Nội dung |
+|------|----------|
+| Tên | Dự đoán AI |
+| Mô tả ngắn gọn | Dự đoán trễ hạn/nguyên nhân cho dự án và lưu kết quả tham chiếu. |
+| Điều kiện tiên quyết | Đăng nhập, có permission `AI.DuDoan`, dữ liệu đầu vào hợp lệ. |
+| Điều kiện hậu | Lưu `AI_KET_QUA` (nếu map dữ liệu hợp lệ) và hiển thị kết quả. |
+| Tình huống lỗi | Lỗi schema/payload AI, thiếu danh mục nguyên nhân fallback. |
+| Trạng thái hệ thống khi lỗi | Không lưu kết quả dự đoán vào DB. |
+| Các Actor giao tiếp | Nhân viên, Quản lý |
+| Trigger | Gửi yêu cầu dự đoán AI theo dự án. |
+| Quy trình chuẩn | 1) Chuẩn hóa feature gửi FastAPI. 2) Nhận kết quả dự đoán. 3) Map nguyên nhân và lưu `AI_KET_QUA`. |
+| Quy trình thay thế | 1) Không có model nguyên nhân hợp lệ. 2) Fallback rule và cảnh báo. |
+
+### 33) Xác nhận nguyên nhân AI
+
+| Mục | Nội dung |
+|------|----------|
+| Tên | Xác nhận nguyên nhân AI |
+| Mô tả ngắn gọn | Quản lý xác nhận nguyên nhân cuối cùng cho dự án. |
+| Điều kiện tiên quyết | Đăng nhập, là Manager hoặc có claim `AI.XacNhan`. |
+| Điều kiện hậu | Cập nhật/ghi mới `AI_NGUYEN_NHAN`. |
+| Tình huống lỗi | Mã nguyên nhân không hợp lệ hoặc không có quyền xác nhận. |
+| Trạng thái hệ thống khi lỗi | Dữ liệu xác nhận nguyên nhân không đổi. |
+| Các Actor giao tiếp | Quản lý |
+| Trigger | Chọn xác nhận nguyên nhân trên màn hình AI hoặc đánh giá dự án. |
+| Quy trình chuẩn | 1) Chọn dự án và nguyên nhân. 2) Kiểm tra quyền + danh mục nguyên nhân. 3) Lưu `AI_NGUYEN_NHAN`. |
+| Quy trình thay thế | 1) Không đủ quyền. 2) Trả lỗi và dừng thao tác. |
 
 # CHÆ¯Æ NG 3: CLASS DIAGRAM
 

@@ -797,7 +797,7 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Ban khong co quyen xem danh gia nhan vien nay.");
             }
 
-            var chiTietRows = await (
+            var chiTietRawRows = await (
                 from ct in _context.CtDanhGiaNhanVien
                 join tc in _context.TieuChiDanhGia on ct.MaTieuChi equals tc.MaTieuChi into tcJoin
                 from tc in tcJoin.DefaultIfEmpty()
@@ -805,18 +805,26 @@ namespace QuanLyDuAn.Services.Implementations
                 from cv in cvJoin.DefaultIfEmpty()
                 where ct.MaDanhGiaNhanVien == maDanhGiaNhanVien && ct.IsDeleted != true
                 orderby ct.MaChiTietDGNV
-                select new DanhGiaNhanVienTieuChiViewModel
+                select new
                 {
-                    MaChiTietDGNV = ct.MaChiTietDGNV,
+                    ct.MaChiTietDGNV,
                     MaTieuChi = ct.MaTieuChi ?? 0,
-                    TenTieuChi = tc != null && !string.IsNullOrWhiteSpace(tc.TenTieuChi)
-                        ? tc.TenTieuChi!
-                        : $"Tieu chi {ct.MaChiTietDGNV}",
-                    MaCongViec = ct.MaCongViec,
-                    TenCongViec = cv.TenCongViec,
-                    DiemDanhGiaNV = Math.Clamp(ct.DiemDanhGiaNV ?? DiemToiThieu, DiemToiThieu, DiemToiDa),
-                    NoiDungDanhGiaNhanVien = ct.NoiDungDanhGiaNhanVien
+                    TenTieuChi = tc == null ? null : tc.TenTieuChi,
+                    ct.MaCongViec,
+                    TenCongViec = cv == null ? null : cv.TenCongViec,
+                    ct.DiemDanhGiaNV,
+                    ct.NoiDungDanhGiaNhanVien
                 }).ToListAsync();
+            var chiTietRows = chiTietRawRows.Select(x => new DanhGiaNhanVienTieuChiViewModel
+            {
+                MaChiTietDGNV = x.MaChiTietDGNV,
+                MaTieuChi = x.MaTieuChi,
+                TenTieuChi = string.IsNullOrWhiteSpace(x.TenTieuChi) ? $"Tieu chi {x.MaChiTietDGNV}" : x.TenTieuChi,
+                MaCongViec = x.MaCongViec,
+                TenCongViec = x.TenCongViec,
+                DiemDanhGiaNV = Math.Clamp(x.DiemDanhGiaNV ?? DiemToiThieu, DiemToiThieu, DiemToiDa),
+                NoiDungDanhGiaNhanVien = x.NoiDungDanhGiaNhanVien
+            }).ToList();
 
             var diemTong = data.DiemTongDanhGiaNV ?? (int)Math.Round(TinhDiemTongKet(chiTietRows.Select(x => x.DiemDanhGiaNV)), MidpointRounding.AwayFromZero);
             var thongKe = await XayDungThongKeNhanVienAsync(data.MaDuAn, data.MaNguoiDung);
@@ -1020,13 +1028,18 @@ namespace QuanLyDuAn.Services.Implementations
                 query = query.Where(x => leaderProjectIds.Contains(x.MaDuAn));
             }
 
-            return await query
+            var duAnRows = await query
                 .OrderBy(x => x.TenDuAn)
-                .Select(x => new DanhGiaNhanVienDuAnOptionViewModel
+                .Select(x => new
                 {
-                    MaDuAn = x.MaDuAn,
-                    TenDuAn = x.TenDuAn ?? $"Du an {x.MaDuAn}"
+                    x.MaDuAn,
+                    x.TenDuAn
                 }).ToListAsync();
+            return duAnRows.Select(x => new DanhGiaNhanVienDuAnOptionViewModel
+            {
+                MaDuAn = x.MaDuAn,
+                TenDuAn = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Du an {x.MaDuAn}" : x.TenDuAn
+            }).ToList();
         }
 
         private async Task<List<DanhGiaNhanVienNhanVienOptionViewModel>> LayDanhSachNhanVienTheoScopeAsync(
@@ -1072,13 +1085,17 @@ namespace QuanLyDuAn.Services.Implementations
             var rows = await query
                 .GroupBy(x => new { x.MaNguoiDung, x.HoTenNguoiDung })
                 .OrderBy(x => x.Key.HoTenNguoiDung)
-                .Select(x => new DanhGiaNhanVienNhanVienOptionViewModel
+                .Select(x => new
                 {
-                    MaNhanVien = x.Key.MaNguoiDung,
-                    TenNhanVien = x.Key.HoTenNguoiDung ?? $"Nguoi dung {x.Key.MaNguoiDung}"
+                    x.Key.MaNguoiDung,
+                    x.Key.HoTenNguoiDung
                 }).ToListAsync();
 
-            return rows;
+            return rows.Select(x => new DanhGiaNhanVienNhanVienOptionViewModel
+            {
+                MaNhanVien = x.MaNguoiDung,
+                TenNhanVien = string.IsNullOrWhiteSpace(x.HoTenNguoiDung) ? $"Nguoi dung {x.MaNguoiDung}" : x.HoTenNguoiDung
+            }).ToList();
         }
 
         private async Task<List<TieuChiDanhGia>> LayTieuChiDanhGiaNhanVienAsync()

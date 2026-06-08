@@ -44,6 +44,7 @@
     var canChiPhi = grantedPermissions.Contains(Permissions.ChiPhi.Xem);
 
     // ===== AI =====
+    var canAi = grantedPermissions.Contains(Permissions.AI.Xem);
     var canAiDataset = grantedPermissions.Contains(Permissions.AI.Dataset);
     var canAiTrain = grantedPermissions.Contains(Permissions.AI.Train);
     var canAiAnalyzeReason = grantedPermissions.Contains(Permissions.AI.PhanTichNguyenNhan);
@@ -77,9 +78,10 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/ui.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuanLyDuAn.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/layout/sidebar.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/TaiKhoanCaNhan/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout/account-menu.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="@(isAuthenticated ? "layout-authenticated" : "layout-guest")">
@@ -261,7 +263,7 @@
                         </div>
                     }
 
-                    @if (canAiDataset || canAiTrain || canAiAnalyzeReason || canAiDashboard)
+                    @if (canAi && (canAiDataset || canAiTrain || canAiAnalyzeReason || canAiDashboard))
                     {
                         <div class="sidebar-section">
                             <div class="sidebar-section-title">AI</div>

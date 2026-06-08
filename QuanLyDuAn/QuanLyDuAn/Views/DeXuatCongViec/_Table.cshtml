@@ -11,8 +11,8 @@
     string? locTheoNgay = ViewBag.LocTheoNgay as string;
 }
 
-<div class="dxcv-table-scroll table-responsive-soft">
-    <table class="table dxcv-table">
+<div class="dxcv-table-scroll table-responsive-soft app-table-scroll proposal-table-scroll">
+    <table class="table dxcv-table app-data-table proposal-table">
         <thead>
             <tr>
                 <th>Công việc đề xuất</th>
@@ -38,10 +38,12 @@
                 {
                     var statusCode = TrangThai.ToCode(item.TrangThaiCongViecDeXuat);
                     var badgeClass = "dxcv-status-neutral";
+                    var statusClass = "status-neutral";
                     if (TrangThai.EqualsValue(statusCode, TrangThai.ChoDuyet)) { badgeClass = "dxcv-status-pending"; }
-                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaDuyet)) { badgeClass = "dxcv-status-approved"; }
-                    else if (TrangThai.EqualsValue(statusCode, TrangThai.TuChoi)) { badgeClass = "dxcv-status-rejected"; }
-                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaHuy)) { badgeClass = "dxcv-status-canceled"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaDuyet)) { badgeClass = "dxcv-status-approved"; statusClass = "status-approved"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.TuChoi)) { badgeClass = "dxcv-status-rejected"; statusClass = "status-rejected"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaHuy)) { badgeClass = "dxcv-status-canceled"; statusClass = "status-neutral"; }
+                    if (TrangThai.EqualsValue(statusCode, TrangThai.ChoDuyet)) { statusClass = "status-pending"; }
 
                     <tr>
                         <td>
@@ -52,11 +54,11 @@
                         <td class="text-nowrap">@item.ChiPhiDeXuat?.ToString("N0") VNĐ</td>
                         <td class="text-nowrap">@item.NgayDeXuatCongViec?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
-                            <span class="dxcv-status-badge @badgeClass">@TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)</span>
+                            <span class="dxcv-status-badge status-badge @badgeClass @statusClass">@TrangThai.ToDisplay(item.TrangThaiCongViecDeXuat)</span>
                         </td>
                         <td class="col-actions dxcv-table-actions">
                             <div class="dxcv-action-group dxcv-table-action-group">
-                                <button type="button" class="dxcv-action-btn dxcv-action-neutral" data-bs-toggle="collapse" data-bs-target="#dxcv-detail-@item.MaDeXuatCV" aria-expanded="false" aria-controls="dxcv-detail-@item.MaDeXuatCV">
+                                <button type="button" class="dxcv-action-btn dxcv-action-neutral btn-action btn-subtle proposal-action-btn" data-bs-toggle="collapse" data-bs-target="#dxcv-detail-@item.MaDeXuatCV" aria-expanded="false" aria-controls="dxcv-detail-@item.MaDeXuatCV">
                                     <i class="bi bi-eye"></i>
                                     Xem chi tiết
                                 </button>
@@ -69,7 +71,7 @@
                                         <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
                                         <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
                                         <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
-                                        <button type="submit" class="dxcv-action-btn dxcv-action-danger">
+                                        <button type="submit" class="dxcv-action-btn dxcv-action-danger btn-action btn-danger-soft proposal-action-btn">
                                             <i class="bi bi-x-circle"></i>
                                             Hủy đề xuất
                                         </button>
@@ -80,7 +82,7 @@
                     </tr>
                     <tr class="collapse" id="dxcv-detail-@item.MaDeXuatCV">
                         <td colspan="6" class="dxcv-detail-cell">
-                            <div class="dxcv-detail-grid">
+                            <div class="dxcv-detail-grid proposal-detail-grid">
                                 <div>
                                     <span>Mô tả</span>
                                     <p>@item.MoTaCongViecDeXuat</p>

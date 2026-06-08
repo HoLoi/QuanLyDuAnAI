@@ -34,15 +34,23 @@ namespace QuanLyDuAn.Services.Implementations
                 DangThieuDataset = dangThieuDataset
             };
 
-            vm.DanhSachDuAn = await _context.DuAn
+            var duAnRows = await _context.DuAn
                 .Where(x => x.IsDeleted != true)
                 .OrderBy(x => x.TenDuAn)
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    x.TenDuAn
+                })
+                .ToListAsync(cancellationToken);
+            vm.DanhSachDuAn = duAnRows
                 .Select(x => new AiDatasetProjectOptionViewModel
                 {
                     MaDuAn = x.MaDuAn,
-                    TenDuAn = x.TenDuAn ?? $"Dự án {x.MaDuAn}"
+                    TenDuAn = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Dự án {x.MaDuAn}" : x.TenDuAn
                 })
-                .ToListAsync(cancellationToken);
+                .OrderBy(x => x.TenDuAn)
+                .ToList();
 
             vm.TongSoDongDataset = await _context.AiDataset.CountAsync(cancellationToken);
             vm.SoDongDuLabel = await _context.AiDataset.CountAsync(

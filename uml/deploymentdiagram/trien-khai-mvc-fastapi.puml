@@ -1,0 +1,66 @@
+@startuml
+title Deployment Diagram - Triển khai MVC kết nối FastAPI AI
+
+skinparam componentStyle rectangle
+
+node "Máy người dùng" as Client {
+  artifact "Trình duyệt" as Browser
+}
+
+package "Application Layer" {
+node "Web Server ASP.NET MVC" as MvcNode {
+  node "ASP.NET Core Runtime\nKestrel / IIS Express" as AspRuntime {
+    artifact "QuanLyDuAn MVC App" as MvcApp
+    component "Controllers" as Controllers
+    component "Services\nAiService, AiDatasetService,\nDashboardService, WorkflowService" as MvcServices
+    component "IAiApiService\nAiApiService" as AiApiService
+    component "Cookie Authentication\nIdentity claims" as Auth
+    component "Entity Framework Core\nQuanLyDuAnDbContext" as EfDbContext
+    artifact "launchSettings.json\nhttps://localhost:7298\nhttp://localhost:5037\nIIS Express sslPort 44302" as LaunchSettings
+    artifact "appsettings.json\nAiApi.BaseUrl = http://127.0.0.1:8001" as MvcConfig
+  }
+}
+}
+
+package "AI Layer" {
+node "FastAPI AI Server" as FastApiNode {
+  artifact "uvicorn / FastAPI process\nQuanLyDuAnAIService/app/main.py" as FastApiProcess
+  component "prediction_router\n/analyze/delay-reason\n/dataset/validate" as PredictionRouter
+  component "model_router\n/model/train\n/model/list" as ModelRouter
+  component "admin_router\n/admin/model/*" as AdminRouter
+  component "model_service\nprediction_service\nvalidation_service" as AiServices
+  artifact "Model AI\nreason_active.joblib\nmetadata JSON" as JoblibModel
+  artifact "AI logs\nlogs/ai_service.log" as AiLogs
+}
+}
+
+package "Database Layer" {
+database "SQL Server" as SqlServer {
+  artifact "Database QuanLyDuAnAI" as Database
+  artifact "Identity tables\nAspNetUsers / Roles / Claims" as IdentityTables
+  artifact "Business tables\nDU_AN, CONG_VIEC, CT_CONG_VIEC,\nTIEN_DO_CONG_VIEC, NGAN_SACH..." as BusinessTables
+  artifact "AI tables\nAI_DATASET, AI_KET_QUA,\nAI_NGUYEN_NHAN, AI_MODEL" as AiSqlTables
+}
+}
+
+Browser --> MvcApp : HTTPS\nRazor MVC request
+MvcApp --> Auth : Cookie Authentication\nAuthorizeFilter toàn cục
+MvcApp --> Controllers : route MVC\n{controller}/{action}/{id?}
+Controllers --> MvcServices : dependency injection
+MvcServices --> EfDbContext : DbContext access
+EfDbContext --> SqlServer : Entity Framework Core\nUseSqlServer(DefaultConnection)
+
+MvcServices --> AiApiService : gọi tích hợp AI
+AiApiService --> FastApiProcess : REST API JSON\nGET /health\nPOST /dataset/validate\nPOST /model/train\nPOST /analyze/delay-reason\nPOST /admin/model/test-reason
+
+FastApiProcess --> PredictionRouter
+FastApiProcess --> ModelRouter
+FastApiProcess --> AdminRouter
+PredictionRouter --> AiServices
+ModelRouter --> AiServices
+AdminRouter --> AiServices
+AiServices --> JoblibModel : load/train/save model
+AiServices --> AiLogs : ghi log
+
+FastApiNode -[#red,dashed]-> SqlServer : không truy cập SQL Server nghiệp vụ
+@enduml

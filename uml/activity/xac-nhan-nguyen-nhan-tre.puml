@@ -1,0 +1,41 @@
+@startuml
+' title Xác nhận nguyên nhân trễ dự án
+
+start
+partition "Quản lý dự án" {
+  :Mở form đánh giá dự án;
+  :Chọn nguyên nhân thật từ danh mục;
+  :Xác nhận nguyên nhân trễ;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.AI.XacNhan hoặc quyền đánh giá phù hợp;
+  :Kiểm tra người dùng là quản lý dự án hoặc có claim xác nhận;
+  :Kiểm tra phạm vi dự án;
+  :Validate mã nguyên nhân và độ tin cậy;
+  if (Dự án hợp lệ và người dùng có quyền?) then (Có)
+    :Chuẩn bị dữ liệu xác nhận;
+  else (Không)
+    :Trả lỗi quyền/phạm vi/validation;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Đã có AI_NGUYEN_NHAN cho dự án?) then (Có)
+    :Cập nhật MaDMNguyenNhan, DoTinCay, người xác nhận, ngày xác nhận;
+    :Khôi phục nếu bản ghi từng bị xóa mềm;
+  else (Không)
+    :Thêm AI_NGUYEN_NHAN mới;
+  endif
+  :Lưu thay đổi;
+}
+
+partition "Hệ thống MVC" {
+  :Kết quả xác nhận trở thành ground truth cho dataset/train;
+  :Trả kết quả về giao diện;
+}
+
+stop
+@enduml

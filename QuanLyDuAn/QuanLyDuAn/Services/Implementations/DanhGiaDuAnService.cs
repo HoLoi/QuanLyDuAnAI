@@ -394,8 +394,15 @@ namespace QuanLyDuAn.Services.Implementations
             var trangThaiDanhGia = ChuanHoaTrangThaiDanhGia(danhGia?.TrangThaiDanhGiaDA);
             var biKhoa = LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.DaDuyet) || LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.ChoDuyet);
             var thongKe = await XayDungThongKeDuAnAsync(maDuAn);
-            var danhSachNguyenNhan = await _context.DmNguyenNhan
+            var nguyenNhanRows = await _context.DmNguyenNhan
                 .OrderBy(x => x.MaDMNguyenNhan)
+                .Select(x => new
+                {
+                    x.MaDMNguyenNhan,
+                    x.TenNguyenNhan
+                })
+                .ToListAsync();
+            var danhSachNguyenNhan = nguyenNhanRows
                 .Select(x => new DanhGiaDuAnNguyenNhanOptionViewModel
                 {
                     MaDMNguyenNhan = x.MaDMNguyenNhan,
@@ -403,7 +410,7 @@ namespace QuanLyDuAn.Services.Implementations
                         ? $"Nguyên nhân {x.MaDMNguyenNhan}"
                         : x.TenNguyenNhan!
                 })
-                .ToListAsync();
+                .ToList();
             var coDuAnTheoScope = duAn.MaNguoiDung == currentUserId
                                   || await _context.NhanVienDuAn.AnyAsync(x =>
                                       x.MaDuAn == maDuAn && x.MaNguoiDung == currentUserId);
@@ -1049,14 +1056,19 @@ namespace QuanLyDuAn.Services.Implementations
                 x.IsDeleted != true
                 && x.MaNguoiDung == currentUserId);
 
-            return await query
+            var rows = await query
                 .OrderBy(x => x.TenDuAn)
-                .Select(x => new DanhGiaDuAnDuAnOptionViewModel
+                .Select(x => new
                 {
-                    MaDuAn = x.MaDuAn,
-                    TenDuAn = x.TenDuAn ?? $"Du an {x.MaDuAn}"
+                    x.MaDuAn,
+                    x.TenDuAn
                 })
                 .ToListAsync();
+            return rows.Select(x => new DanhGiaDuAnDuAnOptionViewModel
+            {
+                MaDuAn = x.MaDuAn,
+                TenDuAn = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Du an {x.MaDuAn}" : x.TenDuAn
+            }).ToList();
         }
 
         private async Task<List<TieuChiDanhGia>> LayTieuChiDanhGiaDuAnAsync()

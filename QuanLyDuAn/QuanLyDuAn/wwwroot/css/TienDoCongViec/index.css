@@ -249,6 +249,10 @@
     height: 8px;
 }
 
+.td-progress-fill {
+    width: var(--progress-width, 0%);
+}
+
 .td-progress-badge {
     width: fit-content;
     background: #eef3ff;

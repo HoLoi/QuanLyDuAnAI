@@ -3,8 +3,8 @@
     var currentUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
 }
 
-<div class="table-responsive dgda-table-wrap">
-    <table class="table workflow-table align-middle dgda-table">
+<div class="table-responsive dgda-table-wrap app-table-scroll evaluation-table-wrap">
+    <table class="table workflow-table align-middle dgda-table app-data-table evaluation-table">
         <thead>
             <tr>
                 <th class="dgda-col-project">Dự án</th>
@@ -30,7 +30,7 @@
                         @if (item.DuAnTreTienDo)
                         {
                             <div class="mt-1">
-                                <span class="dgda-late-badge">Trễ tiến độ</span>
+                                <span class="dgda-late-badge evaluation-late-badge">Trễ tiến độ</span>
                                 @if (item.SoNgayQuaHan.HasValue && item.SoNgayQuaHan.Value > 0)
                                 {
                                     <span class="text-muted small ms-1">Quá hạn @item.SoNgayQuaHan ngày</span>
@@ -47,7 +47,7 @@
                     <td>@item.CongViecTreHan</td>
                     <td>@await Html.PartialAsync("_TrangThaiDanhGiaBadge", item.TrangThaiDanhGia)</td>
                     <td class="text-end dgda-col-actions">
-                        <div class="table-actions dgda-table-actions">
+                        <div class="table-actions dgda-table-actions evaluation-table-actions">
                             <a asp-controller="DanhGiaNhanVien"
                                asp-action="Index"
                                asp-route-maDuAn="@item.MaDuAn"

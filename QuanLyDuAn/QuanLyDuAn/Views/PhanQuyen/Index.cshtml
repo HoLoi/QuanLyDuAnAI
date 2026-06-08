@@ -1,7 +1,13 @@
-﻿@model QuanLyDuAn.ViewModels.PhanQuyen.PhanQuyenPageViewModel
+@model QuanLyDuAn.ViewModels.PhanQuyen.PhanQuyenPageViewModel
 @using QuanLyDuAn.Constants
 @{
     ViewData["Title"] = "Phân quyền";
+    var canSave = Model.Permissions.Contains(Permissions.PhanQuyen.Luu);
+    var groupedByFeature = Model.PermissionGroups
+        .GroupBy(x => new { x.GroupKey, x.GroupName, x.GroupOrder })
+        .OrderBy(x => x.Key.GroupOrder)
+        .ThenBy(x => x.Key.GroupName)
+        .ToList();
 }
 
 @section Styles {
@@ -10,8 +16,14 @@
 
 <section class="phan-quyen-page">
     <header class="phan-quyen-header-card">
-        <h1 class="phan-quyen-title">Phân quyền</h1>
-        <p class="phan-quyen-subtitle">Chọn vai trò, cấu hình quyền theo màn hình và lưu cấu hình truy cập.</p>
+        <div>
+            <p class="phan-quyen-eyebrow">Quản trị hệ thống</p>
+            <h1 class="phan-quyen-title">Phân quyền</h1>
+            <p class="phan-quyen-subtitle">Cấu hình quyền truy cập theo vai trò, nhóm chức năng và màn hình nghiệp vụ.</p>
+        </div>
+        <span class="phan-quyen-header-icon" aria-hidden="true">
+            <i class="bi bi-shield-lock"></i>
+        </span>
     </header>
 
     <section class="phan-quyen-section-card">
@@ -24,13 +36,15 @@
         }
         else
         {
-            <form asp-action="Save" method="post" id="permission-form">
+            <form asp-action="Save" method="post" id="permission-form" class="permission-form" novalidate>
                 @Html.AntiForgeryToken()
-                <div class="row g-3 mb-3">
-                    <div class="col-lg-5">
-                        <label asp-for="SelectedRoleId" class="form-label fw-semibold">Vai trò hệ thống</label>
+
+                <div class="phan-quyen-toolbar">
+                    <div class="toolbar-field role-field">
+                        <label asp-for="SelectedRoleId" class="form-label">Vai trò</label>
                         <select asp-for="SelectedRoleId"
                                 class="form-select"
+                                data-current-role="@Model.Roles.FirstOrDefault(x => x.RoleId == Model.SelectedRoleId)?.RoleName"
                                 onchange="window.location='@Url.Action("Index", "PhanQuyen")?roleId=' + encodeURIComponent(this.value)">
                             <option value="">-- Chọn vai trò --</option>
                             @foreach (var role in Model.Roles)
@@ -39,15 +53,39 @@
                             }
                         </select>
                     </div>
-                    <div class="col-lg-7 d-flex align-items-end justify-content-lg-end gap-2 table-actions">
-                        @if (Model.Permissions.Contains(Permissions.PhanQuyen.Luu))
-                        {
-                            <button type="button" class="btn-action btn-subtle" id="select-all">Chọn tất cả</button>
-                            <button type="button" class="btn-action btn-subtle" id="clear-all">Bỏ chọn tất cả</button>
-                            <button type="submit" class="btn-action btn-confirm">Lưu quyền</button>
-                        }
+
+                    <div class="toolbar-field search-field">
+                        <label for="permission-search" class="form-label">Tìm kiếm</label>
+                        <div class="search-input-wrap">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                            <input type="search"
+                                   class="form-control"
+                                   id="permission-search"
+                                   placeholder="Nhập tên màn hình, quyền hoặc nhóm chức năng" />
+                        </div>
                     </div>
+
+                    @if (canSave)
+                    {
+                        <div class="toolbar-actions">
+                            <button type="button" class="btn-action btn-subtle" id="select-all">
+                                <i class="bi bi-check2-square" aria-hidden="true"></i>
+                                <span>Chọn tất cả</span>
+                            </button>
+                            <button type="button" class="btn-action btn-subtle" id="clear-all">
+                                <i class="bi bi-square" aria-hidden="true"></i>
+                                <span>Bỏ chọn tất cả</span>
+                            </button>
+                            <button type="submit" class="btn-action btn-confirm">
+                                <i class="bi bi-save" aria-hidden="true"></i>
+                                <span>Lưu quyền</span>
+                            </button>
+                        </div>
+                    }
                 </div>
+
+                <div class="permission-alert d-none" id="permission-client-alert" role="alert"></div>
+                <div asp-validation-summary="ModelOnly" class="permission-alert server-alert"></div>
 
                 @if (string.IsNullOrWhiteSpace(Model.SelectedRoleId))
                 {
@@ -59,42 +97,122 @@
                 }
                 else
                 {
-                    <div class="table-responsive">
-                        <table class="table workflow-table align-middle">
-                            <thead>
-                                <tr>
-                                    <th style="width: 28%;">Màn hình</th>
-                                    <th>Danh sách quyền</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var group in Model.PermissionGroups)
-                                {
-                                    <tr>
-                                        <td class="fw-semibold">@group.TenManHinh</td>
-                                        <td>
-                                            <div class="d-flex flex-wrap gap-3">
-                                                @foreach (var permission in group.DanhSachQuyen)
-                                                {
-                                                    <div class="form-check">
-                                                        <input class="form-check-input permission-checkbox"
-                                                               type="checkbox"
-                                                               id="perm-@permission.MaDanhMucQuyen"
-                                                               name="SelectedPermissionIds"
-                                                               value="@permission.MaDanhMucQuyen"
-                                                               disabled="@(!Model.Permissions.Contains(Permissions.PhanQuyen.Luu))"
-                                                               checked="@(permission.IsSelected ? "checked" : null)" />
-                                                        <label class="form-check-label" for="perm-@permission.MaDanhMucQuyen" title="@permission.MoTaDanhMucQuyen">
-                                                            @permission.TenDanhMucQuyen
-                                                        </label>
-                                                    </div>
-                                                }
+                    <div class="permission-accordion accordion" id="permissionAccordion">
+                        @for (var groupIndex = 0; groupIndex < groupedByFeature.Count; groupIndex++)
+                        {
+                            var featureGroup = groupedByFeature[groupIndex];
+                            var groupId = $"permission-group-{groupIndex}";
+                            var collapseId = $"permission-collapse-{groupIndex}";
+                            var isFirst = groupIndex == 0;
+
+                            <section class="accordion-item permission-group"
+                                     data-permission-group="@featureGroup.Key.GroupKey"
+                                     data-search-text="@featureGroup.Key.GroupName">
+                                <h2 class="accordion-header" id="@groupId">
+                                    <button class="accordion-button @(isFirst ? string.Empty : "collapsed")"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId"
+                                            aria-expanded="@(isFirst ? "true" : "false")"
+                                            aria-controls="@collapseId">
+                                        <span class="group-title">@featureGroup.Key.GroupName</span>
+                                        <span class="group-count">@featureGroup.SelectMany(x => x.DanhSachQuyen).Count() quyền</span>
+                                    </button>
+                                </h2>
+                                <div id="@collapseId"
+                                     class="accordion-collapse collapse @(isFirst ? "show" : string.Empty)"
+                                     aria-labelledby="@groupId"
+                                     data-bs-parent="#permissionAccordion">
+                                    <div class="accordion-body">
+                                        @if (canSave)
+                                        {
+                                            <div class="group-actions">
+                                                <button type="button"
+                                                        class="btn-action btn-subtle btn-group-select"
+                                                        data-select-group="@featureGroup.Key.GroupKey">
+                                                    Chọn nhóm
+                                                </button>
+                                                <button type="button"
+                                                        class="btn-action btn-subtle btn-group-clear"
+                                                        data-clear-group="@featureGroup.Key.GroupKey">
+                                                    Bỏ chọn nhóm
+                                                </button>
                                             </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                                        }
+
+                                        <div class="permission-card-grid">
+                                            @foreach (var screen in featureGroup.OrderBy(x => x.ScreenOrder).ThenBy(x => x.DisplayName))
+                                            {
+                                                <article class="permission-screen-card"
+                                                         data-screen-card
+                                                         data-search-text="@screen.SearchText">
+                                                    <div class="screen-card-header">
+                                                        <div>
+                                                            <h3>@screen.DisplayName</h3>
+                                                            <p>@screen.GroupName</p>
+                                                        </div>
+                                                        <span class="screen-card-count">@screen.DanhSachQuyen.Count</span>
+                                                    </div>
+
+                                                    <div class="permission-pill-list">
+                                                        @foreach (var permission in screen.DanhSachQuyen)
+                                                        {
+                                                            var isDisabled = !canSave || permission.IsDeniedByRole || permission.IsRequiredByRole;
+                                                            var tooltip = permission.IsDeniedByRole
+                                                                ? $"Role {Model.Roles.FirstOrDefault(x => x.RoleId == Model.SelectedRoleId)?.RoleName} không được cấp quyền {permission.DisplayName}."
+                                                                : permission.IsRequiredByRole
+                                                                    ? $"Role {Model.Roles.FirstOrDefault(x => x.RoleId == Model.SelectedRoleId)?.RoleName} bắt buộc giữ quyền {permission.DisplayName}."
+                                                                    : !string.IsNullOrWhiteSpace(permission.DependencyMessage)
+                                                                        ? permission.DependencyMessage
+                                                                        : permission.Description;
+                                                            var checkedValue = permission.IsSelected || permission.IsRequiredByRole;
+
+                                                            <label class="permission-pill @(permission.IsParent ? "permission-parent" : "permission-child") @(permission.IsDeniedByRole ? "permission-denied" : string.Empty) @(permission.IsRequiredByRole ? "permission-required" : string.Empty)"
+                                                                   title="@tooltip"
+                                                                   data-permission-pill>
+                                                                <input class="permission-checkbox"
+                                                                       type="checkbox"
+                                                                       id="perm-@permission.MaDanhMucQuyen"
+                                                                       name="SelectedPermissionIds"
+                                                                       value="@permission.MaDanhMucQuyen"
+                                                                       data-permission="@permission.TenDanhMucQuyen"
+                                                                       data-parent-permission="@permission.ParentPermission"
+                                                                       data-group="@permission.GroupKey"
+                                                                       data-screen="@permission.ScreenKey"
+                                                                       data-display-name="@permission.DisplayName"
+                                                                       data-dependency-message="@permission.DependencyMessage"
+                                                                       data-denied-by-role="@permission.IsDeniedByRole.ToString().ToLowerInvariant()"
+                                                                       data-required-by-role="@permission.IsRequiredByRole.ToString().ToLowerInvariant()"
+                                                                       disabled="@(isDisabled ? "disabled" : null)"
+                                                                       checked="@(checkedValue ? "checked" : null)" />
+                                                                @if (permission.IsRequiredByRole)
+                                                                {
+                                                                    <input type="hidden" name="SelectedPermissionIds" value="@permission.MaDanhMucQuyen" />
+                                                                }
+                                                                <span class="permission-pill-text">@permission.DisplayName</span>
+                                                                @if (!string.IsNullOrWhiteSpace(permission.DependencyMessage))
+                                                                {
+                                                                    <i class="bi bi-exclamation-triangle dependency-warning" aria-hidden="true"></i>
+                                                                }
+                                                                @if (permission.IsDeniedByRole)
+                                                                {
+                                                                    <i class="bi bi-lock role-lock" aria-hidden="true"></i>
+                                                                }
+                                                            </label>
+                                                        }
+                                                    </div>
+                                                </article>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        }
+                    </div>
+
+                    <div class="empty-state d-none" id="permission-empty-search">
+                        <i class="bi bi-search"></i>
+                        <p>Không tìm thấy quyền phù hợp.</p>
                     </div>
                 }
             </form>
@@ -103,31 +221,5 @@
 </section>
 
 @section Scripts {
-    <script>
-        (function () {
-            const permissionCheckboxes = document.querySelectorAll('.permission-checkbox');
-            const selectAllButton = document.getElementById('select-all');
-            const clearAllButton = document.getElementById('clear-all');
-
-            if (selectAllButton) {
-                selectAllButton.addEventListener('click', function () {
-                    permissionCheckboxes.forEach(function (checkbox) {
-                        if (!checkbox.disabled) {
-                            checkbox.checked = true;
-                        }
-                    });
-                });
-            }
-
-            if (clearAllButton) {
-                clearAllButton.addEventListener('click', function () {
-                    permissionCheckboxes.forEach(function (checkbox) {
-                        if (!checkbox.disabled) {
-                            checkbox.checked = false;
-                        }
-                    });
-                });
-            }
-        })();
-    </script>
+    <script src="~/js/phanquyen/index.js" asp-append-version="true"></script>
 }

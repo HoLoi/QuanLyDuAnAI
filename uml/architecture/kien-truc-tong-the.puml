@@ -1,0 +1,140 @@
+@startuml
+title Kien truc tong the he thong QuanLyDuAnAI
+
+left to right direction
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam wrapWidth 180
+skinparam maxMessageSize 90
+skinparam packageStyle rectangle
+
+skinparam actor {
+  BackgroundColor #F8FBFF
+  BorderColor #24496B
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #4C566A
+}
+skinparam component {
+  BackgroundColor #F7F9FC
+  BorderColor #3B4252
+}
+skinparam database {
+  BackgroundColor #FFF8E6
+  BorderColor #8A6D1D
+}
+skinparam cloud {
+  BackgroundColor #F1FFF7
+  BorderColor #2F6F4E
+}
+
+actor "Quan tri vien" as Admin
+actor "Quan ly du an" as Manager
+actor "Nhan vien" as Employee
+
+package "Client / Frontend" as ClientLayer {
+  rectangle "Web Browser" as Browser
+
+  package "Rendered UI" as RenderedUi {
+    component "Razor Views\nViews/*.cshtml" as RazorViews
+    component "CSS\nwwwroot/css" as Css
+    component "JavaScript\nwwwroot/js" as Js
+  }
+}
+
+package "ASP.NET MVC (.NET 8)" as MvcLayer {
+  component "Authentication\nCookie Authentication\nGlobal AuthorizeFilter" as Auth
+  component "Claims-based Permission\nRoles + permission claims\nPermissionHelper / PhanQuyenService" as Permission
+  component "Controllers\nRequest routing and UI actions" as Controllers
+  component "ViewModels\nInput binding and display data" as ViewModels
+
+  package "Service Layer" as ServiceLayer {
+    component "Business Services\nProject, task, budget,\napproval, evaluation, chat" as BusinessServices
+    component "Workflow Service\nITrangThaiWorkflowService\nstatus synchronization" as WorkflowService
+    component "Dashboard Service\nIDashboardService\nsummary and reporting" as DashboardService
+    component "AI Integration Service\nIAiService / IAiApiService\nAI orchestration over HTTP" as AiIntegrationService
+    component "AI Dataset Service\nIAiDatasetService\nbusiness feature aggregation" as AiDatasetService
+  }
+}
+
+package "Data Layer" as DataLayer {
+  component "Entity Framework Core\nQuanLyDuAnDbContext" as EfCore
+
+  database "SQL Server\nQuanLyDuAnAI" as SqlServer {
+    rectangle "Business tables\nDU_AN, CONG_VIEC,\nTIEN_DO_CONG_VIEC,\nNGAN_SACH, DE_XUAT..." as BusinessTables
+    rectangle "Identity and permission tables\nAspNetUsers, AspNetRoles,\nAspNetRoleClaims,\nDANH_MUC_QUYEN" as IdentityTables
+    rectangle "AI tables managed by MVC\nAI_DATASET\nAI_KET_QUA\nAI_NGUYEN_NHAN\nAI_MODEL" as AiTables
+  }
+}
+
+cloud "AI Layer" as AiLayer {
+  component "FastAPI AI Service\nQuanLyDuAnAIService\nREST API compute-only" as FastApi
+  component "AI Routers\nhealth, dataset,\nmodel, prediction, admin" as AiRouters
+  component "AI Compute Services\nvalidation, train,\nanalyze delay reason" as AiCompute
+  component "AI Model\nNguyenNhan\njoblib + metadata" as AiModel
+}
+
+Admin --> Browser : use system
+Manager --> Browser : use system
+Employee --> Browser : use system
+
+Browser --> Controllers : HTTPS GET/POST\nMVC requests
+Controllers --> Browser : HTML response\nRazor + CSS + JavaScript
+Browser ..> RazorViews : render HTML
+Browser ..> Css : load styles
+Browser ..> Js : execute UI behavior
+
+Controllers --> Auth : authenticate request
+Auth --> Permission : create claims principal
+Controllers --> Permission : authorize by permission claim
+Permission --> IdentityTables : read roles and claims
+
+Controllers --> ViewModels : bind input\nprepare output
+Controllers --> BusinessServices : execute business use cases
+Controllers --> DashboardService : dashboard and reports
+Controllers --> AiIntegrationService : train, validate,\nanalyze delay reason
+Controllers --> AiDatasetService : aggregate AI dataset
+
+BusinessServices --> WorkflowService : sync project/task status
+WorkflowService --> EfCore : update workflow state
+DashboardService --> EfCore : read summary data
+BusinessServices --> EfCore : read/write business data
+AiDatasetService --> EfCore : aggregate operational data\ninto AI_DATASET
+AiIntegrationService --> EfCore : read AI_DATASET\nsave AI_KET_QUA\nsave AI_NGUYEN_NHAN
+
+EfCore --> SqlServer : SQL Server connection\nDefaultConnection
+SqlServer *-- BusinessTables
+SqlServer *-- IdentityTables
+SqlServer *-- AiTables
+
+AiIntegrationService --> FastApi : HTTP/REST\nAiApi.BaseUrl
+FastApi --> AiRouters : route request
+AiRouters --> AiCompute : validate / train /\nanalyze
+AiCompute --> AiModel : load, train,\npredict reason
+AiModel --> AiCompute : predicted delay cause\nconfidence and explanation
+FastApi --> AiIntegrationService : JSON result
+
+FastApi -[#D9534F,dashed]-> SqlServer : no direct DB access\nMVC is system-of-record
+
+note bottom of AiIntegrationService
+AI Analysis flow:
+1. MVC determines whether a project is late.
+2. MVC sends only delay-reason features to FastAPI.
+3. MVC stores suggested result in AI_KET_QUA.
+4. Manager confirmation is stored in AI_NGUYEN_NHAN.
+end note
+
+note bottom of WorkflowService
+Workflow Management:
+CT_CONG_VIEC -> CONG_VIEC -> DU_AN
+status synchronization is centralized in service layer.
+end note
+
+note bottom of Permission
+Claims-based Permission:
+cookie authentication creates claims;
+controllers and services check permission names.
+end note
+
+@enduml

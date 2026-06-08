@@ -26,11 +26,11 @@
     <td colspan="5" class="history-collapse-cell">
         <div class="td-history-wrap">
             <div class="td-history-header">
-                <div class="history-title">L?ch s? b�o c�o ti?n �?</div>
+                <div class="history-title">Lịch sử báo cáo tiến độ</div>
                 @if (Model.CanUpdate && Model.Item.CoTheCapNhatTienDo)
                 {
                     <button type="button" class="btn-action btn-confirm" data-bs-toggle="collapse" data-bs-target="#@Model.CollapseId">
-                        B�o c�o m?i
+                        Báo cáo mới
                     </button>
                 }
             </div>
@@ -48,42 +48,42 @@
 
                         <div class="history-grid">
                             <div class="history-block">
-                                <div class="history-label">Ng�?i b�o c�o</div>
+                                <div class="history-label">Người báo cáo</div>
                                 <div class="history-value">@ls.TenNguoiBaoCao</div>
                             </div>
                             <div class="history-block">
-                                <div class="history-label">Tr?ng th�i �? xu?t</div>
+                                <div class="history-label">Trạng thái đề xuất</div>
                                 <div class="history-value">
                                     <span class="badge td-ctcv-badge @GetCtcvBadgeClass(ls.TrangThaiCTCVDeXuatCode)">@ls.TrangThaiCTCVDeXuat</span>
                                 </div>
                             </div>
                             <div class="history-block">
-                                <div class="history-label">Ti?n �? snapshot</div>
+                                <div class="history-label">Tiến độ snapshot</div>
                                 <div class="history-value">@ls.PhanTram%</div>
                             </div>
                             <div class="history-block">
-                                <div class="history-label">Ng�?i duy?t</div>
+                                <div class="history-label">Người duyệt</div>
                                 <div class="history-value">@(string.IsNullOrWhiteSpace(ls.TenNguoiDuyet) ? "-" : ls.TenNguoiDuyet)</div>
                             </div>
                             <div class="history-block">
-                                <div class="history-label">Th?i gian duy?t</div>
+                                <div class="history-label">Thời gian duyệt</div>
                                 <div class="history-value">@ls.ThoiGianDuyet?.ToString("dd/MM/yyyy HH:mm")</div>
                             </div>
                         </div>
 
                         <div class="history-notes">
                             <div class="history-note-item">
-                                <div class="history-label">Ghi ch� b�o c�o</div>
+                                <div class="history-label">Ghi chú báo cáo</div>
                                 <div class="history-note-value">@(string.IsNullOrWhiteSpace(ls.GhiChuTienDo) ? "-" : ls.GhiChuTienDo)</div>
                             </div>
                             <div class="history-note-item">
-                                <div class="history-label">Ghi ch� duy?t</div>
+                                <div class="history-label">Ghi chú duyệt</div>
                                 <div class="history-note-value">@(string.IsNullOrWhiteSpace(ls.GhiChuDuyet) ? "-" : ls.GhiChuDuyet)</div>
                             </div>
                         </div>
 
                         <div class="history-files">
-                            <div class="history-label">File minh ch?ng</div>
+                            <div class="history-label">File minh chứng</div>
                             @await Html.PartialAsync("_FileList", new QuanLyDuAn.ViewModels.TienDoCongViec.TienDoCongViecFileListPartialViewModel
                             {
                                 DanhSachFile = ls.DanhSachFile,
@@ -94,7 +94,7 @@
                         @if (Model.CanApprove && Model.Item.CoTheDuyetBaoCao && ls.CoTheXuLyDuyet)
                         {
                             <div class="history-approval-panel">
-                                <div class="history-label mb-2">X? l? duy?t</div>
+                                <div class="history-label mb-2">Xử lý duyệt</div>
 
                                 <form asp-action="DuyetBaoCaoTienDo" method="post" class="history-approval-form">
                                     <input type="hidden" name="MaTienDo" value="@ls.MaTienDo" />
@@ -104,8 +104,8 @@
                                     <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
                                     <input type="hidden" name="tuNgayBaoCao" value="@Model.Filter.TuNgayBaoCao?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="denNgayBaoCao" value="@Model.Filter.DenNgayBaoCao?.ToString("yyyy-MM-dd")" />
-                                    <input type="text" name="GhiChuDuyet" class="form-control" maxlength="255" placeholder="Ghi ch� duy?t (kh�ng b?t bu?c)" />
-                                    <button type="submit" class="btn-action btn-confirm">Duy?t</button>
+                                    <input type="text" name="GhiChuDuyet" class="form-control" maxlength="255" placeholder="Ghi chú duyệt (không bắt buộc)" />
+                                    <button type="submit" class="btn-action btn-confirm">Duyệt</button>
                                 </form>
 
                                 <form asp-action="YeuCauBoSungBaoCaoTienDo" method="post" class="history-approval-form">
@@ -116,8 +116,8 @@
                                     <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
                                     <input type="hidden" name="tuNgayBaoCao" value="@Model.Filter.TuNgayBaoCao?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="denNgayBaoCao" value="@Model.Filter.DenNgayBaoCao?.ToString("yyyy-MM-dd")" />
-                                    <input type="text" name="GhiChuDuyet" class="form-control" maxlength="255" required placeholder="Nh?p l? do y�u c?u b? sung" />
-                                    <button type="submit" class="btn-action btn-reopen">Y�u c?u b? sung</button>
+                                    <input type="text" name="GhiChuDuyet" class="form-control" maxlength="255" required placeholder="Nhập lý do yêu cầu bổ sung" />
+                                    <button type="submit" class="btn-action btn-reopen">Yêu cầu bổ sung</button>
                                 </form>
 
                                 <form asp-action="TuChoiBaoCaoTienDo" method="post" class="history-approval-form">
@@ -128,8 +128,8 @@
                                     <input type="hidden" name="tuKhoa" value="@Model.Filter.TuKhoa" />
                                     <input type="hidden" name="tuNgayBaoCao" value="@Model.Filter.TuNgayBaoCao?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="denNgayBaoCao" value="@Model.Filter.DenNgayBaoCao?.ToString("yyyy-MM-dd")" />
-                                    <input type="text" name="GhiChuDuyet" class="form-control" maxlength="255" required placeholder="Nh?p l? do t? ch?i" />
-                                    <button type="submit" class="btn-action btn-danger-soft">T? ch?i</button>
+                                    <input type="text" name="GhiChuDuyet" class="form-control" maxlength="255" required placeholder="Nhập lý do từ chối" />
+                                    <button type="submit" class="btn-action btn-danger-soft">Từ chối</button>
                                 </form>
                             </div>
                         }

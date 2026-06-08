@@ -1,0 +1,68 @@
+@startuml
+' title Đề xuất và duyệt công việc
+
+start
+partition "Leader" {
+  :Mở màn hình đề xuất công việc;
+  :Chọn dự án, danh mục, thời gian, chi phí và nội dung đề xuất;
+  :Gửi đề xuất;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.DeXuatCongViec.Them;
+  :Kiểm tra Leader thuộc dự án và dự án còn cho phép đề xuất;
+  :Validate dữ liệu đầu vào;
+  :Kiểm tra ngân sách đã duyệt và đề xuất trùng đang chờ;
+  if (Hợp lệ?) then (Có)
+    :Tạo đề xuất trạng thái Chờ duyệt;
+  else (Không)
+    :Trả lỗi về giao diện;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Thêm DE_XUAT_CONG_VIEC;
+  :Ghi nhật ký quản lý dự án;
+}
+
+partition "Quản lý dự án" {
+  :Mở màn hình duyệt đề xuất công việc;
+  :Chọn duyệt hoặc từ chối;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra Permissions.DuyetDeXuatCongViec.Duyet;
+  :Kiểm tra người duyệt là quản lý dự án;
+  :Kiểm tra đề xuất còn Chờ duyệt;
+  if (Duyệt?) then (Có)
+    :Kiểm tra dự án chưa hoàn thành/đã hủy/lưu trữ;
+    :Kiểm tra danh mục công việc và ngân sách hợp lệ;
+  else (Từ chối)
+    :Validate lý do nếu có;
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Duyệt hợp lệ?) then (Có)
+    :Thêm CONG_VIEC trạng thái Chưa bắt đầu;
+    :Thêm chi phí gắn với công việc nếu có;
+    :Cập nhật DE_XUAT_CONG_VIEC = Đã duyệt;
+    :Nếu dự án đang Chờ xác nhận hoàn thành thì đưa về Đang thực hiện;
+    :Ghi nhật ký chi phí và nhật ký dự án;
+  elseif (Từ chối?) then (Có)
+    :Cập nhật DE_XUAT_CONG_VIEC = Từ chối;
+    :Không tạo CONG_VIEC;
+    :Ghi nhật ký dự án;
+  else (Lỗi)
+    :Không tạo dữ liệu chính;
+  endif
+}
+
+partition "Hệ thống MVC" {
+  :Trả kết quả về danh sách duyệt;
+}
+
+stop
+@enduml

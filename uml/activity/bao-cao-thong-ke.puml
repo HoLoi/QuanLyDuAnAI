@@ -1,0 +1,46 @@
+@startuml
+title Báo cáo, thống kê và xuất file
+
+start
+partition "Quản trị viên / Quản lý dự án" {
+  :Mở Dashboard hoặc danh sách nghiệp vụ;
+  :Chọn bộ lọc ngày, trạng thái, dự án hoặc từ khóa;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.ThongKe.Xem hoặc quyền xem của module;
+  :Áp dụng phạm vi dữ liệu theo vai trò, claim và dự án/team;
+  :Validate bộ lọc;
+  if (Bộ lọc hợp lệ?) then (Có)
+    :Tổng hợp số liệu dự án, công việc, đề xuất, ngân sách, tiến độ;
+  else (Không)
+    :Trả lỗi hoặc danh sách rỗng an toàn;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Đọc DU_AN, CONG_VIEC, CT_CONG_VIEC;
+  :Đọc DE_XUAT_CONG_VIEC, DE_XUAT_NGAN_SACH;
+  :Đọc NGAN_SACH, CHI_PHI, TIEN_DO_CONG_VIEC;
+  :Trả dữ liệu đã lọc;
+}
+
+partition "Hệ thống MVC" {
+  :Map dữ liệu sang ViewModel báo cáo/danh sách;
+  if (Người dùng chọn xuất file?) then (Có)
+    :Kiểm tra Permissions.ThongKe.XuatFile;
+    if (Có quyền xuất?) then (Có)
+      :Gọi ExportFileService tạo Excel/PDF theo bộ lọc hiện tại;
+      :Trả file tải xuống;
+    else (Không)
+      :Trả lỗi không có quyền xuất file;
+    endif
+  else (Chỉ xem)
+    :Trả dashboard/danh sách về giao diện;
+  endif
+}
+
+stop
+@enduml

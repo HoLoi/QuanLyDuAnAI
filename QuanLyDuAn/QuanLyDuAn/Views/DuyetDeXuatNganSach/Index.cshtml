@@ -8,62 +8,27 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/shared/approval.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/DuyetDeXuatNganSach/index.css" asp-append-version="true" />
 }
 
-<section class="duyet-de-xuat-ngan-sach-page">
-    <header class="duyet-de-xuat-ngan-sach-header-card">
+<section class="duyet-de-xuat-ngan-sach-page app-page approval-page">
+    <header class="duyet-de-xuat-ngan-sach-header-card app-page-header approval-header-card">
         <div class="duyet-de-xuat-ngan-sach-header-content">
-            <h1 class="duyet-de-xuat-ngan-sach-title">Duyệt đề xuất ngân sách</h1>
-            <p class="duyet-de-xuat-ngan-sach-subtitle">Xem xét, duyệt hoặc từ chối các đề xuất thay đổi ngân sách của dự án</p>
+            <h1 class="duyet-de-xuat-ngan-sach-title app-page-title">Duyệt đề xuất ngân sách</h1>
+            <p class="duyet-de-xuat-ngan-sach-subtitle app-page-subtitle">Xem xét, duyệt hoặc từ chối các đề xuất thay đổi ngân sách của dự án</p>
         </div>
     </header>
 
-    <section class="duyet-de-xuat-ngan-sach-section-card">
+    <section class="duyet-de-xuat-ngan-sach-section-card app-section-card approval-section-card">
         <partial name="_Filter" model="Model" />
     </section>
 
-    <section class="duyet-de-xuat-ngan-sach-section-card">
+    <section class="duyet-de-xuat-ngan-sach-section-card app-section-card approval-section-card">
         <partial name="_Table" model="Model" />
     </section>
 </section>
 
 @section Scripts {
-    <script>
-        (function () {
-            function disableSubmit(button) {
-                if (!button) return;
-                button.disabled = true;
-                button.classList.add("is-submitting");
-            }
-
-            document.querySelectorAll(".js-confirm-submit").forEach(function (form) {
-                form.addEventListener("submit", function (event) {
-                    var message = form.getAttribute("data-confirm");
-                    if (message && !window.confirm(message)) {
-                        event.preventDefault();
-                        return;
-                    }
-
-                    var submitButton = form.querySelector("button[type='submit']");
-                    disableSubmit(submitButton);
-                });
-            });
-
-            document.querySelectorAll(".js-toggle-detail").forEach(function (button) {
-                button.addEventListener("click", function () {
-                    var targetId = button.getAttribute("data-target");
-                    if (!targetId) return;
-
-                    var detailRow = document.getElementById(targetId);
-                    if (!detailRow) return;
-
-                    var isHidden = detailRow.classList.contains("d-none");
-                    detailRow.classList.toggle("d-none", !isHidden);
-                    button.setAttribute("aria-expanded", isHidden ? "true" : "false");
-                    button.textContent = isHidden ? "Ẩn chi tiết" : "Xem chi tiết";
-                });
-            });
-        })();
-    </script>
+    <script src="~/js/approval/index.js" asp-append-version="true"></script>
 }

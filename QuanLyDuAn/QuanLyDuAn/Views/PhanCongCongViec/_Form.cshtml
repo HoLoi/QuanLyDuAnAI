@@ -11,7 +11,7 @@
 
 @if (canShowForm)
 {
-    <form asp-action="ThemPhanCong" method="post" class="pc-assignment-form">
+    <form asp-action="ThemPhanCong" method="post" class="pc-assignment-form assignment-form app-filter">
         <input type="hidden" asp-for="Form.MaCongViec" />
 
         <div class="assignment-form-grid">
@@ -31,11 +31,11 @@
         </div>
 
         <div class="assignment-form-actions">
-            <button type="submit" class="pc-btn pc-btn-primary">
+            <button type="submit" class="pc-btn pc-btn-primary btn-action btn-confirm assignment-action-btn">
                 <i class="bi bi-person-plus"></i>
                 Phân công
             </button>
-            <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="pc-btn pc-btn-secondary">
+            <a asp-action="Index" asp-route-maCongViec="@Model.CongViec.MaCongViec" class="pc-btn pc-btn-secondary btn-action btn-subtle assignment-action-btn">
                 <i class="bi bi-arrow-clockwise"></i>
                 Làm mới
             </a>
@@ -44,13 +44,13 @@
 }
 else if (!coQuyenThucHien || !coTheQuanLy)
 {
-    <div class="pc-inline-note">
+    <div class="pc-inline-note assignment-inline-note">
         Bạn không có quyền phân công mục này.
     </div>
 }
 else if (!coNhanSuHopLe)
 {
-    <div class="pc-inline-note">
+    <div class="pc-inline-note assignment-inline-note">
         Không còn nhân viên phù hợp để phân công.
     </div>
 }

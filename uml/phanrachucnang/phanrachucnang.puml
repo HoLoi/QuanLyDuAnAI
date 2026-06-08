@@ -1,0 +1,166 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F8FBFF
+  BorderColor #4F6BED
+  ArrowColor #4F6BED
+}
+
+actor "Quản trị viên" as Admin
+actor "Quản lý dự án" as Manager
+actor "Nhân viên" as Employee
+actor "Leader" as Leader
+actor "Dịch vụ AI\nFastAPI" as AI
+
+rectangle "Hệ thống quản lý dự án tích hợp AI" {
+
+  package "1. Quản trị hệ thống" {
+    usecase "Quản lý nhân sự" as UC_NhanSu
+    usecase "Quản lý chức danh" as UC_ChucDanh
+    usecase "Quản lý nhóm/team" as UC_Nhom
+    usecase "Quản lý thành viên nhóm" as UC_TVNhom
+    usecase "Phân quyền role/claim" as UC_PhanQuyen
+    usecase "Duyệt yêu cầu đổi quản lý" as UC_DuyetDoiQL
+    usecase "Xem nhật ký hệ thống" as UC_NhatKy
+  }
+
+  package "2. Quản lý dự án" {
+    usecase "Quản lý dự án" as UC_DuAn
+    usecase "Xem chi tiết dự án" as UC_ChiTietDA
+    usecase "Quản lý thành viên dự án" as UC_TVDA
+    usecase "Gán team vào dự án" as UC_TeamDA
+    usecase "Yêu cầu đổi quản lý dự án" as UC_YCDoiQL
+    usecase "Quản lý tài liệu dự án" as UC_FileDA
+  }
+
+  package "3. Quản lý công việc" {
+    usecase "Quản lý danh mục công việc" as UC_DMCV
+    usecase "Xem danh sách công việc" as UC_CV
+    usecase "Quản lý chi tiết công việc" as UC_CTCV
+    usecase "Phân công công việc" as UC_PCCV
+    usecase "Phân công chi tiết công việc" as UC_PCCTCV
+    usecase "Xác nhận hoàn thành công việc" as UC_XNHTCV
+    usecase "Mở lại công việc" as UC_MoLaiCV
+  }
+
+  package "4. Tiến độ công việc" {
+    usecase "Báo cáo tiến độ" as UC_BaoCaoTD
+    usecase "Upload file minh chứng" as UC_UploadTD
+    usecase "Duyệt báo cáo tiến độ" as UC_DuyetTD
+    usecase "Yêu cầu bổ sung báo cáo" as UC_BoSungTD
+    usecase "Từ chối báo cáo tiến độ" as UC_TuChoiTD
+  }
+
+  package "5. Đề xuất và duyệt" {
+    usecase "Đề xuất công việc" as UC_DXCV
+    usecase "Duyệt đề xuất công việc" as UC_DuyetDXCV
+    usecase "Đề xuất ngân sách" as UC_DXNS
+    usecase "Duyệt đề xuất ngân sách" as UC_DuyetNS
+  }
+
+  package "6. Ngân sách và chi phí" {
+    usecase "Xem ngân sách" as UC_NS
+    usecase "Quản lý chi phí" as UC_CP
+    usecase "Theo dõi vượt ngân sách" as UC_VuotNS
+  }
+
+  package "7. Đánh giá và báo cáo" {
+    usecase "Đánh giá dự án" as UC_DGDA
+    usecase "Đánh giá nhân viên" as UC_DGNV
+    usecase "Xem thống kê tổng quan" as UC_ThongKe
+    usecase "Xuất báo cáo" as UC_XuatBaoCao
+    usecase "Xem báo cáo cá nhân" as UC_BaoCaoCN
+  }
+
+  package "8. AI phân tích trễ hạn" {
+    usecase "Tổng hợp dữ liệu AI Dataset" as UC_AIDataset
+    usecase "Huấn luyện model trễ hạn" as UC_TrainTre
+    usecase "Huấn luyện model nguyên nhân" as UC_TrainNN
+    usecase "Quản lý model AI" as UC_AIModel
+    usecase "Dự đoán dự án trễ hạn" as UC_DuDoan
+    usecase "Gợi ý nguyên nhân trễ" as UC_GoiYNN
+    usecase "Xác nhận nguyên nhân thực tế" as UC_XacNhanNN
+  }
+
+  package "9. Trao đổi dự án" {
+    usecase "Tạo phòng chat dự án" as UC_PhongChat
+    usecase "Đồng bộ thành viên phòng chat" as UC_TVChat
+    usecase "Gửi tin nhắn" as UC_TinNhan
+  }
+}
+
+Admin --> UC_NhanSu
+Admin --> UC_ChucDanh
+Admin --> UC_Nhom
+Admin --> UC_TVNhom
+Admin --> UC_PhanQuyen
+Admin --> UC_DuyetDoiQL
+Admin --> UC_NhatKy
+Admin --> UC_AIDataset
+Admin --> UC_TrainTre
+Admin --> UC_TrainNN
+Admin --> UC_AIModel
+Admin --> UC_ThongKe
+
+Manager --> UC_DuAn
+Manager --> UC_ChiTietDA
+Manager --> UC_TVDA
+Manager --> UC_TeamDA
+Manager --> UC_YCDoiQL
+Manager --> UC_FileDA
+Manager --> UC_DMCV
+Manager --> UC_CV
+Manager --> UC_CTCV
+Manager --> UC_PCCV
+Manager --> UC_PCCTCV
+Manager --> UC_XNHTCV
+Manager --> UC_MoLaiCV
+Manager --> UC_DuyetTD
+Manager --> UC_BoSungTD
+Manager --> UC_TuChoiTD
+Manager --> UC_DuyetDXCV
+Manager --> UC_DuyetNS
+Manager --> UC_NS
+Manager --> UC_CP
+Manager --> UC_VuotNS
+Manager --> UC_DGDA
+Manager --> UC_DGNV
+Manager --> UC_ThongKe
+Manager --> UC_XuatBaoCao
+Manager --> UC_DuDoan
+Manager --> UC_GoiYNN
+Manager --> UC_XacNhanNN
+Manager --> UC_TinNhan
+
+Employee --> UC_DuAn
+Employee --> UC_CV
+Employee --> UC_CTCV
+Employee --> UC_BaoCaoTD
+Employee --> UC_UploadTD
+Employee --> UC_BaoCaoCN
+Employee --> UC_TinNhan
+
+Leader --> UC_DXCV
+Leader --> UC_DXNS
+Leader --> UC_PCCV
+Leader --> UC_PCCTCV
+Leader --> UC_DuyetTD
+
+UC_DXCV --> UC_DuyetDXCV : gửi duyệt
+UC_DXNS --> UC_DuyetNS : gửi duyệt
+UC_BaoCaoTD --> UC_UploadTD : kèm minh chứng
+UC_BaoCaoTD --> UC_DuyetTD : chờ xử lý
+UC_DuDoan --> UC_GoiYNN : nếu dự án trễ
+UC_GoiYNN --> UC_XacNhanNN : Manager xác nhận
+UC_AIDataset --> UC_TrainTre
+UC_AIDataset --> UC_TrainNN
+UC_TrainTre --> UC_AIModel
+UC_TrainNN --> UC_AIModel
+AI --> UC_TrainTre
+AI --> UC_TrainNN
+AI --> UC_DuDoan
+AI --> UC_GoiYNN
+
+@enduml

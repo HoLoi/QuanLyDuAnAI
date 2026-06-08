@@ -1,0 +1,70 @@
+.assignment-page {
+    display: grid;
+    gap: 1rem;
+}
+
+.assignment-header-card {
+    align-items: flex-start;
+}
+
+.assignment-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.82rem;
+}
+
+.assignment-summary-card {
+    display: flex;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.assignment-form {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.assignment-section-card {
+    gap: 0.85rem;
+}
+
+.assignment-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e1e8f5;
+    border-radius: 14px;
+}
+
+.assignment-table {
+    min-width: 720px;
+    margin: 0;
+}
+
+.assignment-empty-state,
+.assignment-inline-note {
+    border: 1px dashed #c7d6eb;
+    border-radius: 14px;
+    background: #f8fbff;
+    color: #7289a1;
+    padding: 1rem;
+}
+
+.assignment-empty-state {
+    text-align: center;
+}
+
+.assignment-action-btn {
+    padding: 0.42rem 0.74rem;
+}
+
+@media (max-width: 1199.98px) {
+    .assignment-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .assignment-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}

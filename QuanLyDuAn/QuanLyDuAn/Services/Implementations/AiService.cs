@@ -109,6 +109,13 @@ namespace QuanLyDuAn.Services.Implementations
             vm.TongModelTrongDb = await aiModelQuery.CountAsync(cancellationToken);
             vm.TongLanPhanTichTrongDb = await aiKetQuaQuery.CountAsync(cancellationToken);
             vm.TongXacNhanNguyenNhanTrongDb = await aiNguyenNhanQuery.CountAsync(cancellationToken);
+            vm.TyLeXacNhanAi = vm.TongLanPhanTichTrongDb > 0
+                ? Math.Round((double)vm.TongXacNhanNguyenNhanTrongDb * 100d / vm.TongLanPhanTichTrongDb, 2)
+                : 0d;
+            vm.LuotPhanTichTheoThang = await LayLuotPhanTichAiTheoThangAsync(
+                aiKetQuaQuery,
+                aiNguyenNhanQuery,
+                cancellationToken);
 
             var latestDatasetByProject = await aiDatasetQuery
                 .GroupBy(x => x.MaDuAn)
@@ -144,19 +151,29 @@ namespace QuanLyDuAn.Services.Implementations
                 && x.SoLanCapNhatTienDo.HasValue
                 && x.SoNgayChamCapNhatTienDo.HasValue);
 
-            vm.LichSuModelNguyenNhan = await aiModelQuery
+            var modelRows = await aiModelQuery
                 .OrderByDescending(x => x.NgayTao ?? DateTime.MinValue)
                 .ThenByDescending(x => x.MaModel)
-                .Select(x => new AiModelVersionMetricViewModel
+                .Select(x => new
                 {
-                    TenModel = x.TenModel ?? $"Model {x.MaModel}",
-                    CreatedAt = x.NgayTao ?? DateTime.MinValue,
-                    Accuracy = x.DoChinhXac,
-                    TrainSize = x.TrainSize,
-                    TestSize = x.TestSize,
-                    IsActive = x.IsActive == true
+                    x.MaModel,
+                    x.TenModel,
+                    x.NgayTao,
+                    x.DoChinhXac,
+                    x.TrainSize,
+                    x.TestSize,
+                    x.IsActive
                 })
                 .ToListAsync(cancellationToken);
+            vm.LichSuModelNguyenNhan = modelRows.Select(x => new AiModelVersionMetricViewModel
+            {
+                TenModel = string.IsNullOrWhiteSpace(x.TenModel) ? $"Model {x.MaModel}" : x.TenModel,
+                CreatedAt = x.NgayTao ?? DateTime.MinValue,
+                Accuracy = x.DoChinhXac,
+                TrainSize = x.TrainSize,
+                TestSize = x.TestSize,
+                IsActive = x.IsActive == true
+            }).ToList();
 
             if (!string.IsNullOrWhiteSpace(vm.ModelNguyenNhanDangHoatDong))
             {
@@ -182,8 +199,12 @@ namespace QuanLyDuAn.Services.Implementations
                 vm.TrainSizeModelActive,
                 vm.TestSizeModelActive);
 
-            var tenNguyenNhanMap = await _context.DmNguyenNhan
-                .ToDictionaryAsync(x => x.MaDMNguyenNhan, x => x.TenNguyenNhan ?? $"Nguyên nhân {x.MaDMNguyenNhan}", cancellationToken);
+            var tenNguyenNhanRows = await _context.DmNguyenNhan
+                .Select(x => new { x.MaDMNguyenNhan, x.TenNguyenNhan })
+                .ToListAsync(cancellationToken);
+            var tenNguyenNhanMap = tenNguyenNhanRows.ToDictionary(
+                x => x.MaDMNguyenNhan,
+                x => string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan);
             vm.TenNguyenNhanTheoMa = tenNguyenNhanMap;
 
             var phanBoNguyenNhan = await aiNguyenNhanQuery
@@ -197,10 +218,24 @@ namespace QuanLyDuAn.Services.Implementations
                 NguyenNhan = tenNguyenNhanMap.TryGetValue(x.MaDm, out var ten) ? ten : $"Nguyên nhân {x.MaDm}",
                 TyLePhanTram = tongSoLan > 0 ? (int)Math.Round((double)x.SoLan * 100d / tongSoLan, MidpointRounding.AwayFromZero) : 0
             }).ToList();
+            vm.NguyenNhanTheoQuanLy = await LayNguyenNhanTheoQuanLyAsync(
+                aiNguyenNhanQuery,
+                projectIds,
+                gioiHanTheoScopeDuAn,
+                cancellationToken);
+            vm.NguyenNhanTheoTeam = await LayNguyenNhanTheoTeamAsync(
+                aiNguyenNhanQuery,
+                projectIds,
+                gioiHanTheoScopeDuAn,
+                cancellationToken);
 
-            var tenDuAnMap = await _context.DuAn
+            var tenDuAnRows = await _context.DuAn
                 .Where(x => !gioiHanTheoScopeDuAn || projectIds.Contains(x.MaDuAn))
-                .ToDictionaryAsync(x => x.MaDuAn, x => x.TenDuAn ?? $"Dự án {x.MaDuAn}", cancellationToken);
+                .Select(x => new { x.MaDuAn, x.TenDuAn })
+                .ToListAsync(cancellationToken);
+            var tenDuAnMap = tenDuAnRows.ToDictionary(
+                x => x.MaDuAn,
+                x => string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Dự án {x.MaDuAn}" : x.TenDuAn);
 
             var latestDatasetMapByProject = latestDatasetByProject
                 .GroupBy(x => x.MaDuAn)
@@ -247,8 +282,12 @@ namespace QuanLyDuAn.Services.Implementations
             vm.TongDongDatasetNguyenNhan = qualityReason.SoDongHopLeTrain;
             vm.CoTheTrainNguyenNhan = qualityReason.DuDieuKienTrain;
             vm.BaoCaoDatasetNguyenNhanGanNhat = qualityReason;
-            var tenNguyenNhanTheoMa = await _context.DmNguyenNhan
-                .ToDictionaryAsync(x => x.MaDMNguyenNhan, x => x.TenNguyenNhan ?? $"Nguyên nhân {x.MaDMNguyenNhan}", cancellationToken);
+            var tenNguyenNhanRows = await _context.DmNguyenNhan
+                .Select(x => new { x.MaDMNguyenNhan, x.TenNguyenNhan })
+                .ToListAsync(cancellationToken);
+            var tenNguyenNhanTheoMa = tenNguyenNhanRows.ToDictionary(
+                x => x.MaDMNguyenNhan,
+                x => string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan);
             vm.TenNguyenNhanTheoMa = tenNguyenNhanTheoMa;
             vm.PhanBoNguyenNhanDataset = qualityReason.PhanBoTheoNguyenNhan
                 .Select(x =>
@@ -421,8 +460,12 @@ namespace QuanLyDuAn.Services.Implementations
                     IsActive = x.IsDefault
                 })
                 .ToList();
-            vm.TenNguyenNhanTheoMa = await _context.DmNguyenNhan
-                .ToDictionaryAsync(x => x.MaDMNguyenNhan, x => x.TenNguyenNhan ?? $"Nguyên nhân {x.MaDMNguyenNhan}", cancellationToken);
+            var tenNguyenNhanRows = await _context.DmNguyenNhan
+                .Select(x => new { x.MaDMNguyenNhan, x.TenNguyenNhan })
+                .ToListAsync(cancellationToken);
+            vm.TenNguyenNhanTheoMa = tenNguyenNhanRows.ToDictionary(
+                x => x.MaDMNguyenNhan,
+                x => string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan);
             vm.CoModelLocal = vm.DanhSachModel.Count > 0;
             vm.CoTheKiemTraModel = vm.CoModelLocal;
             vm.CoTheKichHoatModel = vm.DanhSachModel.Any(x => x.CanActivate);
@@ -609,17 +652,22 @@ namespace QuanLyDuAn.Services.Implementations
             var projectIds = await GetAccessibleProjectIdsAsync(currentUserId, roleFlags, cancellationToken);
             var gioiHanTheoScopeDuAn = !roleFlags.IsAdmin;
 
+            var projectOptionRows = await _context.DuAn
+                .Where(x => x.IsDeleted != true && (!gioiHanTheoScopeDuAn || projectIds.Contains(x.MaDuAn)))
+                .OrderBy(x => x.TenDuAn)
+                .Select(x => new { x.MaDuAn, x.TenDuAn })
+                .ToListAsync(cancellationToken);
+
             var vm = new AiPredictPageViewModel
             {
-                DanhSachDuAn = await _context.DuAn
-                    .Where(x => x.IsDeleted != true && (!gioiHanTheoScopeDuAn || projectIds.Contains(x.MaDuAn)))
-                    .OrderBy(x => x.TenDuAn)
+                DanhSachDuAn = projectOptionRows
                     .Select(x => new AiDuAnOptionViewModel
                     {
                         MaDuAn = x.MaDuAn,
-                        TenDuAn = x.TenDuAn ?? $"Dự án {x.MaDuAn}"
+                        TenDuAn = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Dự án {x.MaDuAn}" : x.TenDuAn
                     })
-                    .ToListAsync(cancellationToken)
+                    .OrderBy(x => x.TenDuAn)
+                    .ToList()
             };
 
             var reasonModelList = await _aiApiService.LayDanhSachModelAsync(ModelTypeNguyenNhan, cancellationToken);
@@ -753,14 +801,19 @@ namespace QuanLyDuAn.Services.Implementations
             GanFeatureTuDataset(input, dataset);
             input.LaDuAnTre = dataset.LaDuAnTre;
 
-            var danhMuc = await _context.DmNguyenNhan
+            var danhMucRows = await _context.DmNguyenNhan
                 .OrderBy(x => x.MaDMNguyenNhan)
-                .Select(x => new AiReasonCatalogItemViewModel
+                .Select(x => new
                 {
-                    MaDMNguyenNhan = x.MaDMNguyenNhan.ToString(CultureInfo.InvariantCulture),
-                    TenNguyenNhan = x.TenNguyenNhan ?? $"Nguyên nhân {x.MaDMNguyenNhan}"
+                    x.MaDMNguyenNhan,
+                    x.TenNguyenNhan
                 })
                 .ToListAsync(cancellationToken);
+            var danhMuc = danhMucRows.Select(x => new AiReasonCatalogItemViewModel
+            {
+                MaDMNguyenNhan = x.MaDMNguyenNhan.ToString(CultureInfo.InvariantCulture),
+                TenNguyenNhan = string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan
+            }).ToList();
 
             var request = new AiAnalyzeDelayReasonRequestViewModel
             {
@@ -807,14 +860,19 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
-            var danhMuc = await _context.DmNguyenNhan
+            var danhMucRows = await _context.DmNguyenNhan
                 .OrderBy(x => x.MaDMNguyenNhan)
-                .Select(x => new AiReasonCatalogItemViewModel
+                .Select(x => new
                 {
-                    MaDMNguyenNhan = x.MaDMNguyenNhan.ToString(CultureInfo.InvariantCulture),
-                    TenNguyenNhan = x.TenNguyenNhan ?? $"Nguyên nhân {x.MaDMNguyenNhan}"
+                    x.MaDMNguyenNhan,
+                    x.TenNguyenNhan
                 })
                 .ToListAsync(cancellationToken);
+            var danhMuc = danhMucRows.Select(x => new AiReasonCatalogItemViewModel
+            {
+                MaDMNguyenNhan = x.MaDMNguyenNhan.ToString(CultureInfo.InvariantCulture),
+                TenNguyenNhan = string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan
+            }).ToList();
             var request = new AiTestReasonRequestViewModel
             {
                 ModelFile = string.IsNullOrWhiteSpace(modelFile) ? null : modelFile.Trim(),
@@ -1648,6 +1706,118 @@ namespace QuanLyDuAn.Services.Implementations
                     MaDMNguyenNhan = x.MaDMNguyenNhan!.Value
                 })
                 .ToList();
+        }
+
+        private async Task<List<AiTimelineItemViewModel>> LayLuotPhanTichAiTheoThangAsync(
+            IQueryable<AiKetQua> aiKetQuaQuery,
+            IQueryable<AiNguyenNhan> aiNguyenNhanQuery,
+            CancellationToken cancellationToken)
+        {
+            var now = DateTime.Now;
+            var fromMonth = new DateTime(now.Year, now.Month, 1).AddMonths(-11);
+            var analysisRows = await aiKetQuaQuery
+                .Where(x => x.ThoiGianDuDoanKetQua.HasValue && x.ThoiGianDuDoanKetQua.Value >= fromMonth)
+                .Select(x => x.ThoiGianDuDoanKetQua!.Value)
+                .ToListAsync(cancellationToken);
+            var confirmRows = await aiNguyenNhanQuery
+                .Where(x => x.NgayXacNhan.HasValue && x.NgayXacNhan.Value >= fromMonth)
+                .Select(x => x.NgayXacNhan!.Value)
+                .ToListAsync(cancellationToken);
+
+            var result = new List<AiTimelineItemViewModel>();
+            for (var i = 0; i < 12; i++)
+            {
+                var month = fromMonth.AddMonths(i);
+                result.Add(new AiTimelineItemViewModel
+                {
+                    Label = month.ToString("MM/yyyy", CultureInfo.InvariantCulture),
+                    SoLuotPhanTich = analysisRows.Count(x => x.Year == month.Year && x.Month == month.Month),
+                    SoXacNhan = confirmRows.Count(x => x.Year == month.Year && x.Month == month.Month)
+                });
+            }
+
+            return result;
+        }
+
+        private async Task<List<AiReasonGroupItemViewModel>> LayNguyenNhanTheoQuanLyAsync(
+            IQueryable<AiNguyenNhan> aiNguyenNhanQuery,
+            List<int> projectIds,
+            bool gioiHanTheoScopeDuAn,
+            CancellationToken cancellationToken)
+        {
+            var rows = await (
+                from nn in aiNguyenNhanQuery
+                join da in _context.DuAn on nn.MaDuAn equals da.MaDuAn
+                join ql in _context.NguoiDung on da.MaNguoiDung equals ql.MaNguoiDung
+                join dm in _context.DmNguyenNhan on nn.MaDMNguyenNhan equals dm.MaDMNguyenNhan
+                where da.IsDeleted != true
+                    && ql.IsDeleted != true
+                    && (!gioiHanTheoScopeDuAn || projectIds.Contains(da.MaDuAn))
+                group nn by new
+                {
+                    QuanLy = ql.HoTenNguoiDung,
+                    ql.MaNguoiDung,
+                    NguyenNhan = dm.TenNguyenNhan,
+                    dm.MaDMNguyenNhan
+                } into g
+                select new
+                {
+                    g.Key.QuanLy,
+                    g.Key.MaNguoiDung,
+                    g.Key.NguyenNhan,
+                    g.Key.MaDMNguyenNhan,
+                    SoLan = g.Count()
+                })
+                .OrderByDescending(x => x.SoLan)
+                .Take(8)
+                .ToListAsync(cancellationToken);
+
+            return rows.Select(x => new AiReasonGroupItemViewModel
+            {
+                Nhom = string.IsNullOrWhiteSpace(x.QuanLy) ? $"Quản lý {x.MaNguoiDung}" : x.QuanLy,
+                NguyenNhan = string.IsNullOrWhiteSpace(x.NguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.NguyenNhan,
+                SoLan = x.SoLan
+            }).ToList();
+        }
+
+        private async Task<List<AiReasonGroupItemViewModel>> LayNguyenNhanTheoTeamAsync(
+            IQueryable<AiNguyenNhan> aiNguyenNhanQuery,
+            List<int> projectIds,
+            bool gioiHanTheoScopeDuAn,
+            CancellationToken cancellationToken)
+        {
+            var rows = await (
+                from nn in aiNguyenNhanQuery
+                join td in _context.TeamDuAn on nn.MaDuAn equals td.MaDuAn
+                join team in _context.Team on td.MaTeam equals team.MaTeam
+                join dm in _context.DmNguyenNhan on nn.MaDMNguyenNhan equals dm.MaDMNguyenNhan
+                where team.IsDeleted != true
+                    && (!gioiHanTheoScopeDuAn || projectIds.Contains(nn.MaDuAn))
+                group nn by new
+                {
+                    Team = team.TenTeam,
+                    team.MaTeam,
+                    NguyenNhan = dm.TenNguyenNhan,
+                    dm.MaDMNguyenNhan
+                } into g
+                select new
+                {
+                    g.Key.Team,
+                    g.Key.MaTeam,
+                    g.Key.NguyenNhan,
+                    g.Key.MaDMNguyenNhan,
+                    SoLan = g.Count()
+                })
+                .OrderByDescending(x => x.SoLan)
+                .Take(8)
+                .ToListAsync(cancellationToken);
+
+            return rows.Select(x => new AiReasonGroupItemViewModel
+            {
+                Nhom = string.IsNullOrWhiteSpace(x.Team) ? $"Team {x.MaTeam}" : x.Team,
+                NguyenNhan = string.IsNullOrWhiteSpace(x.NguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.NguyenNhan,
+                SoLan = x.SoLan
+            }).ToList();
         }
 
         private static bool HasRequiredReasonTrainFields(AiDatasetRowViewModel row)

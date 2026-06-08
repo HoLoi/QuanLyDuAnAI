@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
-<section class="ai-page">
-    <header class="ai-header-card">
+<section class="ai-page app-page">
+    <header class="ai-header-card app-page-header">
         <div>
             <h1 class="ai-title">Quản lý dữ liệu AI</h1>
             <p class="ai-subtitle">Tổng hợp AI_DATASET từ dữ liệu nghiệp vụ trước khi huấn luyện model.</p>
@@ -46,7 +46,7 @@
         </article>
     </div>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Bộ feature tổng hợp hiện tại</h2>
         <dl class="ai-dl">
             <div><dt>SoNhanVienDuAn</dt><dd>Số nhân sự hiện có trong dự án (đếm phân biệt theo mã người dùng).</dd></div>
@@ -86,7 +86,7 @@
         </div>
     </article>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <div class="table-card-header ai-panel-header">
             <div class="table-card-header-content">
                 <h2>Tổng hợp AI_DATASET</h2>
@@ -107,15 +107,15 @@
         <div class="ai-inline-actions">
             <form asp-action="TongHopDataset" method="post">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="ai-primary-btn">Tổng hợp dataset</button>
+                <button type="submit" class="ai-primary-btn btn-action btn-confirm">Tổng hợp dataset</button>
             </form>
             <form asp-action="TongHopDataset" method="post">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="ai-secondary-btn">Tổng hợp lại</button>
+                <button type="submit" class="ai-secondary-btn btn-action btn-subtle">Tổng hợp lại</button>
             </form>
             <form asp-action="KiemTraChatLuongDataset" method="post">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="ai-secondary-btn">Kiểm tra chất lượng dataset</button>
+                <button type="submit" class="ai-secondary-btn btn-action btn-subtle">Kiểm tra chất lượng dataset</button>
             </form>
         </div>
 
@@ -132,16 +132,16 @@
                 </select>
             </div>
             <div class="ai-form-actions">
-                <button type="submit" class="ai-secondary-btn">Tổng hợp theo dự án</button>
+                <button type="submit" class="ai-secondary-btn btn-action btn-subtle">Tổng hợp theo dự án</button>
             </div>
         </form>
     </article>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Chất lượng dataset trong DB</h2>
         @if (Model.ChatLuongDatasetDb == null)
         {
-            <div class="ai-empty-state">Chưa có dữ liệu chất lượng dataset.</div>
+            <div class="ai-empty-state app-empty-state">Chưa có dữ liệu chất lượng dataset.</div>
         }
         else
         {

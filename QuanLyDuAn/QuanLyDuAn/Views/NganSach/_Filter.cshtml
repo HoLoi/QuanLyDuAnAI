@@ -6,8 +6,8 @@
     <p class="ngan-sach-section-note">Lọc theo dự án và trạng thái để theo dõi phiên bản ngân sách hiệu lực hoặc đã thay thế.</p>
 </div>
 
-<form asp-action="Index" method="get" class="ngan-sach-filter-form">
-    <div>
+<form asp-action="Index" method="get" class="ngan-sach-filter-form app-filter">
+    <div class="app-filter-field">
         <label for="locMaDuAn" class="form-label">Dự án</label>
         <select id="locMaDuAn" name="locMaDuAn" class="form-select">
             <option value="">Tất cả dự án</option>
@@ -17,7 +17,7 @@
             }
         </select>
     </div>
-    <div>
+    <div class="app-filter-field">
         <label for="locTrangThai" class="form-label">Trạng thái ngân sách</label>
         <select id="locTrangThai" name="locTrangThai" class="form-select">
             <option value="">Tất cả trạng thái</option>
@@ -27,7 +27,7 @@
         </select>
     </div>
     <div class="ngan-sach-filter-actions">
-        <button type="submit" class="ngan-sach-filter-btn-primary">Lọc dữ liệu</button>
-        <a asp-action="Index" class="ngan-sach-filter-btn-secondary">Làm mới</a>
+        <button type="submit" class="ngan-sach-filter-btn-primary btn-action btn-filter-apply">Lọc dữ liệu</button>
+        <a asp-action="Index" class="ngan-sach-filter-btn-secondary btn-action btn-filter-reset">Làm mới</a>
     </div>
 </form>

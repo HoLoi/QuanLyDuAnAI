@@ -1,17 +1,19 @@
-﻿@inject QuanLyDuAn.Services.Interfaces.IPhanQuyenService PhanQuyenService
+@inject QuanLyDuAn.Services.Interfaces.IPhanQuyenService PhanQuyenService
+@inject QuanLyDuAn.Services.Interfaces.IPermissionHelper PermissionHelper
 @using QuanLyDuAn.Constants
-@using QuanLyDuAn.Services.Interfaces
-@inject IPermissionHelper PermissionHelper
 @using QuanLyDuAn.ViewModels.Dashboard
-@using QuanLyDuAn.ViewModels.Ai
+@using System.Text.Json
 @model DashboardViewModel
 @{
     ViewData["Title"] = "Thống kê tổng quan";
-    var ai = ViewBag.AiDashboard as AiDashboardViewModel;
     var updatedAt = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
     var tuNgayText = Model.TuNgay?.ToString("yyyy-MM-dd");
     var denNgayText = Model.DenNgay?.ToString("yyyy-MM-dd");
     var locNhanh = (Model.LocNhanh ?? string.Empty).ToLowerInvariant();
+    var locMaDuAnText = Model.LocMaDuAn?.ToString();
+    var locMaQuanLyText = Model.LocMaQuanLy?.ToString();
+    var locMaTeamText = Model.LocMaTeam?.ToString();
+    var locMaLoaiDuAnText = Model.LocMaLoaiDuAn?.ToString();
 
     var grantedPermissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     if (User?.Identity?.IsAuthenticated == true)
@@ -23,17 +25,27 @@
         || grantedPermissions.Contains(Permissions.TienDo.Xem);
     var canXuLyVuotNganSach = grantedPermissions.Contains(Permissions.ChiPhi.Xem)
         || grantedPermissions.Contains(Permissions.NganSach.Xem);
-    var canXuLyThieuDuLieuAi = grantedPermissions.Contains(Permissions.AI.Dataset)
-        || grantedPermissions.Contains(Permissions.AI.Dashboard);
-
     var canDuyetDeXuatCongViec = grantedPermissions.Contains(Permissions.DuyetDeXuatCongViec.Xem);
     var canDuyetDeXuatNganSach = grantedPermissions.Contains(Permissions.DuyetNganSach.Xem);
     var canDuyetDoiQuanLy = grantedPermissions.Contains(Permissions.DuyetYeuCauDoiQuanLy.Xem);
+    var canAiDashboard = grantedPermissions.Contains(Permissions.AI.Dashboard);
     var canExport = await PermissionHelper.HasPermissionAsync(User!, Permissions.ThongKe.XuatFile);
 
     var tongDuAn = Math.Max(Model.TongDuAn, 0);
     var hasProgressChartData = Model.TenDuAn.Any() && Model.PhanTramTienDo.Any();
     var hasCostChartData = Model.TenDuAn.Any() && Model.ChiPhiTheoDuAn.Any();
+    var hasProjectStatusChartData = Model.TrangThaiDuAnChart.Any(x => x.Value > 0);
+    var hasTaskStatusChartData = Model.TrangThaiCongViecChart.Any(x => x.Value > 0);
+    var hasTimelineChartData = Model.ThongKeTheoThang.Any();
+    var statusOptions = new[]
+    {
+        TrangThai.KhoiTao,
+        TrangThai.DangThucHien,
+        TrangThai.TamDung,
+        TrangThai.ChoXacNhanHoanThanh,
+        TrangThai.HoanThanh,
+        TrangThai.LuuTru
+    };
 
     string BuildRate(int value)
     {
@@ -59,34 +71,42 @@
     <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
-<div class="dashboard-overview-page">
-    <section class="dashboard-header">
+<div class="dashboard-overview-page app-page">
+    <section class="dashboard-header app-page-header">
         <div class="dashboard-header-content">
             <h1 class="dashboard-title">Thống kê tổng quan</h1>
-            <p class="dashboard-subtitle">Theo dõi tình hình dự án, công việc, nhân sự, ngân sách và cảnh báo AI</p>
+            <p class="dashboard-subtitle">Theo dõi dự án, công việc, nhân sự, ngân sách và các hồ sơ chờ duyệt theo phạm vi dữ liệu được phép xem.</p>
         </div>
-        <div class="dashboard-updated">
-            <i class="bi bi-clock-history"></i>
-            <span>Cập nhật mới nhất: @updatedAt</span>
-        </div>
-        @if (canExport)
-        {
-            var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+        <div class="dashboard-header-actions">
+            <div class="dashboard-updated">
+                <i class="bi bi-clock-history"></i>
+                <span>Cập nhật: @updatedAt</span>
+            </div>
+            @if (canExport)
             {
-                Action = "XuatFile",
-                RouteValues = new Dictionary<string, string?>
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
                 {
-                    ["tuNgay"] = tuNgayText,
-                    ["denNgay"] = denNgayText,
-                    ["locNhanh"] = Model.LocNhanh
-                }
-            };
-            <partial name="_ExportDropdown" model="exportVm" />
-        }
+                    Action = "XuatFile",
+                    RouteValues = new Dictionary<string, string?>
+                    {
+                        ["tuNgay"] = tuNgayText,
+                        ["denNgay"] = denNgayText,
+                        ["locNhanh"] = Model.LocNhanh,
+                        ["locMaDuAn"] = locMaDuAnText,
+                        ["locMaQuanLy"] = locMaQuanLyText,
+                        ["locMaTeam"] = locMaTeamText,
+                        ["locTrangThai"] = Model.LocTrangThai,
+                        ["locMaLoaiDuAn"] = locMaLoaiDuAnText,
+                        ["locTheoNgay"] = Model.LocTheoNgay
+                    }
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
+        </div>
     </section>
 
-    <section class="dashboard-time-filter-card">
-        <form asp-action="Index" method="get" class="dashboard-time-filter-form">
+    <section class="dashboard-time-filter-card app-section-card">
+        <form asp-action="Index" method="get" class="dashboard-time-filter-form app-filter">
             <div class="time-filter-grid">
                 <div class="time-filter-field">
                     <label class="form-label" for="tuNgay">Từ ngày</label>
@@ -96,360 +116,194 @@
                     <label class="form-label" for="denNgay">Đến ngày</label>
                     <input id="denNgay" type="date" name="denNgay" value="@denNgayText" class="form-control" />
                 </div>
+                <div class="time-filter-field">
+                    <label class="form-label" for="locTheoNgay">Mốc thời gian</label>
+                    <select id="locTheoNgay" name="locTheoNgay" class="form-select">
+                        <option value="">Ngày tạo</option>
+                        <option value="batdau" selected="@(Model.LocTheoNgay == "batdau")">Ngày bắt đầu</option>
+                        <option value="ketthuc" selected="@(Model.LocTheoNgay == "ketthuc")">Ngày kết thúc</option>
+                        <option value="hoanthanh" selected="@(Model.LocTheoNgay == "hoanthanh")">Ngày hoàn thành</option>
+                    </select>
+                </div>
+                <div class="time-filter-field">
+                    <label class="form-label" for="locTrangThai">Trạng thái</label>
+                    <select id="locTrangThai" name="locTrangThai" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        @foreach (var status in statusOptions)
+                        {
+                            <option value="@status" selected="@(Model.LocTrangThai == status)">@TrangThai.ToDisplay(status)</option>
+                        }
+                    </select>
+                </div>
+                <div class="time-filter-field">
+                    <label class="form-label" for="locMaDuAn">Dự án</label>
+                    <select id="locMaDuAn" name="locMaDuAn" class="form-select">
+                        <option value="">Tất cả dự án</option>
+                        @foreach (var option in Model.DuAnOptions)
+                        {
+                            <option value="@option.Value" selected="@(Model.LocMaDuAn == option.Value)">@option.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="time-filter-field">
+                    <label class="form-label" for="locMaQuanLy">Quản lý</label>
+                    <select id="locMaQuanLy" name="locMaQuanLy" class="form-select">
+                        <option value="">Tất cả quản lý</option>
+                        @foreach (var option in Model.QuanLyOptions)
+                        {
+                            <option value="@option.Value" selected="@(Model.LocMaQuanLy == option.Value)">@option.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="time-filter-field">
+                    <label class="form-label" for="locMaTeam">Team</label>
+                    <select id="locMaTeam" name="locMaTeam" class="form-select">
+                        <option value="">Tất cả team</option>
+                        @foreach (var option in Model.TeamOptions)
+                        {
+                            <option value="@option.Value" selected="@(Model.LocMaTeam == option.Value)">@option.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="time-filter-field">
+                    <label class="form-label" for="locMaLoaiDuAn">Loại dự án</label>
+                    <select id="locMaLoaiDuAn" name="locMaLoaiDuAn" class="form-select">
+                        <option value="">Tất cả loại dự án</option>
+                        @foreach (var option in Model.LoaiDuAnOptions)
+                        {
+                            <option value="@option.Value" selected="@(Model.LocMaLoaiDuAn == option.Value)">@option.Text</option>
+                        }
+                    </select>
+                </div>
                 <div class="time-filter-actions">
-                    <button type="submit" class="dashboard-action-btn">Lọc dữ liệu</button>
-                    <a asp-action="Index" class="dashboard-action-btn">Làm mới</a>
+                    <button type="submit" class="dashboard-action-btn btn-action">Lọc dữ liệu</button>
+                    <a asp-action="Index" class="dashboard-action-btn btn-action">Làm mới</a>
                 </div>
             </div>
         </form>
         <div class="time-quick-wrap">
-            <a asp-action="Index" asp-route-locNhanh="homnay" class="@QuickFilterClass("homnay")">Hôm nay</a>
-            <a asp-action="Index" asp-route-locNhanh="7ngay" class="@QuickFilterClass("7ngay")">7 ngày gần đây</a>
-            <a asp-action="Index" asp-route-locNhanh="thangnay" class="@QuickFilterClass("thangnay")">Tháng này</a>
-            <a asp-action="Index" asp-route-locNhanh="quynay" class="@QuickFilterClass("quynay")">Quý này</a>
-            <a asp-action="Index" asp-route-locNhanh="namnay" class="@QuickFilterClass("namnay")">Năm nay</a>
-            <a asp-action="Index" asp-route-locNhanh="tatca" class="@QuickFilterClass("tatca")">Tất cả</a>
+            @foreach (var quick in new[] { ("homnay", "Hôm nay"), ("7ngay", "7 ngày gần đây"), ("thangnay", "Tháng này"), ("quynay", "Quý này"), ("namnay", "Năm nay"), ("tatca", "Tất cả") })
+            {
+                <a asp-action="Index"
+                   asp-route-locNhanh="@quick.Item1"
+                   asp-route-locMaDuAn="@Model.LocMaDuAn"
+                   asp-route-locMaQuanLy="@Model.LocMaQuanLy"
+                   asp-route-locMaTeam="@Model.LocMaTeam"
+                   asp-route-locTrangThai="@Model.LocTrangThai"
+                   asp-route-locMaLoaiDuAn="@Model.LocMaLoaiDuAn"
+                   asp-route-locTheoNgay="@Model.LocTheoNgay"
+                   class="@QuickFilterClass(quick.Item1)">@quick.Item2</a>
+            }
         </div>
     </section>
 
     <section class="overview-grid">
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-kanban-fill"></i></div>
-            <div class="overview-card-label">Tổng dự án</div>
-            <div class="overview-card-value">@Model.TongDuAn</div>
-            <div class="overview-card-note">Số dự án được tạo trong khoảng thời gian đã chọn.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-list-task"></i></div>
-            <div class="overview-card-label">Tổng công việc</div>
-            <div class="overview-card-value">@Model.TongCongViec</div>
-            <div class="overview-card-note">Số công việc được tạo trong khoảng thời gian đã chọn.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-clipboard2-check"></i></div>
-            <div class="overview-card-label">Tổng đề xuất</div>
-            <div class="overview-card-value">@Model.TongDeXuat</div>
-            <div class="overview-card-note">Đề xuất công việc + ngân sách trong khoảng thời gian đã chọn.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-people-fill"></i></div>
-            <div class="overview-card-label">Tổng nhân sự</div>
-            <div class="overview-card-value">@Model.TongNhanVien</div>
-            <div class="overview-card-note">Nhân sự tham gia hệ thống hiện tại.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-wallet2"></i></div>
-            <div class="overview-card-label">Tổng ngân sách</div>
-            <div class="overview-card-value">@Model.TongNganSach.ToString("N0")</div>
-            <div class="overview-card-note">Ngân sách đã được duyệt và kích hoạt.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-cash-stack"></i></div>
-            <div class="overview-card-label">Tổng chi phí đã chi</div>
-            <div class="overview-card-value">@Model.TongChiPhi.ToString("N0")</div>
-            <div class="overview-card-note">Chi phí phát sinh theo ngày chi trong khoảng đã chọn.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-check2-circle"></i></div>
-            <div class="overview-card-label">Dự án hoàn thành</div>
-            <div class="overview-card-value">@Model.DuAnHoanThanhTrongKy</div>
-            <div class="overview-card-note">Số dự án hoàn thành trong khoảng thời gian đã chọn.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-piggy-bank-fill"></i></div>
-            <div class="overview-card-label">Ngân sách còn lại</div>
-            <div class="overview-card-value">@Model.NganSachConLai.ToString("N0")</div>
-            <div class="overview-card-note">Phần ngân sách còn lại sau khi trừ chi phí.</div>
-        </article>
-
-        <article class="overview-card">
-            <div class="overview-card-icon"><i class="bi bi-speedometer2"></i></div>
-            <div class="overview-card-label">Tỷ lệ sử dụng ngân sách</div>
-            <div class="overview-card-value">@Model.TyLeSuDungNganSach.ToString("0.##")%</div>
-            <div class="overview-card-note">Tỷ lệ tổng chi phí so với tổng ngân sách.</div>
-        </article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-kanban-fill"></i></div><div class="overview-card-label">Tổng dự án</div><div class="overview-card-value">@Model.TongDuAn</div><div class="overview-card-note">Theo bộ lọc hiện tại.</div></article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-list-task"></i></div><div class="overview-card-label">Tổng công việc</div><div class="overview-card-value">@Model.TongCongViec</div><div class="overview-card-note">Công việc thuộc các dự án đang lọc.</div></article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-people-fill"></i></div><div class="overview-card-label">Tổng nhân sự</div><div class="overview-card-value">@Model.TongNhanVien</div><div class="overview-card-note">Nhân sự có trong hệ thống.</div></article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-clipboard2-check"></i></div><div class="overview-card-label">Tổng đề xuất</div><div class="overview-card-value">@Model.TongDeXuat</div><div class="overview-card-note">Công việc và ngân sách.</div></article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-wallet2"></i></div><div class="overview-card-label">Tổng ngân sách</div><div class="overview-card-value">@Model.TongNganSach.ToString("N0")</div><div class="overview-card-note">Ngân sách đã duyệt.</div></article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-cash-stack"></i></div><div class="overview-card-label">Tổng chi phí</div><div class="overview-card-value">@Model.TongChiPhi.ToString("N0")</div><div class="overview-card-note">Chi phí phát sinh theo lọc.</div></article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-check2-circle"></i></div><div class="overview-card-label">Hoàn thành trong kỳ</div><div class="overview-card-value">@Model.DuAnHoanThanhTrongKy</div><div class="overview-card-note">Dự án hoàn thành theo mốc lọc.</div></article>
+        <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-speedometer2"></i></div><div class="overview-card-label">Sử dụng ngân sách</div><div class="overview-card-value">@Model.TyLeSuDungNganSach.ToString("0.##")%</div><div class="overview-card-note">Chi phí so với ngân sách.</div></article>
+        @if (canAiDashboard)
+        {
+            <article class="overview-card">
+                <div class="overview-card-icon"><i class="bi bi-cpu-fill"></i></div>
+                <div class="overview-card-label">Thống kê AI</div>
+                <div class="overview-card-value dashboard-link-value">AI</div>
+                <div class="overview-card-note">Xem dữ liệu AI, model, nguyên nhân trễ và chất lượng dataset.</div>
+                <a class="dashboard-action-btn btn-action" href="@Url.Action("Dashboard", "Ai")">Xem thống kê AI</a>
+            </article>
+        }
     </section>
 
     <section class="status-section">
         <div class="section-heading">
             <h2>Trạng thái dự án</h2>
-            <p>Phân bố trạng thái hiện tại của các dự án đang theo dõi.</p>
+            <p>Phân bố trạng thái hiện tại trong phạm vi bộ lọc.</p>
         </div>
-
         <div class="status-grid">
-            <article class="status-pill-card">
-                <div class="status-header">
-                    <span>Khởi tạo</span>
-                    <strong>@Model.DuAnKhoiTao</strong>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnKhoiTao)%"></div>
-                </div>
-                <small>@BuildRate(Model.DuAnKhoiTao)% tổng dự án</small>
-            </article>
-
-            <article class="status-pill-card">
-                <div class="status-header">
-                    <span>Đang thực hiện</span>
-                    <strong>@Model.DuAnDangThucHien</strong>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnDangThucHien)%"></div>
-                </div>
-                <small>@BuildRate(Model.DuAnDangThucHien)% tổng dự án</small>
-            </article>
-
-            <article class="status-pill-card">
-                <div class="status-header">
-                    <span>Tạm dừng</span>
-                    <strong>@Model.DuAnTamDung</strong>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnTamDung)%"></div>
-                </div>
-                <small>@BuildRate(Model.DuAnTamDung)% tổng dự án</small>
-            </article>
-
-            <article class="status-pill-card">
-                <div class="status-header">
-                    <span>Chờ xác nhận hoàn thành</span>
-                    <strong>@Model.DuAnChoXacNhanHoanThanh</strong>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnChoXacNhanHoanThanh)%"></div>
-                </div>
-                <small>@BuildRate(Model.DuAnChoXacNhanHoanThanh)% tổng dự án</small>
-            </article>
-
-            <article class="status-pill-card">
-                <div class="status-header">
-                    <span>Hoàn thành</span>
-                    <strong>@Model.DuAnHoanThanh</strong>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnHoanThanh)%"></div>
-                </div>
-                <small>@Model.DuAnHoanThanhDungHan đúng hạn · @Model.DuAnHoanThanhTreHan trễ hạn</small>
-            </article>
-
-            <article class="status-pill-card">
-                <div class="status-header">
-                    <span>Lưu trữ</span>
-                    <strong>@Model.DuAnLuuTru</strong>
-                </div>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" style="width: @BuildRate(Model.DuAnLuuTru)%"></div>
-                </div>
-                <small>@BuildRate(Model.DuAnLuuTru)% tổng dự án</small>
-            </article>
+            <article class="status-pill-card"><div class="status-header"><span>Khởi tạo</span><strong>@Model.DuAnKhoiTao</strong></div><div class="progress"><div class="progress-bar dashboard-progress-fill" style="--progress-width: @BuildRate(Model.DuAnKhoiTao)%;"></div></div><small>@BuildRate(Model.DuAnKhoiTao)% tổng dự án</small></article>
+            <article class="status-pill-card"><div class="status-header"><span>Đang thực hiện</span><strong>@Model.DuAnDangThucHien</strong></div><div class="progress"><div class="progress-bar dashboard-progress-fill" style="--progress-width: @BuildRate(Model.DuAnDangThucHien)%;"></div></div><small>@BuildRate(Model.DuAnDangThucHien)% tổng dự án</small></article>
+            <article class="status-pill-card"><div class="status-header"><span>Tạm dừng</span><strong>@Model.DuAnTamDung</strong></div><div class="progress"><div class="progress-bar dashboard-progress-fill" style="--progress-width: @BuildRate(Model.DuAnTamDung)%;"></div></div><small>@BuildRate(Model.DuAnTamDung)% tổng dự án</small></article>
+            <article class="status-pill-card"><div class="status-header"><span>Chờ xác nhận</span><strong>@Model.DuAnChoXacNhanHoanThanh</strong></div><div class="progress"><div class="progress-bar dashboard-progress-fill" style="--progress-width: @BuildRate(Model.DuAnChoXacNhanHoanThanh)%;"></div></div><small>@BuildRate(Model.DuAnChoXacNhanHoanThanh)% tổng dự án</small></article>
+            <article class="status-pill-card"><div class="status-header"><span>Hoàn thành</span><strong>@Model.DuAnHoanThanh</strong></div><div class="progress"><div class="progress-bar dashboard-progress-fill" style="--progress-width: @BuildRate(Model.DuAnHoanThanh)%;"></div></div><small>@Model.DuAnHoanThanhDungHan đúng hạn · @Model.DuAnHoanThanhTreHan trễ hạn</small></article>
+            <article class="status-pill-card"><div class="status-header"><span>Lưu trữ</span><strong>@Model.DuAnLuuTru</strong></div><div class="progress"><div class="progress-bar dashboard-progress-fill" style="--progress-width: @BuildRate(Model.DuAnLuuTru)%;"></div></div><small>@BuildRate(Model.DuAnLuuTru)% tổng dự án</small></article>
         </div>
     </section>
 
     <section class="warning-section">
-        <div class="section-heading">
-            <h2>Cảnh báo cần xử lý</h2>
-            <p>Các điểm nóng cần theo dõi ngay trong vận hành.</p>
-        </div>
-
+        <div class="section-heading"><h2>Cảnh báo cần xử lý</h2><p>Các điểm nóng trong vận hành hiện tại.</p></div>
         <div class="warning-grid">
-            <article class="warning-card @(Model.CongViecTreHan > 0 ? "warning-card-danger" : "warning-card-ok")">
-                <div class="warning-title-wrap">
-                    <h3>Công việc trễ hạn</h3>
-                    <span class="warning-value">@Model.CongViecTreHan</span>
-                </div>
-                <p class="overview-card-note">
-                    @(Model.CongViecTreHan > 0 ? "Có công việc cần xử lý ngay để tránh trễ tiến độ dây chuyền." : "Ổn định. Không có công việc trễ hạn.")
-                </p>
-                @if (Model.CongViecTreHan > 0 && canXuLyCongViecTreHan)
-                {
-                    <a class="dashboard-action-btn" href="@Url.Action("Index", "CongViec", new { treHan = true })">Xem công việc trễ hạn</a>
-                }
-            </article>
-
-            <article class="warning-card @(Model.NhanSuQuaTai > 0 ? "warning-card-danger" : "warning-card-ok")">
-                <div class="warning-title-wrap">
-                    <h3>Nhân sự quá tải</h3>
-                    <span class="warning-value">@Model.NhanSuQuaTai</span>
-                </div>
-                <p class="overview-card-note">
-                    @(Model.NhanSuQuaTai > 0 ? "Có nhân sự đang vượt ngưỡng phân công an toàn." : "Ổn định. Chưa ghi nhận tình trạng quá tải.")
-                </p>
-            </article>
-
-            <article class="warning-card @(Model.DuAnVuotNganSach > 0 ? "warning-card-danger" : "warning-card-ok")">
-                <div class="warning-title-wrap">
-                    <h3>Dự án vượt ngân sách</h3>
-                    <span class="warning-value">@Model.DuAnVuotNganSach</span>
-                </div>
-                <p class="overview-card-note">
-                    @(Model.DuAnVuotNganSach > 0 ? "Một số dự án đã vượt hạn mức ngân sách được duyệt." : "Ổn định. Chưa có dự án vượt ngân sách.")
-                </p>
-                @if (Model.DuAnVuotNganSach > 0 && canXuLyVuotNganSach)
-                {
-                    <a class="dashboard-action-btn" href="@Url.Action("Index", "ChiPhi", new { vuotNganSach = true })">Xem chi phí liên quan</a>
-                }
-            </article>
-
-            <article class="warning-card @(Model.DuAnThieuDatasetAi > 0 ? "warning-card-danger" : "warning-card-ok")">
-                <div class="warning-title-wrap">
-                    <h3>Thiếu dữ liệu AI</h3>
-                    <span class="warning-value">@Model.DuAnThieuDatasetAi</span>
-                </div>
-                <p class="overview-card-note">
-                    @(Model.DuAnThieuDatasetAi > 0 ? "Cần bổ sung dữ liệu để tăng chất lượng phân tích AI." : "Ổn định. Dữ liệu AI đang đầy đủ.")
-                </p>
-                @if (Model.DuAnThieuDatasetAi > 0 && canXuLyThieuDuLieuAi)
-                {
-                    <a class="dashboard-action-btn" href="@Url.Action("Index", "AiDataset", new { thieuDataset = true })">Mở dữ liệu AI</a>
-                }
-            </article>
+            <article class="warning-card @(Model.CongViecTreHan > 0 ? "warning-card-danger" : "warning-card-ok")"><div class="warning-title-wrap"><h3>Công việc trễ hạn</h3><span class="warning-value">@Model.CongViecTreHan</span></div><p class="overview-card-note">@(Model.CongViecTreHan > 0 ? "Có công việc cần xử lý để tránh trễ dây chuyền." : "Không có công việc trễ hạn.")</p>@if (Model.CongViecTreHan > 0 && canXuLyCongViecTreHan) { <a class="dashboard-action-btn btn-action" href="@Url.Action("Index", "CongViec", new { treHan = true })">Xem công việc</a> }</article>
+            <article class="warning-card @(Model.NhanSuQuaTai > 0 ? "warning-card-danger" : "warning-card-ok")"><div class="warning-title-wrap"><h3>Nhân sự quá tải</h3><span class="warning-value">@Model.NhanSuQuaTai</span></div><p class="overview-card-note">@(Model.NhanSuQuaTai > 0 ? "Có nhân sự đang vượt ngưỡng phân công." : "Chưa ghi nhận quá tải.")</p></article>
+            <article class="warning-card @(Model.DuAnVuotNganSach > 0 ? "warning-card-danger" : "warning-card-ok")"><div class="warning-title-wrap"><h3>Dự án vượt ngân sách</h3><span class="warning-value">@Model.DuAnVuotNganSach</span></div><p class="overview-card-note">@(Model.DuAnVuotNganSach > 0 ? "Có dự án đã vượt hạn mức ngân sách." : "Chưa có dự án vượt ngân sách.")</p>@if (Model.DuAnVuotNganSach > 0 && canXuLyVuotNganSach) { <a class="dashboard-action-btn btn-action" href="@Url.Action("Index", "ChiPhi", new { vuotNganSach = true })">Xem chi phí</a> }</article>
         </div>
     </section>
 
     <section class="pending-section">
-        <div class="section-heading">
-            <h2>Đề xuất và yêu cầu chờ duyệt</h2>
-            <p>Tổng hợp nhanh các hồ sơ đang chờ phê duyệt.</p>
-        </div>
-
+        <div class="section-heading"><h2>Đề xuất và yêu cầu chờ duyệt</h2><p>Tổng hợp nhanh các hồ sơ đang chờ phê duyệt.</p></div>
         <div class="pending-grid">
-            <article class="overview-card">
-                <div class="overview-card-icon"><i class="bi bi-clipboard-check"></i></div>
-                <div class="overview-card-label">Đề xuất công việc chờ duyệt</div>
-                <div class="overview-card-value">@Model.DeXuatCongViecChoDuyet</div>
-                <div class="overview-card-note">Theo dõi các đề xuất công việc mới cần duyệt.</div>
-                @if (canDuyetDeXuatCongViec)
-                {
-                    <a class="dashboard-action-btn" href="@Url.Action("Index", "DuyetDeXuatCongViec")">Xem duyệt</a>
-                }
-            </article>
-
-            <article class="overview-card">
-                <div class="overview-card-icon"><i class="bi bi-cash-coin"></i></div>
-                <div class="overview-card-label">Đề xuất ngân sách chờ duyệt</div>
-                <div class="overview-card-value">@Model.DeXuatNganSachChoDuyet</div>
-                <div class="overview-card-note">Theo dõi các đề xuất điều chỉnh ngân sách.</div>
-                @if (canDuyetDeXuatNganSach)
-                {
-                    <a class="dashboard-action-btn" href="@Url.Action("Index", "DuyetDeXuatNganSach")">Xem duyệt</a>
-                }
-            </article>
-
-            <article class="overview-card">
-                <div class="overview-card-icon"><i class="bi bi-person-check-fill"></i></div>
-                <div class="overview-card-label">Yêu cầu đổi quản lý chờ duyệt</div>
-                <div class="overview-card-value">@Model.YeuCauDoiQuanLyChoDuyet</div>
-                <div class="overview-card-note">Yêu cầu đổi quản lý dự án đang chờ xử lý.</div>
-                @if (canDuyetDoiQuanLy)
-                {
-                    <div class="empty-dashboard-state mt-2">Chưa có màn hình duyệt phù hợp để mở trực tiếp.</div>
-                }
-            </article>
+            <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-clipboard-check"></i></div><div class="overview-card-label">Đề xuất công việc</div><div class="overview-card-value">@Model.DeXuatCongViecChoDuyet</div><div class="overview-card-note">Đề xuất công việc chờ duyệt.</div>@if (canDuyetDeXuatCongViec) { <a class="dashboard-action-btn btn-action" href="@Url.Action("Index", "DuyetDeXuatCongViec")">Xem duyệt</a> }</article>
+            <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-cash-coin"></i></div><div class="overview-card-label">Đề xuất ngân sách</div><div class="overview-card-value">@Model.DeXuatNganSachChoDuyet</div><div class="overview-card-note">Đề xuất ngân sách chờ duyệt.</div>@if (canDuyetDeXuatNganSach) { <a class="dashboard-action-btn btn-action" href="@Url.Action("Index", "DuyetDeXuatNganSach")">Xem duyệt</a> }</article>
+            <article class="overview-card"><div class="overview-card-icon"><i class="bi bi-person-check-fill"></i></div><div class="overview-card-label">Đổi quản lý</div><div class="overview-card-value">@Model.YeuCauDoiQuanLyChoDuyet</div><div class="overview-card-note">Yêu cầu đổi quản lý chờ xử lý.</div>@if (canDuyetDoiQuanLy) { <a class="dashboard-action-btn btn-action" href="@Url.Action("Index", "DuyetYeuCauDoiQuanLy")">Xem duyệt</a> }</article>
         </div>
     </section>
 
     <section class="chart-grid">
-        <article class="chart-card">
-            <div class="section-heading mb-2">
-                <h2>Tiến độ các dự án</h2>
-            </div>
-            @if (hasProgressChartData)
-            {
-                <div class="chart-wrapper">
-                    <canvas id="progressChart"></canvas>
-                </div>
-            }
-            else
-            {
-                <div class="empty-dashboard-state">Chưa có dữ liệu biểu đồ.</div>
-            }
-        </article>
+        <article class="chart-card"><div class="section-heading mb-2"><h2>Tiến độ dự án</h2></div>@if (hasProgressChartData) { <div class="chart-wrapper"><canvas id="progressChart"></canvas></div> } else { <div class="empty-dashboard-state app-empty-state">Chưa có dữ liệu biểu đồ.</div> }</article>
+        <article class="chart-card"><div class="section-heading mb-2"><h2>Chi phí theo dự án</h2></div>@if (hasCostChartData) { <div class="chart-wrapper"><canvas id="costChart"></canvas></div> } else { <div class="empty-dashboard-state app-empty-state">Chưa có dữ liệu biểu đồ.</div> }</article>
+        <article class="chart-card"><div class="section-heading mb-2"><h2>Cơ cấu trạng thái dự án</h2></div>@if (hasProjectStatusChartData) { <div class="chart-wrapper"><canvas id="projectStatusChart"></canvas></div> } else { <div class="empty-dashboard-state app-empty-state">Chưa có dữ liệu biểu đồ.</div> }</article>
+        <article class="chart-card"><div class="section-heading mb-2"><h2>Cơ cấu trạng thái công việc</h2></div>@if (hasTaskStatusChartData) { <div class="chart-wrapper"><canvas id="taskStatusChart"></canvas></div> } else { <div class="empty-dashboard-state app-empty-state">Chưa có dữ liệu biểu đồ.</div> }</article>
+        <article class="chart-card"><div class="section-heading mb-2"><h2>Tiến độ theo tháng</h2></div>@if (hasTimelineChartData) { <div class="chart-wrapper"><canvas id="timelineChart"></canvas></div> } else { <div class="empty-dashboard-state app-empty-state">Chưa có dữ liệu biểu đồ.</div> }</article>
+        <article class="chart-card"><div class="section-heading mb-2"><h2>Chi phí theo tháng</h2></div>@if (hasTimelineChartData) { <div class="chart-wrapper"><canvas id="expenseTimelineChart"></canvas></div> } else { <div class="empty-dashboard-state app-empty-state">Chưa có dữ liệu biểu đồ.</div> }</article>
+    </section>
 
-        <article class="chart-card">
-            <div class="section-heading mb-2">
-                <h2>Chi phí theo dự án</h2>
-            </div>
-            @if (hasCostChartData)
+    <section class="detail-grid">
+        <article class="detail-table-card">
+            <h2>Top dự án trễ</h2>
+            @if (Model.TopDuAnTre.Any())
             {
-                <div class="chart-wrapper">
-                    <canvas id="costChart"></canvas>
-                </div>
+                <div class="dashboard-table-scroll app-table-scroll"><table class="dashboard-mini-table app-data-table"><thead><tr><th>Dự án</th><th>Quản lý</th><th>Trễ</th><th>Tiến độ</th></tr></thead><tbody>@foreach (var item in Model.TopDuAnTre) { <tr><td>@item.TenDuAn</td><td>@item.TenQuanLy</td><td>@item.SoNgayTre ngày</td><td>@item.PhanTramHoanThanh%</td></tr> }</tbody></table></div>
             }
-            else
+            else { <div class="empty-dashboard-state app-empty-state">Chưa có dự án trễ.</div> }
+        </article>
+        <article class="detail-table-card">
+            <h2>Top vượt ngân sách</h2>
+            @if (Model.TopDuAnVuotNganSach.Any())
             {
-                <div class="empty-dashboard-state">Chưa có dữ liệu biểu đồ.</div>
+                <div class="dashboard-table-scroll app-table-scroll"><table class="dashboard-mini-table app-data-table"><thead><tr><th>Dự án</th><th>Ngân sách</th><th>Chi phí</th><th>Vượt</th></tr></thead><tbody>@foreach (var item in Model.TopDuAnVuotNganSach) { <tr><td>@item.TenDuAn</td><td>@item.NganSach.ToString("N0")</td><td>@item.ChiPhi.ToString("N0")</td><td>@item.ChenhLech.ToString("N0")</td></tr> }</tbody></table></div>
             }
+            else { <div class="empty-dashboard-state app-empty-state">Chưa có dự án vượt ngân sách.</div> }
+        </article>
+        <article class="detail-table-card">
+            <h2>Nhân sự quá tải</h2>
+            @if (Model.TopNhanSuQuaTai.Any())
+            {
+                <div class="dashboard-table-scroll app-table-scroll"><table class="dashboard-mini-table app-data-table"><thead><tr><th>Nhân sự</th><th>Công việc</th><th>Chi tiết</th><th>Trễ</th></tr></thead><tbody>@foreach (var item in Model.TopNhanSuQuaTai) { <tr><td>@item.TenNhanVien</td><td>@item.SoCongViec</td><td>@item.SoChiTietCongViec</td><td>@item.CongViecTre</td></tr> }</tbody></table></div>
+            }
+            else { <div class="empty-dashboard-state app-empty-state">Chưa có nhân sự quá tải.</div> }
+        </article>
+        <article class="detail-table-card">
+            <h2>Công việc trễ hạn</h2>
+            @if (Model.TopCongViecTre.Any())
+            {
+                <div class="dashboard-table-scroll app-table-scroll"><table class="dashboard-mini-table app-data-table"><thead><tr><th>Công việc</th><th>Dự án</th><th>Phụ trách</th><th>Trễ</th></tr></thead><tbody>@foreach (var item in Model.TopCongViecTre) { <tr><td>@item.TenCongViec</td><td>@item.TenDuAn</td><td>@item.NguoiPhuTrach</td><td>@item.SoNgayTre ngày</td></tr> }</tbody></table></div>
+            }
+            else { <div class="empty-dashboard-state app-empty-state">Chưa có công việc trễ hạn.</div> }
         </article>
     </section>
 
-    <section class="ai-section">
-        <article class="chart-card">
-            <div class="section-heading mb-2">
-                <h2>Cảnh báo AI mức cao</h2>
-            </div>
-            @if (ai == null)
-            {
-                <div class="empty-dashboard-state">Chưa có dữ liệu phân tích AI.</div>
-            }
-            else
-            {
-                <div class="overview-card-value">@ai.SoCanhBaoDo</div>
-                <div class="overview-card-note">Số cảnh báo rủi ro cao do AI ghi nhận.</div>
-            }
-        </article>
-
-        <article class="chart-card">
-            <div class="section-heading mb-2">
-                <h2>Nguyên nhân trễ nhiều nhất</h2>
-            </div>
-            @if (ai?.NguyenNhanThongKe.Any() != true)
-            {
-                <div class="empty-dashboard-state">Chưa có dữ liệu phân tích AI.</div>
-            }
-            else
-            {
-                <div class="d-flex flex-column gap-2">
-                    @foreach (var item in ai!.NguyenNhanThongKe.Take(5))
-                    {
-                        <div class="suggestion-card">
-                            <div class="d-flex justify-content-between align-items-center gap-2">
-                                <strong>@item.NguyenNhan</strong>
-                                <span class="badge text-bg-light">@item.TyLePhanTram%</span>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-        </article>
-    </section>
-
-    <section class="suggestion-section">
-        <div class="section-heading">
-            <h2>Gợi ý ưu tiên</h2>
-            <p>Các gợi ý giúp ưu tiên hành động trong giai đoạn hiện tại.</p>
-        </div>
-
-        @if (!Model.Suggestions.Any())
-        {
-            <div class="empty-dashboard-state">Hiện chưa có gợi ý ưu tiên. Hệ thống đang hoạt động ổn định.</div>
-        }
-        else
-        {
+    @if (Model.Suggestions.Any())
+    {
+        <section class="suggestion-section">
+            <div class="section-heading"><h2>Gợi ý ưu tiên</h2><p>Các gợi ý giúp ưu tiên hành động trong giai đoạn hiện tại.</p></div>
             <div class="d-flex flex-column gap-2">
                 @foreach (var s in Model.Suggestions.Take(6))
                 {
                     <article class="suggestion-card">
-                        <div class="d-flex justify-content-between align-items-center gap-2">
-                            <strong>@s.Title</strong>
-                            <span class="badge @(s.Priority == "Cao" ? "text-bg-danger" : s.Priority == "Trung bình" ? "text-bg-warning" : "text-bg-secondary")">@s.Priority</span>
-                        </div>
+                        <div class="d-flex justify-content-between align-items-center gap-2"><strong>@s.Title</strong><span class="badge @(s.Priority == "Cao" ? "text-bg-danger" : s.Priority == "Trung bình" ? "text-bg-warning" : "text-bg-secondary")">@s.Priority</span></div>
                         <p class="mb-0 mt-2 text-muted">@s.Description</p>
                         @if (!string.IsNullOrWhiteSpace(s.ActionText) && !string.IsNullOrWhiteSpace(s.ActionUrl))
                         {
@@ -458,68 +312,54 @@
                     </article>
                 }
             </div>
-        }
-    </section>
+        </section>
+    }
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TenDuAn ?? new List<string>()));
-        const progressData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.PhanTramTienDo ?? new List<int>()));
-        const costData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChiPhiTheoDuAn ?? new List<decimal>()));
+        const labels = @Html.Raw(JsonSerializer.Serialize(Model.TenDuAn ?? new List<string>()));
+        const progressData = @Html.Raw(JsonSerializer.Serialize(Model.PhanTramTienDo ?? new List<int>()));
+        const costData = @Html.Raw(JsonSerializer.Serialize(Model.ChiPhiTheoDuAn ?? new List<decimal>()));
+        const projectStatusLabels = @Html.Raw(JsonSerializer.Serialize(Model.TrangThaiDuAnChart.Select(x => x.Label).ToList()));
+        const projectStatusValues = @Html.Raw(JsonSerializer.Serialize(Model.TrangThaiDuAnChart.Select(x => x.Value).ToList()));
+        const taskStatusLabels = @Html.Raw(JsonSerializer.Serialize(Model.TrangThaiCongViecChart.Select(x => x.Label).ToList()));
+        const taskStatusValues = @Html.Raw(JsonSerializer.Serialize(Model.TrangThaiCongViecChart.Select(x => x.Value).ToList()));
+        const timelineLabels = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.Label).ToList()));
+        const timelineProjects = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.DuAnTaoMoi).ToList()));
+        const timelineCompletedProjects = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.DuAnHoanThanh).ToList()));
+        const timelineCompletedTasks = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.CongViecHoanThanh).ToList()));
+        const timelineDelayedTasks = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.CongViecTre).ToList()));
+        const timelineExpenses = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.ChiPhi).ToList()));
+        const palette = ["#5067d8", "#21a6c9", "#34a66f", "#f0ae3d", "#d95f59", "#8a7be5"];
 
-        const progressCanvas = document.getElementById("progressChart");
-        if (progressCanvas && labels.length > 0 && progressData.length > 0) {
-            new Chart(progressCanvas, {
-                type: "bar",
-                data: {
-                    labels,
-                    datasets: [{
-                        label: "% hoàn thành",
-                        data: progressData,
-                        backgroundColor: "#6f8bff",
-                        borderRadius: 8,
-                        maxBarThickness: 32
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, max: 100 }
-                    }
-                }
-            });
+        const render = (id, config) => {
+            const canvas = document.getElementById(id);
+            if (!canvas) return;
+            new Chart(canvas, config);
+        };
+
+        if (labels.length > 0 && progressData.length > 0) {
+            render("progressChart", { type: "bar", data: { labels, datasets: [{ label: "% hoàn thành", data: progressData, backgroundColor: "#5067d8", borderRadius: 6, maxBarThickness: 30 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } });
         }
-
-        const costCanvas = document.getElementById("costChart");
-        if (costCanvas && labels.length > 0 && costData.length > 0) {
-            new Chart(costCanvas, {
-                type: "line",
-                data: {
-                    labels,
-                    datasets: [{
-                        label: "Chi phí",
-                        data: costData,
-                        borderColor: "#03a9d9",
-                        backgroundColor: "rgba(3, 169, 217, 0.16)",
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: true }
-                    }
-                }
-            });
+        if (labels.length > 0 && costData.length > 0) {
+            render("costChart", { type: "bar", data: { labels, datasets: [{ label: "Chi phí", data: costData, backgroundColor: "#21a6c9", borderRadius: 6, maxBarThickness: 30 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+        }
+        if (projectStatusLabels.length > 0) {
+            render("projectStatusChart", { type: "doughnut", data: { labels: projectStatusLabels, datasets: [{ data: projectStatusValues, backgroundColor: palette }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+        if (taskStatusLabels.length > 0) {
+            render("taskStatusChart", { type: "bar", data: { labels: taskStatusLabels, datasets: [{ label: "Công việc", data: taskStatusValues, backgroundColor: palette, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+        }
+        if (timelineLabels.length > 0) {
+            render("timelineChart", { type: "line", data: { labels: timelineLabels, datasets: [
+                { label: "Dự án tạo mới", data: timelineProjects, borderColor: "#5067d8", backgroundColor: "#5067d8", tension: 0.25 },
+                { label: "Dự án hoàn thành", data: timelineCompletedProjects, borderColor: "#34a66f", backgroundColor: "#34a66f", tension: 0.25 },
+                { label: "Công việc hoàn thành", data: timelineCompletedTasks, borderColor: "#21a6c9", backgroundColor: "#21a6c9", tension: 0.25 },
+                { label: "Công việc trễ", data: timelineDelayedTasks, borderColor: "#d95f59", backgroundColor: "#d95f59", tension: 0.25 }
+            ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+            render("expenseTimelineChart", { type: "bar", data: { labels: timelineLabels, datasets: [{ label: "Chi phí", data: timelineExpenses, backgroundColor: "#f0ae3d", borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
         }
     </script>
 }

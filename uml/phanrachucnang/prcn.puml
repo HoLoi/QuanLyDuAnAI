@@ -1,0 +1,80 @@
+@startwbs
+* Hệ thống quản lý dự án tích hợp AI
+
+** 1. Quản trị hệ thống
+*** Quản lý nhân sự
+*** Quản lý chức danh
+*** Quản lý nhóm / team
+*** Quản lý thành viên nhóm
+*** Phân quyền
+' *** Duyệt yêu cầu đổi quản lý
+' *** Xem nhật ký hệ thống
+
+** 2. Quản lý dự án
+*** Quản lý dự án
+**** Thêm dự án
+**** Sửa dự án
+**** Xóa dự án
+**** Xem chi tiết dự án
+**** Tạm dừng dự án
+**** Xác nhận hoàn thành dự án
+*** Quản lý thành viên dự án
+*** Gán team vào dự án
+*** Yêu cầu đổi quản lý dự án
+*** Quản lý tài liệu dự án
+
+** 3. Quản lý công việc
+*** Quản lý danh mục công việc
+*** Xem danh sách công việc
+*** Quản lý chi tiết công việc
+*** Phân công công việc
+*** Phân công chi tiết công việc
+*** Xác nhận hoàn thành công việc
+*** Mở lại công việc
+
+** 4. Quản lý tiến độ
+*** Báo cáo tiến độ công việc
+*** Upload file minh chứng
+*** Duyệt báo cáo tiến độ
+*** Yêu cầu bổ sung báo cáo
+*** Từ chối báo cáo tiến độ
+
+** 5. Quản lý đề xuất và duyệt
+*** Đề xuất công việc
+*** Duyệt đề xuất công việc
+*** Đề xuất ngân sách
+*** Duyệt đề xuất ngân sách
+*** Yêu cầu đổi quản lý
+*** Duyệt yêu cầu đổi quản lý
+
+** 6. Quản lý ngân sách và chi phí
+*** Xem ngân sách dự án
+*** Quản lý chi phí
+*** Theo dõi sử dụng ngân sách
+*** Cảnh báo vượt ngân sách
+
+** 7. Đánh giá và báo cáo
+*** Đánh giá dự án
+*** Đánh giá nhân viên
+*** Thống kê tổng quan
+*** Xuất báo cáo
+*** Xem báo cáo cá nhân
+
+** 8. AI phân tích trễ hạn
+*** Tổng hợp dữ liệu AI Dataset
+' *** Huấn luyện model trễ hạn
+' *** Huấn luyện model nguyên nhân
+*** Huấn luyện model AI
+*** Quản lý model AI
+' *** Dự đoán dự án trễ hạn
+' *** Gợi ý nguyên nhân trễ
+*** Phân tích nguyên nhân trễ
+' *** Xác nhận nguyên nhân thực tế
+
+** 9. Trao đổi trong dự án
+' *** Tạo phòng chat dự án
+' *** Đồng bộ thành viên phòng chat
+*** Gửi tin nhắn
+*** Xem lịch sử trao đổi
+
+@endwbs

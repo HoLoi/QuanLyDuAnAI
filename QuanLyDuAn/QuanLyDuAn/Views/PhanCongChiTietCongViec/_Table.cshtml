@@ -9,7 +9,7 @@
 
 @if (!Model.DanhSachPhanCong.Any())
 {
-    <div class="pct-empty-state">
+    <div class="pct-empty-state assignment-empty-state app-empty-state">
         <i class="bi bi-people"></i>
         <h3>Chưa có nhân sự được phân công.</h3>
         <p>Danh sách phân công sẽ hiển thị tại đây khi bạn giao người thực hiện cho chi tiết công việc này.</p>
@@ -17,8 +17,8 @@
 }
 else
 {
-    <div class="pct-table-scroll">
-        <table class="table pct-table">
+    <div class="pct-table-scroll assignment-table-scroll app-table-scroll">
+        <table class="table pct-table app-data-table assignment-table">
             <thead>
                 <tr>
                     <th>Nhân viên</th>
@@ -38,7 +38,7 @@ else
                                 <form asp-action="XoaPhanCong" method="post">
                                     <input type="hidden" name="maChiTietCv" value="@maChiTietCv" />
                                     <input type="hidden" name="maNguoiDung" value="@item.MaNguoiDung" />
-                                    <button type="submit" class="pct-btn pct-btn-danger-soft">Xóa phân công</button>
+                                    <button type="submit" class="pct-btn pct-btn-danger-soft btn-action btn-danger-soft assignment-action-btn">Xóa phân công</button>
                                 </form>
                             }
                         </td>
@@ -56,14 +56,14 @@ else
 
 @if (!Model.ThanhVienCoThePhanCong.Any())
 {
-    <div class="pct-inline-note">
+    <div class="pct-inline-note assignment-inline-note">
         Không còn nhân viên phù hợp để phân công.
     </div>
 }
 else
 {
-    <div class="pct-table-scroll">
-        <table class="table pct-table pct-table-subtle">
+    <div class="pct-table-scroll assignment-table-scroll app-table-scroll">
+        <table class="table pct-table pct-table-subtle app-data-table assignment-table">
             <thead>
                 <tr>
                     <th>Nhân viên</th>
@@ -78,7 +78,7 @@ else
                         <td>@nv.HoTenNguoiDung</td>
                         <td>@nv.VaiTroTrongDuAn</td>
                         <td class="col-actions">
-                            <button type="button" class="pct-btn pct-btn-neutral-soft" disabled>Chọn ở form</button>
+                            <button type="button" class="pct-btn pct-btn-neutral-soft btn-action btn-subtle assignment-action-btn" disabled>Chọn ở form</button>
                         </td>
                     </tr>
                 }

@@ -5,17 +5,17 @@
         <input type="text"
                name="tuKhoa"
                value="@Model.TuKhoa"
-               placeholder="Tìm theo dự án hoặc phòng chat..." />
+               placeholder="Tìm theo dự án hoặc phòng chat..." class="form-control" />
         @if (Model.MaDuAnDangChon.HasValue)
         {
             <input type="hidden" name="maDuAn" value="@Model.MaDuAnDangChon" />
         }
-        <button type="submit" class="btn btn-sm btn-outline-primary">Lọc</button>
+        <button type="submit" class="btn btn-sm btn-outline-primary btn-action btn-filter-apply">Lọc</button>
     </form>
 
     @if (!Model.DanhSachPhong.Any())
     {
-        <div class="chat-room-empty">Bạn chưa tham gia dự án nào có phòng chat.</div>
+        <div class="chat-room-empty app-empty-state">Bạn chưa tham gia dự án nào có phòng chat.</div>
     }
     else
     {

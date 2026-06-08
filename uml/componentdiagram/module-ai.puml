@@ -1,0 +1,105 @@
+@startuml
+title Component Diagram - Module AI reason-only và tích hợp FastAPI
+
+skinparam componentStyle rectangle
+
+actor "Quản trị viên AI" as AiAdmin
+actor "Quản lý dự án" as Manager
+
+package "MVC - Frontend" {
+  component "Views/Ai\nDashboard, Train,\nModels, Predict" as AiViews
+  component "Views/AiDataset/Index" as DatasetView
+  component "wwwroot/js/ai/charts.js" as ChartsJs
+}
+
+package "MVC - Controllers" {
+  component "AiController" as AiController
+  component "AiDatasetController" as AiDatasetController
+  component "DashboardController" as DashboardController
+  component "DanhGiaDuAnController" as ProjectReviewController
+}
+
+package "MVC - Services" {
+  component "IAiService\nAiService" as AiService
+  component "IAiDatasetService\nAiDatasetService" as AiDatasetService
+  component "IAiApiService\nAiApiService" as AiApiService
+  component "IPermissionHelper" as PermissionHelper
+  component "AiApiOptions\nBaseUrl, Timeout, Retry" as AiOptions
+}
+
+package "MVC - Data system-of-record" {
+  component "QuanLyDuAnDbContext" as DbContext
+  database "SQL Server\nQuanLyDuAnAI" as Sql
+  component "AI_DATASET" as AiDatasetTable
+  component "AI_KET_QUA" as AiResultTable
+  component "AI_NGUYEN_NHAN" as AiConfirmedReasonTable
+  component "AI_MODEL" as AiModelTable
+  component "DM_NGUYEN_NHAN" as ReasonCatalogTable
+  component "Dữ liệu nghiệp vụ\nDU_AN, CONG_VIEC,\nTIEN_DO, DE_XUAT,\nNGAN_SACH, CHI_PHI" as BusinessTables
+}
+
+cloud "FastAPI AI Service\ncompute-only" as FastApi {
+  component "FastAPI app\napp/main.py" as FastApiApp
+  component "prediction_router\n/dataset/validate\n/analyze/delay-reason" as PredictionRouter
+  component "model_router\n/model/train\n/model/list" as ModelRouter
+  component "admin_router\n/admin/model/*\n/admin/dataset/*" as AdminRouter
+  component "validation_service" as ValidationService
+  component "model_service" as ModelService
+  component "prediction_service" as PredictionService
+  component "decision_tree_model\nfeature_builder" as MlComponents
+  artifact "models/\nreason_active.joblib\n*.metadata.json" as ModelFiles
+  artifact "logs/ai_service.log" as AiLog
+}
+
+AiAdmin --> AiViews : quản trị AI
+AiAdmin --> DatasetView : tổng hợp/kiểm tra dataset
+Manager --> AiViews : phân tích nguyên nhân trễ
+AiViews --> ChartsJs : hiển thị biểu đồ
+AiViews --> AiController
+DatasetView --> AiDatasetController
+DashboardController --> AiService : số liệu AI tổng quan
+ProjectReviewController --> AiService : phân tích/xác nhận từ đánh giá dự án
+
+AiController --> PermissionHelper : Permissions.AI.*
+AiDatasetController --> PermissionHelper : Permissions.AI.Dataset
+AiController --> AiService
+AiDatasetController --> AiDatasetService
+
+AiService --> AiDatasetService : tổng hợp/bổ sung feature
+AiService --> AiApiService : gọi API AI
+AiApiService --> AiOptions : đọc cấu hình HttpClient
+AiApiService --> FastApi : HTTP/REST JSON
+AiService --> DbContext : lưu AI_KET_QUA, AI_MODEL, AI_NGUYEN_NHAN
+AiDatasetService --> DbContext : tổng hợp AI_DATASET từ dữ liệu nghiệp vụ
+
+DbContext --> AiDatasetTable
+DbContext --> AiResultTable
+DbContext --> AiConfirmedReasonTable
+DbContext --> AiModelTable
+DbContext --> ReasonCatalogTable
+DbContext --> BusinessTables
+AiDatasetTable --> Sql
+AiResultTable --> Sql
+AiConfirmedReasonTable --> Sql
+AiModelTable --> Sql
+ReasonCatalogTable --> Sql
+BusinessTables --> Sql
+
+FastApi --> FastApiApp
+FastApiApp --> PredictionRouter
+FastApiApp --> ModelRouter
+FastApiApp --> AdminRouter
+PredictionRouter --> ValidationService
+PredictionRouter --> ModelService
+ModelRouter --> ModelService
+AdminRouter --> ValidationService
+AdminRouter --> ModelService
+ModelService --> PredictionService : phân tích reason
+ModelService --> MlComponents : train/load/inspect
+ValidationService --> MlComponents : validate feature/dataset
+PredictionService --> MlComponents : build feature frame
+ModelService --> ModelFiles : đọc/ghi model
+ModelService --> AiLog : ghi log sự kiện
+
+FastApi -[#red,dashed]-> Sql : không truy cập SQL nghiệp vụ
+@enduml

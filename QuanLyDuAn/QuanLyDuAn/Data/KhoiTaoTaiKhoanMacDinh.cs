@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Models.Entities;
+using QuanLyDuAn.Services.Implementations;
 
 namespace QuanLyDuAn.Data;
 
@@ -40,6 +41,7 @@ public static class KhoiTaoTaiKhoanMacDinh
         var roleAdmin = await DamBaoRoleAsync(dbContext, "Admin");
         var roleManager = await DamBaoRoleAsync(dbContext, "Manager");
         var roleEmployee = await DamBaoRoleAsync(dbContext, "Employee");
+        var permissionProvider = new PermissionDependencyProvider();
 
         var taiKhoanAdmin = await dbContext.Aspnetusers
             .FirstOrDefaultAsync(x => x.NormalizedUserName == "ADMIN");
@@ -104,17 +106,15 @@ public static class KhoiTaoTaiKhoanMacDinh
 
             // ===== CHAT (tu? ch?n) =====
             Permissions.Chat.Xem,
-            Permissions.Chat.Gui,
             Permissions.DanhGiaDuAn.Xem,
             Permissions.DanhGiaDuAn.Duyet,
             Permissions.DanhGiaNhanVien.Xem,
 
             // AI 
+            Permissions.AI.Xem,
             Permissions.AI.Dataset,
             Permissions.AI.Train,
-            Permissions.AI.PhanTichNguyenNhan,
-            Permissions.AI.Dashboard,
-            Permissions.AI.XacNhan
+            Permissions.AI.Dashboard
             
         });
         await DamBaoRoleClaimToiThieuAsync(dbContext, roleManager.Id, new[]
@@ -193,6 +193,7 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.DanhGiaNhanVien.Sua,
 
             //AI
+            Permissions.AI.Xem,
             Permissions.AI.PhanTichNguyenNhan,
             Permissions.AI.Dashboard,
             Permissions.AI.XacNhan,
@@ -235,7 +236,6 @@ public static class KhoiTaoTaiKhoanMacDinh
             // Tiến độ
             Permissions.TienDo.Xem,
             Permissions.TienDo.CapNhat,
-            Permissions.TienDo.Duyet,
 
             // Chat
             Permissions.Chat.Xem,
@@ -249,6 +249,10 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.DanhGiaNhanVien.Xem,
             Permissions.DanhGiaDuAn.Xem
         });
+
+        await DamBaoRoleKhongCoQuyenAsync(dbContext, roleAdmin.Id, permissionProvider.GetDeniedPermissionsForRole("Admin"));
+        await DamBaoRoleKhongCoQuyenAsync(dbContext, roleManager.Id, permissionProvider.GetDeniedPermissionsForRole("Manager"));
+        await DamBaoRoleKhongCoQuyenAsync(dbContext, roleEmployee.Id, permissionProvider.GetDeniedPermissionsForRole("Employee"));
     }
 
     //private static async Task GanQuyenMacDinhChoRoleAdminAsync(QuanLyDuAnDbContext dbContext, string roleId)
@@ -311,6 +315,38 @@ public static class KhoiTaoTaiKhoanMacDinh
             });
         }
 
+        await dbContext.SaveChangesAsync();
+    }
+
+    private static async Task DamBaoRoleKhongCoQuyenAsync(QuanLyDuAnDbContext dbContext, string roleId, IEnumerable<string> danhSachTenQuyen)
+    {
+        var tenQuyenBiChan = danhSachTenQuyen
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (tenQuyenBiChan.Count == 0)
+        {
+            return;
+        }
+
+        var maQuyenBiChan = await dbContext.DanhMucQuyen
+            .AsNoTracking()
+            .Where(x => x.TenDanhMucQuyen != null && tenQuyenBiChan.Contains(x.TenDanhMucQuyen))
+            .Select(x => x.MaDanhMucQuyen)
+            .ToListAsync();
+        if (maQuyenBiChan.Count == 0)
+        {
+            return;
+        }
+
+        var claimsBiChan = await dbContext.Aspnetroleclaims
+            .Where(x => x.Asp_Id == roleId && maQuyenBiChan.Contains(x.MaDanhMucQuyen))
+            .ToListAsync();
+        if (claimsBiChan.Count == 0)
+        {
+            return;
+        }
+
+        dbContext.Aspnetroleclaims.RemoveRange(claimsBiChan);
         await dbContext.SaveChangesAsync();
     }
 
@@ -551,6 +587,7 @@ public static class KhoiTaoTaiKhoanMacDinh
 
     private static async Task DamBaoDanhMucManHinhVaChucNangAsync(QuanLyDuAnDbContext dbContext)
     {
+        var permissionProvider = new PermissionDependencyProvider();
         var cauHinh = new Dictionary<string, string[]>
         {
             // ===== DASHBOARD =====
@@ -714,6 +751,11 @@ public static class KhoiTaoTaiKhoanMacDinh
             },
 
             // ===== AI =====
+            ["AI"] = new[]
+            {
+                Permissions.AI.Xem
+            },
+
             ["AIDataset"] = new[]
             {
                 Permissions.AI.Dataset
@@ -784,7 +826,7 @@ public static class KhoiTaoTaiKhoanMacDinh
             var manHinhMoi = new DanhMucManHinh
             {
                 TenManHinh = tenManHinh,
-                MoTaManHinh = $"Danh muc man hinh {tenManHinh}"
+                MoTaManHinh = $"Màn hình {permissionProvider.GetPermissionDefinition(cauHinh[tenManHinh].First(), tenManHinh).ScreenDisplayName}"
             };
             dbContext.DanhMucManHinh.Add(manHinhMoi);
             await dbContext.SaveChangesAsync();
@@ -810,9 +852,46 @@ public static class KhoiTaoTaiKhoanMacDinh
                 {
                     MaManHinh = maManHinh,
                     TenDanhMucQuyen = tenQuyen,
-                    MoTaDanhMucQuyen = $"Quyen {tenQuyen}"
+                    MoTaDanhMucQuyen = permissionProvider.GetPermissionDefinition(tenQuyen, item.Key).Description
                 });
             }
+        }
+
+        await dbContext.SaveChangesAsync();
+
+        var manHinhCanCapNhat = await dbContext.DanhMucManHinh.ToListAsync();
+        foreach (var manHinh in manHinhCanCapNhat.Where(x => !string.IsNullOrWhiteSpace(x.TenManHinh)))
+        {
+            if (!cauHinh.TryGetValue(manHinh.TenManHinh!, out var permissions) || permissions.Length == 0)
+            {
+                continue;
+            }
+
+            var screenDisplayName = permissionProvider
+                .GetPermissionDefinition(permissions[0], manHinh.TenManHinh)
+                .ScreenDisplayName;
+            manHinh.MoTaManHinh = $"Màn hình {screenDisplayName}";
+        }
+
+        var quyenCanCapNhat = await (from permission in dbContext.DanhMucQuyen
+                                     join screen in dbContext.DanhMucManHinh
+                                         on permission.MaManHinh equals screen.MaManHinh
+                                     select new
+                                     {
+                                         Permission = permission,
+                                         ScreenKey = screen.TenManHinh
+                                     }).ToListAsync();
+
+        foreach (var item in quyenCanCapNhat)
+        {
+            if (string.IsNullOrWhiteSpace(item.Permission.TenDanhMucQuyen))
+            {
+                continue;
+            }
+
+            item.Permission.MoTaDanhMucQuyen = permissionProvider
+                .GetPermissionDefinition(item.Permission.TenDanhMucQuyen, item.ScreenKey)
+                .Description;
         }
 
         await dbContext.SaveChangesAsync();

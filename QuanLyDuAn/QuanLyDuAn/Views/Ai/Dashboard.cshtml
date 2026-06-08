@@ -1,5 +1,7 @@
-﻿@model QuanLyDuAn.ViewModels.Ai.AiDashboardPageViewModel
+@model QuanLyDuAn.ViewModels.Ai.AiDashboardPageViewModel
 @using System.Text.Json
+@using QuanLyDuAn.Constants
+@inject QuanLyDuAn.Services.Interfaces.IPermissionHelper PermissionHelper
 
 @{
     ViewData["Title"] = "Tổng quan AI";
@@ -8,19 +10,34 @@
     var reasonValues = Model.NguyenNhanPhoBien.Select(x => x.TyLePhanTram).ToList();
     var modelLabels = Model.LichSuModelNguyenNhan.Select(x => x.CreatedAt == DateTime.MinValue ? x.TenModel : $"{x.CreatedAt:dd/MM HH:mm}").ToList();
     var modelAccuracy = Model.LichSuModelNguyenNhan.Select(x => Math.Round((x.Accuracy ?? 0d) * 100d, 2)).ToList();
+    var timelineLabels = Model.LuotPhanTichTheoThang.Select(x => x.Label).ToList();
+    var timelineAnalysis = Model.LuotPhanTichTheoThang.Select(x => x.SoLuotPhanTich).ToList();
+    var timelineConfirm = Model.LuotPhanTichTheoThang.Select(x => x.SoXacNhan).ToList();
+    var canExport = await PermissionHelper.HasPermissionAsync(User!, Permissions.ThongKe.XuatFile);
 }
 
 @section Styles {
     <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
-<section class="ai-page">
-    <header class="ai-header-card">
+<section class="ai-page app-page">
+    <header class="ai-header-card app-page-header">
         <div>
             <h1 class="ai-title">Tổng quan AI</h1>
             <p class="ai-subtitle">AI chỉ hỗ trợ phân tích nguyên nhân trễ dự án. Quyết định nghiệp vụ cuối cùng vẫn do người quản lý.</p>
         </div>
-        <a asp-controller="Ai" asp-action="Models" class="ai-link-btn">Xem chi tiết model</a>
+        <div class="ai-header-actions">
+            <a asp-controller="Ai" asp-action="Models" class="ai-link-btn btn-action btn-subtle">Xem chi tiết model</a>
+            @if (canExport)
+            {
+                var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                {
+                    Action = "XuatFile"
+                };
+                <partial name="_ExportDropdown" model="exportVm" />
+            }
+        </div>
     </header>
 
     @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
@@ -43,19 +60,11 @@
     <h2 class="ai-section-title">Hệ thống và model</h2>
     <div class="ai-grid ai-grid-4">
         <article class="ai-stat-card"><span class="ai-stat-label">Trạng thái service</span><strong class="ai-stat-value">@serviceStatus</strong></article>
-        <article class="ai-stat-card">
-            <span class="ai-stat-label">Model active</span>
-            <strong class="ai-stat-value ai-text-truncate-2">@(string.IsNullOrWhiteSpace(Model.ModelNguyenNhanDangHoatDong) ? "Chưa có" : Model.ModelNguyenNhanDangHoatDong)</strong>
-        </article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Model active</span><strong class="ai-stat-value ai-text-truncate-2">@(string.IsNullOrWhiteSpace(Model.ModelNguyenNhanDangHoatDong) ? "Chưa có" : Model.ModelNguyenNhanDangHoatDong)</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Tổng model nguyên nhân</span><strong class="ai-stat-value">@Model.TongModelTrongDb</strong></article>
-        <article class="ai-stat-card">
-            <span class="ai-stat-label">Tổng lượt phân tích AI</span>
-            <strong class="ai-stat-value">@Model.TongLanPhanTichTrongDb</strong>
-            @if (Model.TongLanPhanTichTrongDb == 0)
-            {
-                <small class="ai-stat-note">Chưa có dữ liệu.</small>
-            }
-        </article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Tổng lượt phân tích AI</span><strong class="ai-stat-value">@Model.TongLanPhanTichTrongDb</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Tổng xác nhận nguyên nhân</span><strong class="ai-stat-value">@Model.TongXacNhanNguyenNhanTrongDb</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Tỷ lệ xác nhận AI</span><strong class="ai-stat-value">@Model.TyLeXacNhanAi.ToString("0.##")%</strong><small class="ai-stat-note">Xác nhận nguyên nhân so với lượt phân tích.</small></article>
     </div>
 
     <h2 class="ai-section-title">Dataset</h2>
@@ -63,95 +72,85 @@
         <article class="ai-stat-card"><span class="ai-stat-label">Tổng dòng dataset</span><strong class="ai-stat-value">@Model.TongDongDataset</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Dòng đủ điều kiện train</span><strong class="ai-stat-value">@Model.TongDongDatasetHopLeTrain</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Dự án trễ đã xác nhận</span><strong class="ai-stat-value">@Model.SoDuAnTreDaXacNhan</strong></article>
-        <article class="ai-stat-card">
-            <span class="ai-stat-label">Dự án trễ chưa xác nhận</span>
-            <strong class="ai-stat-value">@Model.SoDuAnTreChuaXacNhan</strong>
-            @if (Model.SoDuAnTreChuaXacNhan == 0)
-            {
-                <small class="ai-stat-note">Chưa có dữ liệu.</small>
-            }
-        </article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Dự án trễ chưa xác nhận</span><strong class="ai-stat-value">@Model.SoDuAnTreChuaXacNhan</strong></article>
     </div>
 
     <h2 class="ai-section-title">Chất lượng model active</h2>
     <div class="ai-grid ai-grid-4">
-        <article class="ai-stat-card"><span class="ai-stat-label">Độ chính xác model active</span><strong class="ai-stat-value">@(Model.AccuracyModelActive.HasValue ? Model.AccuracyModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Độ chính xác</span><strong class="ai-stat-value">@(Model.AccuracyModelActive.HasValue ? Model.AccuracyModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Precision macro</span><strong class="ai-stat-value">@(Model.PrecisionMacroModelActive.HasValue ? Model.PrecisionMacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Recall macro</span><strong class="ai-stat-value">@(Model.RecallMacroModelActive.HasValue ? Model.RecallMacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">F1 macro</span><strong class="ai-stat-value">@(Model.F1MacroModelActive.HasValue ? Model.F1MacroModelActive.Value.ToString("P2") : "Chưa có dữ liệu")</strong></article>
     </div>
 
     <div class="ai-grid ai-grid-2">
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Phân bố nguyên nhân đã xác nhận</h2>
-            @if (Model.NguyenNhanPhoBien.Any())
-            {
-                <div class="ai-chart-shell">
-                    <canvas id="reasonDistributionDashboardChart"></canvas>
-                </div>
-            }
-            else
-            {
-                <div class="ai-empty-state">Chưa có dữ liệu xác nhận nguyên nhân.</div>
-            }
+            @if (Model.NguyenNhanPhoBien.Any()) { <div class="ai-chart-shell"><canvas id="reasonDistributionDashboardChart"></canvas></div> }
+            else { <div class="ai-empty-state app-empty-state">Chưa có dữ liệu xác nhận nguyên nhân.</div> }
         </article>
-
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Dataset theo trạng thái train</h2>
-            <div class="ai-chart-shell">
-                <canvas id="datasetTrainStateChart"></canvas>
-            </div>
+            <div class="ai-chart-shell"><canvas id="datasetTrainStateChart"></canvas></div>
         </article>
     </div>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
+        <h2>Lượt phân tích và xác nhận theo tháng</h2>
+        @if (Model.LuotPhanTichTheoThang.Any()) { <div class="ai-chart-shell"><canvas id="aiAnalysisTimelineChart"></canvas></div> }
+        else { <div class="ai-empty-state app-empty-state">Chưa có dữ liệu phân tích theo tháng.</div> }
+    </article>
+
+    <div class="ai-grid ai-grid-2">
+        <article class="ai-panel-card app-section-card">
+            <h2>Nguyên nhân theo quản lý</h2>
+            @if (Model.NguyenNhanTheoQuanLy.Any())
+            {
+                <div class="ai-table-scroll app-table-scroll">
+                    <table class="table ai-table app-data-table"><thead><tr><th>Quản lý</th><th>Nguyên nhân</th><th>Số lần</th></tr></thead><tbody>
+                    @foreach (var item in Model.NguyenNhanTheoQuanLy) { <tr><td>@item.Nhom</td><td>@item.NguyenNhan</td><td>@item.SoLan</td></tr> }
+                    </tbody></table>
+                </div>
+            }
+            else { <div class="ai-empty-state app-empty-state">Chưa có dữ liệu nguyên nhân theo quản lý.</div> }
+        </article>
+        <article class="ai-panel-card app-section-card">
+            <h2>Nguyên nhân theo team</h2>
+            @if (Model.NguyenNhanTheoTeam.Any())
+            {
+                <div class="ai-table-scroll app-table-scroll">
+                    <table class="table ai-table app-data-table"><thead><tr><th>Team</th><th>Nguyên nhân</th><th>Số lần</th></tr></thead><tbody>
+                    @foreach (var item in Model.NguyenNhanTheoTeam) { <tr><td>@item.Nhom</td><td>@item.NguyenNhan</td><td>@item.SoLan</td></tr> }
+                    </tbody></table>
+                </div>
+            }
+            else { <div class="ai-empty-state app-empty-state">Chưa có dữ liệu nguyên nhân theo team.</div> }
+        </article>
+    </div>
+
+    <article class="ai-panel-card app-section-card">
         <h2>Accuracy các phiên bản model nguyên nhân</h2>
-        @if (Model.LichSuModelNguyenNhan.Any())
-        {
-            <div class="ai-chart-shell">
-                <canvas id="accuracyByVersionDashboardChart"></canvas>
-            </div>
-        }
-        else
-        {
-            <div class="ai-empty-state">Chưa có dữ liệu accuracy theo phiên bản model.</div>
-        }
+        @if (Model.LichSuModelNguyenNhan.Any()) { <div class="ai-chart-shell"><canvas id="accuracyByVersionDashboardChart"></canvas></div> }
+        else { <div class="ai-empty-state app-empty-state">Chưa có dữ liệu accuracy theo phiên bản model.</div> }
     </article>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Feature importance của model active</h2>
-        @if (Model.FeatureImportanceModelActive.Any())
-        {
-            <div class="ai-chart-shell ai-chart-shell-lg">
-                <canvas id="activeFeatureImportanceDashboardChart"></canvas>
-            </div>
-        }
-        else
-        {
-            <div class="ai-empty-state">Model active chưa có dữ liệu feature importance.</div>
-        }
+        @if (Model.FeatureImportanceModelActive.Any()) { <div class="ai-chart-shell ai-chart-shell-lg"><canvas id="activeFeatureImportanceDashboardChart"></canvas></div> }
+        else { <div class="ai-empty-state app-empty-state">Model active chưa có dữ liệu feature importance.</div> }
     </article>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Cảnh báo dự án trễ theo AI</h2>
         @if (!Model.CanhBaoDuAnQuanLy.Any())
         {
-            <div class="ai-empty-state">Không có cảnh báo nào cho dự án đang trễ theo AI_DATASET.</div>
+            <div class="ai-empty-state app-empty-state">Không có cảnh báo nào cho dự án đang trễ theo AI_DATASET.</div>
         }
         else
         {
-            <div class="ai-table-scroll">
-                <table class="table ai-table">
-                    <thead>
-                        <tr>
-                            <th>Dự án</th>
-                            <th>Nguyên nhân gợi ý</th>
-                            <th>Độ tin cậy</th>
-                            <th>Nguồn</th>
-                            <th>Thời gian</th>
-                            <th>Trạng thái dữ liệu</th>
-                        </tr>
-                    </thead>
+            <div class="ai-table-scroll app-table-scroll">
+                <table class="table ai-table app-data-table">
+                    <thead><tr><th>Dự án</th><th>Nguyên nhân gợi ý</th><th>Độ tin cậy</th><th>Nguồn</th><th>Thời gian</th><th>Trạng thái dữ liệu</th></tr></thead>
                     <tbody>
                     @foreach (var item in Model.CanhBaoDuAnQuanLy)
                     {
@@ -161,16 +160,7 @@
                             <td>@item.DoTinCay.ToString("P0")</td>
                             <td>@item.NguonGoiY</td>
                             <td>@(item.ThoiGianDuDoan?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
-                            <td>
-                                @if (item.KetQuaAiCoTheDaCu)
-                                {
-                                    <span class="text-warning">Kết quả AI có thể đã cũ</span>
-                                }
-                                else
-                                {
-                                    <span class="text-success">Đang khớp AI_DATASET mới nhất</span>
-                                }
-                            </td>
+                            <td>@(item.KetQuaAiCoTheDaCu ? "Kết quả AI có thể đã cũ" : "Đang khớp AI_DATASET mới nhất")</td>
                         </tr>
                     }
                     </tbody>
@@ -185,63 +175,44 @@
     <script src="~/js/ai/charts.js" asp-append-version="true"></script>
     <script>
         (function () {
-            if (window.__aiDashboardInitialized__) {
-                return;
-            }
+            if (window.__aiDashboardInitialized__) return;
             window.__aiDashboardInitialized__ = true;
 
             const renderChart = (canvasId, config) => {
-                if (!window.AiChartHelper) {
-                    return;
-                }
+                if (!window.AiChartHelper) return;
                 window.AiChartHelper.render(canvasId, config);
             };
 
             const reasonLabels = @Html.Raw(JsonSerializer.Serialize(reasonLabels));
             const reasonValues = @Html.Raw(JsonSerializer.Serialize(reasonValues));
+            const timelineLabels = @Html.Raw(JsonSerializer.Serialize(timelineLabels));
+            const timelineAnalysis = @Html.Raw(JsonSerializer.Serialize(timelineAnalysis));
+            const timelineConfirm = @Html.Raw(JsonSerializer.Serialize(timelineConfirm));
+
             if (reasonLabels.length > 0) {
-                renderChart('reasonDistributionDashboardChart', {
-                    type: 'pie',
-                    data: {
-                        labels: reasonLabels,
-                        datasets: [{ data: reasonValues, backgroundColor: ['#2f7fd2', '#3aa675', '#7a8df5', '#f2b84a', '#7bc4c9', '#91c27d'] }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
+                renderChart('reasonDistributionDashboardChart', { type: 'pie', data: { labels: reasonLabels, datasets: [{ data: reasonValues, backgroundColor: ['#2f7fd2', '#3aa675', '#7a8df5', '#f2b84a', '#7bc4c9', '#91c27d'] }] }, options: { responsive: true, maintainAspectRatio: false } });
             }
 
-            renderChart('datasetTrainStateChart', {
-                type: 'bar',
-                data: {
-                    labels: ['Đủ điều kiện train', 'Chưa đủ điều kiện train'],
-                    datasets: [{
-                        label: 'Số dòng',
-                        data: [@Model.TongDongDatasetHopLeTrain, Math.max(@Model.TongDongDataset - @Model.TongDongDatasetHopLeTrain, 0)],
-                        backgroundColor: ['#3aa675', '#c7d6eb']
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            renderChart('datasetTrainStateChart', { type: 'bar', data: { labels: ['Đủ điều kiện train', 'Chưa đủ điều kiện train'], datasets: [{ label: 'Số dòng', data: [@Model.TongDongDatasetHopLeTrain, Math.max(@Model.TongDongDataset - @Model.TongDongDatasetHopLeTrain, 0)], backgroundColor: ['#3aa675', '#c7d6eb'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+
+            if (timelineLabels.length > 0) {
+                renderChart('aiAnalysisTimelineChart', { type: 'line', data: { labels: timelineLabels, datasets: [
+                    { label: 'Lượt phân tích', data: timelineAnalysis, borderColor: '#2f7fd2', backgroundColor: '#2f7fd2', tension: 0.25 },
+                    { label: 'Lượt xác nhận', data: timelineConfirm, borderColor: '#3aa675', backgroundColor: '#3aa675', tension: 0.25 }
+                ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+            }
 
             const modelLabels = @Html.Raw(JsonSerializer.Serialize(modelLabels));
             const modelAccuracy = @Html.Raw(JsonSerializer.Serialize(modelAccuracy));
             if (modelLabels.length > 0) {
-                renderChart('accuracyByVersionDashboardChart', {
-                    type: 'line',
-                    data: { labels: modelLabels, datasets: [{ label: 'Accuracy (%)', data: modelAccuracy, borderColor: '#2f7fd2', backgroundColor: '#2f7fd2' }] },
-                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
-                });
+                renderChart('accuracyByVersionDashboardChart', { type: 'line', data: { labels: modelLabels, datasets: [{ label: 'Accuracy (%)', data: modelAccuracy, borderColor: '#2f7fd2', backgroundColor: '#2f7fd2' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } } });
             }
 
             const featureImportance = @Html.Raw(JsonSerializer.Serialize(Model.FeatureImportanceModelActive));
             const fiLabels = Object.keys(featureImportance || {});
             if (fiLabels.length > 0) {
                 const fiValues = fiLabels.map(x => featureImportance[x]);
-                renderChart('activeFeatureImportanceDashboardChart', {
-                    type: 'bar',
-                    data: { labels: fiLabels.map(x => window.AiChartHelper?.mapFeatureLabel?.(x) ?? x), datasets: [{ label: 'Mức ảnh hưởng', data: fiValues, backgroundColor: '#7a8df5' }] },
-                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-                });
+                renderChart('activeFeatureImportanceDashboardChart', { type: 'bar', data: { labels: fiLabels.map(x => window.AiChartHelper?.mapFeatureLabel?.(x) ?? x), datasets: [{ label: 'Mức ảnh hưởng', data: fiValues, backgroundColor: '#7a8df5' }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false } });
             }
         })();
     </script>

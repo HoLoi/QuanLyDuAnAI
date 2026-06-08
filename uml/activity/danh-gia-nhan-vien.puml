@@ -1,0 +1,66 @@
+@startuml
+' title Đánh giá nhân viên trong dự án
+
+start
+partition "Manager/Leader" {
+  :Mở màn hình đánh giá nhân viên;
+  :Chọn dự án và nhân viên trong phạm vi phụ trách;
+  :Nhập điểm và nhận xét theo tiêu chí;
+  :Lưu hoặc gửi duyệt;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.DanhGiaNhanVien.Xem/DanhGia/Sua;
+  :Kiểm tra phạm vi dự án, nhân viên và vai trò;
+  :Không cho sửa đánh giá đã Chờ duyệt hoặc Đã duyệt;
+  :Validate điểm, nhận xét và dữ liệu form;
+  if (Hợp lệ?) then (Có)
+    :Tính tổng điểm đánh giá nhân viên;
+  else (Không)
+    :Trả lỗi validation;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Thêm hoặc cập nhật DANH_GIA_NHAN_VIEN;
+  :Ghi CT_DANH_GIA_NHAN_VIEN theo tiêu chí;
+  if (Gửi duyệt?) then (Có)
+    :Cập nhật TrangThaiDanhGiaNV = Chờ duyệt;
+  else (Lưu nháp)
+    :Giữ trạng thái Nhập hoặc Từ chối để chỉnh sửa;
+  endif
+}
+
+partition "Quản lý dự án" {
+  :Mở danh sách đánh giá nhân viên chờ duyệt;
+  :Duyệt hoặc từ chối;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra Permissions.DanhGiaNhanVien.Duyet;
+  :Kiểm tra người duyệt là quản lý dự án đúng phạm vi;
+  :Chỉ xử lý đánh giá đang Chờ duyệt;
+  if (Từ chối mà thiếu lý do?) then (Có)
+    :Trả lỗi bắt buộc lý do;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Duyệt?) then (Có)
+    :Cập nhật DANH_GIA_NHAN_VIEN = Đã duyệt;
+    :Lưu người duyệt và ngày duyệt;
+  else (Từ chối)
+    :Cập nhật DANH_GIA_NHAN_VIEN = Từ chối;
+    :Lưu lý do từ chối;
+  endif
+}
+
+partition "Hệ thống MVC" {
+  :Trả kết quả về danh sách/chi tiết đánh giá;
+}
+
+stop
+@enduml

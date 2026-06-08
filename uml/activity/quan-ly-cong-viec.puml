@@ -1,0 +1,59 @@
+@startuml
+' title Quản lý công việc, chi tiết công việc và phân công
+
+start
+partition "Quản lý dự án" {
+  :Mở danh sách công việc hoặc chi tiết công việc;
+  :Tạo/sửa/xóa chi tiết công việc hoặc xác nhận công việc;
+}
+
+partition "Leader" {
+  :Có thể cập nhật chi tiết công việc trong phạm vi dự án được phân vai Leader;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.CongViec.Xem hoặc Permissions.ChiTietCongViec.*;
+  :Kiểm tra phạm vi dự án, vai trò quản lý/Leader;
+  if (Có quyền và đúng phạm vi?) then (Có)
+    :Validate dữ liệu công việc/chi tiết;
+  else (Không)
+    :Trả lỗi quyền hoặc ngoài phạm vi;
+    stop
+  endif
+
+  if (Công việc/dự án đang khóa?) then (Có)
+    :Từ chối cập nhật khi đã hoàn thành, tạm dừng, đã hủy hoặc lưu trữ;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Thêm chi tiết?) then (Có)
+    :Thêm CT_CONG_VIEC;
+  elseif (Sửa chi tiết?) then (Có)
+    :Cập nhật CT_CONG_VIEC;
+    :Cập nhật NgayKetThucCTCV nếu trạng thái hoàn thành;
+  elseif (Xóa chi tiết?) then (Có)
+    :Xóa CT_CONG_VIEC;
+  elseif (Xác nhận công việc hoàn thành?) then (Có)
+    :Chỉ nhận CONG_VIEC đang Chờ xác nhận hoàn thành;
+    :Cập nhật CONG_VIEC sang Hoàn thành;
+  elseif (Mở lại công việc?) then (Có)
+    :Bắt buộc lý do;
+    :Cập nhật CONG_VIEC sang Đang thực hiện;
+    :Ghi nhật ký;
+  endif
+}
+
+partition "Hệ thống MVC" {
+  if (Có thay đổi chi tiết hoặc công việc?) then (Có)
+    :Gọi ITrangThaiWorkflowService;
+    :Đồng bộ CT_CONG_VIEC -> CONG_VIEC;
+    :Đồng bộ CONG_VIEC -> DU_AN;
+  endif
+  :Trả kết quả về giao diện;
+}
+
+stop
+@enduml

@@ -11,13 +11,13 @@
     <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
 }
 
-<section class="ai-page">
-    <header class="ai-header-card">
+<section class="ai-page app-page">
+    <header class="ai-header-card app-page-header">
         <div>
             <h1 class="ai-title">Huấn luyện model nguyên nhân trễ</h1>
             <p class="ai-subtitle">FastAPI chia train/test trong RAM và chỉ train model loại <code>NguyenNhan</code>.</p>
         </div>
-        <a asp-controller="Ai" asp-action="Models" class="ai-link-btn">Model nguyên nhân</a>
+        <a asp-controller="Ai" asp-action="Models" class="ai-link-btn btn-action btn-subtle">Model nguyên nhân</a>
     </header>
 
     @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
@@ -37,7 +37,7 @@
         </div>
     }
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Chất lượng dữ liệu trước train</h2>
         <dl class="ai-dl">
             <div><dt>Tổng dòng AI_DATASET</dt><dd>@Model.TongDongDataset</dd></div>
@@ -59,13 +59,13 @@
                 <textarea asp-for="TrainNote" class="form-control" rows="3" maxlength="255"></textarea>
             </div>
             <div>
-                <button type="submit" class="ai-primary-btn" disabled="@(!Model.CoTheTrainNguyenNhan)">Huấn luyện model nguyên nhân trễ</button>
+                <button type="submit" class="ai-primary-btn btn-action btn-confirm" disabled="@(!Model.CoTheTrainNguyenNhan)">Huấn luyện model nguyên nhân trễ</button>
             </div>
         </form>
     </article>
 
     <div class="ai-grid ai-grid-2">
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Phân bố nguyên nhân trong dataset</h2>
             @if (Model.PhanBoNguyenNhanDataset.Any())
             {
@@ -75,15 +75,15 @@
             }
             else
             {
-                <div class="ai-empty-state">Chưa có dữ liệu phân bố nguyên nhân.</div>
+                <div class="ai-empty-state app-empty-state">Chưa có dữ liệu phân bố nguyên nhân.</div>
             }
         </article>
 
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Kết quả train gần nhất</h2>
             @if (Model.KetQuaTrain == null)
             {
-                <div class="ai-empty-state">Chưa có metadata train gần nhất để hiển thị.</div>
+                <div class="ai-empty-state app-empty-state">Chưa có metadata train gần nhất để hiển thị.</div>
             }
             else
             {
@@ -97,7 +97,7 @@
                     <div><dt>F1 macro</dt><dd>@(Model.KetQuaTrain.F1Macro.HasValue ? Model.KetQuaTrain.F1Macro.Value.ToString("P2") : "Chưa có dữ liệu")</dd></div>
                 </dl>
                 <div class="ai-warning-soft">Chi tiết confusion matrix, feature importance và cây quyết định được hiển thị tại màn hình Model để tránh trùng lặp.</div>
-                <a asp-controller="Ai" asp-action="Models" class="ai-link-btn mt-2">Xem chi tiết model</a>
+                <a asp-controller="Ai" asp-action="Models" class="ai-link-btn btn-action btn-subtle mt-2">Xem chi tiết model</a>
             }
         </article>
     </div>

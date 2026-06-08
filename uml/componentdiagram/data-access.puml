@@ -1,0 +1,53 @@
+@startuml
+title Component Diagram - Data access và nhóm bảng SQL Server
+
+skinparam componentStyle rectangle
+
+package "ASP.NET MVC Services" {
+  component "Business Services\nDuAn, CongViec, TienDo,\nDeXuat, DanhGia, Chat" as BusinessServices
+  component "Security Services\nAccount, PhanQuyen,\nPermissionHelper" as SecurityServices
+  component "AI Services\nAiService, AiDatasetService" as AiServices
+  component "File Services\nFileDuAn, FileTienDo" as FileServices
+}
+
+package "Data Access" {
+  component "QuanLyDuAnDbContext\nDbSet<T> và Fluent mapping" as DbContext
+  component "Entity Framework Core\nUseSqlServer(DefaultConnection)" as EF
+}
+
+database "SQL Server\nDatabase: QuanLyDuAnAI" as Sql
+
+package "Nhóm bảng trong SQL Server" {
+  component "Nghiệp vụ dự án\nDU_AN, LOAI_DU_AN,\nNGUOI_DUNG, CHUC_DANH" as ProjectTables
+  component "Team / thành viên\nTEAM, TEAM_DU_AN,\nNHAN_VIEN_TEAM,\nNHAN_VIEN_DU_AN" as TeamTables
+  component "Công việc\nCONG_VIEC, CT_CONG_VIEC,\nDANH_MUC_CONG_VIEC,\nPHAN_CONG_*" as WorkTables
+  component "Tiến độ và file\nTIEN_DO_CONG_VIEC,\nFILE_TIEN_DO_CONG_VIEC,\nFILE_DU_AN" as ProgressFileTables
+  component "Đề xuất / ngân sách\nDE_XUAT_CONG_VIEC,\nDE_XUAT_NGAN_SACH,\nNGAN_SACH, CHI_PHI" as BudgetTables
+  component "Đánh giá\nDANH_GIA_DU_AN,\nDANH_GIA_NHAN_VIEN,\nCT_DANH_GIA_*,\nTIEU_CHI_DANH_GIA" as ReviewTables
+  component "Chat\nPHONG_CHAT,\nTHANH_VIEN_PHONG_CHAT,\nTIN_NHAN" as ChatTables
+  component "AI\nAI_DATASET, AI_KET_QUA,\nAI_NGUYEN_NHAN, AI_MODEL,\nDM_NGUYEN_NHAN" as AiTables
+  component "Identity / quyền\nAspNetUsers, AspNetRoles,\nAspNetRoleClaims,\nAspNetUserClaims,\nAspNetUserRoles,\nDANH_MUC_MAN_HINH,\nDANH_MUC_QUYEN" as IdentityTables
+  component "Nhật ký\nNHAT_KY_*" as LogTables
+}
+
+artifact "wwwroot/uploads\nfile vật lý" as Uploads
+
+BusinessServices --> DbContext : truy vấn và SaveChanges
+SecurityServices --> DbContext : user, role, claim, permission
+AiServices --> DbContext : MVC ghi dữ liệu AI
+FileServices --> DbContext : metadata file
+FileServices --> Uploads : file vật lý
+
+DbContext --> EF : ORM
+EF --> Sql : SQL query/command
+Sql --> ProjectTables
+Sql --> TeamTables
+Sql --> WorkTables
+Sql --> ProgressFileTables
+Sql --> BudgetTables
+Sql --> ReviewTables
+Sql --> ChatTables
+Sql --> AiTables
+Sql --> IdentityTables
+Sql --> LogTables
+@enduml

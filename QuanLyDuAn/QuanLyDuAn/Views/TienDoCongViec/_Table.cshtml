@@ -81,7 +81,7 @@
                             <td data-label="Tiến độ / Trạng thái" class="col-progress-status">
                                 <div class="td-progress-wrap">
                                     <div class="progress td-progress-track">
-                                        <div class="progress-bar" role="progressbar" style="width: @item.PhanTramHienTai%;"></div>
+                                        <div class="progress-bar td-progress-fill" role="progressbar" style="--progress-width: @item.PhanTramHienTai%;"></div>
                                     </div>
                                     <span class="badge td-progress-badge">@item.PhanTramHienTai%</span>
                                     <span class="badge td-ctcv-badge @GetCtcvBadgeClass(item.TrangThaiCTCVCode)">@item.TrangThaiCTCV</span>

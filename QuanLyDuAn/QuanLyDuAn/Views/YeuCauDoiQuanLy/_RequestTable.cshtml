@@ -30,12 +30,12 @@
 
 @if (Model.DanhSachYeuCau.Count == 0)
 {
-    <div class="yeu-cau-empty-state">Chưa có yêu cầu đổi quản lý nào.</div>
+    <div class="yeu-cau-empty-state app-empty-state">Chưa có yêu cầu đổi quản lý nào.</div>
 }
 else
 {
-    <div class="yeu-cau-table-scroll">
-        <table class="table yeu-cau-table">
+    <div class="yeu-cau-table-scroll app-table-scroll">
+        <table class="table yeu-cau-table app-data-table">
             <thead>
                 <tr>
                     <th>Dự án</th>
@@ -57,7 +57,7 @@ else
                         <td>@item.TenQuanLyDeXuat</td>
                         <td class="text-nowrap">@(item.NgayTaoYeuCauDoiQuanLy?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                         <td>
-                            <span class="yeu-cau-status-badge @GetStatusBadgeClass(item.TrangThaiYeuCauDoiQuanLy)">
+                            <span class="yeu-cau-status-badge status-badge @GetStatusBadgeClass(item.TrangThaiYeuCauDoiQuanLy)">
                                 @TrangThai.ToDisplay(item.TrangThaiYeuCauDoiQuanLy)
                             </span>
                         </td>
@@ -69,7 +69,7 @@ else
                                     <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
                                     <input type="hidden" name="trangThai" value="@Model.TrangThai" />
                                     <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
-                                    <button type="submit" class="yeu-cau-action-btn yeu-cau-action-danger" onclick="return confirm('Bạn có chắc muốn hủy yêu cầu này?');">Hủy yêu cầu</button>
+                                    <button type="submit" class="yeu-cau-action-btn yeu-cau-action-danger btn-action btn-danger-soft" onclick="return confirm('Bạn có chắc muốn hủy yêu cầu này?');">Hủy yêu cầu</button>
                                 </form>
                             }
                             else

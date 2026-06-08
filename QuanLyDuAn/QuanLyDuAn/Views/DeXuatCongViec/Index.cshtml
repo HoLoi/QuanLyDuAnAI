@@ -24,16 +24,17 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/shared/proposal.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/DeXuatCongViec/index.css" asp-append-version="true" />
 }
 
-<div class="de-xuat-cong-viec-page">
-    <section class="dxcv-header-card">
+<div class="de-xuat-cong-viec-page app-page proposal-page">
+    <section class="dxcv-header-card app-page-header proposal-header-card">
         <div>
-            <h1 class="dxcv-title">Đề xuất công việc</h1>
-            <p class="dxcv-subtitle">Tạo và theo dõi các đề xuất công việc trong phạm vi dự án</p>
+            <h1 class="dxcv-title app-page-title">Đề xuất công việc</h1>
+            <p class="dxcv-subtitle app-page-subtitle">Tạo và theo dõi các đề xuất công việc trong phạm vi dự án</p>
         </div>
-        <a asp-controller="DuAn" asp-action="Index" class="dxcv-action-btn dxcv-action-neutral">
+        <a asp-controller="DuAn" asp-action="Index" class="dxcv-action-btn dxcv-action-neutral btn-action btn-subtle proposal-action-btn">
             <i class="bi bi-arrow-left"></i>
             Quay lại dự án
         </a>
@@ -44,35 +45,35 @@
         <div asp-validation-summary="All" class="dxcv-validation-summary text-danger"></div>
     }
 
-    <section class="dxcv-summary-grid">
-        <article class="dxcv-summary-card">
-            <span class="dxcv-summary-icon"><i class="bi bi-kanban"></i></span>
-            <span class="dxcv-summary-label">Dự án</span>
-            <strong class="dxcv-summary-value">@Model.TenDuAn</strong>
-            <p class="dxcv-summary-note">Mã dự án: #@Model.MaDuAn</p>
+    <section class="dxcv-summary-grid proposal-summary-grid">
+        <article class="dxcv-summary-card proposal-summary-card">
+            <span class="dxcv-summary-icon proposal-summary-icon"><i class="bi bi-kanban"></i></span>
+            <span class="dxcv-summary-label proposal-summary-label">Dự án</span>
+            <strong class="dxcv-summary-value proposal-summary-value">@Model.TenDuAn</strong>
+            <p class="dxcv-summary-note proposal-summary-note">Mã dự án: #@Model.MaDuAn</p>
         </article>
 
-        <article class="dxcv-summary-card">
-            <span class="dxcv-summary-icon"><i class="bi bi-wallet2"></i></span>
-            <span class="dxcv-summary-label">Ngân sách hiện tại</span>
-            <strong class="dxcv-summary-value">
+        <article class="dxcv-summary-card proposal-summary-card">
+            <span class="dxcv-summary-icon proposal-summary-icon"><i class="bi bi-wallet2"></i></span>
+            <span class="dxcv-summary-label proposal-summary-label">Ngân sách hiện tại</span>
+            <strong class="dxcv-summary-value proposal-summary-value">
                 @(Model.NganSachDuAn.HasValue ? $"{Model.NganSachDuAn.Value:N0} VNĐ" : "Chưa có ngân sách duyệt")
             </strong>
-            <p class="dxcv-summary-note">Nguồn kiểm soát chi phí đề xuất</p>
+            <p class="dxcv-summary-note proposal-summary-note">Nguồn kiểm soát chi phí đề xuất</p>
         </article>
 
-        <article class="dxcv-summary-card">
-            <span class="dxcv-summary-icon"><i class="bi bi-cash-stack"></i></span>
-            <span class="dxcv-summary-label">Đã sử dụng</span>
-            <strong class="dxcv-summary-value">@Model.TongChiPhiDaDung.ToString("N0") VNĐ</strong>
-            <p class="dxcv-summary-note">Tổng chi phí thực tế của dự án</p>
+        <article class="dxcv-summary-card proposal-summary-card">
+            <span class="dxcv-summary-icon proposal-summary-icon"><i class="bi bi-cash-stack"></i></span>
+            <span class="dxcv-summary-label proposal-summary-label">Đã sử dụng</span>
+            <strong class="dxcv-summary-value proposal-summary-value">@Model.TongChiPhiDaDung.ToString("N0") VNĐ</strong>
+            <p class="dxcv-summary-note proposal-summary-note">Tổng chi phí thực tế của dự án</p>
         </article>
 
-        <article class="dxcv-summary-card">
-            <span class="dxcv-summary-icon"><i class="bi bi-pie-chart"></i></span>
-            <span class="dxcv-summary-label">Ngân sách còn lại</span>
-            <strong class="dxcv-summary-value">@nganSachConLai.ToString("N0") VNĐ</strong>
-            <p class="dxcv-summary-note">Giá trị tham chiếu khi tạo đề xuất mới</p>
+        <article class="dxcv-summary-card proposal-summary-card">
+            <span class="dxcv-summary-icon proposal-summary-icon"><i class="bi bi-pie-chart"></i></span>
+            <span class="dxcv-summary-label proposal-summary-label">Ngân sách còn lại</span>
+            <strong class="dxcv-summary-value proposal-summary-value">@nganSachConLai.ToString("N0") VNĐ</strong>
+            <p class="dxcv-summary-note proposal-summary-note">Giá trị tham chiếu khi tạo đề xuất mới</p>
         </article>
     </section>
 
@@ -84,7 +85,7 @@
                 <h2>Dự án chưa có ngân sách được duyệt</h2>
                 <p>Hãy tạo đề xuất ngân sách trước để đảm bảo đề xuất công việc bám đúng dòng tiền của dự án.</p>
             </div>
-            <a asp-action="DieuHuong" asp-route-maDuAn="@Model.MaDuAn" class="dxcv-action-btn dxcv-action-primary">
+            <a asp-action="DieuHuong" asp-route-maDuAn="@Model.MaDuAn" class="dxcv-action-btn dxcv-action-primary btn-action btn-confirm proposal-action-btn">
                 <i class="bi bi-arrow-right-circle"></i>
                 Mở điều hướng ngân sách
             </a>
@@ -93,7 +94,7 @@
 
     @if (canShowForm)
     {
-        <section class="dxcv-section-card">
+        <section class="dxcv-section-card app-section-card proposal-section-card">
             <div class="dxcv-section-heading">
                 <h2>Tạo đề xuất mới</h2>
                 <p>Điền thông tin công việc cần bổ sung trong phạm vi dự án hiện tại.</p>
@@ -102,7 +103,7 @@
         </section>
     }
 
-    <section class="dxcv-section-card">
+    <section class="dxcv-section-card app-section-card proposal-section-card">
         <div class="dxcv-section-heading">
             <h2>Bộ lọc danh sách</h2>
             <p>Lọc nhanh theo dự án và trạng thái xử lý đề xuất.</p>
@@ -110,7 +111,7 @@
         <partial name="_Filter" model="Model" />
     </section>
 
-    <section class="dxcv-section-card">
+    <section class="dxcv-section-card app-section-card proposal-section-card">
         <div class="dxcv-section-heading">
             <h2>Danh sách đề xuất công việc</h2>
             <p>Theo dõi trạng thái chờ duyệt, đã duyệt, từ chối hoặc đã hủy.</p>

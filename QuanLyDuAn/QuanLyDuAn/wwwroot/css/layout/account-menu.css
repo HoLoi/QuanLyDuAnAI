@@ -1,0 +1,125 @@
+.tai-khoan-dropdown {
+    position: relative;
+}
+
+.tai-khoan-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 2.35rem;
+    border: 1px solid #d8e3f2;
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem 0.2rem 0.25rem;
+    background: #ffffff;
+    color: #3f5879;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.tai-khoan-toggle:hover,
+.tai-khoan-toggle:focus-visible {
+    border-color: #bfd1e9;
+    box-shadow: 0 10px 22px rgba(56, 83, 118, 0.12);
+    background: #fdfefe;
+}
+
+.tai-khoan-toggle i {
+    color: #6e86a5;
+    font-size: 0.82rem;
+    transition: transform 0.2s ease;
+}
+
+.tai-khoan-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #5f73f5, #04b5df);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.tai-khoan-name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tai-khoan-menu {
+    position: absolute;
+    top: calc(100% + 0.48rem);
+    right: 0;
+    z-index: 1200;
+    min-width: 230px;
+    padding: 0.42rem;
+    border: 1px solid #dae4f3;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 20px 36px rgba(43, 66, 99, 0.16);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.tai-khoan-dropdown.open .tai-khoan-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.tai-khoan-dropdown.open .tai-khoan-toggle i {
+    transform: rotate(180deg);
+}
+
+.tai-khoan-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 0;
+    border-radius: 10px;
+    padding: 0.62rem 0.75rem;
+    background: transparent;
+    color: #355174;
+    font-size: 0.87rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.tai-khoan-menu-item:hover,
+.tai-khoan-menu-item:focus-visible {
+    background: #edf4ff;
+    color: #2f4d73;
+}
+
+.tai-khoan-menu-item.danger {
+    color: #b13c45;
+}
+
+.tai-khoan-menu-item.danger:hover,
+.tai-khoan-menu-item.danger:focus-visible {
+    background: #fff3f3;
+    color: #9f2d36;
+}
+
+.tai-khoan-menu-divider {
+    margin: 0.32rem 0;
+    border-top: 1px solid #e6edf7;
+}
+
+.tai-khoan-menu-form {
+    margin: 0;
+}
+
+@media (max-width: 991.98px) {
+    .tai-khoan-name {
+        max-width: 120px;
+    }
+}

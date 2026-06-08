@@ -1,0 +1,55 @@
+@startuml
+' title AI phân tích nguyên nhân trễ dự án
+
+start
+partition "Quản lý dự án" {
+  :Mở màn hình AI phân tích nguyên nhân trễ;
+  :Chọn dự án cần phân tích;
+  :Gửi yêu cầu phân tích;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.AI.PhanTichNguyenNhan;
+  :Kiểm tra phạm vi dự án được truy cập;
+  :Tổng hợp dữ liệu nghiệp vụ từ MVC/SQL;
+  :Xác định dự án có trễ hay không bằng rule MVC;
+  if (Dự án bị trễ?) then (Có)
+    :Chuẩn bị 22 feature và danh mục nguyên nhân;
+    :Không gửi LaDuAnTre lên FastAPI analyze;
+  else (Không)
+    :Không gọi FastAPI;
+    :Trả thông báo dự án không trễ;
+    stop
+  endif
+}
+
+partition "FastAPI AI" {
+  :Nhận POST /analyze/delay-reason;
+  :Validate schema strict;
+  :Tính toán nguyên nhân trễ và độ tin cậy;
+  if (Model lỗi hoặc confidence thấp?) then (Có)
+    :Trả kết quả fallback/rule;
+  else (Không)
+    :Trả nguyên nhân AI đề xuất;
+  endif
+  :Không ghi DB nghiệp vụ;
+}
+
+partition "Hệ thống MVC" {
+  :Nhận kết quả phân tích;
+  :Chuẩn hóa/mapping nguyên nhân theo danh mục;
+  :Chuẩn bị nội dung phân tích và nguyên nhân liên quan;
+}
+
+partition "Cơ sở dữ liệu" {
+  :Lưu gợi ý phân tích vào AI_KET_QUA;
+  :Không ghi AI_NGUYEN_NHAN ở bước này;
+}
+
+partition "Hệ thống MVC" {
+  :Trả kết quả phân tích về giao diện;
+}
+
+stop
+@enduml

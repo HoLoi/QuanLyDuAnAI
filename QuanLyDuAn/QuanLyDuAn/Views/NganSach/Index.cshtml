@@ -16,48 +16,48 @@
     <link rel="stylesheet" href="~/css/shared/export-dropdown.css" asp-append-version="true" />
 }
 
-<section class="ngan-sach-page">
-    <header class="ngan-sach-header-card">
+<section class="ngan-sach-page app-page">
+    <header class="ngan-sach-header-card app-page-header">
         <div class="ngan-sach-header-content">
-            <h1 class="ngan-sach-title">Ngân sách</h1>
-            <p class="ngan-sach-subtitle">Theo dõi ngân sách được duyệt, phiên bản ngân sách và tình hình sử dụng theo dự án.</p>
+            <h1 class="ngan-sach-title app-page-title">Ngân sách</h1>
+            <p class="ngan-sach-subtitle app-page-subtitle">Theo dõi ngân sách được duyệt, phiên bản ngân sách và tình hình sử dụng theo dự án.</p>
             <p class="ngan-sach-readonly-note">Màn hình chỉ phục vụ xem/theo dõi. Mọi thay đổi ngân sách thực hiện qua luồng Đề xuất và Duyệt đề xuất ngân sách.</p>
         </div>
         @if (canApprove)
         {
             <a asp-controller="DuyetDeXuatNganSach"
                asp-action="Index"
-               class="ngan-sach-header-action">Duyệt đề xuất ngân sách</a>
+               class="ngan-sach-header-action btn-action btn-confirm">Duyệt đề xuất ngân sách</a>
         }
     </header>
 
     @if (Model.DanhSach.Count > 0)
     {
         <section class="ngan-sach-stats-grid">
-            <article class="ngan-sach-stat-card">
+            <article class="ngan-sach-stat-card app-section-card">
                 <span class="ngan-sach-stat-label">Tổng ngân sách</span>
                 <strong class="ngan-sach-stat-value">@($"{Model.TongNganSach:N0} VNĐ")</strong>
             </article>
-            <article class="ngan-sach-stat-card">
+            <article class="ngan-sach-stat-card app-section-card">
                 <span class="ngan-sach-stat-label">Ngân sách đang hiệu lực</span>
                 <strong class="ngan-sach-stat-value">@($"{Model.TongNganSachDangHieuLuc:N0} VNĐ")</strong>
             </article>
-            <article class="ngan-sach-stat-card">
+            <article class="ngan-sach-stat-card app-section-card">
                 <span class="ngan-sach-stat-label">Đã sử dụng</span>
                 <strong class="ngan-sach-stat-value">@($"{Model.TongDaSuDung:N0} VNĐ")</strong>
             </article>
-            <article class="ngan-sach-stat-card">
+            <article class="ngan-sach-stat-card app-section-card">
                 <span class="ngan-sach-stat-label">Còn lại</span>
                 <strong class="ngan-sach-stat-value">@($"{Model.TongConLai:N0} VNĐ")</strong>
             </article>
         </section>
     }
 
-    <section class="ngan-sach-section-card">
+    <section class="ngan-sach-section-card app-section-card">
         <partial name="_Filter" model="Model" />
     </section>
 
-    <section class="ngan-sach-section-card">
+    <section class="ngan-sach-section-card app-section-card">
         <div class="table-card-header ngan-sach-list-header">
             <div class="table-card-header-content">
                 <h2 class="ngan-sach-section-title">Danh sách ngân sách</h2>

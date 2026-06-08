@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using QuanLyDuAn.Constants;
+using QuanLyDuAn.Helpers;
+using QuanLyDuAn.Services.Exporting;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.Ai;
 
@@ -15,12 +17,18 @@ namespace QuanLyDuAn.Controllers
     {
         private readonly IAiService _aiService;
         private readonly IPermissionHelper _permission;
+        private readonly IExportFileService _exportFileService;
         private readonly ILogger<AiController> _logger;
 
-        public AiController(IAiService aiService, IPermissionHelper permission, ILogger<AiController> logger)
+        public AiController(
+            IAiService aiService,
+            IPermissionHelper permission,
+            IExportFileService exportFileService,
+            ILogger<AiController> logger)
         {
             _aiService = aiService;
             _permission = permission;
+            _exportFileService = exportFileService;
             _logger = logger;
         }
 
@@ -34,6 +42,36 @@ namespace QuanLyDuAn.Controllers
 
             var vm = await _aiService.LayDashboardAsync(cancellationToken);
             return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> XuatFile(string? format, CancellationToken cancellationToken)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.AI.Dashboard)
+                || !await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            {
+                return Forbid();
+            }
+
+            var vm = await _aiService.LayDashboardAsync(cancellationToken);
+            var rows = BuildDashboardExportRows(vm);
+            var request = new ExportFileRequest
+            {
+                ReportTitle = "Báo cáo tổng quan AI",
+                ExportedBy = User?.Identity?.Name,
+                AppliedFiltersText = "Dữ liệu theo phạm vi quyền xem hiện tại.",
+                Format = ParseExportFormat(format),
+                FileNamePrefix = "bao-cao-ai-dashboard",
+                Rows = rows,
+                Columns =
+                [
+                    new ExportColumnDefinition { Header = "Nhóm", ValueSelector = x => ((AiDashboardExportRow)x).Nhom },
+                    new ExportColumnDefinition { Header = "Chỉ tiêu", ValueSelector = x => ((AiDashboardExportRow)x).ChiTieu },
+                    new ExportColumnDefinition { Header = "Giá trị", ValueSelector = x => ((AiDashboardExportRow)x).GiaTri }
+                ]
+            };
+            var exported = _exportFileService.Export(request);
+            return File(exported.Content, exported.ContentType, exported.FileName);
         }
 
         [HttpGet]
@@ -373,5 +411,39 @@ namespace QuanLyDuAn.Controllers
                 })
                 .ToList();
         }
+
+        private static List<object> BuildDashboardExportRows(AiDashboardPageViewModel vm)
+        {
+            var rows = new List<object>
+            {
+                new AiDashboardExportRow("Tổng quan", "Tổng lượt phân tích AI", vm.TongLanPhanTichTrongDb.ToString("N0")),
+                new AiDashboardExportRow("Tổng quan", "Tổng xác nhận nguyên nhân", vm.TongXacNhanNguyenNhanTrongDb.ToString("N0")),
+                new AiDashboardExportRow("Tổng quan", "Tỷ lệ xác nhận AI", $"{vm.TyLeXacNhanAi:0.##}%"),
+                new AiDashboardExportRow("Dataset", "Tổng dòng dataset", vm.TongDongDataset.ToString("N0")),
+                new AiDashboardExportRow("Dataset", "Dòng đủ điều kiện train", vm.TongDongDatasetHopLeTrain.ToString("N0")),
+                new AiDashboardExportRow("Dataset", "Dự án trễ chưa xác nhận", vm.SoDuAnTreChuaXacNhan.ToString("N0"))
+            };
+
+            rows.AddRange(vm.NguyenNhanPhoBien.Select(x =>
+                (object)new AiDashboardExportRow("Nguyên nhân phổ biến", x.NguyenNhan, $"{x.TyLePhanTram}%")));
+            rows.AddRange(vm.NguyenNhanTheoQuanLy.Select(x =>
+                (object)new AiDashboardExportRow("Nguyên nhân theo quản lý", $"{x.Nhom} - {x.NguyenNhan}", x.SoLan.ToString("N0"))));
+            rows.AddRange(vm.NguyenNhanTheoTeam.Select(x =>
+                (object)new AiDashboardExportRow("Nguyên nhân theo team", $"{x.Nhom} - {x.NguyenNhan}", x.SoLan.ToString("N0"))));
+
+            return rows;
+        }
+
+        private static ExportFileFormat ParseExportFormat(string? format)
+        {
+            return format?.Trim().ToLowerInvariant() switch
+            {
+                "pdf" => ExportFileFormat.Pdf,
+                "csv" => ExportFileFormat.Csv,
+                _ => ExportFileFormat.Excel
+            };
+        }
+
+        private sealed record AiDashboardExportRow(string Nhom, string ChiTieu, string GiaTri);
     }
 }

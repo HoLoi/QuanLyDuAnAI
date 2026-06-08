@@ -1,0 +1,69 @@
+@startuml
+' title Cập nhật, duyệt và đồng bộ báo cáo tiến độ công việc
+
+start
+partition "Nhân viên" {
+  :Mở màn hình tiến độ công việc;
+  :Chọn chi tiết công việc được phân công;
+  :Nhập phần trăm, trạng thái đề xuất, ghi chú và file minh chứng;
+  :Gửi báo cáo tiến độ;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.TienDo.CapNhat;
+  :Kiểm tra nhân viên thuộc phạm vi công việc;
+  :Validate dữ liệu và file minh chứng;
+  if (Hợp lệ và chưa có báo cáo chờ duyệt?) then (Có)
+    :Không cập nhật trạng thái thật của chi tiết công việc;
+  else (Không)
+    :Trả lỗi validation/phạm vi/trạng thái;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Thêm TIEN_DO_CONG_VIEC;
+  :Gán TrangThaiTienDo = Chờ duyệt;
+  :Lưu FILE_TIEN_DO_CONG_VIEC nếu có;
+}
+
+partition "Quản lý dự án / Leader" {
+  :Mở danh sách báo cáo chờ duyệt;
+  :Chọn duyệt, từ chối hoặc yêu cầu bổ sung;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra Permissions.TienDo.Duyet;
+  :Kiểm tra phạm vi quản lý dự án hoặc Leader;
+  :Validate ghi chú duyệt;
+  if (Từ chối hoặc yêu cầu bổ sung mà thiếu lý do?) then (Có)
+    :Trả lỗi yêu cầu nhập ghi chú;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Duyệt báo cáo?) then (Có)
+    :Cập nhật TIEN_DO_CONG_VIEC = Đã duyệt;
+    :Áp dụng TrangThaiCTCVDeXuat vào CT_CONG_VIEC;
+    :Cập nhật NgayKetThucCTCV nếu hoàn thành;
+  elseif (Yêu cầu bổ sung?) then (Có)
+    :Cập nhật TIEN_DO_CONG_VIEC = Yêu cầu bổ sung;
+    :Không đổi CT_CONG_VIEC;
+  else (Từ chối)
+    :Cập nhật TIEN_DO_CONG_VIEC = Từ chối;
+    :Không đổi CT_CONG_VIEC;
+  endif
+}
+
+partition "Hệ thống MVC" {
+  if (Báo cáo được duyệt?) then (Có)
+    :Đồng bộ CT_CONG_VIEC -> CONG_VIEC;
+    :Đồng bộ CONG_VIEC -> DU_AN;
+  endif
+  :Trả kết quả về màn hình tiến độ;
+}
+
+stop
+@enduml

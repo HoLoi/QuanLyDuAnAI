@@ -1,0 +1,89 @@
+@startuml
+title Component Diagram - Module đánh giá, chat và dashboard
+
+skinparam componentStyle rectangle
+
+actor "Quản trị viên" as Admin
+actor "Quản lý dự án" as Manager
+actor "Leader / Nhân viên" as Member
+
+package "Views" {
+  component "Dashboard View" as DashboardView
+  component "DanhGiaDuAn Views" as ProjectReviewViews
+  component "DanhGiaNhanVien Views" as EmployeeReviewViews
+  component "ChatDuAn Views\nRoomList, MessageList,\nMessageForm" as ChatViews
+}
+
+package "Controllers" {
+  component "DashboardController" as DashboardController
+  component "DanhGiaDuAnController" as ProjectReviewController
+  component "DanhGiaNhanVienController" as EmployeeReviewController
+  component "ChatDuAnController" as ChatController
+}
+
+package "Services" {
+  component "IDashboardService\nDashboardService" as DashboardService
+  component "IDanhGiaDuAnService\nDanhGiaDuAnService" as ProjectReviewService
+  component "IDanhGiaNhanVienService\nDanhGiaNhanVienService" as EmployeeReviewService
+  component "IChatDuAnService\nChatDuAnService" as ChatService
+  component "IAiService\nAiService" as AiService
+  component "IAiDatasetService\nAiDatasetService" as AiDatasetService
+  component "IPermissionHelper" as PermissionHelper
+  component "IExportFileService" as ExportService
+}
+
+package "Data" {
+  component "QuanLyDuAnDbContext" as DbContext
+  database "SQL Server" as Sql
+  component "DANH_GIA_DU_AN,\nCT_DANH_GIA_DU_AN" as ProjectReviewTables
+  component "DANH_GIA_NHAN_VIEN,\nCT_DANH_GIA_NHAN_VIEN" as EmployeeReviewTables
+  component "TIEU_CHI_DANH_GIA" as CriteriaTable
+  component "PHONG_CHAT,\nTHANH_VIEN_PHONG_CHAT,\nTIN_NHAN" as ChatTables
+  component "DU_AN, CONG_VIEC,\nTIEN_DO_CONG_VIEC,\nDE_XUAT_*" as DashboardTables
+  component "AI_KET_QUA,\nAI_NGUYEN_NHAN" as AiTables
+}
+
+Admin --> DashboardView
+Manager --> ProjectReviewViews
+Member --> EmployeeReviewViews
+Member --> ChatViews
+
+DashboardView --> DashboardController
+ProjectReviewViews --> ProjectReviewController
+EmployeeReviewViews --> EmployeeReviewController
+ChatViews --> ChatController
+
+DashboardController --> PermissionHelper : Permissions.ThongKe.*
+DashboardController --> DashboardService
+DashboardController --> AiService : lấy số liệu AI tổng quan
+DashboardController --> ExportService
+
+ProjectReviewController --> PermissionHelper : Permissions.DanhGiaDuAn.*
+ProjectReviewController --> ProjectReviewService
+EmployeeReviewController --> PermissionHelper : Permissions.DanhGiaNhanVien.*
+EmployeeReviewController --> EmployeeReviewService
+ChatController --> PermissionHelper : Permissions.Chat.*
+ChatController --> ChatService
+
+ProjectReviewService --> AiService : phân tích/xác nhận nguyên nhân trễ
+ProjectReviewService --> AiDatasetService : dữ liệu AI liên quan
+ProjectReviewService --> DbContext
+EmployeeReviewService --> DbContext
+DashboardService --> DbContext
+ChatService --> DbContext
+AiService --> DbContext
+AiDatasetService --> DbContext
+
+DbContext --> ProjectReviewTables
+DbContext --> EmployeeReviewTables
+DbContext --> CriteriaTable
+DbContext --> ChatTables
+DbContext --> DashboardTables
+DbContext --> AiTables
+ProjectReviewTables --> Sql
+EmployeeReviewTables --> Sql
+CriteriaTable --> Sql
+ChatTables --> Sql
+DashboardTables --> Sql
+AiTables --> Sql
+@enduml

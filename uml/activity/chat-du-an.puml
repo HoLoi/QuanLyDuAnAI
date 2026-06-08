@@ -1,0 +1,55 @@
+@startuml
+' title Chat dự án
+
+start
+partition "Người dùng" {
+  :Mở màn hình chat dự án;
+  :Chọn phòng chat theo dự án được tham gia;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.Chat.Xem;
+  :Lọc phòng chat theo dự án người dùng tham gia;
+  :Đảm bảo phòng chat dự án tồn tại;
+  :Đồng bộ thành viên phòng chat từ thành viên dự án;
+}
+
+partition "Cơ sở dữ liệu" {
+  :Đọc PHONG_CHAT, THANH_VIEN_PHONG_CHAT, TIN_NHAN;
+  :Thêm phòng hoặc thành viên phòng nếu thiếu;
+}
+
+partition "Hệ thống MVC" {
+  :Trả danh sách phòng và tin nhắn về giao diện;
+}
+
+partition "Người dùng" {
+  :Nhập nội dung tin nhắn;
+  :Gửi tin nhắn;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra Permissions.Chat.Gui;
+  :Kiểm tra người gửi thuộc phòng chat;
+  :Validate nội dung tin nhắn;
+  :Không cho gửi nếu dự án đã hủy hoặc lưu trữ;
+  if (Hợp lệ?) then (Có)
+    :Ghi tin nhắn;
+  else (Không)
+    :Trả lỗi về giao diện chat;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Thêm TIN_NHAN;
+  :Lưu thời gian gửi và người gửi;
+}
+
+partition "Hệ thống MVC" {
+  :Tải lại phòng chat và tin nhắn mới nhất;
+}
+
+stop
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+title Deployment Diagram - Tổng quan triển khai QuanLyDuAnAI
+
+skinparam componentStyle rectangle
+
+node "Máy người dùng" as Client {
+  artifact "Client Browser" as Browser
+  component "HTML Razor render\nCSS / JavaScript" as ClientAssets
+}
+
+node "Web Server ASP.NET MVC" as WebServer {
+  artifact "QuanLyDuAn.dll\nASP.NET Core MVC" as MvcApp
+  component "Razor Views\nViews/*.cshtml" as Razor
+  component "Controllers\n*Controller" as Controllers
+  component "Service Layer\nI*Service / *Service" as Services
+  component "Cookie Authentication\nAuthorizeFilter" as CookieAuth
+  component "Entity Framework Core" as EFCore
+  artifact "appsettings.json\nDefaultConnection, AiApi" as AppSettings
+  artifact "wwwroot\nCSS, JS, uploads" as Wwwroot
+}
+
+node "FastAPI AI Server" as FastApiServer {
+  artifact "QuanLyDuAnAIService\nFastAPI app" as FastApiApp
+  component "REST Routers\nhealth, model, prediction, admin" as FastApiRouters
+  component "AI Compute Services\nvalidation, model, prediction" as AiCompute
+  artifact "Model AI\nmodels/reason_active.joblib\n*.metadata.json" as AiModel
+}
+
+database "SQL Server\nQuanLyDuAnAI" as SqlServer {
+  artifact "Bảng nghiệp vụ\nDU_AN, CONG_VIEC, TIEN_DO..." as BusinessTables
+  artifact "Bảng Identity\nAspNetUsers, AspNetRoles,\nAspNetRoleClaims..." as IdentityTables
+  artifact "Bảng AI do MVC quản lý\nAI_DATASET, AI_KET_QUA,\nAI_NGUYEN_NHAN, AI_MODEL" as AiTables
+}
+
+Browser --> MvcApp : HTTPS\nGET/POST MVC
+MvcApp --> Razor : render giao diện
+Razor --> ClientAssets : trả HTML/CSS/JS
+MvcApp --> CookieAuth : xác thực cookie\nvà claim permission
+Controllers --> Services : gọi nghiệp vụ
+Services --> EFCore : truy vấn qua DbContext
+EFCore --> SqlServer : SQL Server connection\nDefaultConnection
+MvcApp --> Wwwroot : static files / upload files
+
+Services --> FastApiApp : REST API HTTP\nAiApi.BaseUrl = http://127.0.0.1:8001
+FastApiApp --> FastApiRouters : route request
+FastApiRouters --> AiCompute : xử lý AI reason-only
+AiCompute --> AiModel : đọc/ghi Joblib model
+
+FastApiServer -[#red,dashed]-> SqlServer : không có kết nối trực tiếp trong source
+@enduml

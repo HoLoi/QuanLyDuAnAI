@@ -7,6 +7,7 @@ namespace QuanLyDuAn.Services
     {
         public static IServiceCollection AddTangDichVu(this IServiceCollection dichVu)
         {
+            dichVu.AddSingleton<IPermissionDependencyProvider, PermissionDependencyProvider>();
             dichVu.AddScoped<IPhanQuyenService, PhanQuyenService>();
             dichVu.AddScoped<IPermissionHelper, PermissionHelper>();
             dichVu.AddScoped<IChucDanhService, ChucDanhService>();

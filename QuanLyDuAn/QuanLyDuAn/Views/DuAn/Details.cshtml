@@ -51,7 +51,7 @@
     <link rel="stylesheet" href="~/css/DuAn/details.css" asp-append-version="true" />
 }
 
-<div class="project-details">
+<div class="project-details app-page">
     <div class="project-hero mb-4">
         <div class="hero-bg"></div>
         <div class="hero-content">
@@ -73,7 +73,7 @@
                        asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
                        asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")"
                        asp-route-locTheoNgay="@Model.LocTheoNgay"
-                       class="btn detail-header-btn detail-header-btn-back">Quay lại danh sách</a>
+                       class="btn detail-header-btn detail-header-btn-back btn-action btn-subtle">Quay lại danh sách</a>
                     @if (permissions.Contains(Permissions.DuAn.Sua))
                     {
                         <a asp-action="Sua"
@@ -84,14 +84,14 @@
                            asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
                            asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")"
                            asp-route-locTheoNgay="@Model.LocTheoNgay"
-                           class="btn detail-header-btn detail-header-btn-edit">Sửa dự án</a>
+                           class="btn detail-header-btn detail-header-btn-edit btn-action btn-confirm">Sửa dự án</a>
                     }
                     @if (canShowYeuCauDoiQuanLyButton)
                     {
                         <a asp-controller="YeuCauDoiQuanLy"
                            asp-action="Create"
                            asp-route-maDuAn="@Model.MaDuAn"
-                           class="btn detail-header-btn detail-header-btn-manager-request">Yêu cầu đổi quản lý</a>
+                           class="btn detail-header-btn detail-header-btn-manager-request btn-action btn-subtle">Yêu cầu đổi quản lý</a>
                     }
                     @if (canShowConfirmCompletionButton)
                     {
@@ -106,7 +106,7 @@
                             <input type="hidden" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
-                            <button type="submit" class="btn detail-header-btn detail-header-btn-confirm">
+                            <button type="submit" class="btn detail-header-btn detail-header-btn-confirm btn-action btn-confirm">
                                 Xác nhận hoàn thành
                             </button>
                         </form>
@@ -114,7 +114,7 @@
                     @if (canShowReopenButton)
                     {
                         <button type="button"
-                                class="btn detail-header-btn detail-header-btn-reopen"
+                                class="btn detail-header-btn detail-header-btn-reopen btn-action btn-reopen"
                                 data-bs-toggle="modal"
                                 data-bs-target="#reopenFromDetailsModal">
                             Mở lại dự án
@@ -123,7 +123,7 @@
                 </div>
             </div>
             <div class="progress-rail mt-3">
-                <div class="progress-fill" style="width: @Model.PhanTramHoanThanh%;"></div>
+                <div class="progress-fill progress-fill-dynamic" style="--progress-width: @Model.PhanTramHoanThanh%;"></div>
             </div>
             <div class="progress-caption">@Model.PhanTramHoanThanh% hoàn thành</div>
         </div>
@@ -131,7 +131,7 @@
 
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="section-card reveal" style="--delay: 80ms;">
+            <div class="section-card app-section-card reveal reveal-delay-80">
                 <div class="section-title">Thông tin chính</div>
                 <div class="info-grid">
                     <div class="info-item">
@@ -161,14 +161,14 @@
                 </div>
             </div>
 
-            <div class="section-card reveal mt-4" style="--delay: 160ms;">
+            <div class="section-card app-section-card reveal mt-4 reveal-delay-160">
                 <div class="section-title">Mô tả dự án</div>
                 <div class="description-box">
                     @(string.IsNullOrWhiteSpace(Model.MoTaDuAn) ? "Chưa có mô tả dự án." : Model.MoTaDuAn)
                 </div>
             </div>
 
-            <div class="section-card reveal mt-4" style="--delay: 200ms;">
+            <div class="section-card app-section-card reveal mt-4 reveal-delay-200">
                 <div class="section-title">Tổng quan hoạt động</div>
                 <div class="preview-grid">
                     <div class="preview-card">
@@ -356,7 +356,7 @@
                 </div>
             </div>
 
-            <div class="section-card reveal mt-4" style="--delay: 240ms;" id="tep-du-an">
+            <div class="section-card app-section-card reveal mt-4 reveal-delay-240" id="tep-du-an">
                 <div class="section-title">Tệp dự án</div>
                 @if (canManageFiles)
                 {
@@ -427,7 +427,7 @@
 
         <div class="col-lg-4">
             <div class="sticky-sidebar">
-                <div class="section-card reveal" style="--delay: 120ms;">
+                <div class="section-card app-section-card reveal reveal-delay-120">
                     <div class="section-title">Thống kê nhanh</div>
                     <div class="stat-grid">
                         <div class="stat-card">
@@ -461,7 +461,7 @@
                     </div>
                 </div>
 
-                <div class="section-card reveal mt-4" style="--delay: 160ms;">
+                <div class="section-card app-section-card reveal mt-4 reveal-delay-160">
                     <div class="section-title">Tiến độ công việc</div>
                     @if (workSummary.TongCongViec == 0)
                     {
@@ -481,7 +481,7 @@
                     {
                         <div class="work-progress">
                             <div class="progress">
-                                <div class="progress-bar bg-success" style="width: @workSummary.TiLeHoanThanhCap%;"></div>
+                                <div class="progress-bar bg-success progress-bar-dynamic" style="--progress-width: @workSummary.TiLeHoanThanhCap%;"></div>
                             </div>
                             <div class="progress-caption">@((workSummary.TiLeHoanThanh ?? 0).ToString("0"))% công việc đã hoàn thành</div>
                         </div>
@@ -512,7 +512,7 @@
 
                 @if (canSeeFinance)
                 {
-                    <div class="section-card reveal mt-4" style="--delay: 200ms;">
+                    <div class="section-card app-section-card reveal mt-4 reveal-delay-200">
                         <div class="section-title">Tài chính dự án</div>
                         @if (budgetSummary == null || !budgetSummary.CoNganSachDaDuyet)
                         {
@@ -545,7 +545,7 @@
                                 </div>
                                 <div class="budget-progress">
                                     <div class="progress">
-                                        <div class="progress-bar @budgetSummary.TrangThaiCss" style="width: @budgetSummary.PhanTramSuDungCap%;"></div>
+                                        <div class="progress-bar @budgetSummary.TrangThaiCss progress-bar-dynamic" style="--progress-width: @budgetSummary.PhanTramSuDungCap%;"></div>
                                     </div>
                                     <div class="budget-caption">@((budgetSummary.PhanTramSuDung ?? 0).ToString("0"))% ngân sách đã sử dụng</div>
                                 </div>
@@ -568,7 +568,7 @@
                     </div>
                 }
 
-                <div class="section-card reveal mt-4" style="--delay: 220ms;">
+                <div class="section-card app-section-card reveal mt-4 reveal-delay-220">
                     <div class="section-title">Cảnh báo dự án</div>
                     @if (!hasAnyWarning)
                     {
@@ -606,7 +606,7 @@
 
                 @if (statusCheck != null)
                 {
-                    <div class="section-card reveal mt-4" style="--delay: 230ms;">
+                    <div class="section-card app-section-card reveal mt-4 reveal-delay-230">
                         <div class="section-title">Trạng thái luồng công việc</div>
                         <div class="workflow-meta">Hiện tại: <strong>@TrangThai.ToDisplay(statusCheck.TrangThaiDuAn)</strong></div>
                         <div class="workflow-grid">
@@ -656,7 +656,7 @@
                     </div>
                 }
 
-                <div class="section-card reveal mt-4" style="--delay: 240ms;">
+                <div class="section-card app-section-card reveal mt-4 reveal-delay-240">
                     <div class="section-title">Điều hướng nhanh</div>
                     <div class="nav-grid">
                         @if (canSeeTasks)

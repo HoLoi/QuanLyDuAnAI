@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
 }
 
-<section class="ai-page">
-    <header class="ai-header-card">
+<section class="ai-page app-page">
+    <header class="ai-header-card app-page-header">
         <div>
             <h1 class="ai-title">Phân tích nguyên nhân trễ dự án</h1>
             <p class="ai-subtitle">AI chỉ phân tích nguyên nhân cho dự án đã được xác định trễ bởi quy tắc nghiệp vụ trong MVC.</p>
@@ -42,7 +42,7 @@
         <div class="ai-warning-soft">@Model.ThongBaoKhongPhanTich</div>
     }
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Dữ liệu đầu vào</h2>
         <div class="ai-warning-soft mb-3">
             <strong>Độ chính xác kiểm thử của model:</strong>
@@ -99,8 +99,8 @@
             </div>
 
             <div class="ai-form-actions d-flex gap-2">
-                <button type="submit" class="ai-primary-btn">Phân tích nguyên nhân trễ</button>
-                <button type="submit" class="ai-secondary-btn" formaction="@Url.Action("TestPredict", "Ai")" disabled="@(!Model.CoModelNguyenNhanHoatDongHopLe)">Phân tích thử</button>
+                <button type="submit" class="ai-primary-btn btn-action btn-confirm">Phân tích nguyên nhân trễ</button>
+                <button type="submit" class="ai-secondary-btn btn-action btn-subtle" formaction="@Url.Action("TestPredict", "Ai")" disabled="@(!Model.CoModelNguyenNhanHoatDongHopLe)">Phân tích thử</button>
             </div>
             <small class="text-muted">Phân tích thử chỉ để kiểm tra model, không ghi vào AI_KET_QUA.</small>
         </form>
@@ -108,7 +108,7 @@
 
     @if (Model.KetQuaPhanTich != null)
     {
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Kết quả phân tích nguyên nhân trễ</h2>
             <div class="ai-grid ai-grid-4">
                 <div class="ai-stat-card">
@@ -147,7 +147,7 @@
                     <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
                     <input type="hidden" name="maDmNguyenNhan" value="@Model.KetQuaPhanTich.MaDMNguyenNhanDuDoan.Value" />
                     <input type="hidden" name="doTinCay" value="@Model.KetQuaPhanTich.DoTinCayKetQua.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
-                    <button type="submit" class="ai-secondary-btn">Manager xác nhận nguyên nhân này</button>
+                    <button type="submit" class="ai-secondary-btn btn-action btn-subtle">Manager xác nhận nguyên nhân này</button>
                 </form>
             }
         </article>
@@ -155,7 +155,7 @@
 
     @if (Model.KetQuaTestPhanTich != null)
     {
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Kết quả phân tích thử</h2>
             <dl class="ai-dl">
                 <div><dt>Độ tin cậy dự đoán cho mẫu hiện tại</dt><dd>@Model.KetQuaTestPhanTich.Confidence.ToString("P0")</dd></div>

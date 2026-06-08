@@ -1,12 +1,12 @@
 ﻿@model string
 
 @{
-    var css = "badge bg-secondary";
-    if (string.Equals(Model, "DaDuyet", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-success"; }
-    else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-warning text-dark"; }
-    else if (string.Equals(Model, "TuChoi", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-danger"; }
-    else if (string.Equals(Model, "Nhap", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-info text-dark"; }
-    else if (string.Equals(Model, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase)) { css = "badge bg-secondary"; }
+    var css = "status-badge status-neutral evaluation-status-badge";
+    if (string.Equals(Model, "DaDuyet", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-approved evaluation-status-badge"; }
+    else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-pending evaluation-status-badge"; }
+    else if (string.Equals(Model, "TuChoi", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-rejected evaluation-status-badge"; }
+    else if (string.Equals(Model, "Nhap", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-draft evaluation-status-badge"; }
+    else if (string.Equals(Model, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase)) { css = "status-badge status-neutral evaluation-status-badge"; }
 
     var text = Model;
     if (string.Equals(Model, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase)) { text = "Chưa đánh giá"; }

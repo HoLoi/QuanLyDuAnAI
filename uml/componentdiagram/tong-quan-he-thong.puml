@@ -1,0 +1,69 @@
+@startuml
+' title Component Diagram - Tổng quan hệ thống QuanLyDuAnAI
+
+skinparam componentStyle rectangle
+
+actor "Người dùng" as User
+
+package "Frontend ASP.NET MVC" {
+  component "Razor Views\nViews/*.cshtml" as Views
+  component "Layout\nViews/Shared/_Layout.cshtml" as Layout
+  component "CSS\nwwwroot/css" as Css
+  component "JavaScript\nwwwroot/js" as Js
+  component "Bootstrap / jQuery\nwwwroot/lib" as Lib
+}
+
+package "ASP.NET MVC Application" {
+  component "Program.cs\nMiddleware, DI, Route" as Program
+  component "Controllers\n*Controller.cs" as Controllers
+  component "ViewModels\nViewModels/*" as ViewModels
+  component "Services Interfaces\nI*Service" as Interfaces
+  component "Services Implementations\n*Service" as Services
+  component "PermissionHelper\nIPermissionHelper" as PermissionHelper
+  component "Workflow Service\nITrangThaiWorkflowService" as Workflow
+  component "AI Integration Service\nIAiService / IAiApiService" as AiMvc
+  component "ExportFileService" as Export
+}
+
+package "Data Access" {
+  component "QuanLyDuAnDbContext" as DbContext
+  component "Entity Framework Core" as EF
+  database "SQL Server\nQuanLyDuAnAI" as Sql
+}
+
+cloud "FastAPI AI Service\nhttp://127.0.0.1:8001" as FastApi {
+  component "Routers\nhealth/model/prediction/admin" as Routers
+  component "AI Services\nmodel/validation/prediction" as AiServices
+  artifact "Model files\n*.joblib, *.metadata.json" as ModelFiles
+}
+
+User --> Views : thao tác giao diện
+Views --> Layout : render trong layout
+Views --> Css : dùng stylesheet
+Views --> Js : dùng script
+Views --> Lib : dùng thư viện tĩnh
+Views --> Controllers : gửi HTTP request
+
+Program --> Controllers : map route, auth filter
+Program --> Services : đăng ký DI AddTangDichVu
+Program --> DbContext : cấu hình SQL Server
+Program --> AiMvc : cấu hình HttpClient AiApi
+
+Controllers --> ViewModels : bind input / trả dữ liệu hiển thị
+Controllers --> PermissionHelper : kiểm tra Permissions.*
+Controllers --> Interfaces : gọi service qua interface
+Interfaces <|.. Services : implementation thực tế
+Services --> DbContext : đọc/ghi nghiệp vụ
+Services --> Workflow : đồng bộ trạng thái khi cần
+Services --> Export : tạo file xuất nếu có quyền
+AiMvc --> DbContext : MVC lưu AI_DATASET, AI_KET_QUA, AI_NGUYEN_NHAN, AI_MODEL
+AiMvc --> FastApi : HTTP/REST
+
+FastApi --> Routers : nhận REST API
+Routers --> AiServices : validate/train/analyze/test
+AiServices --> ModelFiles : đọc/ghi model cục bộ
+FastApi -[#red,dashed]-> Sql : không truy cập SQL nghiệp vụ
+
+DbContext --> EF : ORM mapping entity
+EF --> Sql : truy vấn và lưu dữ liệu
+@enduml

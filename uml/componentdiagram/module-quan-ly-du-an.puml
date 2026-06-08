@@ -1,0 +1,102 @@
+@startuml
+' title Component Diagram - Module quản lý dự án, nhân sự và team
+
+skinparam componentStyle rectangle
+
+actor "Quản lý dự án" as Manager
+actor "Quản trị viên" as Admin
+
+package "Views" {
+  component "DuAn Views\nIndex, Details, ChiTiet,\n_Form, _Table, _Filter" as DuAnViews
+  component "NhanVienDuAn Views" as NhanVienDuAnViews
+  component "Team / TeamDuAn /\nThanhVienTeam Views" as TeamViews
+  component "YeuCauDoiQuanLy Views" as ChangeManagerViews
+}
+
+package "Controllers" {
+  component "DuAnController" as DuAnController
+  component "NhanVienDuAnController" as NhanVienDuAnController
+  component "TeamController" as TeamController
+  component "TeamDuAnController" as TeamDuAnController
+  component "ThanhVienTeamController" as ThanhVienTeamController
+  component "YeuCauDoiQuanLyController" as ChangeManagerController
+  component "DuyetYeuCauDoiQuanLyController" as ApproveChangeManagerController
+}
+
+package "Services" {
+  component "IDuAnService\nDuAnService" as DuAnService
+  component "IFileDuAnService\nFileDuAnService" as FileDuAnService
+  component "INhanVienDuAnService\nNhanVienDuAnService" as NhanVienDuAnService
+  component "ITeamService\nTeamService" as TeamService
+  component "ITeamDuAnService\nTeamDuAnService" as TeamDuAnService
+  component "IThanhVienTeamService\nThanhVienTeamService" as ThanhVienTeamService
+  component "IYeuCauDoiQuanLyService" as ChangeManagerService
+  component "IDuyetYeuCauDoiQuanLyService" as ApproveChangeManagerService
+  component "IChatDuAnService\nChatDuAnService" as ChatService
+  component "IPermissionHelper" as PermissionHelper
+}
+
+package "Data" {
+  component "QuanLyDuAnDbContext" as DbContext
+  database "SQL Server" as Sql
+  component "DU_AN" as DuAnTable
+  component "NHAN_VIEN_DU_AN" as NhanVienDuAnTable
+  component "TEAM, TEAM_DU_AN,\nNHAN_VIEN_TEAM" as TeamTables
+  component "FILE_DU_AN" as FileDuAnTable
+  component "YEU_CAU_DOI_QUAN_LY" as ChangeManagerTable
+  component "NHAT_KY_QUAN_LY_DU_AN" as ProjectLogTable
+  artifact "wwwroot/uploads/duan" as Uploads
+}
+
+Views -[hidden]down-> Controllers
+Controllers -[hidden]down-> Services
+Services -[hidden]down-> Data
+
+Manager --> DuAnViews
+Admin --> ChangeManagerViews
+DuAnViews --> DuAnController
+NhanVienDuAnViews --> NhanVienDuAnController
+TeamViews --> TeamController
+TeamViews --> TeamDuAnController
+TeamViews --> ThanhVienTeamController
+ChangeManagerViews --> ChangeManagerController
+ChangeManagerViews --> ApproveChangeManagerController
+
+DuAnController --> PermissionHelper : Permissions.DuAn.*
+DuAnController --> DuAnService
+DuAnController --> FileDuAnService
+NhanVienDuAnController --> PermissionHelper : Permissions.ThanhVienDuAn.*
+NhanVienDuAnController --> NhanVienDuAnService
+TeamController --> TeamService
+TeamDuAnController --> TeamDuAnService
+ThanhVienTeamController --> ThanhVienTeamService
+ChangeManagerController --> ChangeManagerService
+ApproveChangeManagerController --> ApproveChangeManagerService
+
+DuAnService --> ChatService : đảm bảo phòng chat dự án
+NhanVienDuAnService --> ChatService : đồng bộ thành viên chat
+TeamDuAnService --> ChatService : đồng bộ thành viên chat
+FileDuAnService --> Uploads : lưu/xóa file dự án
+
+DuAnService --> DbContext
+NhanVienDuAnService --> DbContext
+TeamService --> DbContext
+TeamDuAnService --> DbContext
+ThanhVienTeamService --> DbContext
+ChangeManagerService --> DbContext
+ApproveChangeManagerService --> DbContext
+FileDuAnService --> DbContext
+
+DbContext --> DuAnTable
+DbContext --> NhanVienDuAnTable
+DbContext --> TeamTables
+DbContext --> FileDuAnTable
+DbContext --> ChangeManagerTable
+DbContext --> ProjectLogTable
+DuAnTable --> Sql
+NhanVienDuAnTable --> Sql
+TeamTables --> Sql
+FileDuAnTable --> Sql
+ChangeManagerTable --> Sql
+ProjectLogTable --> Sql
+@enduml

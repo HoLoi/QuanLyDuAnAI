@@ -1,0 +1,62 @@
+@startuml
+' title Yêu cầu đổi quản lý dự án và duyệt yêu cầu
+
+start
+partition "Quản lý dự án" {
+  :Mở màn hình yêu cầu đổi quản lý;
+  :Chọn dự án đang quản lý và quản lý mới;
+  :Gửi yêu cầu;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra đăng nhập;
+  :Kiểm tra Permissions.YeuCauDoiQuanLy.Them;
+  :Kiểm tra người gửi là quản lý hiện tại;
+  :Kiểm tra dự án không hoàn thành, đã hủy hoặc lưu trữ;
+  :Kiểm tra không có yêu cầu chờ duyệt trùng;
+  :Validate quản lý mới hợp lệ;
+  if (Hợp lệ?) then (Có)
+    :Tạo yêu cầu trạng thái Chờ duyệt;
+  else (Không)
+    :Trả lỗi về giao diện;
+    stop
+  endif
+}
+
+partition "Cơ sở dữ liệu" {
+  :Thêm YEU_CAU_DOI_QUAN_LY;
+  :Ghi nhật ký quản lý dự án;
+}
+
+partition "Quản trị viên" {
+  :Mở màn hình duyệt yêu cầu đổi quản lý;
+  :Duyệt hoặc từ chối yêu cầu;
+}
+
+partition "Hệ thống MVC" {
+  :Kiểm tra Permissions.DuyetYeuCauDoiQuanLy.Duyet;
+  :Kiểm tra yêu cầu còn Chờ duyệt;
+}
+
+partition "Cơ sở dữ liệu" {
+  if (Duyệt?) then (Có)
+    :Cập nhật DU_AN.MaNguoiQuanLy mới;
+    :Cập nhật yêu cầu = Đã duyệt;
+    :Lưu người duyệt và ngày duyệt;
+    :Ghi nhật ký thay đổi quản lý;
+  elseif (Từ chối?) then (Có)
+    :Cập nhật yêu cầu = Từ chối;
+    :Không đổi quản lý dự án;
+    :Ghi lý do vào nhật ký;
+  else (Hủy bởi người gửi)
+    :Chỉ cho hủy khi còn Chờ duyệt;
+    :Cập nhật yêu cầu = Đã hủy;
+  endif
+}
+
+partition "Hệ thống MVC" {
+  :Trả kết quả về danh sách yêu cầu;
+}
+
+stop
+@enduml

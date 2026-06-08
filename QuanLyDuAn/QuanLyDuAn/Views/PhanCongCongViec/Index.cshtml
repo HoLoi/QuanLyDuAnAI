@@ -12,23 +12,24 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/shared/assignment.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/PhanCongCongViec/index.css" asp-append-version="true" />
 }
 
-<div class="phan-cong-cong-viec-page">
-    <section class="pc-header-card">
+<div class="phan-cong-cong-viec-page app-page assignment-page">
+    <section class="pc-header-card app-page-header assignment-header-card">
         <div class="pc-header-content">
-            <h1 class="pc-title">Phân công công việc</h1>
-            <p class="pc-subtitle">Quản lý nhân sự thực hiện công việc trong phạm vi dự án</p>
+            <h1 class="pc-title app-page-title">Phân công công việc</h1>
+            <p class="pc-subtitle app-page-subtitle">Quản lý nhân sự thực hiện công việc trong phạm vi dự án</p>
         </div>
-        <a asp-controller="CongViec" asp-action="Index" class="pc-back-btn">
+        <a asp-controller="CongViec" asp-action="Index" class="pc-back-btn btn-action btn-subtle assignment-action-btn">
             <i class="bi bi-arrow-left"></i>
             Quay lại công việc
         </a>
     </section>
 
-    <section class="pc-summary-grid">
-        <article class="pc-summary-card">
+    <section class="pc-summary-grid assignment-summary-grid">
+        <article class="pc-summary-card assignment-summary-card app-section-card">
             <span class="pc-summary-icon"><i class="bi bi-briefcase"></i></span>
             <div class="pc-summary-content">
                 <span class="pc-summary-label">Công việc</span>
@@ -37,7 +38,7 @@
             </div>
         </article>
 
-        <article class="pc-summary-card">
+        <article class="pc-summary-card assignment-summary-card app-section-card">
             <span class="pc-summary-icon status"><i class="bi bi-check2-circle"></i></span>
             <div class="pc-summary-content">
                 <span class="pc-summary-label">Trạng thái</span>
@@ -46,7 +47,7 @@
             </div>
         </article>
 
-        <article class="pc-summary-card">
+        <article class="pc-summary-card assignment-summary-card app-section-card">
             <span class="pc-summary-icon progress"><i class="bi bi-activity"></i></span>
             <div class="pc-summary-content">
                 <span class="pc-summary-label">Tiến độ</span>
@@ -55,7 +56,7 @@
             </div>
         </article>
 
-        <article class="pc-summary-card">
+        <article class="pc-summary-card assignment-summary-card app-section-card">
             <span class="pc-summary-icon assigned"><i class="bi bi-people-fill"></i></span>
             <div class="pc-summary-content">
                 <span class="pc-summary-label">Đã phân công</span>
@@ -64,7 +65,7 @@
             </div>
         </article>
 
-        <article class="pc-summary-card">
+        <article class="pc-summary-card assignment-summary-card app-section-card">
             <span class="pc-summary-icon available"><i class="bi bi-person-plus"></i></span>
             <div class="pc-summary-content">
                 <span class="pc-summary-label">Còn có thể phân công</span>
@@ -74,7 +75,7 @@
         </article>
     </section>
 
-    <section class="pc-section-card">
+    <section class="pc-section-card app-section-card assignment-section-card">
         <div class="pc-section-head">
             <h2 class="pc-section-title">Phân công nhân sự</h2>
             <p class="pc-section-note">Chỉ nhân sự đủ điều kiện trong dự án mới có thể được chọn để phân công.</p>
@@ -82,7 +83,7 @@
         <partial name="_Form" model="Model" />
     </section>
 
-    <section class="pc-section-card">
+    <section class="pc-section-card app-section-card assignment-section-card">
         <div class="pc-section-head">
             <h2 class="pc-section-title">Danh sách phân công</h2>
             <p class="pc-section-note">Theo dõi nhân sự đã giao việc và thao tác điều chỉnh khi cần.</p>

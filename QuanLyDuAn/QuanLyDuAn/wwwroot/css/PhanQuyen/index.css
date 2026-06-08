@@ -1,31 +1,39 @@
-﻿.phan-quyen-page {
+.phan-quyen-page {
     display: grid;
     gap: 1rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.45));
-    border: 1px solid #e4e9f3;
-    border-radius: 20px;
-    padding: 1.15rem;
 }
 
 .phan-quyen-header-card,
 .phan-quyen-section-card {
     background: #fff;
     border: 1px solid #e4e9f3;
-    border-radius: 18px;
+    border-radius: 14px;
     box-shadow: 0 8px 24px rgba(48, 71, 102, 0.07);
 }
 
 .phan-quyen-header-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     padding: 1rem 1.1rem;
     border-color: rgba(105, 108, 255, 0.2);
-    background: linear-gradient(125deg, rgba(105, 108, 255, 0.14), rgba(3, 195, 236, 0.14));
+    background: linear-gradient(125deg, rgba(105, 108, 255, 0.12), rgba(3, 195, 236, 0.12));
+}
+
+.phan-quyen-eyebrow {
+    margin: 0 0 0.2rem;
+    color: #667892;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .phan-quyen-title {
     margin: 0;
+    color: #304766;
     font-size: 1.45rem;
     font-weight: 700;
-    color: #304766;
 }
 
 .phan-quyen-subtitle {
@@ -34,15 +42,36 @@
     font-size: 0.92rem;
 }
 
+.phan-quyen-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #435ebe;
+    background: #f4f7ff;
+    border: 1px solid #dfe7fb;
+    font-size: 1.2rem;
+}
+
 .phan-quyen-section-card {
     padding: 1rem;
 }
 
+.phan-quyen-toolbar {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.8fr) minmax(260px, 1.2fr) auto;
+    gap: 0.8rem;
+    align-items: end;
+    margin-bottom: 1rem;
+}
+
 .phan-quyen-page .form-label {
     margin-bottom: 0.35rem;
-    font-size: 0.82rem;
-    font-weight: 600;
     color: #5d7592;
+    font-size: 0.82rem;
+    font-weight: 700;
 }
 
 .phan-quyen-page .form-control,
@@ -59,7 +88,38 @@
     box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.12);
 }
 
+.search-input-wrap {
+    position: relative;
+}
+
+.search-input-wrap i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7b8ca5;
+    font-size: 0.9rem;
+}
+
+.search-input-wrap .form-control {
+    padding-left: 2.2rem;
+}
+
+.toolbar-actions,
+.group-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.group-actions {
+    justify-content: flex-start;
+    margin-bottom: 0.85rem;
+}
+
 .phan-quyen-page .btn-action {
+    min-height: 38px;
     border: 1px solid transparent;
     border-radius: 0.62rem;
     padding: 0.42rem 0.72rem;
@@ -68,7 +128,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.35rem;
     text-decoration: none;
+    white-space: nowrap;
 }
 
 .phan-quyen-page .btn-confirm {
@@ -83,50 +145,185 @@
     color: #3f5877;
 }
 
-.phan-quyen-page .table {
-    border-color: #e1e8f5;
+.permission-alert {
+    margin-bottom: 0.9rem;
+    border: 1px solid #f0c7c7;
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    color: #9a2f2f;
+    background: #fff5f5;
+    font-size: 0.86rem;
 }
 
-.phan-quyen-page .workflow-table thead th {
+.permission-alert ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1.2rem;
+}
+
+.server-alert:empty {
+    display: none;
+}
+
+.permission-accordion {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.permission-accordion .accordion-item {
+    overflow: hidden;
+    border: 1px solid #e1e8f5;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.permission-accordion .accordion-button {
+    min-height: 52px;
     background: #f7faff;
-    color: #5b7391;
-    border-bottom: 1px solid #dce6f3;
-    font-size: 0.81rem;
+    color: #304766;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.permission-accordion .accordion-button:not(.collapsed) {
+    color: #304766;
+    background: #f3f7ff;
+    box-shadow: inset 0 -1px 0 #dce6f3;
+}
+
+.group-title {
+    font-size: 0.94rem;
+}
+
+.group-count {
+    margin-left: 0.65rem;
+    border-radius: 999px;
+    padding: 0.18rem 0.48rem;
+    color: #52677f;
+    background: #e9eef8;
+    font-size: 0.72rem;
     font-weight: 700;
 }
 
-.phan-quyen-page .table td,
-.phan-quyen-page .table th {
-    border-color: #e7edf7;
-    vertical-align: top;
+.permission-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
 }
 
-.phan-quyen-page tbody tr {
-    transition: background-color 0.16s ease;
-}
-
-.phan-quyen-page tbody tr:hover {
-    background: #f9fbff;
-}
-
-.phan-quyen-page .form-check {
-    background: #f8fbff;
-    border: 1px solid #dfe8f6;
+.permission-screen-card {
+    border: 1px solid #e4e9f3;
     border-radius: 10px;
-    padding: 0.42rem 0.62rem 0.42rem 1.95rem;
-    min-height: 38px;
+    background: #fbfcff;
+    padding: 0.85rem;
+}
+
+.screen-card-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.7rem;
+    margin-bottom: 0.75rem;
 }
 
-.phan-quyen-page .form-check-input {
-    margin-top: 0;
+.screen-card-header h3 {
+    margin: 0;
+    color: #304766;
+    font-size: 0.96rem;
+    font-weight: 700;
 }
 
-.phan-quyen-page .form-check-label {
+.screen-card-header p {
+    margin: 0.18rem 0 0;
+    color: #71849d;
     font-size: 0.78rem;
-    color: #35506f;
     font-weight: 600;
+}
+
+.screen-card-count {
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #4c5f78;
+    background: #eef3fb;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.permission-pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.48rem;
+}
+
+.permission-pill {
+    min-height: 36px;
+    border: 1px solid #dfe8f6;
+    border-radius: 999px;
+    padding: 0.35rem 0.58rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    color: #35506f;
+    background: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.permission-pill input {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+}
+
+.permission-parent {
+    border-color: #b7c6f0;
+    color: #304a91;
+    background: #f4f7ff;
+}
+
+.permission-pill:has(input:checked) {
+    border-color: #696cff;
+    color: #26377a;
+    background: #eef1ff;
+}
+
+.permission-pill:has(input:disabled) {
+    color: #8390a3;
+    background: #f1f4f8;
+    border-color: #dce3ed;
+    cursor: not-allowed;
+}
+
+.permission-denied {
+    color: #9a4d23;
+    background: #fff7ed;
+    border-color: #f4d4b2;
+}
+
+.permission-required {
+    color: #22543d;
+    background: #f0fff7;
+    border-color: #b7e4c7;
+}
+
+.dependency-warning,
+.role-lock {
+    display: none;
+    font-size: 0.82rem;
+}
+
+.dependency-invalid .dependency-warning {
+    display: inline-flex;
+    color: #c47f00;
+}
+
+.permission-denied .role-lock {
+    display: inline-flex;
 }
 
 .phan-quyen-page .alert {
@@ -148,18 +345,51 @@
     margin-bottom: 0.35rem;
 }
 
+@media (max-width: 991.98px) {
+    .phan-quyen-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .toolbar-actions {
+        justify-content: flex-start;
+    }
+
+    .permission-card-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 767.98px) {
-    .phan-quyen-page {
-        border-radius: 16px;
-        padding: 0.95rem;
+    .phan-quyen-header-card,
+    .phan-quyen-section-card {
+        border-radius: 12px;
     }
 
     .phan-quyen-header-card {
-        border-radius: 14px;
+        align-items: flex-start;
         padding: 0.9rem;
+    }
+
+    .phan-quyen-header-icon {
+        display: none;
     }
 
     .phan-quyen-title {
         font-size: 1.28rem;
+    }
+
+    .toolbar-actions,
+    .group-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .phan-quyen-page .btn-action {
+        width: 100%;
+    }
+
+    .permission-pill {
+        width: 100%;
+        border-radius: 10px;
     }
 }

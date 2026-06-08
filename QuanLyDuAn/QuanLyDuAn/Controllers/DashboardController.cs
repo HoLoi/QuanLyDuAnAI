@@ -3,53 +3,84 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Helpers;
 using QuanLyDuAn.Services.Exporting;
 using QuanLyDuAn.Services.Interfaces;
-using QuanLyDuAn.ViewModels.Ai;
 
 namespace QuanLyDuAn.Controllers
 {
     public class DashboardController : Controller
     {
         private readonly IDashboardService _dashboardService;
-        private readonly IAiService _aiService;
         private readonly IPermissionHelper _permission;
         private readonly IExportFileService _exportFileService;
 
         public DashboardController(
             IDashboardService dashboardService,
-            IAiService aiService,
             IPermissionHelper permission,
             IExportFileService exportFileService)
         {
             _dashboardService = dashboardService;
-            _aiService = aiService;
             _permission = permission;
             _exportFileService = exportFileService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(DateTime? tuNgay, DateTime? denNgay, string? locNhanh)
+        public async Task<IActionResult> Index(
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locNhanh,
+            int? locMaDuAn,
+            int? locMaQuanLy,
+            int? locMaTeam,
+            string? locTrangThai,
+            int? locMaLoaiDuAn,
+            string? locTheoNgay)
         {
-            var vm = await _dashboardService.GetDashboardAsync(tuNgay, denNgay, locNhanh);
-
-            var aiDashboard = await _aiService.LayDashboardAsync();
-            ViewBag.AiDashboard = new AiDashboardViewModel
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.Xem))
             {
-                SoCanhBaoDo = aiDashboard.SoDuAnTreChuaXacNhan,
-                NguyenNhanThongKe = aiDashboard.NguyenNhanPhoBien
-            };
+                return Forbid();
+            }
+
+            var vm = await _dashboardService.GetDashboardAsync(
+                tuNgay,
+                denNgay,
+                locNhanh,
+                locMaDuAn,
+                locMaQuanLy,
+                locMaTeam,
+                locTrangThai,
+                locMaLoaiDuAn,
+                locTheoNgay);
 
             return View(vm);
         }
 
         [HttpGet]
-        public async Task<IActionResult> XuatFile(DateTime? tuNgay, DateTime? denNgay, string? locNhanh, string? format)
+        public async Task<IActionResult> XuatFile(
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locNhanh,
+            string? format,
+            int? locMaDuAn,
+            int? locMaQuanLy,
+            int? locMaTeam,
+            string? locTrangThai,
+            int? locMaLoaiDuAn,
+            string? locTheoNgay)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
             {
                 return Forbid();
             }
 
-            var vm = await _dashboardService.GetDashboardAsync(tuNgay, denNgay, locNhanh);
+            var vm = await _dashboardService.GetDashboardAsync(
+                tuNgay,
+                denNgay,
+                locNhanh,
+                locMaDuAn,
+                locMaQuanLy,
+                locMaTeam,
+                locTrangThai,
+                locMaLoaiDuAn,
+                locTheoNgay);
             var rows = new List<object>
             {
                 new DashboardExportRow("Tổng quan", "Tổng dự án", vm.TongDuAn.ToString()),
@@ -61,8 +92,7 @@ namespace QuanLyDuAn.Controllers
                 new DashboardExportRow("Tổng quan", "Tỷ lệ sử dụng ngân sách", $"{vm.TyLeSuDungNganSach:0.##}%"),
                 new DashboardExportRow("Cảnh báo", "Công việc trễ hạn", vm.CongViecTreHan.ToString()),
                 new DashboardExportRow("Cảnh báo", "Nhân sự quá tải", vm.NhanSuQuaTai.ToString()),
-                new DashboardExportRow("Cảnh báo", "Dự án vượt ngân sách", vm.DuAnVuotNganSach.ToString()),
-                new DashboardExportRow("Cảnh báo", "Dự án thiếu dữ liệu AI", vm.DuAnThieuDatasetAi.ToString())
+                new DashboardExportRow("Cảnh báo", "Dự án vượt ngân sách", vm.DuAnVuotNganSach.ToString())
             };
 
             for (var i = 0; i < Math.Min(vm.TenDuAn.Count, Math.Min(vm.PhanTramTienDo.Count, vm.ChiPhiTheoDuAn.Count)); i++)
@@ -73,6 +103,22 @@ namespace QuanLyDuAn.Controllers
                     $"Tiến độ: {vm.PhanTramTienDo[i]}% | Chi phí: {ExportSupport.FormatCurrency(vm.ChiPhiTheoDuAn[i])}"));
             }
 
+            foreach (var item in vm.TopDuAnTre)
+            {
+                rows.Add(new DashboardExportRow(
+                    "Top dự án trễ",
+                    item.TenDuAn,
+                    $"Quản lý: {item.TenQuanLy} | Số ngày trễ: {item.SoNgayTre} | Tiến độ: {item.PhanTramHoanThanh}%"));
+            }
+
+            foreach (var item in vm.TopDuAnVuotNganSach)
+            {
+                rows.Add(new DashboardExportRow(
+                    "Top dự án vượt ngân sách",
+                    item.TenDuAn,
+                    $"Ngân sách: {ExportSupport.FormatCurrency(item.NganSach)} | Chi phí: {ExportSupport.FormatCurrency(item.ChiPhi)} | Chênh lệch: {ExportSupport.FormatCurrency(item.ChenhLech)}"));
+            }
+
             var exportRequest = new ExportFileRequest
             {
                 ReportTitle = "Báo cáo thống kê tổng quan",
@@ -81,7 +127,13 @@ namespace QuanLyDuAn.Controllers
                 AppliedFiltersText = ExportSupport.BuildFiltersText(
                     ("Từ ngày", ExportSupport.FormatDate(tuNgay)),
                     ("Đến ngày", ExportSupport.FormatDate(denNgay)),
-                    ("Lọc nhanh", ExportSupport.ResolveTextOrDefault(locNhanh))),
+                    ("Lọc nhanh", ExportSupport.ResolveTextOrDefault(locNhanh)),
+                    ("Dự án", locMaDuAn?.ToString()),
+                    ("Quản lý", locMaQuanLy?.ToString()),
+                    ("Team", locMaTeam?.ToString()),
+                    ("Trạng thái", TrangThai.ToDisplay(locTrangThai)),
+                    ("Loại dự án", locMaLoaiDuAn?.ToString()),
+                    ("Loại mốc ngày", ExportSupport.ResolveTextOrDefault(locTheoNgay, "Ngày tạo"))),
                 FileNamePrefix = "thong-ke-tong-quan",
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>

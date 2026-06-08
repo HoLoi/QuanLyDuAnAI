@@ -35,13 +35,13 @@
     <link rel="stylesheet" href="~/css/AI/index.css" asp-append-version="true" />
 }
 
-<section class="ai-page">
-    <header class="ai-header-card">
+<section class="ai-page app-page">
+    <header class="ai-header-card app-page-header">
         <div>
             <h1 class="ai-title">Model nguyên nhân trễ</h1>
             <p class="ai-subtitle">Chỉ hiển thị các phiên bản model <code>NguyenNhan</code> và metadata phục vụ theo dõi chất lượng.</p>
         </div>
-        <a asp-controller="Ai" asp-action="Train" class="ai-link-btn">Huấn luyện model</a>
+        <a asp-controller="Ai" asp-action="Train" class="ai-link-btn btn-action btn-subtle">Huấn luyện model</a>
     </header>
 
     @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
@@ -61,7 +61,7 @@
         </div>
     }
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Model đang hoạt động</h2>
         <div class="ai-stat-card">
             <span class="ai-stat-label">Model active</span>
@@ -75,16 +75,16 @@
         </div>
     </article>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Danh sách phiên bản model</h2>
         @if (!Model.DanhSachModel.Any())
         {
-            <div class="ai-empty-state">Chưa có model local để hiển thị.</div>
+            <div class="ai-empty-state app-empty-state">Chưa có model local để hiển thị.</div>
         }
         else
         {
-            <div class="ai-table-scroll">
-                <table class="table ai-table">
+            <div class="ai-table-scroll app-table-scroll">
+                <table class="table ai-table app-data-table">
                     <thead>
                         <tr>
                             <th>Tên model</th>
@@ -137,7 +137,7 @@
     </article>
 
     <div class="ai-grid ai-grid-2">
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Metrics theo phiên bản model</h2>
             @if (Model.LichSuModelNguyenNhan.Any())
             {
@@ -147,10 +147,10 @@
             }
             else
             {
-                <div class="ai-empty-state">Chưa có dữ liệu metrics theo phiên bản.</div>
+                <div class="ai-empty-state app-empty-state">Chưa có dữ liệu metrics theo phiên bản.</div>
             }
         </article>
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Train/Test theo phiên bản model</h2>
             @if (Model.LichSuModelNguyenNhan.Any())
             {
@@ -160,13 +160,13 @@
             }
             else
             {
-                <div class="ai-empty-state">Chưa có dữ liệu train/test theo phiên bản.</div>
+                <div class="ai-empty-state app-empty-state">Chưa có dữ liệu train/test theo phiên bản.</div>
             }
         </article>
     </div>
 
     <div class="ai-grid ai-grid-2">
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Trạng thái active/inactive</h2>
             @if (Model.LichSuModelNguyenNhan.Count > 2)
             {
@@ -189,10 +189,10 @@
             }
             else
             {
-                <div class="ai-empty-state">Không có dữ liệu trạng thái model.</div>
+                <div class="ai-empty-state app-empty-state">Không có dữ liệu trạng thái model.</div>
             }
         </article>
-        <article class="ai-panel-card">
+        <article class="ai-panel-card app-section-card">
             <h2>Feature importance (@(Model.TenModelPhanTich ?? "model active"))</h2>
             @if (Model.FeatureImportanceModelActive.Any())
             {
@@ -202,18 +202,18 @@
             }
             else
             {
-                <div class="ai-empty-state">Không có metadata feature importance.</div>
+                <div class="ai-empty-state app-empty-state">Không có metadata feature importance.</div>
             }
         </article>
     </div>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Ma trận nhầm lẫn (@(Model.TenModelPhanTich ?? "model active"))</h2>
         @if (Model.ConfusionMatrixModelActive.Any())
         {
             <div class="text-muted mb-2">Hàng = nhãn thật, cột = nhãn dự đoán, đường chéo là dự đoán đúng.</div>
-            <div class="ai-table-scroll">
-                <table class="table ai-table">
+            <div class="ai-table-scroll app-table-scroll">
+                <table class="table ai-table app-data-table">
                     <thead>
                         <tr>
                             <th>Nhãn thật \ Nhãn dự đoán</th>
@@ -240,11 +240,11 @@
         }
         else
         {
-            <div class="ai-empty-state">Chưa có confusion matrix cho model đang chọn.</div>
+            <div class="ai-empty-state app-empty-state">Chưa có confusion matrix cho model đang chọn.</div>
         }
     </article>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Cây quyết định của model</h2>
         @if (!string.IsNullOrWhiteSpace(Model.DecisionTreeTextModelActive))
         {
@@ -252,23 +252,23 @@
                 <summary>Xem cây quyết định chi tiết</summary>
                 <p class="ai-collapse-note">Cây có thể dài, hệ thống hiển thị trong khung cuộn để tiện đối chiếu.</p>
                 <div class="ai-inline-actions mb-2">
-                    <button type="button" class="ai-secondary-btn" id="copyDecisionTreeBtn">Sao chép cây quyết định</button>
+                    <button type="button" class="ai-secondary-btn btn-action btn-subtle" id="copyDecisionTreeBtn">Sao chép cây quyết định</button>
                 </div>
                 <div class="ai-json-box"><pre id="decisionTreeText">@Model.DecisionTreeTextModelActive</pre></div>
             </details>
         }
         else
         {
-            <div class="ai-empty-state">Chưa có dữ liệu cây quyết định cho model này.</div>
+            <div class="ai-empty-state app-empty-state">Chưa có dữ liệu cây quyết định cho model này.</div>
         }
     </article>
 
-    <article class="ai-panel-card">
+    <article class="ai-panel-card app-section-card">
         <h2>Tải lại model active</h2>
         <form asp-action="ReloadModel" method="post" class="ai-inline-actions">
             @Html.AntiForgeryToken()
             <input type="hidden" name="modelType" value="NguyenNhan" />
-            <button type="submit" class="ai-secondary-btn">Reload model NguyenNhan</button>
+            <button type="submit" class="ai-secondary-btn btn-action btn-subtle">Reload model NguyenNhan</button>
         </form>
     </article>
 </section>

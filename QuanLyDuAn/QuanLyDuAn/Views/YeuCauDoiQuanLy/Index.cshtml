@@ -11,22 +11,22 @@
     <link rel="stylesheet" href="~/css/YeuCauDoiQuanLy/index.css" asp-append-version="true" />
 }
 
-<section class="yeu-cau-doi-quan-ly-page">
-    <header class="yeu-cau-header-card">
+<section class="yeu-cau-doi-quan-ly-page app-page">
+    <header class="yeu-cau-header-card app-page-header">
         <div class="yeu-cau-header-content">
-            <h1 class="yeu-cau-title">Yêu cầu đổi quản lý</h1>
-            <p class="yeu-cau-subtitle">Theo dõi các yêu cầu thay đổi quản lý phụ trách dự án do bạn đã tạo.</p>
+            <h1 class="yeu-cau-title app-page-title">Yêu cầu đổi quản lý</h1>
+            <p class="yeu-cau-subtitle app-page-subtitle">Theo dõi các yêu cầu thay đổi quản lý phụ trách dự án do bạn đã tạo.</p>
         </div>
         @if (canCreate)
         {
-            <a asp-action="Create" asp-route-maDuAn="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-primary">
+            <a asp-action="Create" asp-route-maDuAn="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-primary btn-action btn-confirm">
                 <i class="bi bi-plus-circle"></i>
                 Tạo yêu cầu mới
             </a>
         }
     </header>
 
-    <section class="yeu-cau-section-card">
+    <section class="yeu-cau-section-card app-section-card">
         <div class="yeu-cau-section-head">
             <h2 class="yeu-cau-section-title">Thông tin dự án đang chọn</h2>
             <p class="yeu-cau-section-note">Dự án hiện tại là cơ sở để lọc và tạo yêu cầu đổi quản lý.</p>
@@ -54,18 +54,18 @@
         </div>
     </section>
 
-    <section class="yeu-cau-section-card">
+    <section class="yeu-cau-section-card app-section-card">
         <div class="yeu-cau-section-head">
             <h2 class="yeu-cau-section-title">Bộ lọc danh sách yêu cầu</h2>
             <p class="yeu-cau-section-note">Lọc theo trạng thái hoặc từ khóa dự án/người quản lý.</p>
         </div>
-        <form asp-action="Index" method="get" class="yeu-cau-filter-form">
+        <form asp-action="Index" method="get" class="yeu-cau-filter-form app-filter">
             <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
-            <div>
+            <div class="app-filter-field">
                 <label for="tuKhoa" class="form-label">Từ khóa</label>
                 <input id="tuKhoa" type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên dự án hoặc quản lý" />
             </div>
-            <div>
+            <div class="app-filter-field">
                 <label for="trangThai" class="form-label">Trạng thái</label>
                 <select id="trangThai" name="trangThai" class="form-select">
                     <option value="">Tất cả trạng thái</option>
@@ -76,13 +76,13 @@
                 </select>
             </div>
             <div class="yeu-cau-filter-actions">
-                <button type="submit" class="yeu-cau-action-btn yeu-cau-action-primary">Lọc dữ liệu</button>
-                <a asp-action="Index" asp-route-maDuAn="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-neutral">Làm mới</a>
+                <button type="submit" class="yeu-cau-action-btn yeu-cau-action-primary btn-action btn-filter-apply">Lọc dữ liệu</button>
+                <a asp-action="Index" asp-route-maDuAn="@Model.MaDuAn" class="yeu-cau-action-btn yeu-cau-action-neutral btn-action btn-filter-reset">Làm mới</a>
             </div>
         </form>
     </section>
 
-    <section class="yeu-cau-section-card">
+    <section class="yeu-cau-section-card app-section-card">
         <div class="yeu-cau-section-head">
             <h2 class="yeu-cau-section-title">Danh sách yêu cầu đã tạo</h2>
             <p class="yeu-cau-section-note">Trạng thái gồm: chờ duyệt, đã duyệt, từ chối, đã hủy.</p>

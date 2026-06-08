@@ -11,8 +11,8 @@
     string? locTheoNgay = ViewBag.LocTheoNgay as string;
 }
 
-<div class="dxns-table-scroll table-responsive-soft">
-    <table class="table dxns-table">
+<div class="dxns-table-scroll table-responsive-soft app-table-scroll proposal-table-scroll">
+    <table class="table dxns-table app-data-table proposal-table">
         <thead>
             <tr>
                 <th>Ngân sách cũ</th>
@@ -38,10 +38,12 @@
                 {
                     var statusCode = TrangThai.ToCode(item.TrangThaiDeXuat);
                     var badgeClass = "dxns-status-neutral";
+                    var statusClass = "status-neutral";
                     if (TrangThai.EqualsValue(statusCode, TrangThai.ChoDuyet)) { badgeClass = "dxns-status-pending"; }
-                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaDuyet)) { badgeClass = "dxns-status-approved"; }
-                    else if (TrangThai.EqualsValue(statusCode, TrangThai.TuChoi)) { badgeClass = "dxns-status-rejected"; }
-                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaHuy)) { badgeClass = "dxns-status-canceled"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaDuyet)) { badgeClass = "dxns-status-approved"; statusClass = "status-approved"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.TuChoi)) { badgeClass = "dxns-status-rejected"; statusClass = "status-rejected"; }
+                    else if (TrangThai.EqualsValue(statusCode, TrangThai.DaHuy)) { badgeClass = "dxns-status-canceled"; statusClass = "status-neutral"; }
+                    if (TrangThai.EqualsValue(statusCode, TrangThai.ChoDuyet)) { statusClass = "status-pending"; }
 
                     <tr>
                         <td class="text-nowrap">@(item.NganSachCu?.ToString("N0") ?? "-") VNĐ</td>
@@ -49,11 +51,11 @@
                         <td>@item.NguoiDungDeXuat</td>
                         <td class="text-nowrap">@item.NgayDeXuat?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>
-                            <span class="dxns-status-badge @badgeClass">@TrangThai.ToDisplay(item.TrangThaiDeXuat)</span>
+                            <span class="dxns-status-badge status-badge @badgeClass @statusClass">@TrangThai.ToDisplay(item.TrangThaiDeXuat)</span>
                         </td>
                         <td class="col-actions dxns-table-actions">
                             <div class="dxns-action-group dxns-table-action-group">
-                                <button type="button" class="dxns-action-btn dxns-action-neutral" data-bs-toggle="collapse" data-bs-target="#dxns-detail-@item.MaDeXuatNS" aria-expanded="false" aria-controls="dxns-detail-@item.MaDeXuatNS">
+                                <button type="button" class="dxns-action-btn dxns-action-neutral btn-action btn-subtle proposal-action-btn" data-bs-toggle="collapse" data-bs-target="#dxns-detail-@item.MaDeXuatNS" aria-expanded="false" aria-controls="dxns-detail-@item.MaDeXuatNS">
                                     <i class="bi bi-eye"></i>
                                     Xem chi tiết
                                 </button>
@@ -66,7 +68,7 @@
                                         <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
                                         <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
                                         <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
-                                        <button type="submit" class="dxns-action-btn dxns-action-danger">
+                                        <button type="submit" class="dxns-action-btn dxns-action-danger btn-action btn-danger-soft proposal-action-btn">
                                             <i class="bi bi-x-circle"></i>
                                             Hủy đề xuất
                                         </button>
@@ -77,7 +79,7 @@
                     </tr>
                     <tr class="collapse" id="dxns-detail-@item.MaDeXuatNS">
                         <td colspan="6" class="dxns-detail-cell">
-                            <div class="dxns-detail-grid">
+                            <div class="dxns-detail-grid proposal-detail-grid">
                                 <div>
                                     <span>Lý do đề xuất</span>
                                     <p>@item.LyDoDeXuat</p>

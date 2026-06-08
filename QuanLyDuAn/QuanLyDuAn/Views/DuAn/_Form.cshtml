@@ -78,7 +78,7 @@
             <span asp-validation-for="MoTaDuAn" class="text-danger"></span>
         </div>
 
-        <div class="col-12 mb-3" id="ghiChuTamDungContainer" style="display:none;">
+        <div class="col-12 mb-3 d-none" id="ghiChuTamDungContainer">
             <label>Ghi chú lý do tạm dừng</label>
             <textarea asp-for="GhiChuDuAn" id="ghiChuTamDungInput" class="form-control" rows="2"></textarea>
             <span asp-validation-for="GhiChuDuAn" class="text-danger"></span>
@@ -103,7 +103,7 @@
 
                     const togglePauseNote = () => {
                         const shouldShow = isPauseStatus(statusSelect.value);
-                        noteContainer.style.display = shouldShow ? 'block' : 'none';
+                        noteContainer.classList.toggle('d-none', !shouldShow);
                         noteInput.required = shouldShow;
                     };
 
@@ -137,7 +137,7 @@
                 <!-- Button Bắt đầu dự án -->
                 @if (Model.StatusCheck.CanTransitionToDangThucHien && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.KhoiTao))
                 {
-                    <form asp-action="BatDauDuAn" method="post" style="display:inline;">
+                    <form asp-action="BatDauDuAn" method="post" class="d-inline">
                         <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
                         <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
                         <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
@@ -149,7 +149,7 @@
                 <!-- Button Yêu cầu hoàn thành -->
                 @if (Model.StatusCheck.CanRequestCompletion && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.DangThucHien))
                 {
-                    <form asp-action="YeuCauHoanThanh" method="post" style="display:inline;">
+                    <form asp-action="YeuCauHoanThanh" method="post" class="d-inline">
                         <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
                         <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
                         <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
@@ -161,7 +161,7 @@
                 <!-- Button Xác nhận hoàn thành -->
                 @if (Model.StatusCheck.CanConfirmCompletion && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh))
                 {
-                    <form asp-action="XacNhanHoanThanh" method="post" style="display:inline;">
+                    <form asp-action="XacNhanHoanThanh" method="post" class="d-inline">
                         <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
                         <input type="hidden" name="tuKhoa" value="@ViewBag.TuKhoa" />
                         <input type="hidden" name="locMaLoaiDuAn" value="@ViewBag.LocMaLoaiDuAn" />
@@ -183,7 +183,7 @@
 
                 @if (Model.StatusCheck.CanArchive && TrangThai.EqualsValue(Model.TrangThaiDuAn, TrangThai.HoanThanh))
                 {
-                    <form asp-action="LuuDuAn" method="post" style="display:inline;">
+                    <form asp-action="LuuDuAn" method="post" class="d-inline">
                         <input type="hidden" name="Form.MaDuAn" value="@Model.MaDuAn" />
                         <input type="hidden" name="Form.TenDuAn" value="@Model.TenDuAn" />
                         <input type="hidden" name="Form.MaLoaiDuAn" value="@Model.MaLoaiDuAn" />

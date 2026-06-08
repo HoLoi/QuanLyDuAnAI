@@ -1,0 +1,102 @@
+@startuml
+title Component Diagram - Module công việc, chi tiết, phân công và tiến độ
+
+skinparam componentStyle rectangle
+
+actor "Quản lý dự án" as Manager
+actor "Leader" as Leader
+actor "Nhân viên" as Employee
+
+package "Views" {
+  component "CongViec Views\nIndex, _Table, _Filter" as CongViecViews
+  component "ChiTietCongViec Views\nIndex, _Form, _Table" as ChiTietViews
+  component "PhanCongCongViec Views" as AssignWorkViews
+  component "PhanCongChiTietCongViec Views" as AssignDetailViews
+  component "TienDoCongViec Views\nIndex, _UpdateForm,\n_History, _FileList" as ProgressViews
+}
+
+package "Controllers" {
+  component "CongViecController" as CongViecController
+  component "ChiTietCongViecController" as ChiTietController
+  component "PhanCongCongViecController" as AssignWorkController
+  component "PhanCongChiTietCongViecController" as AssignDetailController
+  component "TienDoCongViecController" as ProgressController
+}
+
+package "Services" {
+  component "ICongViecService\nCongViecService" as CongViecService
+  component "IChiTietCongViecService\nChiTietCongViecService" as ChiTietService
+  component "IPhanCongCongViecService" as AssignWorkService
+  component "IPhanCongChiTietCongViecService" as AssignDetailService
+  component "ITienDoCongViecService\nTienDoCongViecService" as ProgressService
+  component "IFileTienDoCongViecService" as ProgressFileService
+  component "ITrangThaiWorkflowService\nTrangThaiWorkflowService" as WorkflowService
+  component "IPermissionHelper" as PermissionHelper
+  component "IExportFileService" as ExportService
+}
+
+package "Data" {
+  component "QuanLyDuAnDbContext" as DbContext
+  database "SQL Server" as Sql
+  component "DU_AN" as DuAnTable
+  component "CONG_VIEC" as CongViecTable
+  component "CT_CONG_VIEC" as ChiTietTable
+  component "PHAN_CONG_CONG_VIEC" as AssignWorkTable
+  component "PHAN_CONG_CT_CONG_VIEC" as AssignDetailTable
+  component "TIEN_DO_CONG_VIEC" as ProgressTable
+  component "FILE_TIEN_DO_CONG_VIEC" as ProgressFileTable
+  component "NHAT_KY_*" as LogTables
+  artifact "wwwroot/uploads/tiendocongviec" as ProgressUploads
+}
+
+Manager --> CongViecViews
+Leader --> ChiTietViews
+Employee --> ProgressViews
+CongViecViews --> CongViecController
+ChiTietViews --> ChiTietController
+AssignWorkViews --> AssignWorkController
+AssignDetailViews --> AssignDetailController
+ProgressViews --> ProgressController
+
+CongViecController --> PermissionHelper : Permissions.CongViec.Xem
+CongViecController --> CongViecService
+ChiTietController --> PermissionHelper : Permissions.ChiTietCongViec.*
+ChiTietController --> ChiTietService
+AssignWorkController --> AssignWorkService
+AssignDetailController --> AssignDetailService
+ProgressController --> PermissionHelper : Permissions.TienDo.*
+ProgressController --> ProgressService
+ProgressController --> ProgressFileService
+ProgressController --> ExportService
+
+CongViecService --> WorkflowService : sync sau xác nhận/mở lại
+ChiTietService --> WorkflowService : sync sau thêm/sửa/xóa CT
+ProgressService --> WorkflowService : sync sau duyệt tiến độ
+ProgressFileService --> ProgressUploads : lưu/tải minh chứng
+ProgressService --> ProgressUploads : lưu file khi cập nhật tiến độ
+
+CongViecService --> DbContext
+ChiTietService --> DbContext
+AssignWorkService --> DbContext
+AssignDetailService --> DbContext
+ProgressService --> DbContext
+ProgressFileService --> DbContext
+WorkflowService --> DbContext : CT_CONG_VIEC -> CONG_VIEC -> DU_AN
+
+DbContext --> DuAnTable
+DbContext --> CongViecTable
+DbContext --> ChiTietTable
+DbContext --> AssignWorkTable
+DbContext --> AssignDetailTable
+DbContext --> ProgressTable
+DbContext --> ProgressFileTable
+DbContext --> LogTables
+DuAnTable --> Sql
+CongViecTable --> Sql
+ChiTietTable --> Sql
+AssignWorkTable --> Sql
+AssignDetailTable --> Sql
+ProgressTable --> Sql
+ProgressFileTable --> Sql
+LogTables --> Sql
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+title Deployment Diagram - Triển khai production dự kiến theo source hiện tại
+
+skinparam componentStyle rectangle
+
+package "Client Layer" {
+node "Máy người dùng" as Client {
+  artifact "Client Browser" as Browser
+}
+}
+
+package "Application Layer" {
+node "Web Server ASP.NET MVC" as WebServer {
+  node "IIS hoặc Kestrel" as Host {
+    artifact "ASP.NET MVC\nQuanLyDuAn.dll" as MvcApp
+    component "Razor MVC\nControllers + Views" as MvcRuntime
+    component "Cookie Authentication\nIdentity / Claims" as Auth
+    component "Service Layer\nBusiness + Permission + Workflow" as BusinessServices
+    component "Entity Framework Core\nQuanLyDuAnDbContext" as EFCore
+    artifact "appsettings.json\nConnectionStrings.DefaultConnection\nAiApi.BaseUrl" as Config
+    artifact "wwwroot\nstatic files, uploads" as StaticFiles
+  }
+}
+}
+
+package "AI Layer" {
+node "FastAPI AI Server" as AiServer {
+  artifact "FastAPI service\nuvicorn app.main:app" as FastApi
+  component "REST API\n/health, /dataset/validate,\n/model/train, /analyze/delay-reason,\n/admin/model/*" as RestApi
+  component "Python AI runtime\npandas, scikit-learn, joblib" as PythonAi
+  artifact "Joblib Model\nreason_active.joblib" as JoblibModel
+  artifact "Model Metadata\n*.metadata.json" as ModelMetadata
+}
+}
+
+package "Database Layer" {
+database "SQL Server" as SqlServer {
+  artifact "QuanLyDuAnAI database" as Db
+  artifact "Business schema\nDU_AN, CONG_VIEC, CT_CONG_VIEC,\nTIEN_DO_CONG_VIEC, DE_XUAT_*, NGAN_SACH" as BusinessSchema
+  artifact "Identity schema\nAspNetUsers, AspNetRoles,\nAspNetRoleClaims, AspNetUserClaims" as IdentitySchema
+  artifact "AI persisted data\nAI_DATASET, AI_KET_QUA,\nAI_NGUYEN_NHAN, AI_MODEL" as AiSchema
+}
+}
+
+Browser --> Host : HTTPS
+Host --> MvcApp : reverse proxy / process hosting
+MvcApp --> MvcRuntime : xử lý request MVC
+MvcRuntime --> Auth : cookie auth + identity claims
+MvcRuntime --> BusinessServices : gọi service
+BusinessServices --> EFCore : đọc/ghi DbContext
+EFCore --> SqlServer : SQL Server protocol\nEntity Framework Core
+MvcApp --> StaticFiles : phục vụ static/upload file
+
+BusinessServices --> RestApi : REST API HTTP/HTTPS\nMVC là system-of-record
+RestApi --> FastApi : nhận request
+FastApi --> PythonAi : validate/train/analyze reason-only
+PythonAi --> JoblibModel : load/save model
+PythonAi --> ModelMetadata : đọc/ghi metadata
+
+AiServer -[#red,dashed]-> SqlServer : không triển khai kết nối trực tiếp\nFastAPI chỉ compute AI
+@enduml

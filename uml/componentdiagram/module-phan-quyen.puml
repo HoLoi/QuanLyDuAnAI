@@ -1,0 +1,62 @@
+@startuml
+title Component Diagram - Đăng nhập và phân quyền
+
+skinparam componentStyle rectangle
+
+actor "Người dùng" as User
+actor "Quản trị viên" as Admin
+
+package "Frontend" {
+  component "Account Views\nLogin, ForgotPassword,\nVerifyOtp, ResetPassword" as AccountViews
+  component "PhanQuyen View\nViews/PhanQuyen/Index.cshtml" as RoleView
+}
+
+package "Controllers" {
+  component "AccountController" as AccountController
+  component "PhanQuyenController" as PhanQuyenController
+  component "Các Controller nghiệp vụ" as BusinessControllers
+}
+
+package "Services" {
+  component "IAccountService\nAccountService" as AccountService
+  component "IPhanQuyenService\nPhanQuyenService" as PhanQuyenService
+  component "IPermissionHelper\nPermissionHelper" as PermissionHelper
+  component "IEmailService\nGmailEmailService" as EmailService
+}
+
+package "Security / Constants" {
+  component "Cookie Authentication" as CookieAuth
+  component "AuthorizeFilter toàn cục" as AuthFilter
+  component "Permissions.cs\nPermissions.*" as Permissions
+}
+
+package "Data" {
+  component "QuanLyDuAnDbContext" as DbContext
+  database "SQL Server" as Sql
+  component "Identity tables\nAspNetUsers, AspNetRoles,\nAspNetRoleClaims, AspNetUserClaims,\nAspNetUserRoles" as IdentityTables
+  component "Danh mục quyền\nDANH_MUC_MAN_HINH,\nDANH_MUC_QUYEN" as PermissionTables
+}
+
+User --> AccountViews : đăng nhập / quên mật khẩu
+AccountViews --> AccountController : POST form
+AccountController --> AccountService : Authenticate / OTP / reset
+AccountService --> DbContext : đọc user, role, claim, token
+AccountService --> EmailService : gửi OTP
+AccountController --> CookieAuth : tạo cookie đăng nhập
+
+Admin --> RoleView : cấu hình quyền
+RoleView --> PhanQuyenController : lưu quyền role
+PhanQuyenController --> PermissionHelper : kiểm tra Permissions.PhanQuyen.*
+PhanQuyenController --> PhanQuyenService : đọc/lưu role claim
+
+BusinessControllers --> AuthFilter : yêu cầu đăng nhập
+BusinessControllers --> PermissionHelper : kiểm tra Permissions.*
+PermissionHelper --> PhanQuyenService : kiểm tra claim permission
+PhanQuyenService --> DbContext : đọc/ghi quyền
+Permissions --> PermissionHelper : tên quyền chuẩn
+
+DbContext --> IdentityTables : mapping EF Core
+DbContext --> PermissionTables : mapping EF Core
+IdentityTables --> Sql
+PermissionTables --> Sql
+@enduml
