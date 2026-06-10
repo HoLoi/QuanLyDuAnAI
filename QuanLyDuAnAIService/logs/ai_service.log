@@ -19,3 +19,4 @@
 {"time": "2026-05-28T13:49:50.382756Z", "endpoint": "/analyze/delay-reason", "eventType": "analyze", "success": true, "modelName": "decision_tree_reason_20260528_061957.joblib", "durationMs": 4, "error": null, "extra": {}}
 {"time": "2026-05-28T13:49:52.095169Z", "endpoint": "/analyze/delay-reason", "eventType": "analyze", "success": true, "modelName": "decision_tree_reason_20260528_061957.joblib", "durationMs": 4, "error": null, "extra": {}}
 {"time": "2026-05-28T13:49:59.608816Z", "endpoint": "/analyze/delay-reason", "eventType": "analyze", "success": true, "modelName": "decision_tree_reason_20260528_061957.joblib", "durationMs": 4, "error": null, "extra": {}}
+{"time": "2026-06-10T15:49:09.544620Z", "endpoint": "/analyze/delay-reason", "eventType": "analyze", "success": true, "modelName": "decision_tree_reason_20260528_061957.joblib", "durationMs": 20, "error": null, "extra": {}}

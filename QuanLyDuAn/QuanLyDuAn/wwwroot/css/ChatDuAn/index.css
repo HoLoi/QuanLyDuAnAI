@@ -1,18 +1,22 @@
 .chat-du-an-page {
     padding: 0.25rem 0;
-    overflow-x: hidden;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .chat-layout {
     display: grid;
     grid-template-columns: 340px minmax(0, 1fr);
     gap: 1rem;
-    min-height: calc(100vh - 150px);
+    height: calc(100vh - 150px);
+    min-height: 0;
+    overflow: hidden;
 }
 
 .chat-sidebar,
 .chat-main {
     min-width: 0;
+    min-height: 0;
     border-radius: 1rem;
     border: 1px solid rgba(67, 89, 113, 0.14);
     background: #fff;
@@ -30,12 +34,18 @@
 }
 
 @media (max-width: 992px) {
+    .chat-du-an-page {
+        overflow: visible;
+    }
+
     .chat-layout {
         grid-template-columns: 1fr;
-        min-height: auto;
+        height: auto;
+        overflow: visible;
     }
 
     .chat-main {
-        min-height: 70vh;
+        height: 70vh;
+        min-height: 420px;
     }
 }

@@ -1123,30 +1123,54 @@ namespace QuanLyDuAn.Services.Implementations
                 return thongKeRong;
             }
 
-            var congViecQuery =
+            var homNay = DateTime.Now.Date;
+            var trangThaiHoanThanhCongViec = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var trangThaiBiCanTro = TrangThai.GetCommonStatusVariants(TrangThai.BiCanCan);
+            var trangThaiChoDuyet = TrangThai.GetCommonStatusVariants(TrangThai.ChoDuyet);
+            var trangThaiDaDuyet = TrangThai.GetCommonStatusVariants(TrangThai.DaDuyet);
+            var trangThaiTuChoi = TrangThai.GetCommonStatusVariants(TrangThai.TuChoi);
+            var trangThaiYeuCauBoSung = TrangThai.GetCommonStatusVariants(TrangThai.YeuCauBoSung);
+
+            var congViecRows = await (
                 from cv in _context.CongViec
                 join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
                 where dm.MaDuAn == maDuAn
                       && dm.IsDeleted != true
                       && cv.IsDeleted != true
-                select cv;
+                select new
+                {
+                    cv.MaCongViec,
+                    cv.TrangThaiCongViec,
+                    cv.NgayKetThucCVDuKien,
+                    cv.NgayKetThucCVThucTe
+                }).ToListAsync(cancellationToken);
 
-            var trangThaiHoanThanhCongViec = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
-            var soCongViec = await congViecQuery.CountAsync(cancellationToken);
-            var soCongViecHoanThanh = await congViecQuery.CountAsync(x =>
+            var soCongViec = congViecRows.Count;
+            var soCongViecHoanThanh = congViecRows.Count(x =>
                 x.TrangThaiCongViec != null
-                && trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec), cancellationToken);
-            var soCongViecTreHan = await congViecQuery.CountAsync(x =>
+                && trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec));
+            var soCongViecChuaHoanThanh = Math.Max(0, soCongViec - soCongViecHoanThanh);
+            var soCongViecDangTreHan = congViecRows.Count(x =>
                 x.NgayKetThucCVDuKien.HasValue
-                && x.NgayKetThucCVDuKien.Value < DateTime.Now
+                && x.NgayKetThucCVDuKien.Value.Date < homNay
                 && (x.TrangThaiCongViec == null
-                    || !trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec)), cancellationToken);
-            var ngayKetThucThucTeFallback = await congViecQuery
+                    || !trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec)));
+            var soCongViecHoanThanhTreHan = congViecRows.Count(x =>
+                x.NgayKetThucCVDuKien.HasValue
+                && x.NgayKetThucCVThucTe.HasValue
+                && x.NgayKetThucCVThucTe.Value.Date > x.NgayKetThucCVDuKien.Value.Date
+                && x.TrangThaiCongViec != null
+                && trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec));
+            var tongCongViecTreHan = soCongViecDangTreHan + soCongViecHoanThanhTreHan;
+            var tyLeCongViecTreHan = TinhTyLe(tongCongViecTreHan, soCongViec);
+            var ngayKetThucThucTeFallback = congViecRows
                 .Where(x => x.NgayKetThucCVThucTe.HasValue)
-                .MaxAsync(x => (DateTime?)x.NgayKetThucCVThucTe, cancellationToken);
+                .Select(x => x.NgayKetThucCVThucTe)
+                .OrderByDescending(x => x)
+                .FirstOrDefault();
             var ngayKetThucThucTeDuAn = duAn.NgayHoanThanhThucTeDuAn ?? ngayKetThucThucTeFallback;
 
-            var chiTietQuery =
+            var chiTietRows = await (
                 from ct in _context.CtCongViec
                 join cv in _context.CongViec on ct.MaCongViec equals cv.MaCongViec
                 join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
@@ -1154,46 +1178,71 @@ namespace QuanLyDuAn.Services.Implementations
                       && dm.IsDeleted != true
                       && cv.IsDeleted != true
                       && ct.IsDeleted != true
-                select ct;
+                select new
+                {
+                    ct.MaChiTietCV,
+                    ct.TrangThaiCTCV,
+                    ct.NgayKetThucCTCV
+                }).ToListAsync(cancellationToken);
 
-            var soChiTiet = await chiTietQuery.CountAsync(cancellationToken);
-            var maChiTietIds = await chiTietQuery.Select(x => x.MaChiTietCV).Distinct().ToListAsync(cancellationToken);
-            var soChiTietHoanThanh = await chiTietQuery.CountAsync(x =>
+            var soChiTiet = chiTietRows.Count;
+            var maChiTietIds = chiTietRows.Select(x => x.MaChiTietCV).Distinct().ToList();
+            var soChiTietHoanThanh = chiTietRows.Count(x =>
                 x.TrangThaiCTCV != null
-                && trangThaiHoanThanhCongViec.Contains(x.TrangThaiCTCV), cancellationToken);
-            var soChiTietTreHan = await chiTietQuery.CountAsync(x =>
+                && trangThaiHoanThanhCongViec.Contains(x.TrangThaiCTCV));
+            var soChiTietChuaHoanThanh = Math.Max(0, soChiTiet - soChiTietHoanThanh);
+            var soChiTietBiCanTro = chiTietRows.Count(x =>
+                x.TrangThaiCTCV != null
+                && trangThaiBiCanTro.Contains(x.TrangThaiCTCV));
+            var soChiTietTreHan = chiTietRows.Count(x =>
                 x.NgayKetThucCTCV.HasValue
-                && x.NgayKetThucCTCV.Value < DateTime.Now
+                && x.NgayKetThucCTCV.Value.Date < homNay
                 && (x.TrangThaiCTCV == null
-                    || !trangThaiHoanThanhCongViec.Contains(x.TrangThaiCTCV)), cancellationToken);
+                    || !trangThaiHoanThanhCongViec.Contains(x.TrangThaiCTCV)));
+            var tyLeChiTietHoanThanh = TinhTyLe(soChiTietHoanThanh, soChiTiet);
 
-            var soBaoCaoTienDo = await _context.TienDoCongViec
-                .CountAsync(x => maChiTietIds.Contains(x.MaChiTietCV), cancellationToken);
-            var lanBaoCaoMoiNhat = await _context.TienDoCongViec
+            var baoCaoTienDoRows = await _context.TienDoCongViec
                 .Where(x => maChiTietIds.Contains(x.MaChiTietCV))
-                .MaxAsync(x => (DateTime?)x.ThoiGianCapNhat, cancellationToken);
+                .Select(x => new
+                {
+                    x.TrangThaiTienDo,
+                    x.ThoiGianCapNhat
+                })
+                .ToListAsync(cancellationToken);
+            var soBaoCaoTienDo = baoCaoTienDoRows.Count;
+            var soBaoCaoTienDoChoDuyet = baoCaoTienDoRows.Count(x => trangThaiChoDuyet.Contains(x.TrangThaiTienDo ?? string.Empty));
+            var soBaoCaoTienDoDaDuyet = baoCaoTienDoRows.Count(x => trangThaiDaDuyet.Contains(x.TrangThaiTienDo ?? string.Empty));
+            var soBaoCaoTienDoBiTuChoi = baoCaoTienDoRows.Count(x => trangThaiTuChoi.Contains(x.TrangThaiTienDo ?? string.Empty));
+            var soBaoCaoTienDoYeuCauBoSung = baoCaoTienDoRows.Count(x => trangThaiYeuCauBoSung.Contains(x.TrangThaiTienDo ?? string.Empty));
+            var tyLeBaoCaoTienDoBiTuChoi = TinhTyLe(soBaoCaoTienDoBiTuChoi, soBaoCaoTienDo);
+            var lanBaoCaoMoiNhat = baoCaoTienDoRows
+                .Where(x => x.ThoiGianCapNhat.HasValue)
+                .Select(x => x.ThoiGianCapNhat)
+                .OrderByDescending(x => x)
+                .FirstOrDefault();
             var soBaoCaoMoiNhat = 0;
             if (lanBaoCaoMoiNhat.HasValue)
             {
                 var batDauNgay = lanBaoCaoMoiNhat.Value.Date;
                 var ketThucNgay = batDauNgay.AddDays(1);
-                soBaoCaoMoiNhat = await _context.TienDoCongViec
-                    .CountAsync(x =>
-                        maChiTietIds.Contains(x.MaChiTietCV)
-                        && x.ThoiGianCapNhat.HasValue
-                        && x.ThoiGianCapNhat.Value >= batDauNgay
-                        && x.ThoiGianCapNhat.Value < ketThucNgay, cancellationToken);
+                soBaoCaoMoiNhat = baoCaoTienDoRows.Count(x =>
+                    x.ThoiGianCapNhat.HasValue
+                    && x.ThoiGianCapNhat.Value >= batDauNgay
+                    && x.ThoiGianCapNhat.Value < ketThucNgay);
             }
+            var mocChamCapNhatTienDo = duAn.NgayKetThucDuAn?.Date ?? homNay;
+            var soNgayChamCapNhatTienDo = lanBaoCaoMoiNhat.HasValue
+                ? Math.Max(0, (mocChamCapNhatTienDo - lanBaoCaoMoiNhat.Value.Date).Days)
+                : (int?)null;
 
             var tyLe = soCongViec <= 0 ? 0d : Math.Round((double)soCongViecHoanThanh / soCongViec * 100d, 2);
 
-            var trangThaiDaDuyetNganSach = TrangThai.GetCommonStatusVariants(TrangThai.DaDuyet);
             var tongNganSachDaDuyet = await _context.NganSach
                 .Where(x =>
                     x.MaDuAn == maDuAn
                     && x.IsDeleted != true
                     && x.TrangThaiNganSach != null
-                    && trangThaiDaDuyetNganSach.Contains(x.TrangThaiNganSach))
+                    && trangThaiDaDuyet.Contains(x.TrangThaiNganSach))
                 .SumAsync(x => x.SoTienNganSach ?? 0m, cancellationToken);
 
             var tongChiPhiDaDung = await (
@@ -1207,6 +1256,75 @@ namespace QuanLyDuAn.Services.Implementations
             var tyLeSuDungNganSach = tongNganSachDaDuyet <= 0m
                 ? 0d
                 : Math.Round((double)(tongChiPhiDaDung / tongNganSachDaDuyet) * 100d, 2);
+            var nganSachConLai = tongNganSachDaDuyet > tongChiPhiDaDung
+                ? tongNganSachDaDuyet - tongChiPhiDaDung
+                : 0m;
+            var soTienVuotNganSach = tongChiPhiDaDung > tongNganSachDaDuyet
+                ? tongChiPhiDaDung - tongNganSachDaDuyet
+                : 0m;
+            var tyLeVuotNganSach = tongNganSachDaDuyet <= 0m || soTienVuotNganSach <= 0m
+                ? 0d
+                : Math.Round((double)(soTienVuotNganSach / tongNganSachDaDuyet) * 100d, 2);
+            var trangThaiNganSach = tongNganSachDaDuyet <= 0m
+                ? "Chưa có ngân sách"
+                : soTienVuotNganSach > 0m
+                    ? "Vượt ngân sách"
+                    : "Trong ngân sách";
+
+            var deXuatCongViecRows = await _context.DeXuatCongViec
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
+                .Select(x => new
+                {
+                    x.TrangThaiCongViecDeXuat,
+                    x.NgayDeXuatCongViec,
+                    x.NgayDuyetDeXuatCongViec
+                })
+                .ToListAsync(cancellationToken);
+            var soDeXuatCongViecChoDuyet = deXuatCongViecRows.Count(x => trangThaiChoDuyet.Contains(x.TrangThaiCongViecDeXuat ?? string.Empty));
+            var soDeXuatCongViecBiTuChoi = deXuatCongViecRows.Count(x => trangThaiTuChoi.Contains(x.TrangThaiCongViecDeXuat ?? string.Empty));
+            var thoiGianDuyetCongViecTrungBinh = deXuatCongViecRows
+                .Where(x => x.NgayDeXuatCongViec.HasValue && x.NgayDuyetDeXuatCongViec.HasValue)
+                .Select(x => Math.Max(0d, (x.NgayDuyetDeXuatCongViec!.Value - x.NgayDeXuatCongViec!.Value).TotalDays))
+                .DefaultIfEmpty(0d)
+                .Average();
+            thoiGianDuyetCongViecTrungBinh = Math.Round(thoiGianDuyetCongViecTrungBinh, 2);
+
+            var deXuatNganSachRows = await _context.DeXuatNganSach
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
+                .Select(x => new
+                {
+                    x.TrangThaiDeXuat,
+                    x.NgayDeXuat,
+                    x.NgayDuyet
+                })
+                .ToListAsync(cancellationToken);
+            var soDeXuatNganSachChoDuyet = deXuatNganSachRows.Count(x => trangThaiChoDuyet.Contains(x.TrangThaiDeXuat ?? string.Empty));
+            var soDeXuatNganSachBiTuChoi = deXuatNganSachRows.Count(x => trangThaiTuChoi.Contains(x.TrangThaiDeXuat ?? string.Empty));
+            var thoiGianDuyetNganSachTrungBinh = deXuatNganSachRows
+                .Where(x => x.NgayDeXuat.HasValue && x.NgayDuyet.HasValue)
+                .Select(x => Math.Max(0d, (x.NgayDuyet!.Value - x.NgayDeXuat!.Value).TotalDays))
+                .DefaultIfEmpty(0d)
+                .Average();
+            thoiGianDuyetNganSachTrungBinh = Math.Round(thoiGianDuyetNganSachTrungBinh, 2);
+
+            var soNhanVienThamGia = await _context.NhanVienDuAn
+                .Where(x => x.MaDuAn == maDuAn)
+                .Select(x => x.MaNguoiDung)
+                .Distinct()
+                .CountAsync(cancellationToken);
+            var nhatKyPhuTrachRows = await _context.NhatKyPhuTrachDuAn
+                .Where(x => x.MaDuAn == maDuAn)
+                .Select(x => x.NkHanhDongPTDA)
+                .ToListAsync(cancellationToken);
+            var soLanThayDoiNhanSu = nhatKyPhuTrachRows.Count(LaHanhDongThayDoiNhanSu);
+            var soLanThayDoiQuanLy = await _context.YeuCauDoiQuanLy
+                .CountAsync(x =>
+                    x.MaDuAn == maDuAn
+                    && x.IsDeleted != true
+                    && x.NgayDuyetYeuCauDoiQuanLy.HasValue
+                    && x.MaQuanLyHienTai != x.MaQuanLyDeXuat
+                    && x.TrangThaiYeuCauDoiQuanLy != null
+                    && trangThaiDaDuyet.Contains(x.TrangThaiYeuCauDoiQuanLy), cancellationToken);
 
             var soFileDuAn = await _context.FileDuAn.CountAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true, cancellationToken);
 
@@ -1221,16 +1339,43 @@ namespace QuanLyDuAn.Services.Implementations
                 PhanTramHoanThanh = Math.Clamp(duAn.PhanTramHoanThanh ?? 0, 0, 100),
                 TongCongViec = soCongViec,
                 CongViecHoanThanh = soCongViecHoanThanh,
-                CongViecTreHan = soCongViecTreHan,
+                CongViecTreHan = soCongViecDangTreHan,
+                CongViecChuaHoanThanh = soCongViecChuaHoanThanh,
+                CongViecDangTreHan = soCongViecDangTreHan,
+                CongViecHoanThanhTreHan = soCongViecHoanThanhTreHan,
+                TyLeCongViecTreHan = tyLeCongViecTreHan,
                 TongChiTietCongViec = soChiTiet,
                 ChiTietHoanThanh = soChiTietHoanThanh,
+                ChiTietChuaHoanThanh = soChiTietChuaHoanThanh,
+                ChiTietBiCanTro = soChiTietBiCanTro,
                 ChiTietTreHan = soChiTietTreHan,
+                TyLeChiTietHoanThanh = tyLeChiTietHoanThanh,
                 TyLeHoanThanh = tyLe,
                 SoBaoCaoTienDo = soBaoCaoTienDo,
                 SoBaoCaoMoiNhat = soBaoCaoMoiNhat,
+                SoBaoCaoTienDoChoDuyet = soBaoCaoTienDoChoDuyet,
+                SoBaoCaoTienDoDaDuyet = soBaoCaoTienDoDaDuyet,
+                SoBaoCaoTienDoBiTuChoi = soBaoCaoTienDoBiTuChoi,
+                SoBaoCaoTienDoYeuCauBoSung = soBaoCaoTienDoYeuCauBoSung,
+                TyLeBaoCaoTienDoBiTuChoi = tyLeBaoCaoTienDoBiTuChoi,
+                LanCapNhatTienDoGanNhat = lanBaoCaoMoiNhat,
+                SoNgayChamCapNhatTienDo = soNgayChamCapNhatTienDo,
                 TongNganSach = tongNganSachDaDuyet,
                 TongChiPhi = tongChiPhiDaDung,
                 TyLeSuDungNganSach = tyLeSuDungNganSach,
+                NganSachConLai = nganSachConLai,
+                SoTienVuotNganSach = soTienVuotNganSach,
+                TyLeVuotNganSach = tyLeVuotNganSach,
+                TrangThaiNganSach = trangThaiNganSach,
+                SoDeXuatCongViecChoDuyet = soDeXuatCongViecChoDuyet,
+                SoDeXuatCongViecBiTuChoi = soDeXuatCongViecBiTuChoi,
+                ThoiGianDuyetCongViecTrungBinh = thoiGianDuyetCongViecTrungBinh,
+                SoDeXuatNganSachChoDuyet = soDeXuatNganSachChoDuyet,
+                SoDeXuatNganSachBiTuChoi = soDeXuatNganSachBiTuChoi,
+                ThoiGianDuyetNganSachTrungBinh = thoiGianDuyetNganSachTrungBinh,
+                SoNhanVienThamGia = soNhanVienThamGia,
+                SoLanThayDoiNhanSu = soLanThayDoiNhanSu,
+                SoLanThayDoiQuanLy = soLanThayDoiQuanLy,
                 SoFileDuAn = soFileDuAn
             };
             return thongKe;
@@ -1991,6 +2136,40 @@ namespace QuanLyDuAn.Services.Implementations
             return TrangThai.EqualsValue(trangThaiDuAn, TrangThai.HoanThanh)
                    || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.ChoXacNhanHoanThanh)
                    || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.LuuTru);
+        }
+
+        private static double TinhTyLe(int tuSo, int mauSo)
+        {
+            if (mauSo <= 0)
+            {
+                return 0d;
+            }
+
+            return Math.Round((double)tuSo * 100d / mauSo, 2);
+        }
+
+        private static bool LaHanhDongThayDoiNhanSu(string? hanhDong)
+        {
+            var normalized = TrangThai.Normalize(hanhDong).Replace(" ", string.Empty);
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return false;
+            }
+
+            return normalized.Contains("themnhansu")
+                   || normalized.Contains("themnhanvien")
+                   || normalized.Contains("themthanhvien")
+                   || normalized.Contains("xoanhansu")
+                   || normalized.Contains("xoanhanvien")
+                   || normalized.Contains("xoathanhvien")
+                   || normalized.Contains("gonhanvien")
+                   || normalized.Contains("gonhansu")
+                   || normalized.Contains("bochon")
+                   || normalized.Contains("capnhatvaitrophutrach")
+                   || normalized.Contains("thaydoiphutrach")
+                   || normalized.Contains("doiphutrach")
+                   || normalized.Contains("dieuchuyennhansu")
+                   || normalized.Contains("ganthanhvien");
         }
 
         private static void KiemTraHopLeDuLieuTieuChi(List<(int Diem, string? NhanXet)> tieuChi)

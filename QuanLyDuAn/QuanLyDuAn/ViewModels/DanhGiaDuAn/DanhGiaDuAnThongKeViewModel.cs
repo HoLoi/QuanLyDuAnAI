@@ -17,15 +17,42 @@
         public int TongCongViec { get; set; }
         public int CongViecHoanThanh { get; set; }
         public int CongViecTreHan { get; set; }
+        public int CongViecChuaHoanThanh { get; set; }
+        public int CongViecDangTreHan { get; set; }
+        public int CongViecHoanThanhTreHan { get; set; }
+        public double TyLeCongViecTreHan { get; set; }
         public int TongChiTietCongViec { get; set; }
         public int ChiTietHoanThanh { get; set; }
+        public int ChiTietChuaHoanThanh { get; set; }
+        public int ChiTietBiCanTro { get; set; }
         public int ChiTietTreHan { get; set; }
+        public double TyLeChiTietHoanThanh { get; set; }
         public double TyLeHoanThanh { get; set; }
         public int SoBaoCaoTienDo { get; set; }
         public int SoBaoCaoMoiNhat { get; set; }
+        public int SoBaoCaoTienDoChoDuyet { get; set; }
+        public int SoBaoCaoTienDoDaDuyet { get; set; }
+        public int SoBaoCaoTienDoBiTuChoi { get; set; }
+        public int SoBaoCaoTienDoYeuCauBoSung { get; set; }
+        public double TyLeBaoCaoTienDoBiTuChoi { get; set; }
+        public DateTime? LanCapNhatTienDoGanNhat { get; set; }
+        public int? SoNgayChamCapNhatTienDo { get; set; }
         public decimal TongNganSach { get; set; }
         public decimal TongChiPhi { get; set; }
         public double TyLeSuDungNganSach { get; set; }
+        public decimal NganSachConLai { get; set; }
+        public decimal SoTienVuotNganSach { get; set; }
+        public double TyLeVuotNganSach { get; set; }
+        public string TrangThaiNganSach { get; set; } = "Chưa có ngân sách";
+        public int SoDeXuatCongViecChoDuyet { get; set; }
+        public int SoDeXuatCongViecBiTuChoi { get; set; }
+        public double ThoiGianDuyetCongViecTrungBinh { get; set; }
+        public int SoDeXuatNganSachChoDuyet { get; set; }
+        public int SoDeXuatNganSachBiTuChoi { get; set; }
+        public double ThoiGianDuyetNganSachTrungBinh { get; set; }
+        public int SoNhanVienThamGia { get; set; }
+        public int SoLanThayDoiNhanSu { get; set; }
+        public int SoLanThayDoiQuanLy { get; set; }
         public int SoFileDuAn { get; set; }
         public bool? CoDuLieuAi { get; set; }
         public bool? DuAnBiTreTheoAi { get; set; }

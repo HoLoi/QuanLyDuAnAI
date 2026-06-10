@@ -1,21 +1,21 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\",
+  "WorkspaceRootPath": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl15\\quanlyduanai\\quanlyduan\\quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl16\\quanlyduanai\\quanlyduan\\quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl15\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\duanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl16\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\duanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\services\\implementations\\duanservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl15\\quanlyduanai\\quanlyduan\\quanlyduan\\controllers\\danhgiaduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl16\\quanlyduanai\\quanlyduan\\quanlyduan\\controllers\\danhgiaduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\controllers\\danhgiaduancontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl15\\quanlyduanai\\quanlyduan\\quanlyduan\\migrations\\20260527125053_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl16\\quanlyduanai\\quanlyduan\\quanlyduan\\migrations\\20260527125053_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\migrations\\20260527125053_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -56,9 +56,9 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "DuAnService.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
               "RelativeToolTip": "QuanLyDuAn\\Services\\Implementations\\DuAnService.cs",
               "ViewState": "AgIAABcAAAAAAAAAAAAQwJEEAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -68,11 +68,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "TrangThai.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Constants\\TrangThai.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
               "RelativeToolTip": "QuanLyDuAn\\Constants\\TrangThai.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-05-28T15:57:29.175Z",
               "EditorCaption": ""
@@ -81,9 +81,9 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "DanhGiaDuAnController.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
               "RelativeToolTip": "QuanLyDuAn\\Controllers\\DanhGiaDuAnController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -93,9 +93,9 @@
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "20260527125053_Init.cs",
-              "DocumentMoniker": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
-              "ToolTip": "E:\\D\\Luan Van\\dvl15\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl16\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
               "RelativeToolTip": "QuanLyDuAn\\Migrations\\20260527125053_Init.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",

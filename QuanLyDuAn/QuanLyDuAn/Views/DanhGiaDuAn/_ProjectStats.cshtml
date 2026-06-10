@@ -1,4 +1,4 @@
-﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnThongKeViewModel
+@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnThongKeViewModel
 
 @{
     var hasData = !string.IsNullOrWhiteSpace(Model.TenDuAn)
@@ -6,41 +6,149 @@
                   || Model.TongChiTietCongViec > 0
                   || Model.SoBaoCaoTienDo > 0
                   || Model.TongNganSach > 0
-                  || Model.TongChiPhi > 0;
-    var chenhLechNganSach = Model.TongNganSach - Model.TongChiPhi;
+                  || Model.TongChiPhi > 0
+                  || Model.SoNhanVienThamGia > 0
+                  || Model.SoDeXuatCongViecChoDuyet > 0
+                  || Model.SoDeXuatNganSachChoDuyet > 0
+                  || Model.CoDuLieuAi == true;
+    var hoanThanhDungHan = string.Equals(Model.TrangThaiThoiHanDuAn, "Hoàn thành đúng hạn", StringComparison.OrdinalIgnoreCase);
+    var hoanThanhTreHan = string.Equals(Model.TrangThaiThoiHanDuAn, "Hoàn thành trễ hạn", StringComparison.OrdinalIgnoreCase);
+    var quaHan = string.Equals(Model.TrangThaiThoiHanDuAn, "Quá hạn", StringComparison.OrdinalIgnoreCase);
+    var thoiHanCanhBao = hoanThanhTreHan || quaHan || Model.SoNgayQuaHan.GetValueOrDefault() > 0;
+    var ngayConLaiLabel = hoanThanhDungHan ? "Hoàn thành sớm/đúng hạn" : "Số ngày còn lại";
+    var ngayConLaiValue = hoanThanhDungHan
+        ? (Model.SoNgayConLai.GetValueOrDefault() > 0 ? $"{Model.SoNgayConLai} ngày" : "Đúng hạn")
+        : (Model.SoNgayConLai.HasValue ? $"{Model.SoNgayConLai} ngày" : "Không áp dụng");
+    var nganSachCanhBao = Model.SoTienVuotNganSach > 0m || Model.TyLeSuDungNganSach > 100d;
+    var coCanhBaoAi = Model.KetQuaAiCoTheDaCu || !string.IsNullOrWhiteSpace(Model.CanhBaoDuLieuAi);
+    var nguonAi = string.IsNullOrWhiteSpace(Model.NguonNguyenNhanAi) ? "Chưa xác định" : Model.NguonNguyenNhanAi;
+    var modelAi = !string.IsNullOrWhiteSpace(Model.TenModelNguyenNhanAi)
+        ? Model.TenModelNguyenNhanAi
+        : (!string.IsNullOrWhiteSpace(Model.TenModelTreHanAi) ? Model.TenModelTreHanAi : "Chưa có");
+    var mucPhuHopAi = string.IsNullOrWhiteSpace(Model.MucPhuHopAi)
+        ? (Model.DoTinCayAi.HasValue ? $"{Model.DoTinCayAi.Value * 100d:0.##}%" : "Chưa có")
+        : Model.MucPhuHopAi;
 }
 
 <div class="project-stats card border-0 shadow-sm mb-3">
     <div class="card-body">
-        <h6 class="mb-3">Dữ liệu hỗ trợ</h6>
+        <div class="support-header">
+            <h6 class="mb-0">Dữ liệu hỗ trợ</h6>
+            @if (thoiHanCanhBao || nganSachCanhBao || Model.CongViecDangTreHan > 0 || Model.SoBaoCaoTienDoBiTuChoi > 0 || coCanhBaoAi)
+            {
+                <span class="support-badge support-badge-warning">Có điểm cần chú ý</span>
+            }
+        </div>
 
         @if (!hasData)
         {
-            <div class="empty-note">Chưa có dữ liệu hỗ trợ\.</div>
+            <div class="empty-note">Chưa có dữ liệu hỗ trợ.</div>
         }
         else
         {
-            <div class="row g-2">
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngày bắt đầu dự án</span><strong>@(Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngày kết thúc dự kiến</span><strong>@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "Chưa có mốc kết thúc dự kiến")</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngày kết thúc thực tế</span><strong>@(Model.NgayKetThucThucTeDuAn?.ToString("dd/MM/yyyy") ?? "Chưa hoàn thành")</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Trạng thái thời hạn</span><strong>@(string.IsNullOrWhiteSpace(Model.TrangThaiThoiHanDuAn) ? "Chưa có dữ liệu" : Model.TrangThaiThoiHanDuAn)</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số ngày còn lại</span><strong>@(Model.SoNgayConLai.HasValue ? $"{Model.SoNgayConLai} ngày" : "Không áp dụng")</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số ngày quá hạn</span><strong>@(Model.SoNgayQuaHan.HasValue ? $"{Model.SoNgayQuaHan} ngày" : "Không áp dụng")</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tổng công việc</span><strong>@Model.TongCongViec</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Công việc hoàn thành</span><strong>@Model.CongViecHoanThanh</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Công việc trễ hạn</span><strong>@Model.CongViecTreHan</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tỷ lệ hoàn thành</span><strong>@Model.TyLeHoanThanh.ToString("0.##")%</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Ngân sách được duyệt</span><strong>@Model.TongNganSach.ToString("N0")</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Chi phí đã dùng</span><strong>@Model.TongChiPhi.ToString("N0")</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Tỷ lệ sử dụng ngân sách</span><strong>@Model.TyLeSuDungNganSach.ToString("0.##")%</strong></div></div>
-                <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Số báo cáo tiến độ</span><strong>@Model.SoBaoCaoTienDo</strong></div></div>
-                @if (chenhLechNganSach != 0m)
-                {
-                    <div class="col-lg-3 col-md-4 col-sm-6"><div class="stat-box"><span>Chênh lệch ngân sách</span><strong>@chenhLechNganSach.ToString("N0")</strong></div></div>
-                }
-            </div>
+            <section class="support-section">
+                <div class="support-section-title">Thời hạn dự án</div>
+                <div class="support-grid">
+                    <div class="stat-box"><span>Ngày bắt đầu dự án</span><strong>@(Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</strong></div>
+                    <div class="stat-box"><span>Ngày kết thúc dự kiến</span><strong>@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "Chưa có mốc kết thúc dự kiến")</strong></div>
+                    <div class="stat-box"><span>Ngày hoàn thành tham chiếu</span><strong>@(Model.NgayKetThucThucTeDuAn?.ToString("dd/MM/yyyy") ?? "Chưa hoàn thành")</strong><small>Ưu tiên ngày hoàn thành dự án, nếu chưa có thì tham chiếu công việc cuối cùng.</small></div>
+                    <div class="stat-box @(thoiHanCanhBao ? "stat-warning" : string.Empty)"><span>Trạng thái thời hạn</span><strong>@(string.IsNullOrWhiteSpace(Model.TrangThaiThoiHanDuAn) ? "Chưa có dữ liệu" : Model.TrangThaiThoiHanDuAn)</strong></div>
+                    <div class="stat-box"><span>@ngayConLaiLabel</span><strong>@ngayConLaiValue</strong></div>
+                    <div class="stat-box @(Model.SoNgayQuaHan.GetValueOrDefault() > 0 ? "stat-warning" : string.Empty)"><span>Số ngày quá hạn</span><strong>@(Model.SoNgayQuaHan.HasValue ? $"{Model.SoNgayQuaHan} ngày" : "Không áp dụng")</strong></div>
+                </div>
+            </section>
+
+            <section class="support-section">
+                <div class="support-section-title">Công việc</div>
+                <div class="support-grid">
+                    <div class="stat-box"><span>Tổng công việc</span><strong>@Model.TongCongViec</strong></div>
+                    <div class="stat-box"><span>Công việc hoàn thành</span><strong>@Model.CongViecHoanThanh</strong></div>
+                    <div class="stat-box"><span>Công việc chưa hoàn thành</span><strong>@Model.CongViecChuaHoanThanh</strong></div>
+                    <div class="stat-box @(Model.CongViecDangTreHan > 0 ? "stat-warning" : string.Empty)"><span>Công việc đang trễ hạn</span><strong>@Model.CongViecDangTreHan</strong></div>
+                    <div class="stat-box @(Model.CongViecHoanThanhTreHan > 0 ? "stat-warning" : string.Empty)"><span>Công việc hoàn thành trễ hạn</span><strong>@Model.CongViecHoanThanhTreHan</strong></div>
+                    <div class="stat-box @(Model.TyLeCongViecTreHan > 0 ? "stat-warning" : string.Empty)"><span>Tỷ lệ công việc trễ hạn</span><strong>@Model.TyLeCongViecTreHan.ToString("0.##")%</strong></div>
+                    <div class="stat-box"><span>Tỷ lệ công việc hoàn thành</span><strong>@Model.TyLeHoanThanh.ToString("0.##")%</strong></div>
+                </div>
+            </section>
+
+            <section class="support-section">
+                <div class="support-section-title">Chi tiết công việc</div>
+                <div class="support-grid">
+                    <div class="stat-box"><span>Tổng chi tiết công việc</span><strong>@Model.TongChiTietCongViec</strong></div>
+                    <div class="stat-box"><span>Chi tiết hoàn thành</span><strong>@Model.ChiTietHoanThanh</strong></div>
+                    <div class="stat-box"><span>Chi tiết chưa hoàn thành</span><strong>@Model.ChiTietChuaHoanThanh</strong></div>
+                    <div class="stat-box @(Model.ChiTietBiCanTro > 0 ? "stat-warning" : string.Empty)"><span>Chi tiết bị cản trở</span><strong>@Model.ChiTietBiCanTro</strong></div>
+                    <div class="stat-box @(Model.ChiTietTreHan > 0 ? "stat-warning" : string.Empty)"><span>Chi tiết trễ hạn</span><strong>@Model.ChiTietTreHan</strong></div>
+                    <div class="stat-box"><span>Tỷ lệ chi tiết hoàn thành</span><strong>@Model.TyLeChiTietHoanThanh.ToString("0.##")%</strong></div>
+                </div>
+            </section>
+
+            <section class="support-section">
+                <div class="support-section-title">Báo cáo tiến độ</div>
+                <div class="support-grid">
+                    <div class="stat-box"><span>Số báo cáo tiến độ</span><strong>@Model.SoBaoCaoTienDo</strong></div>
+                    <div class="stat-box @(Model.SoBaoCaoTienDoChoDuyet > 0 ? "stat-notice" : string.Empty)"><span>Báo cáo chờ duyệt</span><strong>@Model.SoBaoCaoTienDoChoDuyet</strong></div>
+                    <div class="stat-box"><span>Báo cáo đã duyệt</span><strong>@Model.SoBaoCaoTienDoDaDuyet</strong></div>
+                    <div class="stat-box @(Model.SoBaoCaoTienDoBiTuChoi > 0 ? "stat-warning" : string.Empty)"><span>Báo cáo tiến độ bị từ chối</span><strong>@Model.SoBaoCaoTienDoBiTuChoi</strong></div>
+                    <div class="stat-box @(Model.SoBaoCaoTienDoYeuCauBoSung > 0 ? "stat-warning" : string.Empty)"><span>Báo cáo yêu cầu bổ sung</span><strong>@Model.SoBaoCaoTienDoYeuCauBoSung</strong></div>
+                    <div class="stat-box @(Model.TyLeBaoCaoTienDoBiTuChoi > 0 ? "stat-warning" : string.Empty)"><span>Tỷ lệ báo cáo bị từ chối</span><strong>@Model.TyLeBaoCaoTienDoBiTuChoi.ToString("0.##")%</strong></div>
+                    <div class="stat-box"><span>Lần cập nhật gần nhất</span><strong>@(Model.LanCapNhatTienDoGanNhat?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có cập nhật")</strong></div>
+                    <div class="stat-box @(Model.SoNgayChamCapNhatTienDo.GetValueOrDefault() > 0 ? "stat-notice" : string.Empty)"><span>Số ngày chậm cập nhật</span><strong>@(Model.SoNgayChamCapNhatTienDo.HasValue ? $"{Model.SoNgayChamCapNhatTienDo} ngày" : "Chưa có dữ liệu")</strong></div>
+                </div>
+            </section>
+
+            <section class="support-section">
+                <div class="support-section-title">Ngân sách / chi phí</div>
+                <div class="support-grid">
+                    <div class="stat-box"><span>Ngân sách được duyệt</span><strong>@Model.TongNganSach.ToString("N0")</strong></div>
+                    <div class="stat-box"><span>Chi phí đã dùng</span><strong>@Model.TongChiPhi.ToString("N0")</strong></div>
+                    <div class="stat-box @(Model.TyLeSuDungNganSach > 100d ? "stat-warning" : string.Empty)"><span>Tỷ lệ sử dụng ngân sách</span><strong>@Model.TyLeSuDungNganSach.ToString("0.##")%</strong></div>
+                    <div class="stat-box @(nganSachCanhBao ? "stat-warning" : "stat-success")"><span>Trạng thái ngân sách</span><strong>@Model.TrangThaiNganSach</strong></div>
+                    <div class="stat-box"><span>Ngân sách còn lại</span><strong>@Model.NganSachConLai.ToString("N0")</strong></div>
+                    <div class="stat-box @(Model.SoTienVuotNganSach > 0m ? "stat-warning" : string.Empty)"><span>Số tiền vượt ngân sách</span><strong>@Model.SoTienVuotNganSach.ToString("N0")</strong></div>
+                    <div class="stat-box @(Model.TyLeVuotNganSach > 0d ? "stat-warning" : string.Empty)"><span>Tỷ lệ vượt ngân sách</span><strong>@Model.TyLeVuotNganSach.ToString("0.##")%</strong></div>
+                </div>
+            </section>
+
+            <section class="support-section">
+                <div class="support-section-title">Đề xuất</div>
+                <div class="support-grid">
+                    <div class="stat-box @(Model.SoDeXuatCongViecChoDuyet > 0 ? "stat-notice" : string.Empty)"><span>Đề xuất công việc chờ duyệt</span><strong>@Model.SoDeXuatCongViecChoDuyet</strong></div>
+                    <div class="stat-box @(Model.SoDeXuatCongViecBiTuChoi > 0 ? "stat-warning" : string.Empty)"><span>Đề xuất công việc bị từ chối</span><strong>@Model.SoDeXuatCongViecBiTuChoi</strong></div>
+                    <div class="stat-box"><span>Thời gian duyệt công việc trung bình</span><strong>@Model.ThoiGianDuyetCongViecTrungBinh.ToString("0.##") ngày</strong></div>
+                    <div class="stat-box @(Model.SoDeXuatNganSachChoDuyet > 0 ? "stat-notice" : string.Empty)"><span>Đề xuất ngân sách chờ duyệt</span><strong>@Model.SoDeXuatNganSachChoDuyet</strong></div>
+                    <div class="stat-box @(Model.SoDeXuatNganSachBiTuChoi > 0 ? "stat-warning" : string.Empty)"><span>Đề xuất ngân sách bị từ chối</span><strong>@Model.SoDeXuatNganSachBiTuChoi</strong></div>
+                    <div class="stat-box"><span>Thời gian duyệt ngân sách trung bình</span><strong>@Model.ThoiGianDuyetNganSachTrungBinh.ToString("0.##") ngày</strong></div>
+                </div>
+            </section>
+
+            <section class="support-section">
+                <div class="support-section-title">Nhân sự</div>
+                <div class="support-grid">
+                    <div class="stat-box"><span>Số nhân viên tham gia</span><strong>@Model.SoNhanVienThamGia</strong></div>
+                    <div class="stat-box @(Model.SoLanThayDoiNhanSu > 0 ? "stat-notice" : string.Empty)"><span>Số lần thay đổi nhân sự</span><strong>@Model.SoLanThayDoiNhanSu</strong></div>
+                    <div class="stat-box @(Model.SoLanThayDoiQuanLy > 0 ? "stat-notice" : string.Empty)"><span>Số lần thay đổi quản lý</span><strong>@Model.SoLanThayDoiQuanLy</strong></div>
+                </div>
+            </section>
+
+            @if (Model.CoDuLieuAi == true || Model.DuAnBiTreTheoAi.HasValue || coCanhBaoAi || !string.IsNullOrWhiteSpace(Model.TenNguyenNhanManagerXacNhan))
+            {
+                <section class="support-section">
+                    <div class="support-section-title">AI</div>
+                    <div class="support-grid">
+                        <div class="stat-box"><span>Nguyên nhân AI gợi ý</span><strong>@(string.IsNullOrWhiteSpace(Model.TenNguyenNhanAiDuDoan) ? "Chưa có gợi ý" : Model.TenNguyenNhanAiDuDoan)</strong></div>
+                        <div class="stat-box @(Model.DoTinCayAi.HasValue && Model.DoTinCayAi.Value < 0.5d ? "stat-warning" : string.Empty)"><span>Mức phù hợp / độ tin cậy</span><strong>@mucPhuHopAi</strong></div>
+                        <div class="stat-box"><span>Nguồn kết quả AI</span><strong>@nguonAi</strong></div>
+                        <div class="stat-box"><span>Model AI</span><strong>@modelAi</strong></div>
+                        <div class="stat-box"><span>Thời gian phân tích</span><strong>@(Model.ThoiGianDuDoanAi?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có")</strong></div>
+                        <div class="stat-box"><span>Nguyên nhân Manager xác nhận</span><strong>@(string.IsNullOrWhiteSpace(Model.TenNguyenNhanManagerXacNhan) ? "Chưa xác nhận" : Model.TenNguyenNhanManagerXacNhan)</strong></div>
+                        @if (coCanhBaoAi)
+                        {
+                            <div class="stat-box stat-warning"><span>Cảnh báo AI</span><strong>@(string.IsNullOrWhiteSpace(Model.CanhBaoDuLieuAi) ? "Kết quả AI có thể đã cũ" : Model.CanhBaoDuLieuAi)</strong></div>
+                        }
+                    </div>
+                </section>
+            }
         }
     </div>
 </div>
-

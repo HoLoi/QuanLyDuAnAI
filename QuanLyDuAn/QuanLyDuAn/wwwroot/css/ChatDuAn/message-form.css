@@ -1,6 +1,6 @@
 .chat-message-form {
-    position: sticky;
-    bottom: 0;
+    position: static;
+    flex-shrink: 0;
     z-index: 2;
     border-top: 1px solid rgba(67, 89, 113, 0.16);
     background: #fff;

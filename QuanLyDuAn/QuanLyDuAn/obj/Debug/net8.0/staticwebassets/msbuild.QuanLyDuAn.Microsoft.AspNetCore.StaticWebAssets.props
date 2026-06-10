@@ -84,8 +84,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>fk3cr9p8o7</Fingerprint>
-      <Integrity>8RNViL1E/5qKRvr7M4HorQEYeHR+ZA0hFnyCqes2H/w=</Integrity>
+      <Fingerprint>m7vy0yi4aa</Fingerprint>
+      <Integrity>grrsDiZAlcpHBihOnCrVU2qeKi2SDkLldJr7CZtRSxc=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\index.css'))</OriginalItemSpec>
@@ -102,8 +102,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>grybmb5exs</Fingerprint>
-      <Integrity>RMl6JUd+UGWvjBJ6Q+aJpUQMeTPAux8K2GEJ1MOzxEU=</Integrity>
+      <Fingerprint>1bdkk8wxyf</Fingerprint>
+      <Integrity>o4ulV0PRxCOyE6/rLtjgXJOtA+0SL6mQYjKtKuqs/PA=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\message-form.css'))</OriginalItemSpec>
@@ -138,8 +138,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>zv4ke3dzuw</Fingerprint>
-      <Integrity>v5/5Ueqo3DQf0PAb46pBjyXOsnK+iCTmIZnaZc39gsU=</Integrity>
+      <Fingerprint>j09dxitaay</Fingerprint>
+      <Integrity>HfjDvlAgvJOLfzA4TBc0X5ZrE9f5dbXZm9aep3YQ/08=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\message-list.css'))</OriginalItemSpec>
@@ -156,8 +156,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>eqwad1v4jk</Fingerprint>
-      <Integrity>NoXOS24h2xpGqn2IBEC0iSHX6NIdIzklgB9D6LOByiI=</Integrity>
+      <Fingerprint>g5b8uo5haa</Fingerprint>
+      <Integrity>dLiVgl0mqfIUhAs3BvkqRMmrRRIQWUKSkKjv8q6a+yw=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\room-list.css'))</OriginalItemSpec>
@@ -282,8 +282,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>ix9os6kbob</Fingerprint>
-      <Integrity>RrzMxf2DMTRH/mMWvc0ZajVBDVUz/KOg6jaNGNer8Uc=</Integrity>
+      <Fingerprint>ivq8bqj0ai</Fingerprint>
+      <Integrity>Dv0kNusg8G4fW5q4J40b/QUrl9go+oYogdFT5JG8htE=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DanhGiaDuAn\index.css'))</OriginalItemSpec>

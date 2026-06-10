@@ -290,6 +290,97 @@
     height: 100%;
 }
 
+.danh-gia-du-an-page .support-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+}
+
+.danh-gia-du-an-page .support-section {
+    border: 1px solid #edf2f8;
+    border-radius: 14px;
+    background: #fbfdff;
+    padding: 0.72rem;
+    margin-top: 0.75rem;
+}
+
+.danh-gia-du-an-page .support-section:first-of-type {
+    margin-top: 0;
+}
+
+.danh-gia-du-an-page .support-section-title {
+    color: #3b5574;
+    font-size: 0.84rem;
+    font-weight: 700;
+    margin-bottom: 0.55rem;
+}
+
+.danh-gia-du-an-page .support-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.55rem;
+}
+
+.danh-gia-du-an-page .support-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    border-radius: 999px;
+    padding: 0.22rem 0.62rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.danh-gia-du-an-page .support-badge-warning {
+    color: #8a6415;
+    background: #fff8e6;
+    border-color: #f1dcad;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box {
+    min-height: 78px;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box small {
+    display: block;
+    color: #73869d;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    margin-top: 0.25rem;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box.stat-warning {
+    background: #fff9ed;
+    border-color: #ecd7aa;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box.stat-warning strong {
+    color: #8a6415;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box.stat-notice {
+    background: #f4f8ff;
+    border-color: #cbdcf6;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box.stat-notice strong {
+    color: #2f5f9f;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box.stat-success {
+    background: #f4fbf3;
+    border-color: #cde8c7;
+}
+
+.danh-gia-du-an-page .project-stats .stat-box.stat-success strong {
+    color: #2c7a3d;
+}
+
 .danh-gia-du-an-page .project-stats .stat-box span,
 .danh-gia-du-an-page .ai-insight-card .stat-box span {
     display: block;
@@ -609,6 +700,10 @@
         grid-column: span 2;
         justify-content: flex-start;
     }
+
+    .danh-gia-du-an-page .support-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 767.98px) {
@@ -648,6 +743,10 @@
     .danh-gia-du-an-page .primary-cta-card,
     .danh-gia-du-an-page .module-bridge-card {
         padding: 0.75rem 0.8rem;
+    }
+
+    .danh-gia-du-an-page .support-grid {
+        grid-template-columns: 1fr;
     }
 }
 
