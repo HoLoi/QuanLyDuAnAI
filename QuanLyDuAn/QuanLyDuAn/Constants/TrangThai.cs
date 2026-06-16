@@ -48,9 +48,11 @@ namespace QuanLyDuAn.Constants
         public const string TreTienDo = "Tre";
         public const string TreTienDoHienThi = "Trễ tiến độ";
         public const string TaiKhoanHoatDong = "hoatdong";
-        public const string TaiKhoanHoatDongHienThi = "Tài khoản hoạt động";
+        public const string TaiKhoanHoatDongHienThi = "Đang hoạt động";
+        public const string TaiKhoanChoKichHoat = "chokichhoat";
+        public const string TaiKhoanChoKichHoatHienThi = "Chờ kích hoạt";
         public const string TaiKhoanKhoa = "khoa";
-        public const string TaiKhoanKhoaHienThi = "Tài khoản bị khóa";
+        public const string TaiKhoanKhoaHienThi = "Đã khóa";
         public const string Done = "Done";
         public const string Completed = "Completed";
 
@@ -195,6 +197,7 @@ namespace QuanLyDuAn.Constants
             if (normalized == Normalize(DangSuDung)) return DangSuDung;
             if (normalized == Normalize(TreTienDo)) return TreTienDo;
             if (normalized == Normalize(TaiKhoanHoatDong)) return TaiKhoanHoatDong;
+            if (normalized == Normalize(TaiKhoanChoKichHoat)) return TaiKhoanChoKichHoat;
             if (normalized == Normalize(TaiKhoanKhoa)) return TaiKhoanKhoa;
 
             return value ?? string.Empty;
@@ -224,6 +227,9 @@ namespace QuanLyDuAn.Constants
             if (normalized == Normalize(NgungHoatDong)) return NgungHoatDongHienThi;
             if (normalized == Normalize(DangSuDung)) return DangSuDungHienThi;
             if (normalized == Normalize(TreTienDo)) return TreTienDoHienThi;
+            if (normalized == Normalize(TaiKhoanHoatDong)) return TaiKhoanHoatDongHienThi;
+            if (normalized == Normalize(TaiKhoanChoKichHoat)) return TaiKhoanChoKichHoatHienThi;
+            if (normalized == Normalize(TaiKhoanKhoa)) return TaiKhoanKhoaHienThi;
 
             return value ?? string.Empty;
         }

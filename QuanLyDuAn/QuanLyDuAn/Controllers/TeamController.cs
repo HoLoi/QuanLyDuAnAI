@@ -24,19 +24,21 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? tuKhoa, string? locTrangThaiTeam)
+        public async Task<IActionResult> Index(string? tuKhoa, string? locTrangThaiTeam, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.Nhom.Xem))
                 return Forbid();
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+            var paged = await _service.GetPagedAsync(tuKhoa, locTrangThaiTeam, pageNumber, pageSize);
 
             var vm = new TeamPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locTrangThaiTeam),
+                DanhSach = paged.Items,
                 Form = new(),
                 TuKhoa = tuKhoa,
                 LocTrangThaiTeam = locTrangThaiTeam,
+                Pagination = paged.Pagination,
                 Permissions = permissions
             };
 
@@ -44,7 +46,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Sua(int id, string? tuKhoa, string? locTrangThaiTeam)
+        public async Task<IActionResult> Sua(int id, string? tuKhoa, string? locTrangThaiTeam, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.Nhom.Sua))
                 return Forbid();
@@ -57,13 +59,15 @@ namespace QuanLyDuAn.Controllers
             }
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+            var paged = await _service.GetPagedAsync(tuKhoa, locTrangThaiTeam, pageNumber, pageSize);
 
             var vm = new TeamPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locTrangThaiTeam),
+                DanhSach = paged.Items,
                 Form = form,
                 TuKhoa = tuKhoa,
                 LocTrangThaiTeam = locTrangThaiTeam,
+                Pagination = paged.Pagination,
                 Permissions = permissions
             };
 
@@ -77,7 +81,9 @@ namespace QuanLyDuAn.Controllers
 
             if (!ModelState.IsValid)
             {
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocTrangThaiTeam);
+                var paged = await _service.GetPagedAsync(vm.TuKhoa, vm.LocTrangThaiTeam);
+                vm.DanhSach = paged.Items;
+                vm.Pagination = paged.Pagination;
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
             }
@@ -106,7 +112,9 @@ namespace QuanLyDuAn.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("Form.TenTeam", ex.Message);
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocTrangThaiTeam);
+                var paged = await _service.GetPagedAsync(vm.TuKhoa, vm.LocTrangThaiTeam);
+                vm.DanhSach = paged.Items;
+                vm.Pagination = paged.Pagination;
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
             }

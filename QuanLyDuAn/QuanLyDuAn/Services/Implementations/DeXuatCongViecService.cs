@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DeXuatCongViec;
 using System.Security.Claims;
 
@@ -24,7 +25,10 @@ namespace QuanLyDuAn.Services.Implementations
             string? locTrangThai,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = PaginationViewModel.DefaultPageSize,
+            bool paginate = true)
         {
             if (!locMaDuAn.HasValue)
                 throw new Exception("Vui lòng chọn dự án.");
@@ -126,6 +130,19 @@ namespace QuanLyDuAn.Services.Implementations
                 select cp.SoTienDaChi ?? 0
             ).SumAsync();
 
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+            IQueryable<DeXuatCongViecItemViewModel> danhSachQuery = query
+                .OrderByDescending(x => x.NgayDeXuatCongViec)
+                .ThenByDescending(x => x.MaDeXuatCV);
+
+            if (paginate)
+            {
+                danhSachQuery = danhSachQuery
+                    .Skip(pagination.Skip)
+                    .Take(pagination.PageSize);
+            }
+
             return new DeXuatCongViecPageViewModel
             {
                 MaDuAn = selectedProject.MaDuAn,
@@ -133,10 +150,8 @@ namespace QuanLyDuAn.Services.Implementations
                 NganSachDuAn = nganSachHienTai,
                 TongChiPhiDaDung = tongChiPhiDaDung,
                 HasApprovedBudget = nganSachHienTai.HasValue,
-                DanhSach = await query
-                    .OrderByDescending(x => x.NgayDeXuatCongViec)
-                    .ThenByDescending(x => x.MaDeXuatCV)
-                    .ToListAsync(),
+                DanhSach = await danhSachQuery.ToListAsync(),
+                Pagination = pagination,
                 DanhSachDuAn = projectOptions,
                 DanhSachDanhMuc = danhSachDanhMuc,
                 DanhSachMucDo = danhSachMucDo,

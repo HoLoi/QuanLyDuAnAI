@@ -1,4 +1,5 @@
-﻿using QuanLyDuAn.ViewModels.DuAn;
+﻿using QuanLyDuAn.ViewModels.Common;
+using QuanLyDuAn.ViewModels.DuAn;
 
 namespace QuanLyDuAn.Services.Interfaces
 {
@@ -11,6 +12,15 @@ namespace QuanLyDuAn.Services.Interfaces
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay);
+        Task<PagedResultViewModel<DuAnViewModel>> GetPagedAsync(
+            string? tuKhoa,
+            int? maLoaiDuAn,
+            string? trangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = 20);
         Task<DuAnChiTietViewModel?> GetChiTietAsync(int id);
         Task<DuAnCreateUpdateViewModel?> GetByIdAsync(int id);
         Task<List<LoaiDuAnOptionViewModel>> GetLoaiDuAnOptionsAsync();
@@ -30,3 +40,4 @@ namespace QuanLyDuAn.Services.Interfaces
         Task PauseProjectAsync(int maDuAn, string ghiChuDuAn);
     }
 }
+

@@ -40,16 +40,21 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
 
+            var paged = await _service.GetPagedAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, pageNumber, pageSize);
+
             var vm = new DuAnPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay),
+                DanhSach = paged.Items,
+                Pagination = paged.Pagination,
                 Form = new(),
                 DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync(),
                 TuKhoa = tuKhoa,
@@ -272,7 +277,7 @@ namespace QuanLyDuAn.Controllers
 
             var vm = new DuAnPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay),
+                DanhSach = (await _service.GetPagedAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay)).Items,
                 Form = form,
                 DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync(),
                 TuKhoa = tuKhoa,

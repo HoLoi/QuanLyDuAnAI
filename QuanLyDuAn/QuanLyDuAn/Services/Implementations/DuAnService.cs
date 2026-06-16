@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DuAn;
 using System.Security.Claims;
 
@@ -122,6 +123,117 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<PagedResultViewModel<DuAnViewModel>> GetPagedAsync(
+            string? tuKhoa,
+            int? maLoaiDuAn,
+            string? trangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = PaginationViewModel.DefaultPageSize)
+        {
+            var currentUserId = await GetCurrentUserIdAsync();
+            var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgay, denNgay);
+            var locTheo = string.IsNullOrWhiteSpace(locTheoNgay) ? "NgayTao" : locTheoNgay.Trim();
+
+            var query = from da in _context.DuAn
+                        join loai in _context.LoaiDuAn on da.MaLoaiDuAn equals loai.MaLoaiDuAn
+                        where da.IsDeleted != true
+                        select new DuAnViewModel
+                        {
+                            MaDuAn = da.MaDuAn,
+                            TenDuAn = da.TenDuAn ?? string.Empty,
+                            MoTaDuAn = da.MoTaDuAn,
+                            MaNguoiDung = da.MaNguoiDung,
+                            TenNguoiQuanLy = string.Empty,
+                            MaLoaiDuAn = da.MaLoaiDuAn,
+                            TenLoaiDuAn = loai.TenLoai ?? string.Empty,
+                            NgayTaoDuAn = da.NgayTaoDuAn,
+                            NgayBatDauDuAn = da.NgayBatDauDuAn,
+                            NgayKetThucDuAn = da.NgayKetThucDuAn,
+                            NgayHoanThanhThucTeDuAn = da.NgayHoanThanhThucTeDuAn,
+                            PhanTramHoanThanh = da.PhanTramHoanThanh ?? 0,
+                            TrangThaiDuAn = da.TrangThaiDuAn ?? string.Empty,
+                            SoLuongTeam = _context.TeamDuAn.Count(x => x.MaDuAn == da.MaDuAn),
+                            SoLuongThanhVien = _context.NhanVienDuAn.Count(x => x.MaDuAn == da.MaDuAn),
+                            HasApprovedBudget = _context.NganSach.Any(x =>
+                                x.MaDuAn == da.MaDuAn
+                                && x.IsDeleted != true
+                                && x.IsActive == true
+                                && (x.TrangThaiNganSach == TrangThai.DaDuyet || x.TrangThaiNganSach == TrangThai.DaDuyetHienThi))
+                        };
+
+            if (isManager)
+            {
+                query = query.Where(x => x.MaNguoiDung == currentUserId);
+            }
+            else if (isEmployee)
+            {
+                query = query.Where(x => _context.NhanVienDuAn.Any(nv =>
+                    nv.MaDuAn == x.MaDuAn && nv.MaNguoiDung == currentUserId));
+            }
+
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var keyword = tuKhoa.Trim().ToLower();
+                query = query.Where(x =>
+                    x.TenDuAn.ToLower().Contains(keyword) ||
+                    x.TenLoaiDuAn.ToLower().Contains(keyword) ||
+                    (x.MoTaDuAn != null && x.MoTaDuAn.ToLower().Contains(keyword)));
+            }
+
+            if (maLoaiDuAn.HasValue && maLoaiDuAn.Value > 0)
+            {
+                query = query.Where(x => x.MaLoaiDuAn == maLoaiDuAn.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThaiDuAn))
+            {
+                var filterValues = TrangThai.GetCommonStatusVariants(trangThaiDuAn);
+                if (filterValues.Length > 0)
+                {
+                    query = query.Where(x => filterValues.Contains(x.TrangThaiDuAn));
+                }
+            }
+
+            if (tuNgayLoc.HasValue)
+            {
+                query = locTheo switch
+                {
+                    "NgayBatDau" => query.Where(x => x.NgayBatDauDuAn.HasValue && x.NgayBatDauDuAn.Value >= tuNgayLoc.Value),
+                    "NgayKetThuc" => query.Where(x => x.NgayKetThucDuAn.HasValue && x.NgayKetThucDuAn.Value >= tuNgayLoc.Value),
+                    _ => query.Where(x => x.NgayTaoDuAn.HasValue && x.NgayTaoDuAn.Value >= tuNgayLoc.Value)
+                };
+            }
+
+            if (denNgayLoc.HasValue)
+            {
+                var denNgayDocQuyen = denNgayLoc.Value.AddDays(1);
+                query = locTheo switch
+                {
+                    "NgayBatDau" => query.Where(x => x.NgayBatDauDuAn.HasValue && x.NgayBatDauDuAn.Value < denNgayDocQuyen),
+                    "NgayKetThuc" => query.Where(x => x.NgayKetThucDuAn.HasValue && x.NgayKetThucDuAn.Value < denNgayDocQuyen),
+                    _ => query.Where(x => x.NgayTaoDuAn.HasValue && x.NgayTaoDuAn.Value < denNgayDocQuyen)
+                };
+            }
+
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+            var items = await query
+                .OrderByDescending(x => x.MaDuAn)
+                .Skip(pagination.Skip)
+                .Take(pagination.PageSize)
+                .ToListAsync();
+
+            return new PagedResultViewModel<DuAnViewModel>
+            {
+                Items = items,
+                Pagination = pagination
+            };
         }
 
         public async Task<DuAnChiTietViewModel?> GetChiTietAsync(int id)
@@ -1388,3 +1500,4 @@ namespace QuanLyDuAn.Services.Implementations
         #endregion
     }
 }
+

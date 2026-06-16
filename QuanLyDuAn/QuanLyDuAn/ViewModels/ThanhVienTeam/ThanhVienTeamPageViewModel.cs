@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.ThanhVienTeam
 {
     public class ThanhVienTeamPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public List<ThanhVienTeamViewModel> DanhSach { get; set; } = new();
         public ThanhVienTeamCreateUpdateViewModel Form { get; set; } = new();
         public List<TeamOptionViewModel> DanhSachTeam { get; set; } = new();

@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.NhanVienDuAn
 {
     public class NhanVienDuAnPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public int MaDuAn { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public string TrangThaiDuAn { get; set; } = string.Empty;

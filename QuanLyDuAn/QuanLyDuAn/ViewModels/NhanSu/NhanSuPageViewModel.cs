@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.NhanSu
 {
     public class NhanSuPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public List<NhanSuViewModel> DanhSach { get; set; } = new();
         public NhanSuCreateUpdateViewModel Form { get; set; } = new();
         public List<ChucDanhOptionViewModel> DanhSachChucDanh { get; set; } = new();

@@ -33,6 +33,15 @@
                 <h2 class="auth-card-title">Đăng nhập</h2>
                 <p class="auth-card-description">Vui lòng nhập thông tin tài khoản.</p>
 
+                @if (TempData["Success"] is string successMessage)
+                {
+                    <div class="alert alert-success">@successMessage</div>
+                }
+                @if (TempData["Error"] is string errorMessage)
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
                 <form asp-action="Login" method="post" class="auth-form">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="returnUrl" value="@returnUrl" />

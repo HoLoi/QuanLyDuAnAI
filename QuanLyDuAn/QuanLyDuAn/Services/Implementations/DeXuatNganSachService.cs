@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DeXuatNganSach;
 using System.Security.Claims;
 
@@ -24,7 +25,10 @@ namespace QuanLyDuAn.Services.Implementations
             string? locTrangThai,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = PaginationViewModel.DefaultPageSize,
+            bool paginate = true)
         {
             if (!locMaDuAn.HasValue)
                 throw new Exception("Vui lòng chọn dự án.");
@@ -115,6 +119,19 @@ namespace QuanLyDuAn.Services.Implementations
                 select cv.MaCongViec
             ).CountAsync();
 
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+            IQueryable<DeXuatNganSachItemViewModel> danhSachQuery = query
+                .OrderByDescending(x => x.NgayDeXuat)
+                .ThenByDescending(x => x.MaDeXuatNS);
+
+            if (paginate)
+            {
+                danhSachQuery = danhSachQuery
+                    .Skip(pagination.Skip)
+                    .Take(pagination.PageSize);
+            }
+
             return new DeXuatNganSachPageViewModel
             {
                 MaDuAn = selectedProject.MaDuAn,
@@ -122,10 +139,8 @@ namespace QuanLyDuAn.Services.Implementations
                 NganSachDuAn = nganSachHienTai,
                 TongChiPhiDaDung = tongChiPhiDaDung,
                 TongCongViecDuAn = tongCongViecDuAn,
-                DanhSach = await query
-                    .OrderByDescending(x => x.NgayDeXuat)
-                    .ThenByDescending(x => x.MaDeXuatNS)
-                    .ToListAsync(),
+                DanhSach = await danhSachQuery.ToListAsync(),
+                Pagination = pagination,
                 DanhSachDuAn = projectOptions,
                 Form = new DeXuatNganSachCreateViewModel
                 {

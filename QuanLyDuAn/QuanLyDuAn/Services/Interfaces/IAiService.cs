@@ -9,7 +9,7 @@ namespace QuanLyDuAn.Services.Interfaces
         Task<AiTrainPageViewModel> LayTrangTrainAsync(CancellationToken cancellationToken = default);
         Task<AiOperationResultViewModel<AiTrainResponseViewModel>> TrainAsync(string modelType, bool activateAfterTrain, string? trainNote, CancellationToken cancellationToken = default);
 
-        Task<AiModelPageViewModel> LayTrangModelAsync(string? modelDangXem, string? boLocLoaiModel, CancellationToken cancellationToken = default);
+        Task<AiModelPageViewModel> LayTrangModelAsync(string? modelDangXem, string? boLocLoaiModel, CancellationToken cancellationToken = default, int pageNumber = 1, int pageSize = 20);
         Task<AiOperationResultViewModel<AiValidateModelResponseViewModel>> ValidateModelAsync(string modelFile, string modelType, CancellationToken cancellationToken = default);
         Task<AiOperationResultViewModel<AiCompareModelResponseViewModel>> CompareModelAsync(string currentModelFile, string newModelFile, string modelType, CancellationToken cancellationToken = default);
         Task<AiOperationResultViewModel<AiModelActivationResultViewModel>> DatModelHoatDongAsync(string modelFile, string modelType, CancellationToken cancellationToken = default);

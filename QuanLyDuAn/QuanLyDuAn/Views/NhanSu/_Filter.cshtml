@@ -31,6 +31,7 @@
         <select name="locTrangThaiTaiKhoan" class="form-select">
             <option value="">-- Tất cả trạng thái tài khoản --</option>
             <option value="@TrangThai.TaiKhoanHoatDong" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.TaiKhoanHoatDong) ? "selected" : null)">@TrangThai.TaiKhoanHoatDongHienThi</option>
+            <option value="@TrangThai.TaiKhoanChoKichHoat" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.TaiKhoanChoKichHoat) ? "selected" : null)">@TrangThai.TaiKhoanChoKichHoatHienThi</option>
             <option value="@TrangThai.TaiKhoanKhoa" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.TaiKhoanKhoa) ? "selected" : null)">@TrangThai.TaiKhoanKhoaHienThi</option>
         </select>
     </div>

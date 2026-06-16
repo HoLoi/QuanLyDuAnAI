@@ -8,7 +8,9 @@ namespace QuanLyDuAn.Services.Interfaces
             int maDuAn,
             string? tuKhoa,
             int? locMaLoaiDuAn,
-            string? locTrangThaiDuAn);
+            string? locTrangThaiDuAn,
+            int pageNumber = 1,
+            int pageSize = 20);
 
         Task AddAsync(int maDuAn, List<int> maNguoiDungDuocChon);
         Task UpdateRoleAsync(int maDuAn, int maNguoiDung, string vaiTroTrongDuAn);

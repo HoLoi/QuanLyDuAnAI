@@ -29,16 +29,24 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? tuKhoa, int? locMaChucDanh, string? locTrangThaiTaiKhoan)
+        public async Task<IActionResult> Index(
+            string? tuKhoa,
+            int? locMaChucDanh,
+            string? locTrangThaiTaiKhoan,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.NhanSu.Xem))
                 return Forbid();
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
 
+            var paged = await _service.GetPagedAsync(tuKhoa, locMaChucDanh, locTrangThaiTaiKhoan, pageNumber, pageSize);
+
             var vm = new NhanSuPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaChucDanh, locTrangThaiTaiKhoan),
+                DanhSach = paged.Items,
+                Pagination = paged.Pagination,
                 Form = new(),
                 DanhSachChucDanh = await _service.GetChucDanhOptionsAsync(),
                 DanhSachVaiTroHeThong = await _service.GetVaiTroHeThongOptionsAsync(),
@@ -68,7 +76,7 @@ namespace QuanLyDuAn.Controllers
 
             var vm = new NhanSuPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(null, null, null),
+                DanhSach = (await _service.GetPagedAsync(null, null, null)).Items,
                 Form = form,
                 DanhSachChucDanh = await _service.GetChucDanhOptionsAsync(),
                 DanhSachVaiTroHeThong = await _service.GetVaiTroHeThongOptionsAsync(),
@@ -85,6 +93,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LuuNhanSu(NhanSuPageViewModel vm)
         {
             var model = vm.Form;
@@ -113,7 +122,9 @@ namespace QuanLyDuAn.Controllers
             {
                 var laAdminDangThaoTac = User.IsInRole("ADMIN") || User.IsInRole("Admin");
                 var warning = await _service.SaveAsync(model, laAdminDangThaoTac);
-                TempData["Success"] = "Đã lưu nhân sự";
+                TempData["Success"] = model.MaNguoiDung == null && string.IsNullOrWhiteSpace(warning)
+                    ? "Đã tạo nhân sự và gửi email kích hoạt đến địa chỉ đã đăng ký."
+                    : "Đã lưu nhân sự";
                 if (!string.IsNullOrWhiteSpace(warning))
                 {
                     TempData["Warning"] = warning;
@@ -133,6 +144,34 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GuiLaiEmailKichHoat(int maNguoiDung)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.NhanSu.Sua))
+                return Forbid();
+
+            try
+            {
+                var warning = await _service.GuiLaiEmailKichHoatAsync(maNguoiDung);
+                if (string.IsNullOrWhiteSpace(warning))
+                {
+                    TempData["Success"] = "Đã gửi lại email kích hoạt.";
+                }
+                else
+                {
+                    TempData["Warning"] = warning;
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> XoaNhanSu(int maNguoiDung)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.NhanSu.Xoa))
@@ -152,6 +191,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> KhoaTaiKhoan(int maNguoiDung)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.NhanSu.Khoa))
@@ -171,6 +211,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MoKhoaTaiKhoan(int maNguoiDung)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.NhanSu.MoKhoa))
@@ -223,7 +264,7 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Ngày sinh", ValueSelector = row => ExportSupport.FormatDate(((NhanSuViewModel)row).NgaySinh) },
                     new() { Header = "Username", ValueSelector = row => ((NhanSuViewModel)row).UserName ?? string.Empty },
                     new() { Header = "Email", ValueSelector = row => ((NhanSuViewModel)row).Email ?? string.Empty },
-                    new() { Header = "Trạng thái tài khoản", ValueSelector = row => ((NhanSuViewModel)row).TaiKhoanBiKhoa ? TrangThai.TaiKhoanKhoaHienThi : TrangThai.TaiKhoanHoatDongHienThi }
+                    new() { Header = "Trạng thái tài khoản", ValueSelector = row => ((NhanSuViewModel)row).TrangThaiTaiKhoan }
                 },
                 Rows = rows
             };

@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.DeXuatCongViec
 {
     public class DeXuatCongViecPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public int MaDuAn { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public List<DeXuatCongViecItemViewModel> DanhSach { get; set; } = new();

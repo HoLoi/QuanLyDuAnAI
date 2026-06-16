@@ -36,7 +36,9 @@ namespace QuanLyDuAn.Controllers
             string? trangThai,
             string? nguon,
             DateTime? tuNgayDanhGia,
-            DateTime? denNgayDanhGia)
+            DateTime? denNgayDanhGia,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DanhGiaNhanVien.Xem))
             {
@@ -45,7 +47,7 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                var vm = await _service.GetPageAsync(maDuAn, maNhanVien, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia);
+                var vm = await _service.GetPageAsync(maDuAn, maNhanVien, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia, pageNumber, pageSize);
                 vm.Nguon = nguon;
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View(vm);
@@ -260,7 +262,7 @@ namespace QuanLyDuAn.Controllers
                 return Forbid();
             }
 
-            var page = await _service.GetPageAsync(maDuAn, maNhanVien, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia);
+            var page = await _service.GetPageAsync(maDuAn, maNhanVien, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia, paginate: false);
             var rows = page.DanhSach.Cast<object>().ToList();
 
             var exportRequest = new ExportFileRequest

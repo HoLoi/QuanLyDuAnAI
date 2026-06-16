@@ -34,6 +34,10 @@
                     {
                         <span class="workflow-badge workflow-blocked">@TrangThai.TaiKhoanKhoaHienThi</span>
                     }
+                    else if (ns.ChoKichHoat)
+                    {
+                        <span class="workflow-badge workflow-idle">@TrangThai.TaiKhoanChoKichHoatHienThi</span>
+                    }
                     else
                     {
                         <span class="workflow-badge workflow-success">@TrangThai.TaiKhoanHoatDongHienThi</span>
@@ -50,6 +54,14 @@
                         <form asp-action="XoaNhanSu" method="post">
                             <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
                             <button type="submit" class="btn-action btn-danger-soft">Xóa</button>
+                        </form>
+                    }
+
+                    @if (ns.CoTheGuiLaiKichHoat && permissions.Contains(Permissions.NhanSu.Sua))
+                    {
+                        <form asp-action="GuiLaiEmailKichHoat" method="post">
+                            <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
+                            <button type="submit" class="btn-action btn-subtle">Gửi kích hoạt</button>
                         </form>
                     }
 

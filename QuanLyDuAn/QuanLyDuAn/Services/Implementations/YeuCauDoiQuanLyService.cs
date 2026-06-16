@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.YeuCauDoiQuanLy;
 using System.Security.Claims;
 
@@ -19,7 +20,13 @@ namespace QuanLyDuAn.Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<YeuCauDoiQuanLyPageViewModel> GetPageAsync(int? maDuAn, string? trangThai, string? tuKhoa)
+        public async Task<YeuCauDoiQuanLyPageViewModel> GetPageAsync(
+            int? maDuAn,
+            string? trangThai,
+            string? tuKhoa,
+            int pageNumber = 1,
+            int pageSize = PaginationViewModel.DefaultPageSize,
+            bool paginate = true)
         {
             var currentUserId = await GetCurrentUserIdAsync();
             await EnsureManagerCanCreateAsync(currentUserId);
@@ -91,10 +98,20 @@ namespace QuanLyDuAn.Services.Implementations
                     || x.TenQuanLyDeXuat.ToLower().Contains(keyword));
             }
 
-            var danhSachYeuCau = await query
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+            IQueryable<YeuCauDoiQuanLyItemViewModel> danhSachQuery = query
                 .OrderByDescending(x => x.NgayTaoYeuCauDoiQuanLy)
-                .ThenByDescending(x => x.MaYeuCauDoiQuanLy)
-                .ToListAsync();
+                .ThenByDescending(x => x.MaYeuCauDoiQuanLy);
+
+            if (paginate)
+            {
+                danhSachQuery = danhSachQuery
+                    .Skip(pagination.Skip)
+                    .Take(pagination.PageSize);
+            }
+
+            var danhSachYeuCau = await danhSachQuery.ToListAsync();
 
             return new YeuCauDoiQuanLyPageViewModel
             {
@@ -109,6 +126,7 @@ namespace QuanLyDuAn.Services.Implementations
                 LyDoKhongTheTaoYeuCau = canCreateResult.Reason,
                 DanhSachQuanLy = managerOptions,
                 DanhSachYeuCau = danhSachYeuCau,
+                Pagination = pagination,
                 Form = new YeuCauDoiQuanLyCreateViewModel
                 {
                     MaDuAn = managedProject.MaDuAn

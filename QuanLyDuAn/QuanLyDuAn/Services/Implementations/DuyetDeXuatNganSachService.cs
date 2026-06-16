@@ -4,6 +4,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DuyetDeXuatNganSach;
 using System;
 using System.Data;
@@ -24,7 +25,12 @@ namespace QuanLyDuAn.Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<DuyetDeXuatNganSachPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai)
+        public async Task<DuyetDeXuatNganSachPageViewModel> GetPageAsync(
+            int? locMaDuAn,
+            string? locTrangThai,
+            int pageNumber = 1,
+            int pageSize = PaginationViewModel.DefaultPageSize,
+            bool paginate = true)
         {
             var currentUserId = await GetCurrentUserIdAsync();
 
@@ -67,12 +73,23 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+            IQueryable<DuyetDeXuatNganSachItemViewModel> danhSachQuery = query
+                .OrderByDescending(x => x.NgayDeXuat)
+                .ThenByDescending(x => x.MaDeXuatNS);
+
+            if (paginate)
+            {
+                danhSachQuery = danhSachQuery
+                    .Skip(pagination.Skip)
+                    .Take(pagination.PageSize);
+            }
+
             return new DuyetDeXuatNganSachPageViewModel
             {
-                DanhSach = await query
-                    .OrderByDescending(x => x.NgayDeXuat)
-                    .ThenByDescending(x => x.MaDeXuatNS)
-                    .ToListAsync(),
+                DanhSach = await danhSachQuery.ToListAsync(),
+                Pagination = pagination,
                 LocMaDuAn = locMaDuAn,
                 LocTrangThai = locTrangThai
             };

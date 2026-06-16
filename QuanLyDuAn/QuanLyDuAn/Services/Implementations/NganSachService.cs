@@ -2,6 +2,7 @@
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.NganSach;
 using System.Security.Claims;
 
@@ -18,7 +19,7 @@ namespace QuanLyDuAn.Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<NganSachPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai)
+        public async Task<NganSachPageViewModel> GetPageAsync(int? locMaDuAn, string? locTrangThai, int pageNumber = 1, int pageSize = 20, bool paginate = true)
         {
             var allowedProjectIds = await GetAccessibleProjectIdsAsync();
             var projectOptions = await GetProjectOptionsAsync(allowedProjectIds);
@@ -67,28 +68,36 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
-            var danhSach = await query
-                .OrderByDescending(x => x.NgayDuyetNganSach)
-                .ThenByDescending(x => x.MaNganSach)
-                .ToListAsync();
-
-            var maNganSachList = danhSach
-                .Select(x => x.MaNganSach)
-                .Distinct()
-                .ToList();
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+            var maNganSachQuery = query.Select(x => x.MaNganSach);
 
             decimal tongDaSuDung = 0;
-            if (maNganSachList.Count > 0)
+            if (totalItems > 0)
             {
                 tongDaSuDung = await _context.ChiPhi
-                    .Where(x => x.IsDeleted != true && maNganSachList.Contains(x.MaNganSach))
+                    .Where(x => x.IsDeleted != true && maNganSachQuery.Contains(x.MaNganSach))
                     .SumAsync(x => x.SoTienDaChi ?? 0);
             }
 
-            var tongNganSach = danhSach.Sum(x => x.SoTienNganSach ?? 0);
-            var tongNganSachDangHieuLuc = danhSach
+            var tongNganSach = await query.SumAsync(x => x.SoTienNganSach ?? 0);
+            var tongNganSachDangHieuLuc = await query
                 .Where(x => x.IsActive)
-                .Sum(x => x.SoTienNganSach ?? 0);
+                .SumAsync(x => x.SoTienNganSach ?? 0);
+
+            var orderedQuery = query
+                .OrderByDescending(x => x.NgayDuyetNganSach)
+                .ThenByDescending(x => x.MaNganSach)
+                .AsQueryable();
+
+            if (paginate)
+            {
+                orderedQuery = orderedQuery
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize);
+            }
+
+            var danhSach = await orderedQuery.ToListAsync();
 
             return new NganSachPageViewModel
             {
@@ -99,7 +108,8 @@ namespace QuanLyDuAn.Services.Implementations
                 TongNganSach = tongNganSach,
                 TongNganSachDangHieuLuc = tongNganSachDangHieuLuc,
                 TongDaSuDung = tongDaSuDung,
-                TongConLai = tongNganSachDangHieuLuc - tongDaSuDung
+                TongConLai = tongNganSachDangHieuLuc - tongDaSuDung,
+                Pagination = pagination
             };
         }
 

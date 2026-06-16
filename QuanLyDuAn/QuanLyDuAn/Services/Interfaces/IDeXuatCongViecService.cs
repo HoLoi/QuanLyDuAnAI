@@ -9,7 +9,10 @@ namespace QuanLyDuAn.Services.Interfaces
             string? locTrangThai,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay);
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = 20,
+            bool paginate = true);
         Task CreateAsync(DeXuatCongViecCreateViewModel model);
         Task CancelAsync(int maDeXuatCv);
     }

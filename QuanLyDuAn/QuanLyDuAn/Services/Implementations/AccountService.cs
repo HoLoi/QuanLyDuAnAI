@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
+using QuanLyDuAn.Services;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Account;
 
 namespace QuanLyDuAn.Services.Implementations;
 
@@ -39,7 +41,7 @@ public class AccountService : IAccountService
                 x.NormalizedUserName == normalizedUserName
                 || x.UserName == userName.Trim());
 
-        if (account is null || string.IsNullOrWhiteSpace(account.PasswordHash))
+        if (account is null)
         {
             throw new Exception("Tên đăng nhập hoặc mật khẩu không đúng.");
         }
@@ -50,6 +52,16 @@ public class AccountService : IAccountService
         if (taiKhoanBiKhoa)
         {
             throw new Exception("Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.");
+        }
+
+        if (!account.EmailConfirmed)
+        {
+            throw new Exception("Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email hoặc liên hệ quản trị viên.");
+        }
+
+        if (string.IsNullOrWhiteSpace(account.PasswordHash))
+        {
+            throw new Exception("Tên đăng nhập hoặc mật khẩu không đúng.");
         }
 
         var verifyResult = _passwordHasher.VerifyHashedPassword(account, account.PasswordHash, password);
@@ -146,6 +158,74 @@ public class AccountService : IAccountService
         return new ClaimsPrincipal(identity);
     }
 
+    public async Task<ActivateAccountViewModel> TaoFormKichHoatAsync(string userId, string token)
+    {
+        var account = await LayTaiKhoanKichHoatHopLeAsync(userId, token, xoaTokenHetHan: false);
+
+        return new ActivateAccountViewModel
+        {
+            UserId = userId.Trim(),
+            Token = token.Trim(),
+            TenDangNhapHienThi = CheBot(account.UserName),
+            EmailHienThi = CheBotEmail(account.Email)
+        };
+    }
+
+    public async Task KichHoatTaiKhoanAsync(ActivateAccountViewModel model)
+    {
+        if (model is null || string.IsNullOrWhiteSpace(model.UserId) || string.IsNullOrWhiteSpace(model.Token))
+        {
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+        var userId = model.UserId.Trim();
+        var token = model.Token.Trim();
+        var account = await _dbContext.Aspnetusers.FirstOrDefaultAsync(x => x.Id == userId);
+        var activationToken = await _dbContext.Aspnetusertokens.FirstOrDefaultAsync(x =>
+            x.Id == userId
+            && x.LoginProvider == AccountActivationTokenHelper.LoginProvider
+            && x.Name == AccountActivationTokenHelper.TokenName);
+
+        if (account is null || activationToken is null)
+        {
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (account.EmailConfirmed)
+        {
+            _dbContext.Aspnetusertokens.Remove(activationToken);
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+            throw new Exception("Tài khoản đã được kích hoạt trước đó.");
+        }
+
+        var payload = AccountActivationTokenHelper.Deserialize(activationToken.Value);
+        if (payload is null || payload.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            _dbContext.Aspnetusertokens.Remove(activationToken);
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (!AccountActivationTokenHelper.IsTokenMatch(payload.TokenHash, token))
+        {
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        account.PasswordHash = _passwordHasher.HashPassword(account, model.Password);
+        account.EmailConfirmed = true;
+        account.SecurityStamp = Guid.NewGuid().ToString("N");
+        account.ConcurrencyStamp = Guid.NewGuid().ToString("N");
+        account.AccessFailedCount = 0;
+
+        _dbContext.Aspnetusertokens.Remove(activationToken);
+        await _dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
+    }
+
     public async Task<string> KhoiTaoQuenMatKhauAsync(string tenDangNhapHoacEmail)
     {
         var maPhien = TaoMaPhien();
@@ -164,7 +244,7 @@ public class AccountService : IAccountService
                 || x.NormalizedEmail == normalizedInput
                 || x.Email == thongTinDangNhap);
 
-        if (account is null || string.IsNullOrWhiteSpace(account.Email))
+        if (account is null || string.IsNullOrWhiteSpace(account.Email) || !account.EmailConfirmed)
         {
             return maPhien;
         }
@@ -389,6 +469,82 @@ public class AccountService : IAccountService
         {
             _dbContext.Aspnetusertokens.RemoveRange(tokens);
         }
+    }
+
+    private async Task<Aspnetusers> LayTaiKhoanKichHoatHopLeAsync(string userId, string token, bool xoaTokenHetHan)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+        {
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        var normalizedUserId = userId.Trim();
+        var account = await _dbContext.Aspnetusers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == normalizedUserId);
+
+        if (account is null)
+        {
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (account.EmailConfirmed)
+        {
+            throw new Exception("Tài khoản đã được kích hoạt trước đó.");
+        }
+
+        var activationToken = await _dbContext.Aspnetusertokens.FirstOrDefaultAsync(x =>
+            x.Id == normalizedUserId
+            && x.LoginProvider == AccountActivationTokenHelper.LoginProvider
+            && x.Name == AccountActivationTokenHelper.TokenName);
+
+        if (activationToken is null)
+        {
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        var payload = AccountActivationTokenHelper.Deserialize(activationToken.Value);
+        if (payload is null || payload.ExpiresAtUtc <= DateTime.UtcNow)
+        {
+            if (xoaTokenHetHan)
+            {
+                _dbContext.Aspnetusertokens.Remove(activationToken);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (!AccountActivationTokenHelper.IsTokenMatch(payload.TokenHash, token.Trim()))
+        {
+            throw new Exception("Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.");
+        }
+
+        return account;
+    }
+
+    private static string? CheBot(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var trimmed = value.Trim();
+        return trimmed.Length <= 2
+            ? new string('*', trimmed.Length)
+            : $"{trimmed[0]}***{trimmed[^1]}";
+    }
+
+    private static string? CheBotEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        {
+            return CheBot(email);
+        }
+
+        var parts = email.Trim().Split('@', 2);
+        return $"{CheBot(parts[0])}@{parts[1]}";
     }
 
     private static string TaoMaPhien() => Guid.NewGuid().ToString("N");

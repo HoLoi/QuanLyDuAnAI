@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -33,6 +34,42 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<AiApiOptions>(builder.Configuration.GetSection(AiApiOptions.SectionName));
+builder.Services
+    .AddOptions<AccountActivationOptions>()
+    .Bind(builder.Configuration.GetSection(AccountActivationOptions.SectionName))
+    .Validate(
+        options => options.TokenLifetimeHours > 0,
+        "AccountActivation:TokenLifetimeHours phải lớn hơn 0.")
+    .Validate(
+        options => options.ResendCooldownSeconds > 0,
+        "AccountActivation:ResendCooldownSeconds phải lớn hơn 0.")
+    .Validate(
+        options =>
+        {
+            if (!Uri.TryCreate(options.AppBaseUrl?.Trim(), UriKind.Absolute, out var uri))
+            {
+                return false;
+            }
+
+            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            {
+                return false;
+            }
+
+            if (uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (IPAddress.TryParse(uri.Host, out var ipAddress) && IPAddress.IsLoopback(ipAddress))
+            {
+                return false;
+            }
+
+            return true;
+        },
+        "AccountActivation:AppBaseUrl phải là URL HTTP/HTTPS tuyệt đối và không được dùng localhost/loopback.")
+    .ValidateOnStart();
 
 builder.Services.AddHttpClient<IAiApiService, AiApiService>((serviceProvider, client) =>
 {
@@ -54,9 +91,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();

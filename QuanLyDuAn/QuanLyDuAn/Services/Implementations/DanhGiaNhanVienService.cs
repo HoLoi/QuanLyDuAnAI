@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DanhGiaNhanVien;
 using System.Security.Claims;
 
@@ -46,7 +47,10 @@ namespace QuanLyDuAn.Services.Implementations
             string? tuKhoa,
             string? trangThai,
             DateTime? tuNgayDanhGia,
-            DateTime? denNgayDanhGia)
+            DateTime? denNgayDanhGia,
+            int pageNumber = 1,
+            int pageSize = 20,
+            bool paginate = true)
         {
             KiemTraQuyenTheoClaim(Permissions.DanhGiaNhanVien.Xem);
             var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgayDanhGia, denNgayDanhGia);
@@ -124,22 +128,81 @@ namespace QuanLyDuAn.Services.Implementations
                     || (x.TenNhanVien ?? string.Empty).ToLower().Contains(keyword));
             }
 
-            var candidateRows = await query
+            query = query.Where(x => x.MaNhanVien != currentUserId);
+
+            if (tuNgayLoc.HasValue)
+            {
+                query = query.Where(x => _context.DanhGiaNhanVien
+                    .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn && dg.MaNguoiDung == x.MaNhanVien)
+                    .OrderByDescending(dg => dg.NgayDanhGiaNV)
+                    .ThenByDescending(dg => dg.MaDanhGiaNhanVien)
+                    .Select(dg => dg.NgayDanhGiaNV)
+                    .FirstOrDefault() >= tuNgayLoc.Value);
+            }
+
+            if (denNgayDocQuyen.HasValue)
+            {
+                query = query.Where(x => _context.DanhGiaNhanVien
+                    .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn && dg.MaNguoiDung == x.MaNhanVien)
+                    .OrderByDescending(dg => dg.NgayDanhGiaNV)
+                    .ThenByDescending(dg => dg.MaDanhGiaNhanVien)
+                    .Select(dg => dg.NgayDanhGiaNV)
+                    .FirstOrDefault() < denNgayDocQuyen.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                if (LaTrangThaiDanhGia(TrangThaiChuaDanhGia, trangThai))
+                {
+                    query = query.Where(x => !_context.DanhGiaNhanVien
+                        .Any(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn && dg.MaNguoiDung == x.MaNhanVien));
+                }
+                else
+                {
+                    var trangThaiFilterValues = TrangThai.GetCommonStatusVariants(trangThai);
+                    if (trangThaiFilterValues.Length > 0)
+                    {
+                        query = query.Where(x => trangThaiFilterValues.Contains(_context.DanhGiaNhanVien
+                            .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn && dg.MaNguoiDung == x.MaNhanVien)
+                            .OrderByDescending(dg => dg.NgayDanhGiaNV)
+                            .ThenByDescending(dg => dg.MaDanhGiaNhanVien)
+                            .Select(dg => dg.TrangThaiDanhGiaNV ?? string.Empty)
+                            .FirstOrDefault() ?? string.Empty));
+                    }
+                }
+            }
+
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            var summaryRows = await query
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    x.MaNhanVien,
+                    TrangThaiDanhGia = _context.DanhGiaNhanVien
+                        .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn && dg.MaNguoiDung == x.MaNhanVien)
+                        .OrderByDescending(dg => dg.NgayDanhGiaNV)
+                        .ThenByDescending(dg => dg.MaDanhGiaNhanVien)
+                        .Select(dg => dg.TrangThaiDanhGiaNV)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            var orderedQuery = query
                 .OrderBy(x => x.TenDuAn)
                 .ThenBy(x => x.TenNhanVien)
                 .ThenBy(x => x.MaNhanVien)
-                .ToListAsync();
+                .AsQueryable();
 
-            candidateRows = candidateRows
-                .Where(x => CoQuyenTaoDanhGiaNhanVien(
-                    roleFlags,
-                    currentUserId,
-                    x.MaNguoiQuanLy,
-                    x.MaDuAn,
-                    x.MaNhanVien,
-                    leaderTeamIds,
-                    leaderProjectIds))
-                .ToList();
+            if (paginate)
+            {
+                orderedQuery = orderedQuery
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize);
+            }
+
+            var candidateRows = await orderedQuery.ToListAsync();
 
             var pairKeys = candidateRows
                 .Select(x => (x.MaDuAn, x.MaNhanVien))
@@ -256,20 +319,6 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }).ToList();
 
-            if (tuNgayLoc.HasValue)
-            {
-                items = items
-                    .Where(x => x.NgayDanhGia.HasValue && x.NgayDanhGia.Value >= tuNgayLoc.Value)
-                    .ToList();
-            }
-
-            if (denNgayDocQuyen.HasValue)
-            {
-                items = items
-                    .Where(x => x.NgayDanhGia.HasValue && x.NgayDanhGia.Value < denNgayDocQuyen.Value)
-                    .ToList();
-            }
-
             return new DanhGiaNhanVienPageViewModel
             {
                 MaDuAn = maDuAn,
@@ -278,18 +327,19 @@ namespace QuanLyDuAn.Services.Implementations
                 TrangThai = trangThai,
                 TuNgayDanhGia = tuNgayLoc,
                 DenNgayDanhGia = denNgayLoc,
-                DanhSach = items.Where(x => string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai)).ToList(),
+                DanhSach = items,
                 DanhSachDuAn = danhSachDuAn,
                 DanhSachNhanVien = await LayDanhSachNhanVienTheoScopeAsync(currentUserId, roleFlags, maDuAn, leaderProjectIds, leaderTeamIds),
-                TongSo = items.Count(x => string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai)),
-                SoChuaDanhGia = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiChuaDanhGia) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
-                SoNhap = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiNhap) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
-                SoChoDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.ChoDuyet) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
-                SoDaDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.DaDuyet) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
-                SoTuChoi = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.TuChoi) && (string.IsNullOrWhiteSpace(trangThai) || LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))),
+                TongSo = totalItems,
+                SoChuaDanhGia = summaryRows.Count(x => string.IsNullOrWhiteSpace(x.TrangThaiDanhGia)),
+                SoNhap = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiNhap)),
+                SoChoDuyet = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.ChoDuyet)),
+                SoDaDuyet = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.DaDuyet)),
+                SoTuChoi = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.TuChoi)),
                 TenDuAnDangLoc = maDuAn.HasValue
                     ? danhSachDuAn.FirstOrDefault(x => x.MaDuAn == maDuAn.Value)?.TenDuAn
-                    : null
+                    : null,
+                Pagination = pagination
             };
         }
 

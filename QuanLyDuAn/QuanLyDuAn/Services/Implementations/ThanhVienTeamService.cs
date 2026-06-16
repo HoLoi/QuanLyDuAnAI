@@ -2,6 +2,7 @@
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.ThanhVienTeam;
 
 namespace QuanLyDuAn.Services.Implementations
@@ -54,6 +55,62 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<PagedResultViewModel<ThanhVienTeamViewModel>> GetPagedAsync(string? tuKhoa, int? maTeam, bool? isLeader, int pageNumber = 1, int pageSize = 20)
+        {
+            var query = from tv in _context.NhanVienTeam
+                        join team in _context.Team on tv.MaTeam equals team.MaTeam
+                        join ns in _context.NguoiDung on tv.MaNguoiDung equals ns.MaNguoiDung
+                        where team.IsDeleted != true && ns.IsDeleted != true
+                        select new ThanhVienTeamViewModel
+                        {
+                            MaTeam = tv.MaTeam,
+                            TenTeam = team.TenTeam ?? string.Empty,
+                            MaNguoiDung = tv.MaNguoiDung,
+                            HoTenNguoiDung = ns.HoTenNguoiDung ?? string.Empty,
+                            VaiTroTrongTeam = tv.VaiTroTrongTeam ?? string.Empty,
+                            NgayThamGiaTeam = tv.NgayThamGiaTeam,
+                            IsLeader = tv.IsLeader ?? false,
+                            TeamDaCoTruongNhom = _context.NhanVienTeam.Any(x => x.MaTeam == tv.MaTeam && x.IsLeader == true)
+                        };
+
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var keyword = tuKhoa.Trim().ToLower();
+                query = query.Where(x =>
+                    x.TenTeam.ToLower().Contains(keyword) ||
+                    x.HoTenNguoiDung.ToLower().Contains(keyword) ||
+                    x.VaiTroTrongTeam.ToLower().Contains(keyword));
+            }
+
+            if (maTeam.HasValue && maTeam.Value > 0)
+            {
+                query = query.Where(x => x.MaTeam == maTeam.Value);
+            }
+
+            if (isLeader.HasValue)
+            {
+                query = query.Where(x => x.IsLeader == isLeader.Value);
+            }
+
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            var items = await query
+                .OrderByDescending(x => x.MaTeam)
+                .ThenByDescending(x => x.IsLeader)
+                .ThenBy(x => x.HoTenNguoiDung)
+                .ThenBy(x => x.MaNguoiDung)
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToListAsync();
+
+            return new PagedResultViewModel<ThanhVienTeamViewModel>
+            {
+                Items = items,
+                Pagination = pagination
+            };
         }
 
         public async Task<ThanhVienTeamCreateUpdateViewModel?> GetByIdAsync(int maTeam, int maNguoiDung)

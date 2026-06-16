@@ -49,7 +49,7 @@ public static class KhoiTaoTaiKhoanMacDinh
         if (taiKhoanAdmin is null)
         {
             var passwordHasher = new PasswordHasher<Aspnetusers>();
-            await TaoNguoiDungMacDinhAsync(dbContext, passwordHasher, "admin", "Quan tri he thong", roleAdmin.Id);
+            await TaoNguoiDungMacDinhAsync(dbContext, passwordHasher, "admin", "Quản trị hệ thống", roleAdmin.Id);
             taiKhoanAdmin = await dbContext.Aspnetusers.FirstAsync(x => x.NormalizedUserName == "ADMIN");
         }
 
@@ -104,7 +104,7 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.ThongKe.Xem,
             Permissions.ThongKe.XuatFile,
 
-            // ===== CHAT (tu? ch?n) =====
+            // ===== CHAT (tùy chọn) =====
             Permissions.Chat.Xem,
             Permissions.DanhGiaDuAn.Xem,
             Permissions.DanhGiaDuAn.Duyet,
@@ -183,7 +183,7 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.ThongKe.Xem,
             Permissions.ThongKe.XuatFile,
 
-            // Danh gia
+            // Đánh giá
             Permissions.DanhGiaDuAn.Xem,
             Permissions.DanhGiaDuAn.DanhGia,
             Permissions.DanhGiaDuAn.Sua,
@@ -192,7 +192,7 @@ public static class KhoiTaoTaiKhoanMacDinh
             Permissions.DanhGiaNhanVien.DanhGia,
             Permissions.DanhGiaNhanVien.Sua,
 
-            //AI
+            // AI
             Permissions.AI.Xem,
             Permissions.AI.PhanTichNguyenNhan,
             Permissions.AI.Dashboard,
@@ -363,22 +363,59 @@ public static class KhoiTaoTaiKhoanMacDinh
     {
         var mau = new[]
          {
-            (ten: "Quan tri vien", moTa: "Quan tri he thong va phan quyen"),
-            (ten: "Quan ly du an", moTa: "Dieu phoi va duyet nghiep vu du an"),
-            (ten: "Developer", moTa: "Lap trinh vien tham gia phat trien"),
-            (ten: "Tester", moTa: "Kiem thu va dam bao chat luong"),
-            (ten: "Business Analyst", moTa: "Phan tich nghiep vu")
+            (ten: "Quản trị viên", moTa: "Quản trị hệ thống và phân quyền"),
+            (ten: "Quản lý dự án", moTa: "Điều phối và duyệt nghiệp vụ dự án"),
+            (ten: "Developer", moTa: "Lập trình viên tham gia phát triển"),
+            (ten: "Tester", moTa: "Kiểm thử và đảm bảo chất lượng"),
+            (ten: "Business Analyst", moTa: "Phân tích nghiệp vụ")
         };
 
-        var hienCo = await dbContext.ChucDanh
-            .AsNoTracking()
+        var mappingChuanHoa = new Dictionary<string, (string ten, string moTa)>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Quan tri vien"] = ("Quản trị viên", "Quản trị hệ thống và phân quyền"),
+            ["Quan ly du an"] = ("Quản lý dự án", "Điều phối và duyệt nghiệp vụ dự án"),
+            ["Developer"] = ("Developer", "Lập trình viên tham gia phát triển"),
+            ["Tester"] = ("Tester", "Kiểm thử và đảm bảo chất lượng"),
+            ["Business Analyst"] = ("Business Analyst", "Phân tích nghiệp vụ")
+        };
+
+        var rows = await dbContext.ChucDanh
             .Where(x => x.TenChucDanh != null)
-            .Select(x => x.TenChucDanh!)
             .ToListAsync();
+
+        foreach (var row in rows)
+        {
+            var tenGoc = row.TenChucDanh?.Trim();
+            if (tenGoc != null && mappingChuanHoa.TryGetValue(tenGoc, out var tenChuan))
+            {
+                var rowChuan = rows.FirstOrDefault(x =>
+                    x.MaChucDanh != row.MaChucDanh
+                    && dbContext.Entry(x).State != EntityState.Deleted
+                    && string.Equals(x.TenChucDanh?.Trim(), tenChuan.ten, StringComparison.OrdinalIgnoreCase));
+
+                if (rowChuan is null)
+                {
+                    row.TenChucDanh = tenChuan.ten;
+                    row.MoTaChucDanh = tenChuan.moTa;
+                    continue;
+                }
+
+                rowChuan.MoTaChucDanh = tenChuan.moTa;
+                await ChuyenThamChieuChucDanhAsync(dbContext, row.MaChucDanh, rowChuan.MaChucDanh);
+                await dbContext.SaveChangesAsync();
+                dbContext.ChucDanh.Remove(row);
+            }
+        }
+
+        var hienCo = rows
+            .Where(x => dbContext.Entry(x).State != EntityState.Deleted
+                && !string.IsNullOrWhiteSpace(x.TenChucDanh))
+            .Select(x => x.TenChucDanh!.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var item in mau)
         {
-            if (hienCo.Contains(item.ten, StringComparer.OrdinalIgnoreCase))
+            if (hienCo.Contains(item.ten))
             {
                 continue;
             }
@@ -397,20 +434,55 @@ public static class KhoiTaoTaiKhoanMacDinh
     {
         var mau = new[]
         {
-            (ten: "Phat trien phan mem", moTa: "Du an xay dung he thong phan mem"),
-            (ten: "Bao tri nang cap", moTa: "Du an bao tri va nang cap he thong"),
-            (ten: "Nghien cuu AI", moTa: "Du an tap trung nghien cuu ve AI")
+            (ten: "Phát triển phần mềm", moTa: "Dự án xây dựng hệ thống phần mềm"),
+            (ten: "Bảo trì, nâng cấp", moTa: "Dự án bảo trì và nâng cấp hệ thống"),
+            (ten: "Nghiên cứu AI", moTa: "Dự án tập trung nghiên cứu về AI")
         };
 
-        var hienCo = await dbContext.LoaiDuAn
-            .AsNoTracking()
+        var mappingChuanHoa = new Dictionary<string, (string ten, string moTa)>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Phat trien phan mem"] = ("Phát triển phần mềm", "Dự án xây dựng hệ thống phần mềm"),
+            ["Bao tri nang cap"] = ("Bảo trì, nâng cấp", "Dự án bảo trì và nâng cấp hệ thống"),
+            ["Nghien cuu AI"] = ("Nghiên cứu AI", "Dự án tập trung nghiên cứu về AI")
+        };
+
+        var rows = await dbContext.LoaiDuAn
             .Where(x => x.TenLoai != null)
-            .Select(x => x.TenLoai!)
             .ToListAsync();
+
+        foreach (var row in rows)
+        {
+            var tenGoc = row.TenLoai?.Trim();
+            if (tenGoc != null && mappingChuanHoa.TryGetValue(tenGoc, out var tenChuan))
+            {
+                var rowChuan = rows.FirstOrDefault(x =>
+                    x.MaLoaiDuAn != row.MaLoaiDuAn
+                    && dbContext.Entry(x).State != EntityState.Deleted
+                    && string.Equals(x.TenLoai?.Trim(), tenChuan.ten, StringComparison.OrdinalIgnoreCase));
+
+                if (rowChuan is null)
+                {
+                    row.TenLoai = tenChuan.ten;
+                    row.MoTaLoaiDuAn = tenChuan.moTa;
+                    continue;
+                }
+
+                rowChuan.MoTaLoaiDuAn = tenChuan.moTa;
+                await ChuyenThamChieuLoaiDuAnAsync(dbContext, row.MaLoaiDuAn, rowChuan.MaLoaiDuAn);
+                await dbContext.SaveChangesAsync();
+                dbContext.LoaiDuAn.Remove(row);
+            }
+        }
+
+        var hienCo = rows
+            .Where(x => dbContext.Entry(x).State != EntityState.Deleted
+                && !string.IsNullOrWhiteSpace(x.TenLoai))
+            .Select(x => x.TenLoai!.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var item in mau)
         {
-            if (hienCo.Contains(item.ten, StringComparer.OrdinalIgnoreCase))
+            if (hienCo.Contains(item.ten))
             {
                 continue;
             }
@@ -429,21 +501,57 @@ public static class KhoiTaoTaiKhoanMacDinh
     {
         var mau = new[]
         {
-            (ten: "Thap", moTa: "Muc uu tien thap"),
-            (ten: "Trung binh", moTa: "Muc uu tien trung binh"),
-            (ten: "Cao", moTa: "Muc uu tien cao"),
-            (ten: "Khan cap", moTa: "Xu ly ngay lap tuc")
+            (ten: "Thấp", moTa: "Mức ưu tiên thấp"),
+            (ten: "Trung bình", moTa: "Mức ưu tiên trung bình"),
+            (ten: "Cao", moTa: "Mức ưu tiên cao"),
+            (ten: "Khẩn cấp", moTa: "Xử lý ngay lập tức")
         };
 
-        var hienCo = await dbContext.MucDoUuTien
-            .AsNoTracking()
+        var mappingChuanHoa = new Dictionary<string, (string ten, string moTa)>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Thap"] = ("Thấp", "Mức ưu tiên thấp"),
+            ["Trung binh"] = ("Trung bình", "Mức ưu tiên trung bình"),
+            ["Cao"] = ("Cao", "Mức ưu tiên cao"),
+            ["Khan cap"] = ("Khẩn cấp", "Xử lý ngay lập tức")
+        };
+
+        var rows = await dbContext.MucDoUuTien
             .Where(x => x.TenMucDo != null)
-            .Select(x => x.TenMucDo!)
             .ToListAsync();
+
+        foreach (var row in rows)
+        {
+            var tenGoc = row.TenMucDo?.Trim();
+            if (tenGoc != null && mappingChuanHoa.TryGetValue(tenGoc, out var tenChuan))
+            {
+                var rowChuan = rows.FirstOrDefault(x =>
+                    x.MaMucDo != row.MaMucDo
+                    && dbContext.Entry(x).State != EntityState.Deleted
+                    && string.Equals(x.TenMucDo?.Trim(), tenChuan.ten, StringComparison.OrdinalIgnoreCase));
+
+                if (rowChuan is null)
+                {
+                    row.TenMucDo = tenChuan.ten;
+                    row.MoTaMucDo = tenChuan.moTa;
+                    continue;
+                }
+
+                rowChuan.MoTaMucDo = tenChuan.moTa;
+                await ChuyenThamChieuMucDoUuTienAsync(dbContext, row.MaMucDo, rowChuan.MaMucDo);
+                await dbContext.SaveChangesAsync();
+                dbContext.MucDoUuTien.Remove(row);
+            }
+        }
+
+        var hienCo = rows
+            .Where(x => dbContext.Entry(x).State != EntityState.Deleted
+                && !string.IsNullOrWhiteSpace(x.TenMucDo))
+            .Select(x => x.TenMucDo!.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         foreach (var item in mau)
         {
-            if (hienCo.Contains(item.ten, StringComparer.OrdinalIgnoreCase))
+            if (hienCo.Contains(item.ten))
             {
                 continue;
             }
@@ -462,39 +570,91 @@ public static class KhoiTaoTaiKhoanMacDinh
     {
         var mau = new[]
         {
-            (ten: "Tien do", diem: 10d, moTa: "Danh gia theo muc do dap ung tien do", loai: "NhanVien"),
-            (ten: "Chat luong cong viec", diem: 10d, moTa: "Danh gia chat luong dau ra", loai: "NhanVien"),
-            (ten: "Trach nhiem va chu dong", diem: 10d, moTa: "Danh gia tinh than trach nhiem va chu dong", loai: "NhanVien"),
-            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia kha nang phoi hop trong du an", loai: "NhanVien"),
-            (ten: "Bao cao va minh chung", diem: 10d, moTa: "Danh gia chat luong bao cao tien do", loai: "NhanVien"),
-            (ten: "Tien do", diem: 10d, moTa: "Danh gia tien do tong the du an", loai: "DuAn"),
-            (ten: "Chat luong", diem: 10d, moTa: "Danh gia chat luong tong the du an", loai: "DuAn"),
-            (ten: "Chi phi ngan sach", diem: 10d, moTa: "Danh gia kha nang kiem soat chi phi", loai: "DuAn"),
-            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia su phoi hop giua cac ben", loai: "DuAn"),
-            (ten: "Hieu qua tong the", diem: 10d, moTa: "Danh gia hieu qua dau ra cua du an", loai: "DuAn"),
-            (ten: "Tien do", diem: 10d, moTa: "Danh gia tien do tong the du an", loai: "DanhGiaDuAn"),
-            (ten: "Chat luong", diem: 10d, moTa: "Danh gia chat luong tong the du an", loai: "DanhGiaDuAn"),
-            (ten: "Chi phi ngan sach", diem: 10d, moTa: "Danh gia kha nang kiem soat chi phi", loai: "DanhGiaDuAn"),
-            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia su phoi hop giua cac ben", loai: "DanhGiaDuAn"),
-            (ten: "Hieu qua tong the", diem: 10d, moTa: "Danh gia hieu qua dau ra cua du an", loai: "DanhGiaDuAn"),
-            (ten: "Tien do", diem: 10d, moTa: "Danh gia theo muc do dap ung tien do", loai: "DanhGiaNhanVien"),
-            (ten: "Chat luong cong viec", diem: 10d, moTa: "Danh gia chat luong dau ra", loai: "DanhGiaNhanVien"),
-            (ten: "Trach nhiem va chu dong", diem: 10d, moTa: "Danh gia tinh than trach nhiem va chu dong", loai: "DanhGiaNhanVien"),
-            (ten: "Phoi hop", diem: 10d, moTa: "Danh gia kha nang phoi hop trong du an", loai: "DanhGiaNhanVien"),
-            (ten: "Bao cao va minh chung", diem: 10d, moTa: "Danh gia chat luong bao cao tien do", loai: "DanhGiaNhanVien")
+            (ten: "Tiến độ", diem: 10d, moTa: "Đánh giá theo mức độ đáp ứng tiến độ", loai: "NhanVien"),
+            (ten: "Chất lượng công việc", diem: 10d, moTa: "Đánh giá chất lượng đầu ra", loai: "NhanVien"),
+            (ten: "Trách nhiệm và chủ động", diem: 10d, moTa: "Đánh giá tinh thần trách nhiệm và chủ động", loai: "NhanVien"),
+            (ten: "Phối hợp", diem: 10d, moTa: "Đánh giá khả năng phối hợp trong dự án", loai: "NhanVien"),
+            (ten: "Báo cáo và minh chứng", diem: 10d, moTa: "Đánh giá chất lượng báo cáo tiến độ", loai: "NhanVien"),
+            (ten: "Tiến độ", diem: 10d, moTa: "Đánh giá tiến độ tổng thể dự án", loai: "DuAn"),
+            (ten: "Chất lượng", diem: 10d, moTa: "Đánh giá chất lượng tổng thể dự án", loai: "DuAn"),
+            (ten: "Chi phí ngân sách", diem: 10d, moTa: "Đánh giá khả năng kiểm soát chi phí", loai: "DuAn"),
+            (ten: "Phối hợp", diem: 10d, moTa: "Đánh giá sự phối hợp giữa các bên", loai: "DuAn"),
+            (ten: "Hiệu quả tổng thể", diem: 10d, moTa: "Đánh giá hiệu quả đầu ra của dự án", loai: "DuAn"),
+            (ten: "Tiến độ", diem: 10d, moTa: "Đánh giá tiến độ tổng thể dự án", loai: "DanhGiaDuAn"),
+            (ten: "Chất lượng", diem: 10d, moTa: "Đánh giá chất lượng tổng thể dự án", loai: "DanhGiaDuAn"),
+            (ten: "Chi phí ngân sách", diem: 10d, moTa: "Đánh giá khả năng kiểm soát chi phí", loai: "DanhGiaDuAn"),
+            (ten: "Phối hợp", diem: 10d, moTa: "Đánh giá sự phối hợp giữa các bên", loai: "DanhGiaDuAn"),
+            (ten: "Hiệu quả tổng thể", diem: 10d, moTa: "Đánh giá hiệu quả đầu ra của dự án", loai: "DanhGiaDuAn"),
+            (ten: "Tiến độ", diem: 10d, moTa: "Đánh giá theo mức độ đáp ứng tiến độ", loai: "DanhGiaNhanVien"),
+            (ten: "Chất lượng công việc", diem: 10d, moTa: "Đánh giá chất lượng đầu ra", loai: "DanhGiaNhanVien"),
+            (ten: "Trách nhiệm và chủ động", diem: 10d, moTa: "Đánh giá tinh thần trách nhiệm và chủ động", loai: "DanhGiaNhanVien"),
+            (ten: "Phối hợp", diem: 10d, moTa: "Đánh giá khả năng phối hợp trong dự án", loai: "DanhGiaNhanVien"),
+            (ten: "Báo cáo và minh chứng", diem: 10d, moTa: "Đánh giá chất lượng báo cáo tiến độ", loai: "DanhGiaNhanVien")
         };
 
-        var hienCo = await dbContext.TieuChiDanhGia
-            .AsNoTracking()
+        var mappingChuanHoa = new Dictionary<(string ten, string loai), (string ten, string moTa)>(new TieuChiDanhGiaComparer())
+        {
+            [("Tien do", "NhanVien")] = ("Tiến độ", "Đánh giá theo mức độ đáp ứng tiến độ"),
+            [("Chat luong cong viec", "NhanVien")] = ("Chất lượng công việc", "Đánh giá chất lượng đầu ra"),
+            [("Trach nhiem va chu dong", "NhanVien")] = ("Trách nhiệm và chủ động", "Đánh giá tinh thần trách nhiệm và chủ động"),
+            [("Phoi hop", "NhanVien")] = ("Phối hợp", "Đánh giá khả năng phối hợp trong dự án"),
+            [("Bao cao va minh chung", "NhanVien")] = ("Báo cáo và minh chứng", "Đánh giá chất lượng báo cáo tiến độ"),
+            [("Tien do", "DuAn")] = ("Tiến độ", "Đánh giá tiến độ tổng thể dự án"),
+            [("Chat luong", "DuAn")] = ("Chất lượng", "Đánh giá chất lượng tổng thể dự án"),
+            [("Chi phi ngan sach", "DuAn")] = ("Chi phí ngân sách", "Đánh giá khả năng kiểm soát chi phí"),
+            [("Phoi hop", "DuAn")] = ("Phối hợp", "Đánh giá sự phối hợp giữa các bên"),
+            [("Hieu qua tong the", "DuAn")] = ("Hiệu quả tổng thể", "Đánh giá hiệu quả đầu ra của dự án"),
+            [("Tien do", "DanhGiaDuAn")] = ("Tiến độ", "Đánh giá tiến độ tổng thể dự án"),
+            [("Chat luong", "DanhGiaDuAn")] = ("Chất lượng", "Đánh giá chất lượng tổng thể dự án"),
+            [("Chi phi ngan sach", "DanhGiaDuAn")] = ("Chi phí ngân sách", "Đánh giá khả năng kiểm soát chi phí"),
+            [("Phoi hop", "DanhGiaDuAn")] = ("Phối hợp", "Đánh giá sự phối hợp giữa các bên"),
+            [("Hieu qua tong the", "DanhGiaDuAn")] = ("Hiệu quả tổng thể", "Đánh giá hiệu quả đầu ra của dự án"),
+            [("Tien do", "DanhGiaNhanVien")] = ("Tiến độ", "Đánh giá theo mức độ đáp ứng tiến độ"),
+            [("Chat luong cong viec", "DanhGiaNhanVien")] = ("Chất lượng công việc", "Đánh giá chất lượng đầu ra"),
+            [("Trach nhiem va chu dong", "DanhGiaNhanVien")] = ("Trách nhiệm và chủ động", "Đánh giá tinh thần trách nhiệm và chủ động"),
+            [("Phoi hop", "DanhGiaNhanVien")] = ("Phối hợp", "Đánh giá khả năng phối hợp trong dự án"),
+            [("Bao cao va minh chung", "DanhGiaNhanVien")] = ("Báo cáo và minh chứng", "Đánh giá chất lượng báo cáo tiến độ")
+        };
+
+        var rows = await dbContext.TieuChiDanhGia
             .Where(x => x.TenTieuChi != null && x.LoaiTieuChi != null)
-            .Select(x => new { x.TenTieuChi, x.LoaiTieuChi })
             .ToListAsync();
+
+        foreach (var row in rows)
+        {
+            var key = (row.TenTieuChi!.Trim(), row.LoaiTieuChi!.Trim());
+            if (mappingChuanHoa.TryGetValue(key, out var tieuChiChuan))
+            {
+                var rowChuan = rows.FirstOrDefault(x =>
+                    x.MaTieuChi != row.MaTieuChi
+                    && dbContext.Entry(x).State != EntityState.Deleted
+                    && string.Equals(x.TenTieuChi?.Trim(), tieuChiChuan.ten, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(x.LoaiTieuChi?.Trim(), row.LoaiTieuChi?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+                if (rowChuan is null)
+                {
+                    row.TenTieuChi = tieuChiChuan.ten;
+                    row.MoTa = tieuChiChuan.moTa;
+                    continue;
+                }
+
+                rowChuan.MoTa = tieuChiChuan.moTa;
+                await ChuyenThamChieuTieuChiDanhGiaAsync(dbContext, row.MaTieuChi, rowChuan.MaTieuChi);
+                await dbContext.SaveChangesAsync();
+                dbContext.TieuChiDanhGia.Remove(row);
+            }
+        }
+
+        var hienCo = rows
+            .Where(x => dbContext.Entry(x).State != EntityState.Deleted
+                && !string.IsNullOrWhiteSpace(x.TenTieuChi)
+                && !string.IsNullOrWhiteSpace(x.LoaiTieuChi))
+            .Select(x => (ten: x.TenTieuChi!.Trim(), loai: x.LoaiTieuChi!.Trim()))
+            .ToHashSet(new TieuChiDanhGiaComparer());
 
         foreach (var item in mau)
         {
-            if (hienCo.Any(x =>
-                string.Equals(x.TenTieuChi, item.ten, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(x.LoaiTieuChi, item.loai, StringComparison.OrdinalIgnoreCase)))
+            if (hienCo.Contains((item.ten, item.loai)))
             {
                 continue;
             }
@@ -518,13 +678,16 @@ public static class KhoiTaoTaiKhoanMacDinh
         {
             ["Thieu nhan su"] = "Thiếu nhân sự",
             ["Thay doi yeu cau lien tuc"] = "Thay đổi yêu cầu liên tục",
-            ["Cham phe duyet"] = "Chậm phê duyệt",
+            ["Cham phe duyet"] = "Quy trình xử lý chậm",
             ["Vuot ngan sach"] = "Vượt ngân sách",
             ["Rui ro ky thuat"] = "Rủi ro kỹ thuật",
-            ["Cong viec phu thuoc bi cham"] = "Công việc phụ thuộc bị chậm",
-            ["Thieu du lieu hoac tai lieu"] = "Thiếu dữ liệu hoặc tài liệu",
+            ["Cong viec phu thuoc bi cham"] = "Phối hợp công việc chưa tốt",
+            ["Thieu du lieu hoac tai lieu"] = "Thông tin đầu vào chưa đầy đủ",
             ["Uoc luong thoi gian chua chinh xac"] = "Ước lượng thời gian chưa chính xác",
             ["Tien do cap nhat khong day du"] = "Tiến độ cập nhật không đầy đủ",
+            ["Chậm phê duyệt"] = "Quy trình xử lý chậm",
+            ["Công việc phụ thuộc bị chậm"] = "Phối hợp công việc chưa tốt",
+            ["Thiếu dữ liệu hoặc tài liệu"] = "Thông tin đầu vào chưa đầy đủ",
             ["Khac"] = "Khác"
         };
 
@@ -532,11 +695,11 @@ public static class KhoiTaoTaiKhoanMacDinh
         {
             "Thiếu nhân sự",
             "Thay đổi yêu cầu liên tục",
-            "Chậm phê duyệt",
+            "Quy trình xử lý chậm",
             "Vượt ngân sách",
             "Rủi ro kỹ thuật",
-            "Công việc phụ thuộc bị chậm",
-            "Thiếu dữ liệu hoặc tài liệu",
+            "Phối hợp công việc chưa tốt",
+            "Thông tin đầu vào chưa đầy đủ",
             "Ước lượng thời gian chưa chính xác",
             "Tiến độ cập nhật không đầy đủ",
             "Khác"
@@ -553,12 +716,26 @@ public static class KhoiTaoTaiKhoanMacDinh
             var tenGoc = row.TenNguyenNhan.Trim();
             if (mappingChuanHoa.TryGetValue(tenGoc, out var tenChuan))
             {
-                row.TenNguyenNhan = tenChuan;
+                var rowChuan = rows.FirstOrDefault(x =>
+                    x.MaDMNguyenNhan != row.MaDMNguyenNhan
+                    && dbContext.Entry(x).State != EntityState.Deleted
+                    && string.Equals(x.TenNguyenNhan?.Trim(), tenChuan, StringComparison.OrdinalIgnoreCase));
+
+                if (rowChuan is null)
+                {
+                    row.TenNguyenNhan = tenChuan;
+                    continue;
+                }
+
+                await ChuyenThamChieuNguyenNhanAsync(dbContext, row.MaDMNguyenNhan, rowChuan.MaDMNguyenNhan);
+                await dbContext.SaveChangesAsync();
+                dbContext.DmNguyenNhan.Remove(row);
             }
         }
 
         var hienCo = rows
-            .Where(x => !string.IsNullOrWhiteSpace(x.TenNguyenNhan))
+            .Where(x => dbContext.Entry(x).State != EntityState.Deleted
+                && !string.IsNullOrWhiteSpace(x.TenNguyenNhan))
             .Select(x => x.TenNguyenNhan!.Trim())
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -573,13 +750,6 @@ public static class KhoiTaoTaiKhoanMacDinh
             {
                 TenNguyenNhan = ten
             });
-        }
-
-        var reasonKhongTre = await dbContext.DmNguyenNhan
-            .FirstOrDefaultAsync(x => x.TenNguyenNhan == "Không có nguyên nhân trễ");
-        if (reasonKhongTre != null)
-        {
-            dbContext.DmNguyenNhan.Remove(reasonKhongTre);
         }
 
         await dbContext.SaveChangesAsync();
@@ -597,7 +767,7 @@ public static class KhoiTaoTaiKhoanMacDinh
                 Permissions.ThongKe.XuatFile
             },
 
-            // ===== HE THONG =====
+            // ===== HỆ THỐNG =====
             ["NhanSu"] = new[]
             {
                 Permissions.NhanSu.Xem,
@@ -643,7 +813,7 @@ public static class KhoiTaoTaiKhoanMacDinh
                 Permissions.DuyetYeuCauDoiQuanLy.Duyet
             },
 
-            // ===== DU AN =====
+            // ===== DỰ ÁN =====
             ["DuAn"] = new[]
             {
                 Permissions.DuAn.Xem,
@@ -672,7 +842,7 @@ public static class KhoiTaoTaiKhoanMacDinh
                 Permissions.ThanhVienDuAn.Xoa
             },
 
-            // ===== CONG VIEC =====
+            // ===== CÔNG VIỆC =====
             ["DanhMucCongViec"] = new[]
             {
                 Permissions.DanhMucCongViec.Xem,
@@ -725,7 +895,7 @@ public static class KhoiTaoTaiKhoanMacDinh
                 Permissions.TienDo.Duyet
             },
 
-            // ===== TAI CHINH =====
+            // ===== TÀI CHÍNH =====
             ["DeXuatNganSach"] = new[]
             {
                 Permissions.DeXuatNganSach.Xem,
@@ -781,7 +951,7 @@ public static class KhoiTaoTaiKhoanMacDinh
                 Permissions.AI.Dashboard
             },
 
-            // ===== DANH GIA =====
+            // ===== ĐÁNH GIÁ =====
             ["DanhGiaDuAn"] = new[]
             {
                 Permissions.DanhGiaDuAn.Xem,
@@ -798,7 +968,7 @@ public static class KhoiTaoTaiKhoanMacDinh
                 Permissions.DanhGiaNhanVien.Duyet
             },
 
-            // ===== KHAC =====
+            // ===== KHÁC =====
             ["Chat"] = new[]
             {
                 Permissions.Chat.Xem,
@@ -897,6 +1067,126 @@ public static class KhoiTaoTaiKhoanMacDinh
         await dbContext.SaveChangesAsync();
     }
 
+    private static async Task ChuyenThamChieuChucDanhAsync(
+        QuanLyDuAnDbContext dbContext,
+        int maChucDanhCu,
+        int maChucDanhChuan)
+    {
+        var nguoiDungCanChuyen = await dbContext.NguoiDung
+            .Where(x => x.MaChucDanh == maChucDanhCu)
+            .ToListAsync();
+
+        foreach (var nguoiDung in nguoiDungCanChuyen)
+        {
+            nguoiDung.MaChucDanh = maChucDanhChuan;
+        }
+    }
+
+    private static async Task ChuyenThamChieuLoaiDuAnAsync(
+        QuanLyDuAnDbContext dbContext,
+        int maLoaiDuAnCu,
+        int maLoaiDuAnChuan)
+    {
+        var duAnCanChuyen = await dbContext.DuAn
+            .Where(x => x.MaLoaiDuAn == maLoaiDuAnCu)
+            .ToListAsync();
+
+        foreach (var duAn in duAnCanChuyen)
+        {
+            duAn.MaLoaiDuAn = maLoaiDuAnChuan;
+        }
+    }
+
+    private static async Task ChuyenThamChieuMucDoUuTienAsync(
+        QuanLyDuAnDbContext dbContext,
+        int maMucDoCu,
+        int maMucDoChuan)
+    {
+        var congViecCanChuyen = await dbContext.CongViec
+            .Where(x => x.MaMucDo == maMucDoCu)
+            .ToListAsync();
+        foreach (var congViec in congViecCanChuyen)
+        {
+            congViec.MaMucDo = maMucDoChuan;
+        }
+
+        var deXuatCongViecCanChuyen = await dbContext.DeXuatCongViec
+            .Where(x => x.MaMucDo == maMucDoCu)
+            .ToListAsync();
+        foreach (var deXuatCongViec in deXuatCongViecCanChuyen)
+        {
+            deXuatCongViec.MaMucDo = maMucDoChuan;
+        }
+    }
+
+    private static async Task ChuyenThamChieuTieuChiDanhGiaAsync(
+        QuanLyDuAnDbContext dbContext,
+        int maTieuChiCu,
+        int maTieuChiChuan)
+    {
+        var chiTietDanhGiaDuAnCanChuyen = await dbContext.CtDanhGiaDuAn
+            .Where(x => x.MaTieuChi == maTieuChiCu)
+            .ToListAsync();
+        foreach (var chiTietDanhGiaDuAn in chiTietDanhGiaDuAnCanChuyen)
+        {
+            chiTietDanhGiaDuAn.MaTieuChi = maTieuChiChuan;
+        }
+
+        var chiTietDanhGiaNhanVienCanChuyen = await dbContext.CtDanhGiaNhanVien
+            .Where(x => x.MaTieuChi == maTieuChiCu)
+            .ToListAsync();
+        foreach (var chiTietDanhGiaNhanVien in chiTietDanhGiaNhanVienCanChuyen)
+        {
+            chiTietDanhGiaNhanVien.MaTieuChi = maTieuChiChuan;
+        }
+    }
+
+    private static async Task ChuyenThamChieuNguyenNhanAsync(
+        QuanLyDuAnDbContext dbContext,
+        int maNguyenNhanCu,
+        int maNguyenNhanChuan)
+    {
+        var datasetCanChuyen = await dbContext.AiDataset
+            .Where(x => x.MaDMNguyenNhan == maNguyenNhanCu)
+            .ToListAsync();
+        foreach (var dataset in datasetCanChuyen)
+        {
+            dataset.MaDMNguyenNhan = maNguyenNhanChuan;
+        }
+
+        var ketQuaCanChuyen = await dbContext.AiKetQua
+            .Where(x => x.MaDMNguyenNhan == maNguyenNhanCu)
+            .ToListAsync();
+        foreach (var ketQua in ketQuaCanChuyen)
+        {
+            ketQua.MaDMNguyenNhan = maNguyenNhanChuan;
+        }
+
+        var nguyenNhanCanChuyen = await dbContext.AiNguyenNhan
+            .Where(x => x.MaDMNguyenNhan == maNguyenNhanCu)
+            .ToListAsync();
+        foreach (var nguyenNhan in nguyenNhanCanChuyen)
+        {
+            nguyenNhan.MaDMNguyenNhan = maNguyenNhanChuan;
+        }
+    }
+
+    private sealed class TieuChiDanhGiaComparer : IEqualityComparer<(string ten, string loai)>
+    {
+        public bool Equals((string ten, string loai) x, (string ten, string loai) y)
+        {
+            return string.Equals(x.ten, y.ten, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(x.loai, y.loai, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode((string ten, string loai) obj)
+        {
+            return HashCode.Combine(
+                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.ten),
+                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.loai));
+        }
+    }
+
     private static async Task TaoNguoiDungMacDinhAsync(
         QuanLyDuAnDbContext dbContext,
         PasswordHasher<Aspnetusers> passwordHasher,
@@ -906,14 +1196,14 @@ public static class KhoiTaoTaiKhoanMacDinh
     {
         var chucDanhAdmin = await dbContext.ChucDanh
             .OrderBy(x => x.MaChucDanh)
-            .FirstOrDefaultAsync(x => x.TenChucDanh == "Quan tri vien");
+            .FirstOrDefaultAsync(x => x.TenChucDanh == "Quản trị viên");
 
         if (chucDanhAdmin is null)
         {
             chucDanhAdmin = new ChucDanh
             {
-                TenChucDanh = "Quan tri vien",
-                MoTaChucDanh = "Chuc danh mac dinh cho tai khoan admin"
+                TenChucDanh = "Quản trị viên",
+                MoTaChucDanh = "Chức danh mặc định cho tài khoản admin"
             };
             dbContext.ChucDanh.Add(chucDanhAdmin);
             await dbContext.SaveChangesAsync();

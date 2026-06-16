@@ -15,5 +15,8 @@ namespace QuanLyDuAn.ViewModels.NhanSu
         public string? Email { get; set; }
         public bool CoTaiKhoan { get; set; }
         public bool TaiKhoanBiKhoa { get; set; }
+        public bool ChoKichHoat { get; set; }
+        public bool CoTheGuiLaiKichHoat { get; set; }
+        public string TrangThaiTaiKhoan { get; set; } = string.Empty;
     }
 }

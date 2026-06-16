@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.NhanVienDuAn;
 using System.Security.Claims;
 
@@ -28,7 +29,9 @@ namespace QuanLyDuAn.Services.Implementations
             int maDuAn,
             string? tuKhoa,
             int? locMaLoaiDuAn,
-            string? locTrangThaiDuAn)
+            string? locTrangThaiDuAn,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             var duAn = await GetProjectAsync(maDuAn);
             var (coTheChinhSua, lyDoKhongTheChinhSua) = EvaluateEditableCondition(duAn);
@@ -50,11 +53,10 @@ namespace QuanLyDuAn.Services.Implementations
                 LocTrangThaiDuAn = locTrangThaiDuAn
             };
 
-            vm.DanhSachNhanVienPhuTrach = await (
+            var danhSachNhanVienQuery =
                 from nvda in _context.NhanVienDuAn
                 join nd in _context.NguoiDung on nvda.MaNguoiDung equals nd.MaNguoiDung
                 where nvda.MaDuAn == maDuAn && nd.IsDeleted != true
-                orderby nd.HoTenNguoiDung
                 select new NhanVienDuAnItemViewModel
                 {
                     MaNguoiDung = nvda.MaNguoiDung,
@@ -69,11 +71,23 @@ namespace QuanLyDuAn.Services.Implementations
                          join team in _context.Team on nvt.MaTeam equals team.MaTeam
                          where assignedTeamIds.Contains(nvt.MaTeam) && nvt.MaNguoiDung == nvda.MaNguoiDung
                          select team.TenTeam ?? $"Team {team.MaTeam}").Distinct())
-                }).ToListAsync();
+                };
 
-            var assignedIds = vm.DanhSachNhanVienPhuTrach
+            var totalItems = await danhSachNhanVienQuery.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            vm.DanhSachNhanVienPhuTrach = await danhSachNhanVienQuery
+                .OrderBy(x => x.HoTenNguoiDung)
+                .ThenBy(x => x.MaNguoiDung)
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToListAsync();
+            vm.Pagination = pagination;
+
+            var assignedIds = await _context.NhanVienDuAn
+                .Where(x => x.MaDuAn == maDuAn)
                 .Select(x => x.MaNguoiDung)
-                .ToList();
+                .ToListAsync();
 
             var employeeRoleIds = _context.Aspnetroles
                 .Where(x => x.NormalizedName == "EMPLOYEE")

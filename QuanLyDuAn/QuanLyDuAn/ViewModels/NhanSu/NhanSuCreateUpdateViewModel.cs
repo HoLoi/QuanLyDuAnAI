@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace QuanLyDuAn.ViewModels.NhanSu
 {
-    public class NhanSuCreateUpdateViewModel : IValidatableObject
+    public class NhanSuCreateUpdateViewModel
     {
         public int? MaNguoiDung { get; set; }
 
@@ -34,25 +34,11 @@ namespace QuanLyDuAn.ViewModels.NhanSu
         [EmailAddress(ErrorMessage = "Email không hợp lệ")]
         public string Email { get; set; } = string.Empty;
 
-        [MinLength(6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự")]
-        [MaxLength(100, ErrorMessage = "Mật khẩu tối đa 100 ký tự")]
         public string? Password { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn vai trò hệ thống")]
         public string RoleId { get; set; } = string.Empty;
 
-        [MinLength(6, ErrorMessage = "Mật khẩu mới tối thiểu 6 ký tự")]
-        [MaxLength(100, ErrorMessage = "Mật khẩu mới tối đa 100 ký tự")]
         public string? ResetPassword { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (MaNguoiDung == null && string.IsNullOrWhiteSpace(Password))
-            {
-                yield return new ValidationResult(
-                    "Mật khẩu không được để trống khi tạo mới.",
-                    new[] { nameof(Password) });
-            }
-        }
     }
 }

@@ -29,7 +29,9 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThai,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DeXuatNganSach.Xem))
                 return Forbid();
@@ -42,7 +44,7 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai, tuNgay, denNgay, locTheoNgay);
+                var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai, tuNgay, denNgay, locTheoNgay, pageNumber, pageSize);
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View(vm);
             }

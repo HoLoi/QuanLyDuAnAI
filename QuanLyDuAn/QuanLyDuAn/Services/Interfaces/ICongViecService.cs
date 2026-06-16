@@ -10,7 +10,10 @@ namespace QuanLyDuAn.Services.Interfaces
             string? tuKhoa,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay);
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = 20,
+            bool paginate = true);
         Task XacNhanHoanThanhCongViecAsync(int maCongViec);
         Task MoLaiCongViecAsync(int maCongViec, string lyDo);
     }

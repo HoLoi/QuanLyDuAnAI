@@ -8,6 +8,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.Ai;
 
 namespace QuanLyDuAn.Services.Implementations
@@ -434,7 +435,7 @@ namespace QuanLyDuAn.Services.Implementations
             return trainResult;
         }
 
-        public async Task<AiModelPageViewModel> LayTrangModelAsync(string? modelDangXem, string? boLocLoaiModel, CancellationToken cancellationToken = default)
+        public async Task<AiModelPageViewModel> LayTrangModelAsync(string? modelDangXem, string? boLocLoaiModel, CancellationToken cancellationToken = default, int pageNumber = 1, int pageSize = 20)
         {
             var vm = new AiModelPageViewModel
             {
@@ -443,10 +444,11 @@ namespace QuanLyDuAn.Services.Implementations
             };
 
             var list = await _aiApiService.LayDanhSachModelAsync(ModelTypeNguyenNhan, cancellationToken);
-            vm.DanhSachModel = list.DuLieu ?? [];
-            vm.LichSuModelNguyenNhan = vm.DanhSachModel
+            var tatCaModel = list.DuLieu ?? [];
+            vm.LichSuModelNguyenNhan = tatCaModel
                 .OrderByDescending(x => x.CreatedAt)
                 .ThenByDescending(x => x.UpdatedAt)
+                .ThenByDescending(x => x.TenFile)
                 .Select(x => new AiModelVersionMetricViewModel
                 {
                     TenModel = x.TenFile,
@@ -460,16 +462,24 @@ namespace QuanLyDuAn.Services.Implementations
                     IsActive = x.IsDefault
                 })
                 .ToList();
+            vm.Pagination = PaginationViewModel.Create(pageNumber, pageSize, tatCaModel.Count);
+            vm.DanhSachModel = tatCaModel
+                .OrderByDescending(x => x.CreatedAt)
+                .ThenByDescending(x => x.UpdatedAt)
+                .ThenByDescending(x => x.TenFile)
+                .Skip((vm.Pagination.PageNumber - 1) * vm.Pagination.PageSize)
+                .Take(vm.Pagination.PageSize)
+                .ToList();
             var tenNguyenNhanRows = await _context.DmNguyenNhan
                 .Select(x => new { x.MaDMNguyenNhan, x.TenNguyenNhan })
                 .ToListAsync(cancellationToken);
             vm.TenNguyenNhanTheoMa = tenNguyenNhanRows.ToDictionary(
                 x => x.MaDMNguyenNhan,
                 x => string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan);
-            vm.CoModelLocal = vm.DanhSachModel.Count > 0;
+            vm.CoModelLocal = tatCaModel.Count > 0;
             vm.CoTheKiemTraModel = vm.CoModelLocal;
-            vm.CoTheKichHoatModel = vm.DanhSachModel.Any(x => x.CanActivate);
-            vm.CoTheSoSanhModel = vm.DanhSachModel.Count(x => x.CanActivate) >= 2;
+            vm.CoTheKichHoatModel = tatCaModel.Any(x => x.CanActivate);
+            vm.CoTheSoSanhModel = tatCaModel.Count(x => x.CanActivate) >= 2;
             if (!list.ThanhCong)
             {
                 vm.CanhBao = list.ThongBao;
@@ -482,7 +492,7 @@ namespace QuanLyDuAn.Services.Implementations
                 vm.LoadedModel = health.DuLieu.LoadedReasonModel;
             }
 
-            var danhSachModelSet = vm.DanhSachModel
+            var danhSachModelSet = tatCaModel
                 .Select(x => x.TenFile)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -499,8 +509,8 @@ namespace QuanLyDuAn.Services.Implementations
 
             vm.CurrentModelFile = vm.LoadedModelNamTrongDanhSachLocal
                 ? vm.LoadedReasonModel
-                : vm.DanhSachModel.FirstOrDefault(x => x.CanActivate)?.TenFile;
-            vm.NewModelFile = vm.DanhSachModel
+                : tatCaModel.FirstOrDefault(x => x.CanActivate)?.TenFile;
+            vm.NewModelFile = tatCaModel
                 .Where(x => x.CanActivate)
                 .Select(x => x.TenFile)
                 .FirstOrDefault(x => !string.Equals(x, vm.CurrentModelFile, StringComparison.OrdinalIgnoreCase));
@@ -543,9 +553,9 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
-            var modelDangXemHoacActive = vm.DanhSachModel.FirstOrDefault(x =>
+            var modelDangXemHoacActive = tatCaModel.FirstOrDefault(x =>
                 string.Equals(x.TenFile, vm.TenModelPhanTich, StringComparison.OrdinalIgnoreCase))
-                ?? vm.DanhSachModel.FirstOrDefault(x =>
+                ?? tatCaModel.FirstOrDefault(x =>
                     string.Equals(x.TenFile, vm.LoadedReasonModel, StringComparison.OrdinalIgnoreCase));
             if (modelDangXemHoacActive != null)
             {

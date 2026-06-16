@@ -5,6 +5,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.TienDoCongViec;
 using System.Security.Claims;
 
@@ -40,7 +41,10 @@ namespace QuanLyDuAn.Services.Implementations
             int? locMaChiTietCv,
             string? tuKhoa,
             DateTime? tuNgayBaoCao,
-            DateTime? denNgayBaoCao)
+            DateTime? denNgayBaoCao,
+            int pageNumber = 1,
+            int pageSize = 20,
+            bool paginate = true)
         {
             var currentUserId = await GetCurrentUserIdAsync();
             var roleFlags = await GetCurrentUserRoleFlagsAsync();
@@ -94,9 +98,39 @@ namespace QuanLyDuAn.Services.Implementations
                     || (x.NoiDungChiTietCV ?? string.Empty).ToLower().Contains(keyword));
             }
 
-            var detailRows = await baseQuery
-                .OrderByDescending(x => x.MaChiTietCV)
+            if (tuNgayLoc.HasValue || denNgayDocQuyen.HasValue)
+            {
+                baseQuery = baseQuery.Where(x => _context.TienDoCongViec.Any(td =>
+                    td.MaChiTietCV == x.MaChiTietCV &&
+                    td.ThoiGianCapNhat.HasValue &&
+                    (!tuNgayLoc.HasValue || td.ThoiGianCapNhat.Value >= tuNgayLoc.Value) &&
+                    (!denNgayDocQuyen.HasValue || td.ThoiGianCapNhat.Value < denNgayDocQuyen.Value)));
+            }
+
+            var totalItems = await baseQuery.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            var dsMaDuAn = await baseQuery
+                .Select(x => x.MaDuAn)
+                .Distinct()
                 .ToListAsync();
+            var dsMaCongViec = await baseQuery
+                .Select(x => x.MaCongViec)
+                .Distinct()
+                .ToListAsync();
+
+            var orderedDetailQuery = baseQuery
+                .OrderByDescending(x => x.MaChiTietCV)
+                .AsQueryable();
+
+            if (paginate)
+            {
+                orderedDetailQuery = orderedDetailQuery
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize);
+            }
+
+            var detailRows = await orderedDetailQuery.ToListAsync();
 
             var detailIds = detailRows.Select(x => x.MaChiTietCV).Distinct().ToList();
 
@@ -119,17 +153,6 @@ namespace QuanLyDuAn.Services.Implementations
             var progressByDetail = progressRows
                 .GroupBy(x => x.MaChiTietCV)
                 .ToDictionary(x => x.Key, x => x.ToList());
-
-            if (tuNgayLoc.HasValue || denNgayLoc.HasValue)
-            {
-                detailRows = detailRows
-                    .Where(x => progressByDetail.ContainsKey(x.MaChiTietCV))
-                    .ToList();
-                detailIds = detailRows.Select(x => x.MaChiTietCV).Distinct().ToList();
-                progressByDetail = progressByDetail
-                    .Where(x => detailIds.Contains(x.Key))
-                    .ToDictionary(x => x.Key, x => x.Value);
-            }
 
             var detailById = detailRows.ToDictionary(x => x.MaChiTietCV, x => x);
 
@@ -339,9 +362,6 @@ namespace QuanLyDuAn.Services.Implementations
                 danhSach.Add(item);
             }
 
-            var dsMaDuAn = detailRows.Select(x => x.MaDuAn).Distinct().ToList();
-            var dsMaCongViec = detailRows.Select(x => x.MaCongViec).Distinct().ToList();
-
             var duAnOptions = await (
                 from da in _context.DuAn
                 where da.IsDeleted != true && dsMaDuAn.Contains(da.MaDuAn)
@@ -375,7 +395,8 @@ namespace QuanLyDuAn.Services.Implementations
                 },
                 DanhSach = danhSach,
                 DanhSachDuAn = duAnOptions,
-                DanhSachCongViec = congViecOptions
+                DanhSachCongViec = congViecOptions,
+                Pagination = pagination
             };
         }
 

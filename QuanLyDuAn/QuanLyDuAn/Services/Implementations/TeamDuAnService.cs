@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.TeamDuAn;
 using System.Security.Claims;
 
@@ -29,16 +30,17 @@ namespace QuanLyDuAn.Services.Implementations
             int? maTeamDangChon,
             string? tuKhoa,
             int? locMaLoaiDuAn,
-            string? locTrangThaiDuAn)
+            string? locTrangThaiDuAn,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             var duAn = await GetProjectAsync(maDuAn);
             var (coTheChinhSua, lyDoKhongTheChinhSua) = EvaluateEditableCondition(duAn);
 
-            var danhSachTeamDuAn = await (
+            var danhSachTeamDuAnQuery =
                 from td in _context.TeamDuAn
                 join team in _context.Team on td.MaTeam equals team.MaTeam
                 where td.MaDuAn == maDuAn && team.IsDeleted != true
-                orderby td.NgayTeamThamGiaDA descending
                 select new TeamDuAnItemViewModel
                 {
                     MaTeam = td.MaTeam,
@@ -47,7 +49,17 @@ namespace QuanLyDuAn.Services.Implementations
                     SoThanhVienPhuTrach = _context.NhanVienDuAn.Count(nvda =>
                         nvda.MaDuAn == maDuAn &&
                         _context.NhanVienTeam.Any(nvt => nvt.MaTeam == td.MaTeam && nvt.MaNguoiDung == nvda.MaNguoiDung))
-                }).ToListAsync();
+                };
+
+            var totalItems = await danhSachTeamDuAnQuery.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            var danhSachTeamDuAn = await danhSachTeamDuAnQuery
+                .OrderByDescending(x => x.NgayTeamThamGiaDuAn)
+                .ThenByDescending(x => x.MaTeam)
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToListAsync();
 
             var danhSachTeam = await _context.Team
                 .Where(x => x.IsDeleted != true)
@@ -70,6 +82,7 @@ namespace QuanLyDuAn.Services.Implementations
                 MaTeamDangChon = maTeamDangChon,
                 DanhSachTeamPhuTrach = danhSachTeamDuAn,
                 DanhSachTeamCoTheGan = danhSachTeam,
+                Pagination = pagination,
                 TuKhoa = tuKhoa,
                 LocMaLoaiDuAn = locMaLoaiDuAn,
                 LocTrangThaiDuAn = locTrangThaiDuAn

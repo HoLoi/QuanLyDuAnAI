@@ -38,14 +38,16 @@ namespace QuanLyDuAn.Controllers
             int? locMaChiTietCv,
             string? tuKhoa,
             DateTime? tuNgayBaoCao,
-            DateTime? denNgayBaoCao)
+            DateTime? denNgayBaoCao,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TienDo.Xem))
                 return Forbid();
 
             try
             {
-                var vm = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao);
+                var vm = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao, pageNumber, pageSize);
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View(vm);
             }
@@ -195,7 +197,7 @@ namespace QuanLyDuAn.Controllers
             if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
                 return Forbid();
 
-            var page = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao);
+            var page = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao, paginate: false);
             var rows = page.DanhSach.Cast<object>().ToList();
 
             var exportRequest = new ExportFileRequest

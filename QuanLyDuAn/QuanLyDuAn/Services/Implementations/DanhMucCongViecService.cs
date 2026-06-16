@@ -2,6 +2,7 @@
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DanhMucCongViec;
 
 namespace QuanLyDuAn.Services.Implementations
@@ -50,6 +51,56 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<PagedResultViewModel<DanhMucCongViecViewModel>> GetPagedAsync(string? tuKhoa, int? maDuAn, int pageNumber = 1, int pageSize = 20)
+        {
+            var query = (
+                from dm in _context.DanhMucCongViec
+                join da in _context.DuAn on dm.MaDuAn equals da.MaDuAn
+                where dm.IsDeleted != true && da.IsDeleted != true
+                select new DanhMucCongViecViewModel
+                {
+                    MaDanhMucCV = dm.MaDanhMucCV,
+                    MaDuAn = dm.MaDuAn,
+                    TenDuAn = da.TenDuAn ?? $"Dự án {da.MaDuAn}",
+                    TenDanhMucCV = dm.TenDanhMucCV ?? string.Empty,
+                    MoTaDanhMucCV = dm.MoTaDanhMucCV,
+                    NgayTaoDMCV = dm.NgayTaoDMCV,
+                    SoLuongCongViec = _context.CongViec.Count(cv =>
+                        cv.MaDanhMucCV == dm.MaDanhMucCV && cv.IsDeleted != true)
+                })
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var keyword = tuKhoa.Trim().ToLowerInvariant();
+                query = query.Where(x =>
+                    x.TenDanhMucCV.ToLower().Contains(keyword) ||
+                    (x.MoTaDanhMucCV != null && x.MoTaDanhMucCV.ToLower().Contains(keyword)) ||
+                    x.TenDuAn.ToLower().Contains(keyword));
+            }
+
+            if (maDuAn.HasValue)
+            {
+                query = query.Where(x => x.MaDuAn == maDuAn.Value);
+            }
+
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            var items = await query
+                .OrderByDescending(x => x.NgayTaoDMCV)
+                .ThenByDescending(x => x.MaDanhMucCV)
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToListAsync();
+
+            return new PagedResultViewModel<DanhMucCongViecViewModel>
+            {
+                Items = items,
+                Pagination = pagination
+            };
         }
 
         public async Task<DanhMucCongViecCreateUpdateViewModel?> GetByIdAsync(int id)

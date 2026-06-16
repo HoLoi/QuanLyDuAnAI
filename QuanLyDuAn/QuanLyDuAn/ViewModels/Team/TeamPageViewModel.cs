@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.Team
 {
     public class TeamPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public List<TeamViewModel> DanhSach { get; set; } = new();
         public TeamCreateUpdateViewModel Form { get; set; } = new();
         public string? TuKhoa { get; set; }

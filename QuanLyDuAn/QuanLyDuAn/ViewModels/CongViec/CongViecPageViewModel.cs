@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.CongViec
 {
     public class CongViecPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public List<CongViecItemViewModel> DanhSach { get; set; } = new();
         public List<CongViecDuAnOptionViewModel> DanhSachDuAn { get; set; } = new();
         public int? LocMaDuAn { get; set; }

@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DuyetYeuCauDoiQuanLy;
 using System.Data;
 using System.Security.Claims;
@@ -20,7 +21,13 @@ namespace QuanLyDuAn.Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<DuyetYeuCauDoiQuanLyPageViewModel> GetPageAsync(string? trangThai, int? maDuAn, string? tuKhoa)
+        public async Task<DuyetYeuCauDoiQuanLyPageViewModel> GetPageAsync(
+            string? trangThai,
+            int? maDuAn,
+            string? tuKhoa,
+            int pageNumber = 1,
+            int pageSize = PaginationViewModel.DefaultPageSize,
+            bool paginate = true)
         {
             var currentUser = await GetCurrentUserContextAsync();
             await EnsureCanReviewAsync(currentUser.AspUserId);
@@ -50,17 +57,28 @@ namespace QuanLyDuAn.Services.Implementations
                     || x.TenQuanLyDeXuat.ToLower().Contains(keyword));
             }
 
-            var danhSach = await query
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+            IQueryable<DuyetYeuCauDoiQuanLyItemViewModel> danhSachQuery = query
                 .OrderByDescending(x => x.NgayTaoYeuCauDoiQuanLy)
-                .ThenByDescending(x => x.MaYeuCauDoiQuanLy)
-                .ToListAsync();
+                .ThenByDescending(x => x.MaYeuCauDoiQuanLy);
+
+            if (paginate)
+            {
+                danhSachQuery = danhSachQuery
+                    .Skip(pagination.Skip)
+                    .Take(pagination.PageSize);
+            }
+
+            var danhSach = await danhSachQuery.ToListAsync();
 
             return new DuyetYeuCauDoiQuanLyPageViewModel
             {
                 TrangThai = trangThai,
                 MaDuAn = maDuAn,
                 TuKhoa = tuKhoa,
-                DanhSachYeuCau = danhSach
+                DanhSachYeuCau = danhSach,
+                Pagination = pagination
             };
         }
 

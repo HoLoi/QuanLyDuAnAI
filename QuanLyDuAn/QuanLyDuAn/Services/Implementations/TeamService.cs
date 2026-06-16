@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.Team;
 
 namespace QuanLyDuAn.Services.Implementations
@@ -51,6 +52,56 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             return await query.ToListAsync();
+        }
+
+        public async Task<PagedResultViewModel<TeamViewModel>> GetPagedAsync(string? tuKhoa, string? trangThaiTeam, int pageNumber = 1, int pageSize = 20)
+        {
+            var query = _context.Team
+                .Where(x => x.IsDeleted != true)
+                .Select(x => new TeamViewModel
+                {
+                    MaTeam = x.MaTeam,
+                    TenTeam = x.TenTeam ?? string.Empty,
+                    MoTaTeam = x.MoTaTeam,
+                    NgayLapTeam = x.NgayLapTeam,
+                    TrangThaiTeam = x.TrangThaiTeam ?? string.Empty,
+                    SoLuongThanhVien = _context.NhanVienTeam.Count(nvt => nvt.MaTeam == x.MaTeam),
+                    CoTruongNhom = _context.NhanVienTeam.Any(nvt => nvt.MaTeam == x.MaTeam && nvt.IsLeader == true)
+                })
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var keyword = tuKhoa.Trim().ToLower();
+                query = query.Where(x =>
+                    x.TenTeam.ToLower().Contains(keyword) ||
+                    (x.MoTaTeam != null && x.MoTaTeam.ToLower().Contains(keyword)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThaiTeam))
+            {
+                var filterValues = TrangThai.GetCommonStatusVariants(trangThaiTeam);
+                if (filterValues.Length > 0)
+                {
+                    query = query.Where(x => filterValues.Contains(x.TrangThaiTeam));
+                }
+            }
+
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            var items = await query
+                .OrderByDescending(x => x.NgayLapTeam)
+                .ThenByDescending(x => x.MaTeam)
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToListAsync();
+
+            return new PagedResultViewModel<TeamViewModel>
+            {
+                Items = items,
+                Pagination = pagination
+            };
         }
 
         public async Task<TeamCreateUpdateViewModel?> GetByIdAsync(int id)

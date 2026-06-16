@@ -24,7 +24,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? tuKhoa, int? locMaDuAn)
+        public async Task<IActionResult> Index(string? tuKhoa, int? locMaDuAn, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DanhMucCongViec.Xem))
                 return Forbid();
@@ -45,11 +45,13 @@ namespace QuanLyDuAn.Controllers
                 return RedirectToAction("Index", "DuAn");
             }
 
+            var paged = await _service.GetPagedAsync(tuKhoa, locMaDuAn, pageNumber, pageSize);
+
             var vm = new DanhMucCongViecPageViewModel
             {
                 MaDuAn = selectedProject.MaDuAn,
                 TenDuAn = selectedProject.TenDuAn,
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaDuAn),
+                DanhSach = paged.Items,
                 DanhSachDuAn = duAnOptions,
                 Form = new DanhMucCongViecCreateUpdateViewModel
                 {
@@ -57,6 +59,7 @@ namespace QuanLyDuAn.Controllers
                 },
                 TuKhoa = tuKhoa,
                 LocMaDuAn = locMaDuAn,
+                Pagination = paged.Pagination,
                 Permissions = permissions
             };
 
@@ -64,7 +67,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Sua(int id, string? tuKhoa, int? locMaDuAn)
+        public async Task<IActionResult> Sua(int id, string? tuKhoa, int? locMaDuAn, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DanhMucCongViec.Sua))
                 return Forbid();
@@ -93,16 +96,18 @@ namespace QuanLyDuAn.Controllers
             }
 
             form.MaDuAn = selectedProject.MaDuAn;
+            var paged = await _service.GetPagedAsync(tuKhoa, locMaDuAn, pageNumber, pageSize);
 
             var vm = new DanhMucCongViecPageViewModel
             {
                 MaDuAn = selectedProject.MaDuAn,
                 TenDuAn = selectedProject.TenDuAn,
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaDuAn),
+                DanhSach = paged.Items,
                 DanhSachDuAn = duAnOptions,
                 Form = form,
                 TuKhoa = tuKhoa,
                 LocMaDuAn = locMaDuAn,
+                Pagination = paged.Pagination,
                 Permissions = permissions
             };
 
@@ -133,10 +138,12 @@ namespace QuanLyDuAn.Controllers
 
             if (!ModelState.IsValid)
             {
+                var paged = await _service.GetPagedAsync(vm.TuKhoa, selectedMaDuAn);
                 vm.MaDuAn = selectedProject.MaDuAn;
                 vm.TenDuAn = selectedProject.TenDuAn;
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, selectedMaDuAn);
+                vm.DanhSach = paged.Items;
                 vm.DanhSachDuAn = duAnOptions;
+                vm.Pagination = paged.Pagination;
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
             }
@@ -165,10 +172,12 @@ namespace QuanLyDuAn.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("Form.TenDanhMucCV", ex.Message);
+                var paged = await _service.GetPagedAsync(vm.TuKhoa, selectedMaDuAn);
                 vm.MaDuAn = selectedProject.MaDuAn;
                 vm.TenDuAn = selectedProject.TenDuAn;
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, selectedMaDuAn);
+                vm.DanhSach = paged.Items;
                 vm.DanhSachDuAn = duAnOptions;
+                vm.Pagination = paged.Pagination;
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
             }

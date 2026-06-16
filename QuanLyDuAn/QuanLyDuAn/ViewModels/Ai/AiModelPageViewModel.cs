@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.Ai
 {
     public class AiModelPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public string? CanhBao { get; set; }
         public string? LoiHeThong { get; set; }
 

@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.DanhMucCongViec
 {
     public class DanhMucCongViecPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public int MaDuAn { get; set; }
         public string TenDuAn { get; set; } = string.Empty;
         public List<DanhMucCongViecViewModel> DanhSach { get; set; } = new();

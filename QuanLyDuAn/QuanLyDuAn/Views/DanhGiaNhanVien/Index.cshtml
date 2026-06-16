@@ -92,6 +92,7 @@
             @if (Model.DanhSach.Any())
             {
                 @await Html.PartialAsync("_Table", Model)
+                <partial name="_Pagination" model="Model.Pagination" />
             }
             else
             {

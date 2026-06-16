@@ -9,7 +9,9 @@ namespace QuanLyDuAn.Services.Interfaces
             int? maTeamDangChon,
             string? tuKhoa,
             int? locMaLoaiDuAn,
-            string? locTrangThaiDuAn);
+            string? locTrangThaiDuAn,
+            int pageNumber = 1,
+            int pageSize = 20);
 
         Task SaveAsync(int maDuAn, int? maTeam, List<int> maNguoiDungDuocChon);
         Task DeleteAsync(int maDuAn, int maTeam, bool xoaNhanVienThuocTeam);

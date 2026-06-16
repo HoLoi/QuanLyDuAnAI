@@ -23,14 +23,19 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? trangThai, int? maDuAn, string? tuKhoa)
+        public async Task<IActionResult> Index(
+            string? trangThai,
+            int? maDuAn,
+            string? tuKhoa,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuyetYeuCauDoiQuanLy.Xem))
             {
                 return Forbid();
             }
 
-            var vm = await _service.GetPageAsync(trangThai, maDuAn, tuKhoa);
+            var vm = await _service.GetPageAsync(trangThai, maDuAn, tuKhoa, pageNumber, pageSize);
             vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             return View(vm);
         }

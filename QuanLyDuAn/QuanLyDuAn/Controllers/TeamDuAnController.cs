@@ -29,7 +29,9 @@ namespace QuanLyDuAn.Controllers
             int? maTeamDangChon,
             string? tuKhoa,
             int? locMaLoaiDuAn,
-            string? locTrangThaiDuAn)
+            string? locTrangThaiDuAn,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.TeamDuAn.Xem))
                 return Forbid();
@@ -40,7 +42,7 @@ namespace QuanLyDuAn.Controllers
                 return RedirectToAction("Index", "DuAn");
             }
 
-            var vm = await _service.GetPageAsync(maDuAn, maTeamDangChon, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn);
+            var vm = await _service.GetPageAsync(maDuAn, maTeamDangChon, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, pageNumber, pageSize);
             vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             return View(vm);
         }

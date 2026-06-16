@@ -29,12 +29,12 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? locMaDuAn, string? locTrangThai)
+        public async Task<IActionResult> Index(int? locMaDuAn, string? locTrangThai, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.NganSach.Xem))
                 return Forbid();
 
-            var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai);
+            var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai, pageNumber, pageSize);
             vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             return View(vm);
         }
@@ -45,7 +45,7 @@ namespace QuanLyDuAn.Controllers
             if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
                 return Forbid();
 
-            var page = await _service.GetPageAsync(locMaDuAn, locTrangThai);
+            var page = await _service.GetPageAsync(locMaDuAn, locTrangThai, paginate: false);
             var rows = page.DanhSach.Cast<object>().ToList();
 
             var exportRequest = new ExportFileRequest

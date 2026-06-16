@@ -10,7 +10,10 @@ namespace QuanLyDuAn.Services.Interfaces
             string? tuKhoa,
             string? trangThai,
             DateTime? tuNgayDanhGia,
-            DateTime? denNgayDanhGia);
+            DateTime? denNgayDanhGia,
+            int pageNumber = 1,
+            int pageSize = 20,
+            bool paginate = true);
         Task<DanhGiaNhanVienFormViewModel> GetFormAsync(int maDuAn, int maNhanVien);
         Task LuuDanhGiaAsync(DanhGiaNhanVienFormViewModel form);
         Task GuiDuyetAsync(int maDanhGiaNhanVien);

@@ -89,22 +89,20 @@
             <span asp-validation-for="RoleId" class="text-danger"></span>
         </div>
 
-        @if (Model.MaNguoiDung == null)
-        {
-            <div class="col-md-6 mb-2">
-                <label>Mật khẩu</label>
-                <input asp-for="Password" type="password" class="form-control" autocomplete="new-password" required />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-        }
-        else
-        {
-            <div class="col-md-6 mb-2">
-                <label>Reset mật khẩu (để trống nếu không đổi)</label>
-                <input asp-for="ResetPassword" type="password" class="form-control" autocomplete="new-password" />
-                <span asp-validation-for="ResetPassword" class="text-danger"></span>
-            </div>
-        }
+        @* <div class="col-12 mb-2">
+            @if (Model.MaNguoiDung == null)
+            {
+                <div class="alert alert-info mb-0">
+                    Sau khi tạo tài khoản, hệ thống sẽ gửi email mời để nhân viên tự thiết lập mật khẩu và kích hoạt tài khoản.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0">
+                    Mật khẩu không được đặt trực tiếp tại màn hình nhân sự. Người dùng có thể tự đặt lại mật khẩu qua email khi cần.
+                </div>
+            }
+        </div> *@
     </div>
 
     <div class="table-actions">

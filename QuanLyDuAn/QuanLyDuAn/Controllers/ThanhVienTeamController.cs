@@ -24,17 +24,18 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? tuKhoa, int? locMaTeam, string? locVaiTroLanhDao, bool? cheDoGanTruongNhom)
+        public async Task<IActionResult> Index(string? tuKhoa, int? locMaTeam, string? locVaiTroLanhDao, bool? cheDoGanTruongNhom, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.ThanhVienNhom.Xem))
                 return Forbid();
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             var locLeader = ParseLeaderFilter(locVaiTroLanhDao);
+            var paged = await _service.GetPagedAsync(tuKhoa, locMaTeam, locLeader, pageNumber, pageSize);
 
             var vm = new ThanhVienTeamPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaTeam, locLeader),
+                DanhSach = paged.Items,
                 Form = new ThanhVienTeamCreateUpdateViewModel
                 {
                     MaTeam = locMaTeam
@@ -45,6 +46,7 @@ namespace QuanLyDuAn.Controllers
                 LocMaTeam = locMaTeam,
                 LocVaiTroLanhDao = locVaiTroLanhDao,
                 CheDoGanTruongNhom = cheDoGanTruongNhom == true,
+                Pagination = paged.Pagination,
                 Permissions = permissions
             };
 
@@ -52,7 +54,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Sua(int maTeam, int maNguoiDung, string? tuKhoa, int? locMaTeam, string? locVaiTroLanhDao, bool? cheDoGanTruongNhom)
+        public async Task<IActionResult> Sua(int maTeam, int maNguoiDung, string? tuKhoa, int? locMaTeam, string? locVaiTroLanhDao, bool? cheDoGanTruongNhom, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.ThanhVienNhom.Them))
                 return Forbid();
@@ -66,10 +68,11 @@ namespace QuanLyDuAn.Controllers
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             var locLeader = ParseLeaderFilter(locVaiTroLanhDao);
+            var paged = await _service.GetPagedAsync(tuKhoa, locMaTeam, locLeader, pageNumber, pageSize);
 
             var vm = new ThanhVienTeamPageViewModel
             {
-                DanhSach = await _service.GetAllAsync(tuKhoa, locMaTeam, locLeader),
+                DanhSach = paged.Items,
                 Form = form,
                 DanhSachTeam = await _service.GetTeamOptionsAsync(),
                 DanhSachNhanSu = await _service.GetNhanSuOptionsAsync(),
@@ -77,6 +80,7 @@ namespace QuanLyDuAn.Controllers
                 LocMaTeam = locMaTeam,
                 LocVaiTroLanhDao = locVaiTroLanhDao,
                 CheDoGanTruongNhom = cheDoGanTruongNhom == true,
+                Pagination = paged.Pagination,
                 Permissions = permissions
             };
 
@@ -92,7 +96,9 @@ namespace QuanLyDuAn.Controllers
             if (!ModelState.IsValid)
             {
                 var locLeaderInvalid = ParseLeaderFilter(vm.LocVaiTroLanhDao);
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaTeam, locLeaderInvalid);
+                var paged = await _service.GetPagedAsync(vm.TuKhoa, vm.LocMaTeam, locLeaderInvalid);
+                vm.DanhSach = paged.Items;
+                vm.Pagination = paged.Pagination;
                 vm.DanhSachTeam = await _service.GetTeamOptionsAsync();
                 vm.DanhSachNhanSu = await _service.GetNhanSuOptionsAsync();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
@@ -115,7 +121,9 @@ namespace QuanLyDuAn.Controllers
             {
                 ModelState.AddModelError("Form.VaiTroTrongTeam", ex.Message);
                 var locLeaderFailed = ParseLeaderFilter(vm.LocVaiTroLanhDao);
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaTeam, locLeaderFailed);
+                var paged = await _service.GetPagedAsync(vm.TuKhoa, vm.LocMaTeam, locLeaderFailed);
+                vm.DanhSach = paged.Items;
+                vm.Pagination = paged.Pagination;
                 vm.DanhSachTeam = await _service.GetTeamOptionsAsync();
                 vm.DanhSachNhanSu = await _service.GetNhanSuOptionsAsync();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);

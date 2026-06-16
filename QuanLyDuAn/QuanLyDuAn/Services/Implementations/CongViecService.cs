@@ -2,6 +2,7 @@
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.CongViec;
 using System.Security.Claims;
 
@@ -29,7 +30,10 @@ namespace QuanLyDuAn.Services.Implementations
             string? tuKhoa,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            int pageNumber = 1,
+            int pageSize = PaginationViewModel.DefaultPageSize,
+            bool paginate = true)
         {
             var currentUserId = await GetCurrentUserIdAsync();
             var (isAdmin, isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
@@ -134,10 +138,21 @@ namespace QuanLyDuAn.Services.Implementations
                     || _context.PhanCongCongViec.Any(pc => pc.MaCongViec == x.MaCongViec && pc.MaNguoiDung == currentUserId));
             }
 
-            var danhSach = await query
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            IQueryable<CongViecItemViewModel> danhSachQuery = query
                 .OrderByDescending(x => x.NgayTaoCongViec)
-                .ThenByDescending(x => x.MaCongViec)
-                .ToListAsync();
+                .ThenByDescending(x => x.MaCongViec);
+
+            if (paginate)
+            {
+                danhSachQuery = danhSachQuery
+                    .Skip(pagination.Skip)
+                    .Take(pagination.PageSize);
+            }
+
+            var danhSach = await danhSachQuery.ToListAsync();
 
             await GanCoThePhanCongCongViecAsync(danhSach, currentUserId, isManager, isEmployee, isAdmin);
             await GanCoTheXuLyTrangThaiCongViecAsync(danhSach, currentUserId);
@@ -146,6 +161,7 @@ namespace QuanLyDuAn.Services.Implementations
             return new CongViecPageViewModel
             {
                 DanhSach = danhSach,
+                Pagination = pagination,
                 DanhSachDuAn = projectOptions,
                 LocMaDuAn = locMaDuAn,
                 LocTrangThai = locTrangThai,

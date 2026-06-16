@@ -24,7 +24,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn)
+        public async Task<IActionResult> Index(int maDuAn, string? tuKhoa, int? locMaLoaiDuAn, string? locTrangThaiDuAn, int pageNumber = 1, int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.ThanhVienDuAn.Xem))
                 return Forbid();
@@ -35,7 +35,7 @@ namespace QuanLyDuAn.Controllers
                 return RedirectToAction("Index", "DuAn");
             }
 
-            var vm = await _service.GetPageAsync(maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn);
+            var vm = await _service.GetPageAsync(maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, pageNumber, pageSize);
             vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             return View(vm);
         }

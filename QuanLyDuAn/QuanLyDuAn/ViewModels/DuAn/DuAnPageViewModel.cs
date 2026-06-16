@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.DuAn
 {
     public class DuAnPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public List<DuAnViewModel> DanhSach { get; set; } = new();
         public DuAnCreateUpdateViewModel Form { get; set; } = new();
         public List<LoaiDuAnOptionViewModel> DanhSachLoaiDuAn { get; set; } = new();

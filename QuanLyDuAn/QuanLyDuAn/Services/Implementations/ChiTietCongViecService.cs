@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.ChiTietCongViec;
 using System.Security.Claims;
 
@@ -24,17 +25,37 @@ namespace QuanLyDuAn.Services.Implementations
             _trangThaiWorkflowService = trangThaiWorkflowService;
         }
 
-        public async Task<ChiTietCongViecPageViewModel> GetPageAsync(int maCongViec)
+        public async Task<ChiTietCongViecPageViewModel> GetPageAsync(int maCongViec, int pageNumber = 1, int pageSize = 20, bool paginate = true)
         {
             var congViec = await LayCongViecAsync(maCongViec);
             var coTheCapNhat = await CoTheCapNhatAsync(congViec)
                                && !BiKhoaCapNhatTheoTrangThaiCongViec(congViec.TrangThaiCongViec);
             var coThePhanCongChiTietCongViec = await CoThePhanCongChiTietCongViecAsync(congViec);
 
-            var danhSach = await _context.CtCongViec
-                .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true)
+            var query = _context.CtCongViec
+                .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true);
+
+            var tongSoChiTiet = await query.CountAsync();
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var soChiTietHoanThanh = await query.CountAsync(x =>
+                trangThaiHoanThanh.Contains(x.TrangThaiCTCV ?? string.Empty));
+            var pagination = paginate
+                ? PaginationViewModel.Create(pageNumber, pageSize, tongSoChiTiet)
+                : PaginationViewModel.Create(1, tongSoChiTiet > 0 ? tongSoChiTiet : PaginationViewModel.DefaultPageSize, tongSoChiTiet);
+
+            var pagedQuery = query
                 .OrderByDescending(x => x.NgayTaoCTCV)
                 .ThenByDescending(x => x.MaChiTietCV)
+                .AsQueryable();
+
+            if (paginate)
+            {
+                pagedQuery = pagedQuery
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize);
+            }
+
+            var danhSach = await pagedQuery
                 .Select(x => new ChiTietCongViecItemViewModel
                 {
                     MaChiTietCV = x.MaChiTietCV,
@@ -51,8 +72,6 @@ namespace QuanLyDuAn.Services.Implementations
             GanThongTinWorkflowUi(danhSach);
 
             var trangThaiCongViec = TrangThai.ToCode(congViec.TrangThaiCongViec);
-            var tongSoChiTiet = danhSach.Count;
-            var soChiTietHoanThanh = danhSach.Count(x => TrangThai.LaHoanThanhCongViec(x.TrangThaiCTCV));
             var phanTramTienDo = tongSoChiTiet == 0
                 ? 0
                 : (int)Math.Round((double)soChiTietHoanThanh * 100 / tongSoChiTiet);
@@ -78,7 +97,8 @@ namespace QuanLyDuAn.Services.Implementations
                     NgayBatDauCTCV = DateTime.Today,
                     TrangThaiCTCV = TrangThai.ChuaBatDau
                 },
-                DanhSach = danhSach
+                DanhSach = danhSach,
+                Pagination = pagination
             };
         }
 

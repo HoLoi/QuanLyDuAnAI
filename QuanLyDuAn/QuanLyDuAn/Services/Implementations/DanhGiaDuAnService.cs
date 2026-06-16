@@ -3,6 +3,7 @@ using QuanLyDuAn.Constants;
 using QuanLyDuAn.Data;
 using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
+using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.Ai;
 using QuanLyDuAn.ViewModels.DanhGiaDuAn;
 using System.Security.Claims;
@@ -87,7 +88,10 @@ namespace QuanLyDuAn.Services.Implementations
             string? trangThai,
             int? maDuAn,
             DateTime? tuNgayDanhGia,
-            DateTime? denNgayDanhGia)
+            DateTime? denNgayDanhGia,
+            int pageNumber = 1,
+            int pageSize = 20,
+            bool paginate = true)
         {
             KiemTraQuyenTheoClaim(Permissions.DanhGiaDuAn.Xem);
             var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgayDanhGia, denNgayDanhGia);
@@ -142,10 +146,77 @@ namespace QuanLyDuAn.Services.Implementations
                     || (x.TenNguoiQuanLy ?? string.Empty).ToLower().Contains(keyword));
             }
 
-            var duAnRows = await query
+            if (tuNgayLoc.HasValue)
+            {
+                query = query.Where(x => _context.DanhGiaDuAn
+                    .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn)
+                    .OrderByDescending(dg => dg.NgayDanhGiaDA)
+                    .ThenByDescending(dg => dg.MaDanhGiaDuAn)
+                    .Select(dg => dg.NgayDanhGiaDA)
+                    .FirstOrDefault() >= tuNgayLoc.Value);
+            }
+
+            if (denNgayDocQuyen.HasValue)
+            {
+                query = query.Where(x => _context.DanhGiaDuAn
+                    .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn)
+                    .OrderByDescending(dg => dg.NgayDanhGiaDA)
+                    .ThenByDescending(dg => dg.MaDanhGiaDuAn)
+                    .Select(dg => dg.NgayDanhGiaDA)
+                    .FirstOrDefault() < denNgayDocQuyen.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(trangThai))
+            {
+                if (LaTrangThaiDanhGia(TrangThaiChuaDanhGia, trangThai))
+                {
+                    query = query.Where(x => !_context.DanhGiaDuAn
+                        .Any(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn));
+                }
+                else
+                {
+                    var trangThaiFilterValues = TrangThai.GetCommonStatusVariants(trangThai);
+                    if (trangThaiFilterValues.Length > 0)
+                    {
+                        query = query.Where(x => trangThaiFilterValues.Contains(_context.DanhGiaDuAn
+                            .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn)
+                            .OrderByDescending(dg => dg.NgayDanhGiaDA)
+                            .ThenByDescending(dg => dg.MaDanhGiaDuAn)
+                            .Select(dg => dg.TrangThaiDanhGiaDA ?? string.Empty)
+                            .FirstOrDefault() ?? string.Empty));
+                    }
+                }
+            }
+
+            var totalItems = await query.CountAsync();
+            var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
+
+            var summaryRows = await query
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    TrangThaiDanhGia = _context.DanhGiaDuAn
+                        .Where(dg => dg.IsDeleted != true && dg.MaDuAn == x.MaDuAn)
+                        .OrderByDescending(dg => dg.NgayDanhGiaDA)
+                        .ThenByDescending(dg => dg.MaDanhGiaDuAn)
+                        .Select(dg => dg.TrangThaiDanhGiaDA)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            var orderedQuery = query
                 .OrderBy(x => x.TenDuAn)
                 .ThenBy(x => x.MaDuAn)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (paginate)
+            {
+                orderedQuery = orderedQuery
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize);
+            }
+
+            var duAnRows = await orderedQuery.ToListAsync();
 
             var duAnIds = duAnRows.Select(x => x.MaDuAn).Distinct().ToList();
             var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
@@ -292,32 +363,6 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }).ToList();
 
-            if (tuNgayLoc.HasValue)
-            {
-                items = items
-                    .Where(x => x.NgayDanhGia.HasValue && x.NgayDanhGia.Value >= tuNgayLoc.Value)
-                    .ToList();
-            }
-
-            if (denNgayDocQuyen.HasValue)
-            {
-                items = items
-                    .Where(x => x.NgayDanhGia.HasValue && x.NgayDanhGia.Value < denNgayDocQuyen.Value)
-                    .ToList();
-            }
-
-            if (!string.IsNullOrWhiteSpace(trangThai))
-            {
-                items = items
-                    .Where(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, trangThai))
-                    .ToList();
-            }
-
-            items = items
-                .OrderBy(x => x.TenDuAn)
-                .ThenBy(x => x.MaDuAn)
-                .ToList();
-
             return new DanhGiaDuAnPageViewModel
             {
                 TuKhoa = tuKhoa,
@@ -327,12 +372,13 @@ namespace QuanLyDuAn.Services.Implementations
                 DenNgayDanhGia = denNgayLoc,
                 DanhSach = items,
                 DanhSachDuAn = danhSachDuAnTheoScope,
-                TongSo = items.Count,
-                SoChuaDanhGia = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiChuaDanhGia)),
-                SoNhap = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiNhap)),
-                SoChoDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.ChoDuyet)),
-                SoDaDuyet = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.DaDuyet)),
-                SoTuChoi = items.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.TuChoi))
+                TongSo = totalItems,
+                SoChuaDanhGia = summaryRows.Count(x => string.IsNullOrWhiteSpace(x.TrangThaiDanhGia)),
+                SoNhap = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThaiNhap)),
+                SoChoDuyet = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.ChoDuyet)),
+                SoDaDuyet = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.DaDuyet)),
+                SoTuChoi = summaryRows.Count(x => LaTrangThaiDanhGia(x.TrangThaiDanhGia, TrangThai.TuChoi)),
+                Pagination = pagination
             };
         }
 

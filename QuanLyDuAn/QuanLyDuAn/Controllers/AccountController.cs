@@ -87,6 +87,60 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Activate(string? userId, string? token)
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+            {
+                TempData["Error"] = "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            try
+            {
+                var model = await _accountService.TaoFormKichHoatAsync(userId, token);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Login));
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Activate(ActivateAccountViewModel model)
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                await _accountService.KichHoatTaiKhoanAsync(model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+
+            TempData["Success"] = "Kích hoạt tài khoản thành công. Vui lòng đăng nhập bằng mật khẩu mới.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        [HttpGet]
         public IActionResult ForgotPassword()
         {
             if (User?.Identity?.IsAuthenticated == true)

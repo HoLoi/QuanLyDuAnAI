@@ -1,7 +1,10 @@
-﻿namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
+using QuanLyDuAn.ViewModels.Common;
+
+namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
 {
     public class DanhGiaDuAnPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public string? TuKhoa { get; set; }
         public string? TrangThai { get; set; }
         public int? MaDuAn { get; set; }

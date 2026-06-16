@@ -1,7 +1,10 @@
+using QuanLyDuAn.ViewModels.Common;
+
 namespace QuanLyDuAn.ViewModels.NganSach
 {
     public class NganSachPageViewModel
     {
+        public PaginationViewModel Pagination { get; set; } = new();
         public List<NganSachItemViewModel> DanhSach { get; set; } = new();
         public List<NganSachDuAnOptionViewModel> DanhSachDuAn { get; set; } = new();
         public int? LocMaDuAn { get; set; }

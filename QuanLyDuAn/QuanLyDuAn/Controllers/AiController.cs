@@ -212,14 +212,14 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Models(string? model, string? loaiModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> Models(string? model, string? loaiModel, int pageNumber = 1, int pageSize = 20, CancellationToken cancellationToken = default)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.AI.Train))
             {
                 return Forbid();
             }
 
-            var vm = await _aiService.LayTrangModelAsync(model, loaiModel, cancellationToken);
+            var vm = await _aiService.LayTrangModelAsync(model, loaiModel, cancellationToken, pageNumber, pageSize);
             return View(vm);
         }
 

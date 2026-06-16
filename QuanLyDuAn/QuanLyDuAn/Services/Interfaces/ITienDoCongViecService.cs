@@ -10,7 +10,10 @@ namespace QuanLyDuAn.Services.Interfaces
             int? locMaChiTietCv,
             string? tuKhoa,
             DateTime? tuNgayBaoCao,
-            DateTime? denNgayBaoCao);
+            DateTime? denNgayBaoCao,
+            int pageNumber = 1,
+            int pageSize = 20,
+            bool paginate = true);
 
         Task CapNhatTienDoAsync(TienDoCongViecCapNhatViewModel form);
         Task DuyetBaoCaoTienDoAsync(TienDoCongViecDuyetViewModel form);

@@ -1,0 +1,95 @@
+@model QuanLyDuAn.ViewModels.Common.PaginationViewModel
+
+@{
+    var routeValues = ViewContext.HttpContext.Request.Query
+        .Where(x => !string.Equals(x.Key, "pageNumber", StringComparison.OrdinalIgnoreCase))
+        .ToDictionary(x => x.Key, x => x.Value.ToString());
+    routeValues["pageSize"] = Model.PageSize.ToString();
+
+    var pages = new List<int>();
+    void AddPage(int page)
+    {
+        if (page >= 1 && page <= Model.TotalPages && !pages.Contains(page))
+        {
+            pages.Add(page);
+        }
+    }
+
+    AddPage(1);
+    for (var page = Model.PageNumber - 2; page <= Model.PageNumber + 2; page++)
+    {
+        AddPage(page);
+    }
+    AddPage(Model.TotalPages);
+    pages.Sort();
+}
+
+<div class="pagination-wrap d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mt-3">
+    <form method="get" class="d-flex align-items-center gap-2 flex-wrap pagination-size-form">
+        @foreach (var query in ViewContext.HttpContext.Request.Query)
+        {
+            if (!string.Equals(query.Key, "pageSize", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(query.Key, "pageNumber", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var value in query.Value)
+                {
+                    <input type="hidden" name="@query.Key" value="@value" />
+                }
+            }
+        }
+        <input type="hidden" name="pageNumber" value="1" />
+        <label for="pageSize" class="text-muted small mb-0">Hiển thị</label>
+        <select id="pageSize" name="pageSize" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+            @foreach (var size in QuanLyDuAn.ViewModels.Common.PaginationViewModel.AllowedPageSizes)
+            {
+                <option value="@size" selected="@(Model.PageSize == size)">@size</option>
+            }
+        </select>
+        <span class="text-muted small">dòng/trang</span>
+    </form>
+
+    <div class="text-muted small">
+        @if (Model.TotalItems == 0)
+        {
+            <span>0 kết quả</span>
+        }
+        else
+        {
+            <span>Hiển thị @Model.FromItem-@Model.ToItem trong tổng số @Model.TotalItems kết quả</span>
+        }
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Phân trang">
+            <ul class="pagination pagination-sm mb-0 flex-wrap">
+                @{
+                    routeValues["pageNumber"] = (Model.PageNumber - 1).ToString();
+                }
+                <li class="page-item @(Model.HasPreviousPage ? string.Empty : "disabled")">
+                    <a class="page-link" asp-all-route-data="routeValues" aria-label="Trang trước">Trước</a>
+                </li>
+
+                @for (var i = 0; i < pages.Count; i++)
+                {
+                    if (i > 0 && pages[i] - pages[i - 1] > 1)
+                    {
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+
+                    routeValues["pageNumber"] = pages[i].ToString();
+                    <li class="page-item @(pages[i] == Model.PageNumber ? "active" : string.Empty)">
+                        <a class="page-link" asp-all-route-data="routeValues">@pages[i]</a>
+                    </li>
+                }
+
+                @{
+                    routeValues["pageNumber"] = (Model.PageNumber + 1).ToString();
+                }
+                <li class="page-item @(Model.HasNextPage ? string.Empty : "disabled")">
+                    <a class="page-link" asp-all-route-data="routeValues" aria-label="Trang sau">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
