@@ -60,10 +60,19 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new InvalidOperationException("Cấu hình EmailSettings:SenderEmail không hợp lệ.");
             }
 
-            if (string.IsNullOrWhiteSpace(toEmail) || !MailAddress.TryCreate(toEmail.Trim(), out var recipientAddress))
+            var recipientEmail = toEmail?.Trim();
+            if (string.IsNullOrWhiteSpace(recipientEmail) || !MailAddress.TryCreate(recipientEmail, out var recipientAddress))
             {
                 throw new InvalidOperationException("Email người nhận không hợp lệ.");
             }
+
+            _logger.LogInformation(
+                "Bat dau gui email. Operation={Operation}, Recipient={Recipient}, Sender={Sender}, SmtpHost={SmtpHost}, Port={Port}.",
+                "SendAsync",
+                MaskEmail(recipientEmail),
+                MaskEmail(senderEmail),
+                smtpServer,
+                port);
 
             if (string.IsNullOrWhiteSpace(subject))
             {
@@ -97,13 +106,18 @@ namespace QuanLyDuAn.Services.Implementations
             try
             {
                 await smtp.SendMailAsync(mail);
+                _logger.LogInformation(
+                    "SMTP da chap nhan email. Operation={Operation}, Recipient={Recipient}.",
+                    "SendAsync",
+                    MaskEmail(recipientEmail));
             }
             catch (SmtpException ex)
             {
                 _logger.LogError(
                     ex,
-                    "SMTP gui email that bai. Operation: {Operation}, StatusCode: {StatusCode}, ExceptionType: {ExceptionType}",
+                    "SMTP gui email that bai. Operation={Operation}, Recipient={Recipient}, StatusCode={StatusCode}, ExceptionType={ExceptionType}.",
                     "SendAsync",
+                    MaskEmail(recipientEmail),
                     ex.StatusCode,
                     ex.GetType().Name);
 
@@ -126,18 +140,19 @@ namespace QuanLyDuAn.Services.Implementations
             var body = $"""
 Xin chào {recipientName},
 
-Tài khoản của bạn đã được tạo trên hệ thống Quản lý dự án AI.
+Tài khoản của bạn trên hệ thống Quản lý dự án AI đã được tạo.
 
 Tên đăng nhập: {userName}
 
-Vui lòng nhấn vào liên kết bên dưới để thiết lập mật khẩu và kích hoạt tài khoản:
+Để đặt mật khẩu và kích hoạt tài khoản, vui lòng mở liên kết sau trong thời hạn {lifetimeHours} giờ:
 {activationUrl}
 
-Liên kết có hiệu lực trong {lifetimeHours} giờ và chỉ sử dụng được một lần.
+Liên kết này chỉ sử dụng được một lần.
 
-Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email hoặc liên hệ quản trị viên.
+Nếu bạn không yêu cầu tài khoản này, vui lòng bỏ qua email.
 
-Trân trọng.
+Trân trọng,
+Hệ thống Quản lý dự án AI
 """;
 
             return SendAsync(toEmail, "Kích hoạt tài khoản Quản lý dự án AI", body);
@@ -180,6 +195,23 @@ Trân trọng.
             }
 
             return "Không gửi được email kích hoạt. Vui lòng kiểm tra cấu hình Gmail hoặc thử lại sau.";
+        }
+
+        private static string MaskEmail(string? email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return "[empty]";
+            }
+
+            var trimmed = email.Trim();
+            var atIndex = trimmed.IndexOf('@');
+            if (atIndex <= 1)
+            {
+                return "***";
+            }
+
+            return $"{trimmed[0]}***{trimmed[(atIndex - 1)..]}";
         }
     }
 }

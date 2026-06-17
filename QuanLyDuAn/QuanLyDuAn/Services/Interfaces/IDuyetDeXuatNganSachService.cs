@@ -11,6 +11,6 @@ namespace QuanLyDuAn.Services.Interfaces
             int pageSize = 20,
             bool paginate = true);
         Task ApproveAsync(int maDeXuatNs);
-        Task RejectAsync(int maDeXuatNs, string? lyDo);
+        Task RejectAsync(int maDeXuatNs);
     }
 }

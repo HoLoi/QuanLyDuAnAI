@@ -13,5 +13,9 @@ namespace QuanLyDuAn.ViewModels.DanhMucCongViec
         public string? TuKhoa { get; set; }
         public int? LocMaDuAn { get; set; }
         public HashSet<string> Permissions { get; set; } = new();
+        public bool CoTheXemDanhMuc { get; set; }
+        public bool CoTheThemDanhMuc { get; set; }
+        public bool CoTheSuaDanhMuc { get; set; }
+        public bool CoTheXoaDanhMuc { get; set; }
     }
 }

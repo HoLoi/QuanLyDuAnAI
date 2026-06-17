@@ -1,5 +1,6 @@
 ﻿@model QuanLyDuAn.ViewModels.DuAn.DuAnChiTietViewModel
 @using QuanLyDuAn.Constants
+@inject QuanLyDuAn.Services.Interfaces.IDanhMucCongViecScopeService DanhMucCongViecScopeService
 
 @{
     ViewData["Title"] = "Chi tiết dự án";
@@ -24,7 +25,7 @@
     var canSeeTeams = permissions.Contains(Permissions.TeamDuAn.Xem);
     var canSeeTasks = permissions.Contains(Permissions.CongViec.Xem);
     var canSeeWorkDetails = permissions.Contains(Permissions.ChiTietCongViec.Xem) && Model.MaCongViecDauTien.HasValue;
-    var canSeeCategories = permissions.Contains(Permissions.DanhMucCongViec.Xem);
+    var canSeeCategories = await DanhMucCongViecScopeService.CanAccessProjectAsync(User!, Model.MaDuAn, Permissions.DanhMucCongViec.Xem);
     var canSeeDeXuatCongViec = permissions.Contains(Permissions.DeXuatCongViec.Xem);
     var canSeeDeXuatNganSach = permissions.Contains(Permissions.DeXuatNganSach.Xem);
     var canSeeNganSach = permissions.Contains(Permissions.NganSach.Xem);

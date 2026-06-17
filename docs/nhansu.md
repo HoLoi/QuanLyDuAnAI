@@ -1439,3 +1439,1141 @@ Lưu ý:
   - View `Activate` không dùng URL localhost hard-code cho tài nguyên nội bộ.
 - Chưa đủ bằng chứng để kết luận nguyên nhân duy nhất của màn hình trắng là `UseHttpsRedirection`; cần kiểm chứng runtime theo checklist mục 10.
 - Các yếu tố firewall/LAN/VPN/AP isolation là nguyên nhân môi trường thường gặp và không phải lỗi nghiệp vụ kích hoạt tài khoản.
+
+# RÀ SOÁT EMAIL XUẤT HIỆN TRONG ĐÃ GỬI NHƯNG NGƯỜI NHẬN KHÔNG NHẬN ĐƯỢC
+
+## 1. Hiện tượng thực tế
+
+- Ứng dụng báo gửi email kích hoạt thành công (không có `Warning`/`Error` từ luồng tạo nhân sự hoặc gửi lại).
+- Trong tài khoản Gmail người gửi, mục **Đã gửi** có bản sao email.
+- Tài khoản người nhận **không thấy** email trong Hộp thư đến (Inbox).
+
+Phân biệt các trạng thái trong chuỗi giao thư:
+
+| Bước | Trạng thái | Ý nghĩa |
+| ---- | ---------- | ------- |
+| 1 | Ứng dụng gọi `SendMailAsync` không exception | Code SMTP hoàn tất bình thường |
+| 2 | Gmail SMTP chấp nhận thư | Máy chủ gửi tiếp nhận lệnh gửi |
+| 3 | Gmail lưu vào **Đã gửi** | Tài khoản gửi ghi nhận thao tác gửi thành công |
+| 4 | Hệ thống mail đích chấp nhận thư | Mail server người nhận nhận thư từ Gmail |
+| 5 | Thư vào Inbox | Người nhận thấy ở Hộp thư đến |
+| 6 | Thư vào Spam/Quảng cáo/Tất cả thư | Đã giao nhưng không ở Inbox |
+| 7 | Bounce/filter/quarantine | Giao thất bại hoặc bị chặn sau bước 3 |
+
+**Hiện tượng quan sát được chứng minh ít nhất đến bước 3.** Không thể suy ra bước 4–5 chỉ vì có trong **Đã gửi**.
+
+## 2. Phạm vi source đã đọc
+
+### Controller
+- `QuanLyDuAn/QuanLyDuAn/Controllers/NhanSuController.cs`
+- `QuanLyDuAn/QuanLyDuAn/Controllers/AccountController.cs`
+
+### Service và interface
+- `QuanLyDuAn/QuanLyDuAn/Services/Interfaces/IEmailService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/GmailEmailService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Interfaces/INhanSuService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/NhanSuService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/AccountService.cs` (luồng OTP, đối chiếu pattern gửi mail)
+- `QuanLyDuAn/QuanLyDuAn/Services/AccountActivationOptions.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/AccountActivationTokenHelper.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/CauHinhDichVu.cs`
+
+### Entity/DbContext
+- `QuanLyDuAn/QuanLyDuAn/Data/QuanLyDuAnDbContext.cs`
+- `QuanLyDuAn/QuanLyDuAn/Models/Entities/Aspnetusers.cs`
+- `QuanLyDuAn/QuanLyDuAn/Models/Entities/NguoiDung.cs`
+- `QuanLyDuAn/QuanLyDuAn/Models/Entities/Aspnetusertokens.cs`
+
+### View
+- `QuanLyDuAn/QuanLyDuAn/Views/NhanSu/_Table.cshtml`
+- `QuanLyDuAn/QuanLyDuAn/Views/NhanSu/Index.cshtml`
+- `QuanLyDuAn/QuanLyDuAn/Views/Shared/_Layout.cshtml`
+
+### Cấu hình
+- `QuanLyDuAn/QuanLyDuAn/Program.cs`
+- `QuanLyDuAn/QuanLyDuAn/appsettings.json`
+- `QuanLyDuAn/QuanLyDuAn/appsettings.Development.json`
+- `QuanLyDuAn/QuanLyDuAn/Properties/launchSettings.json`
+- `QuanLyDuAn/QuanLyDuAn/QuanLyDuAn.csproj`
+
+## 3. Luồng gửi email thực tế
+
+### Tạo nhân sự mới
+
+```text
+NhanSuController.LuuNhanSu (POST)
+  → NhanSuService.SaveAsync (nhánh create)
+    → Transaction: NguoiDung + Aspnetusers + Aspnetuserroles + Aspnetusertokens
+    → Commit DB
+    → TaoActivationUrl(userId, token)
+    → IEmailService.SendAccountActivationEmailAsync(email, hoTen, userName, activationUrl, lifetimeHours)
+      → GmailEmailService.SendAsync(toEmail, subject, body)
+        → SmtpClient.SendMailAsync(mail)  [await]
+  → Controller: Success nếu warning == null; Warning nếu SMTP/URL lỗi
+```
+
+### Gửi lại email kích hoạt
+
+```text
+NhanSuController.GuiLaiEmailKichHoat (POST)
+  → NhanSuService.GuiLaiEmailKichHoatAsync(id)
+    → Join NguoiDung + Aspnetusers theo MaNguoiDung
+    → Transaction Serializable: thu hồi token cũ, tạo token mới, Commit
+    → TaoActivationUrl + SendAccountActivationEmailAsync(data.Email, ...)
+    → Nếu SMTP fail: hoàn tác token mới, khôi phục token cũ còn hạn
+  → Controller: Success chỉ khi service trả null; Warning nếu có chuỗi cảnh báo
+```
+
+## 4. Địa chỉ người nhận được lấy từ đâu
+
+| Luồng | Nguồn dữ liệu | Trường truyền vào email service |
+| ----- | ------------- | -------------------------------- |
+| Tạo nhân sự | `model.Email.Trim()` → lưu `Aspnetusers.Email` | Biến cục bộ `email` sau trim |
+| Gửi lại kích hoạt | Query join `NguoiDung` + `Aspnetusers` theo `MaNguoiDung == id` | `data.Email` từ `Aspnetusers.Email` |
+
+Kiểm tra chi tiết:
+
+| # | Kiểm tra | Kết quả từ source |
+| - | -------- | ----------------- |
+| 1 | Lấy đúng `Aspnetusers.Email` | Có — không lấy từ `NguoiDung` (bảng này không có cột email) |
+| 2 | Lấy nhầm email người gửi | Không — `SenderEmail` chỉ dùng cho `mail.From` và SMTP auth |
+| 3 | Lấy nhầm email admin đang đăng nhập | Không — không dùng `HttpContext.User` cho recipient |
+| 4 | Truyền nhầm thứ tự tham số | Không — `SendAccountActivationEmailAsync(toEmail, recipientName, userName, activationUrl, lifetimeHours)` khớp interface |
+| 5 | `NguoiDung` vs `Aspnetusers` không đồng bộ email | Không áp dụng — email chỉ ở `Aspnetusers`; join qua `nd.Id == tk.Id` |
+| 6 | Khoảng trắng đầu/cuối | Có trim khi tạo (`model.Email.Trim()`); `GmailEmailService` trim lại `toEmail` trước gửi |
+| 7 | Ký tự ẩn/xuống dòng | Chưa validate riêng; `[EmailAddress]` trên ViewModel giảm rủi ro nhập form |
+| 8 | Normalize khác giá trị gửi | Không — gửi `email` đã trim, không gửi `NormalizedEmail` |
+| 9 | Sai đuôi miền (@gmail.con, …) | Không phát hiện ở source nếu cú pháp hợp lệ; cần đối chiếu DB thủ công |
+| 10 | Email cũ trong DB | Có thể nếu admin nhập sai lúc tạo; email readonly khi sửa, không tự sửa DB |
+| 11 | Join sai lấy email nhân sự khác | Không — filter `where nd.MaNguoiDung == id` |
+
+**Kết luận:** Source truyền recipient từ `Aspnetusers.Email` đúng thiết kế. Nếu người nhận không thấy thư, cần đối chiếu email trong DB với email thực tế người dùng đang kiểm tra.
+
+## 5. Phân tích GmailEmailService
+
+### Cấu hình MailMessage thực tế
+
+| Thuộc tính | Giá trị | Ghi chú |
+| ---------- | ------- | ------- |
+| `From` | `new MailAddress(senderAddress.Address, senderName)` | `SenderEmail` từ config, đã trim |
+| `To` | `mail.To.Add(recipientAddress)` | Một recipient, không dùng Bcc thay To |
+| `CC` | Không set | — |
+| `Bcc` | Không set | — |
+| `Subject` | Tham số `subject` | Activation: `"Kích hoạt tài khoản Quản lý dự án AI"` |
+| `Body` | Plain text | `IsBodyHtml = false` |
+| `SubjectEncoding` / `BodyEncoding` | UTF-8 | — |
+
+### SMTP client
+
+- `SmtpServer`: `smtp.gmail.com` (fallback nếu config rỗng)
+- `Port`: `587`
+- `EnableSsl = true`
+- `UseDefaultCredentials = false`
+- `Credentials = new NetworkCredential(username, appPassword)`
+- `AppPassword`: bỏ khoảng trắng và trim
+
+### Kiểm tra lỗi thường gặp
+
+| Lỗi tiềm ẩn | Trạng thái |
+| ----------- | ---------- |
+| Dùng Bcc thay To | Không |
+| To rỗng | Bị chặn validate trước gửi |
+| Gửi về SenderEmail | Không — trừ khi admin nhập trùng email người gửi |
+| Gán nhầm Username vào recipient | Không |
+| `message.To.Clear()` sau khi thêm | Không |
+| `SendMailAsync` không await | Không — có `await smtp.SendMailAsync(mail)` |
+| Exception bị nuốt | Không — `SmtpException` được log và rethrow `InvalidOperationException` |
+| Fire-and-forget `_ = SendMailAsync` | Không |
+
+## 6. Phân tích kết quả SMTP
+
+### GmailEmailService → NhanSuService → Controller
+
+**Tạo nhân sự:**
+
+- `SendMailAsync` thành công → `SaveAsync` trả `null` → Controller set `TempData["Success"] = "Đã tạo nhân sự và gửi email kích hoạt đến địa chỉ đã đăng ký."`
+- `SendMailAsync` hoặc tạo URL lỗi → catch trong `SaveAsync`, trả warning → Controller set `Success` = `"Đã lưu nhân sự"` + `Warning` mô tả lỗi gửi mail
+
+**Gửi lại:**
+
+- Thành công → service trả `null` → Controller chỉ set `Success`
+- Thất bại → service trả chuỗi warning → Controller chỉ set `Warning`, không set `Success`
+
+**Không hiển thị success khi `SendMailAsync` throw:** Đúng theo source hiện tại (sau các đợt fix trước).
+
+### Phân loại lỗi SMTP
+
+- `GmailEmailService` bắt riêng `SmtpException`, log `StatusCode`, map message thân thiện (auth, connection, recipient, timeout).
+- `NhanSuService.GuiLaiEmailKichHoatAsync` có `catch (SmtpException)` nhưng `GmailEmailService` bọc lại thành `InvalidOperationException` → nhánh `SmtpException` thực tế không chạy; lỗi vẫn được xử lý qua `catch (Exception)`.
+
+### Bounce sau khi SMTP chấp nhận
+
+- Source **không** theo dõi bounce/Delivery Status Notification.
+- Gmail có thể chấp nhận thư (bước 2–3) rồi mail server đích từ chối sau đó (bước 7) — ứng dụng không biết.
+
+## 7. Ý nghĩa mục Đã gửi
+
+### SMTP accepted không đồng nghĩa email đã vào Inbox
+
+- Mức độ: Trung bình
+- Trạng thái: Đã xác nhận về mặt luồng kỹ thuật
+- File liên quan: `GmailEmailService.cs`, `NhanSuController.cs`
+- Method liên quan: `SendAsync`, `LuuNhanSu`, `GuiLaiEmailKichHoat`
+- Bằng chứng: `SendMailAsync` hoàn thành không exception; thư xuất hiện trong mục **Đã gửi** của Gmail gửi.
+- Nguyên nhân: SMTP/`SendMailAsync` chỉ xác nhận máy chủ gửi (Gmail) đã tiếp nhận thư để relay; không xác nhận delivery tới Inbox người nhận.
+- Tác động: Admin có thể hiểu nhầm “gửi thành công” = “người nhận chắc chắn đã nhận”.
+- Cách tái hiện: Gửi activation → kiểm tra **Đã gửi** có thư → Inbox người nhận không có.
+- Cách kiểm tra: Spam, Quảng cáo, Tất cả thư, bounce ở hộp gửi, đối chiếu recipient trong log (đã che).
+- Hướng xử lý: Điều chỉnh copy UI (nếu cần): “Yêu cầu gửi email đã được máy chủ thư chấp nhận. Vui lòng kiểm tra Hộp thư đến, Spam hoặc Quảng cáo.”; dùng log recipient che bớt để đối chiếu.
+- Có cần sửa source không: Có thể (chỉ message UI/logging; không đổi workflow)
+- Có cần thay đổi database không: Không
+
+**Mục Đã gửi chỉ chứng minh Gmail đã chấp nhận thao tác gửi từ tài khoản người gửi, chưa chứng minh thư đã vào Inbox của người nhận.**
+
+## 8. Phân tích template email kích hoạt
+
+Template trong `SendAccountActivationEmailAsync`:
+
+- **Subject:** `Kích hoạt tài khoản Quản lý dự án AI` — hợp lý, không quá “spammy”.
+- **Sender name:** `QuanLyDuAn AI` (config `SenderName`).
+- **Body:** Plain text UTF-8, không HTML.
+- **Nội dung:** Lời chào + tên đăng nhập + link activation + thời hạn + cảnh báo bỏ qua nếu không yêu cầu.
+- **Không chứa:** mật khẩu, hash token, App Password.
+- **Link mẫu (redacted):** `http://192.168.2.27:5037/Account/Activate?userId=[REDACTED]&token=[REDACTED]`
+
+Đánh giá yếu tố spam:
+
+| Yếu tố | Đánh giá |
+| ------ | -------- |
+| HTML lỗi | Không áp dụng (plain text) |
+| Chữ viết hoa / dấu chấm than quá mức | Thấp |
+| Từ ngữ giống phishing | Trung bình — có link đặt mật khẩu + token dài |
+| Link HTTP IP private | Cao — xem mục 9 |
+| Token dài trong query string | Trung bình |
+| Text ẩn / HTML đáng ngờ | Không |
+
+## 9. Nguy cơ link HTTP IP nội bộ bị lọc
+
+### Link activation dùng HTTP + IP LAN private
+
+- Mức độ: Trung bình
+- Trạng thái: Có nguy cơ
+- File liên quan: `NhanSuService.cs`, `appsettings.json`, `AccountActivationOptions.cs`
+- Method liên quan: `TaoActivationUrl`, `SendAccountActivationEmailAsync`
+- Bằng chứng: `AccountActivation:AppBaseUrl = "http://192.168.2.27:5037"`; link ghép path `/Account/Activate?userId=...&token=...`.
+- Nguyên nhân: Email chứa URL không HTTPS, trỏ IP private RFC1918, có query token dài — pattern thường bị bộ lọc thư đánh dấu đáng ngờ.
+- Tác động: SMTP vẫn thành công và có trong **Đã gửi**, nhưng thư có thể vào Spam/Quảng cáo hoặc bị filter phía người nhận.
+- Cách tái hiện: Gửi activation → kiểm tra Spam/Quảng cáo/Tất cả thư người nhận.
+- Cách kiểm tra: TC01–TC05, TC09; xem header nếu email vào Spam.
+- Hướng xử lý: Khi triển khai thật dùng `https://ten-mien-that/Account/Activate`; giai đoạn dev LAN chấp nhận rủi ro hoặc hướng dẫn người nhận kiểm tra Spam.
+- Có cần sửa source không: Không bắt buộc ở bước phân tích (không tự đổi sang localhost, không bỏ token)
+- Có cần thay đổi database không: Không
+
+## 10. Kiểm tra bounce và delivery failure
+
+Source **không** đọc bounce webhook hay hộp thư đến của sender.
+
+Cần kiểm tra thủ công ở tài khoản **người gửi**:
+
+- Thư từ `Mail Delivery Subsystem`, `mailer-daemon@...`
+- Tiêu đề: `Delivery Status Notification`, `Undelivered Mail Returned to Sender`
+
+Mã lỗi tham chiếu (chỉ ghi nếu thấy trong bounce thật, không bịa):
+
+- `550`, `551`, `552`, `553`, `554`
+- `5.1.1`, `5.2.1`, `5.7.1`
+- `Recipient address rejected`, `Mailbox unavailable`, `Message blocked`
+
+**Trạng thái hiện tại:** Chưa có bounce thật trong phạm vi phân tích source — thuộc nhóm **Chưa đủ bằng chứng** cho đến khi kiểm tra hộp thư gửi.
+
+## 11. Kiểm tra Spam, filter và blocked sender
+
+Nguyên nhân ngoài source phổ biến nhất khi **Đã gửi** có thư nhưng Inbox trống:
+
+1. **Spam / Thư rác**
+2. **Quảng cáo / Promotions** (Gmail)
+3. **Tất cả thư (All Mail)** — đã giao nhưng không nằm Inbox
+4. **Filter/rule** tự chuyển hoặc xóa
+5. **Blocked addresses** — chặn sender
+6. **Forwarding** — thư chuyển sang hộp khác
+
+Không thể xác nhận từ source; bắt buộc kiểm tra thủ công trên tài khoản **người nhận**.
+
+## 12. Các lỗi source đã xác nhận
+
+**Không phát hiện lỗi source trực tiếp** khiến email “gửi thành công về mặt SMTP” nhưng gán sai recipient, không await, hoặc nuốt exception rồi vẫn báo success.
+
+Các điểm đã xác nhận **đúng**:
+
+- Recipient từ `Aspnetusers.Email`, có trim ở tầng service/email.
+- `mail.To` dùng đúng địa chỉ người nhận; `From` dùng `SenderEmail`.
+- `await smtp.SendMailAsync(mail)` được gọi đúng.
+- Exception SMTP được log và propagate; Controller không set success khi service trả warning (resend) hoặc trả warning kèm lưu nhân sự (create).
+
+## 13. Các nguy cơ từ source
+
+### Thông báo UI gợi ý đã gửi tới người nhận
+
+- Mức độ: Trung bình
+- Trạng thái: Có nguy cơ
+- File liên quan: `NhanSuController.cs`
+- Method liên quan: `LuuNhanSu`, `GuiLaiEmailKichHoat`
+- Bằng chứng: `"Đã tạo nhân sự và gửi email kích hoạt đến địa chỉ đã đăng ký."` / `"Đã gửi lại email kích hoạt."` khi SMTP không lỗi.
+- Nguyên nhân: Message mô tả hành động gửi qua SMTP, không phân biệt “accepted” vs “delivered to Inbox”.
+- Tác động: Admin kỳ vọng người nhận thấy ngay trong Inbox.
+- Hướng xử lý: Làm rõ “máy chủ thư đã chấp nhận”; hướng dẫn kiểm tra Spam (chỉ khi product owner đồng ý đổi copy).
+- Có cần sửa source không: Có thể
+- Có cần thay đổi database không: Không
+
+### Link HTTP IP private trong body activation
+
+- Xem mục 9.
+
+### SenderEmail và Username không được validate khớp nhau
+
+- Mức độ: Thấp
+- Trạng thái: Có nguy cơ
+- File liên quan: `GmailEmailService.cs`
+- Bằng chứng: Hai field config độc lập; Gmail thường yêu cầu khớp nhưng source không ép.
+- Tác động: Nếu lệch, có thể fail SMTP — **không** khớp hiện tượng “Đã gửi có thư”.
+- Có cần sửa source không: Không bắt buộc cho case này
+- Có cần thay đổi database không: Không
+
+### Catch SmtpException ở NhanSuService không hiệu lực
+
+- Mức độ: Thấp
+- Trạng thái: Có nguy cơ (dead code)
+- File liên quan: `NhanSuService.cs`
+- Method liên quan: `GuiLaiEmailKichHoatAsync`
+- Bằng chứng: `GmailEmailService` bọc `SmtpException` → `InvalidOperationException`.
+- Tác động: Không ảnh hưởng hiện tượng delivery; lỗi vẫn vào `catch (Exception)`.
+- Có cần sửa source không: Không bắt buộc ở bước này
+- Có cần thay đổi database không: Không
+
+## 14. Các nguyên nhân ngoài source
+
+| Nguyên nhân | Khả năng với hiện tượng quan sát |
+| ----------- | -------------------------------- |
+| Email vào Spam/Quảng cáo/Tất cả thư | **Cao** |
+| Filter/rule hoặc blocked sender ở người nhận | Trung bình |
+| Địa chỉ recipient sai (typo lúc admin nhập) | Trung bình — cần đối chiếu DB vs email thật |
+| Bounce sau khi Gmail chấp nhận | Trung bình — kiểm tra mailer-daemon ở sender |
+| Mailbox đầy / tạm ngưng | Chưa đủ bằng chứng |
+| Mail server đích trì hoãn (greylisting) | Chưa đủ bằng chứng |
+| Gmail delivery policy / reputation sender mới | Có nguy cơ |
+| Firewall/AP — **không** liên quan trực tiếp vì SMTP đã gửi và có **Đã gửi** | Loại trừ cho bước gửi |
+
+## 15. Kịch bản kiểm thử
+
+| Mã | Mô tả | Kết quả mong đợi | Trạng thái thực hiện |
+| -- | ----- | ---------------- | -------------------- |
+| TC01 | Gửi email text đơn giản thủ công từ Gmail web tới đúng recipient | Nếu không nhận → lỗi ngoài app | **Chưa test thủ công** |
+| TC02 | App gửi email plain không link (OTP pattern hoặc body test) | So sánh với activation | **Chưa test thủ công** |
+| TC03 | Gửi tới Gmail khác | Kiểm tra cross-Gmail delivery | **Chưa test thủ công** |
+| TC04 | Gửi tới Outlook/Hotmail | Kiểm tra hệ thống nhận khác | **Chưa test thủ công** |
+| TC05 | Kiểm tra Spam, Quảng cáo, Tất cả thư, Thùng rác | Tìm thư activation | **Chưa test thủ công** |
+| TC06 | Filter, blocked, forwarding ở người nhận | Loại trừ rule chặn | **Chưa test thủ công** |
+| TC07 | Tìm bounce ở sender (Mail Delivery Subsystem) | Xác định reject sau accept | **Chưa test thủ công** |
+| TC08 | Đối chiếu recipient trong log (MaskEmail) với DB/UI | Xác nhận đúng địa chỉ | **Có thể sau khi deploy logging** |
+| TC09 | Phân tích activation với domain HTTPS production (chỉ phân tích) | Giảm spam score khi go-live | Phân tích — không triển khai |
+
+## 16. Logging chẩn đoán
+
+### Trước bước phân tích
+
+- Log lỗi SMTP có `StatusCode` nhưng **không** log recipient che bớt khi bắt đầu/thành công.
+
+### Đã bổ sung (an toàn)
+
+File: `GmailEmailService.cs`
+
+- Helper `MaskEmail` — che dạng `u***r@domain.com`.
+- Trước gửi: log `Recipient`, `Sender`, `SmtpHost`, `Port` (không log token, URL, App Password, body).
+- Sau `SendMailAsync` thành công: log `SMTP da chap nhan email` + recipient che.
+- Khi lỗi: log thêm `Recipient` che + `StatusCode`.
+
+**Không log:** App Password, token raw, full activation URL, HTML/body chứa token, User Secrets.
+
+## 17. File cần sửa nếu có
+
+| File | Thay đổi ở bước này | Ghi chú |
+| ---- | ------------------- | ------- |
+| `GmailEmailService.cs` | Đã thêm logging `MaskEmail` | Chẩn đoán recipient |
+| `NhanSuController.cs` | Không sửa | Có thể điều chỉnh copy UI sau |
+| `NhanSuService.cs` | Không sửa workflow | — |
+| `docs/nhansu.md` | Đã cập nhật mục này | — |
+
+Không sửa database, migration, workflow kích hoạt.
+
+## 18. Kết luận
+
+1. **Vị trí lỗi trong chuỗi:** Với bằng chứng “app success + **Đã gửi** có thư”, lỗi **không nằm** ở các bước `NhanSuController` → `NhanSuService` → `GmailEmailService` → SMTP accept (bước 1–3). Khả năng cao nằm ở **bước 4–7** (delivery, Spam, filter, bounce, sai địa chỉ thực tế) — **ngoài phạm vi xác nhận từ source**.
+
+2. **Recipient:** Lấy từ `Aspnetusers.Email`, trim, truyền đúng vào `mail.To` — **không phát hiện gán nhầm từ code**.
+
+3. **SMTP:** `await SendMailAsync` đúng; exception không bị nuốt im lặng.
+
+4. **Template:** Plain text; link `http://192.168.x.x:5037/Account/Activate?...` có nguy cơ bị lọc spam — **có nguy cơ**, chưa xác nhận là nguyên nhân duy nhất.
+
+5. **Hành động tiếp theo (vận hành):** TC01–TC08; kiểm Spam/Quảng cáo; kiểm bounce sender; đối chiếu email DB vs log `Recipient` đã che.
+
+6. **Không kết luận** “đã giao tới Inbox” chỉ vì SMTP không báo lỗi hoặc có mục **Đã gửi**.
+
+## 19. Rà soát bổ sung ngày 2026-06-17
+
+- Đã đọc lại source thật theo phạm vi yêu cầu và đối chiếu lại với tài liệu này.
+- Không phát hiện lỗi source mới trong chuỗi `NhanSuController` → `NhanSuService` → `GmailEmailService`:
+  - Tạo nhân sự mới dùng `model.Email.Trim()` làm recipient.
+  - Gửi lại email kích hoạt lấy recipient từ `Aspnetusers.Email` qua query theo `MaNguoiDung`.
+  - `GmailEmailService` trim `toEmail`, validate bằng `MailAddress.TryCreate`, thêm vào `mail.To`, và `await smtp.SendMailAsync(mail)`.
+  - Exception SMTP không bị nuốt im lặng; service/controller chỉ báo thành công khi tầng gửi không throw hoặc không trả warning.
+- Logging an toàn trong `GmailEmailService` đã đủ cho chẩn đoán bước tiếp theo: log recipient/sender đã che, SMTP host, port và `SmtpException.StatusCode`; không log token raw, full activation URL, App Password hoặc body chứa token.
+- Không sửa thêm source ở lần rà soát này vì chưa có bằng chứng source gửi sai recipient hoặc báo thành công khi SMTP throw.
+- Trọng tâm kiểm tra tiếp theo là vận hành: đối chiếu recipient đã che trong log với email thật trong DB/UI, kiểm Spam/Quảng cáo/Tất cả thư, filter/blocked sender của người nhận, và bounce/Delivery Status Notification trong tài khoản Gmail gửi.
+- Không thay đổi database, không tạo hoặc sửa migration.
+
+# TRẠNG THÁI SAU KHI CẢI THIỆN CHẨN ĐOÁN EMAIL KHÔNG VÀO INBOX
+
+> Lưu ý: Mục này ghi lại trạng thái tại thời điểm từng bổ sung chức năng email diagnostic. Trạng thái hiện hành sau khi đã xóa chức năng này được mô tả ở mục `TRẠNG THÁI SAU KHI XÓA CHỨC NĂNG GỬI EMAIL KIỂM TRA` ở cuối tài liệu.
+
+## 1. File đã sửa
+
+- `QuanLyDuAn/QuanLyDuAn/Controllers/NhanSuController.cs`
+  - Đổi thông báo thành công để không khẳng định email đã vào Inbox.
+  - Thêm action POST `GuiEmailKiemTra` cho Admin gửi email plain text không chứa link.
+- `QuanLyDuAn/QuanLyDuAn/Services/Interfaces/IEmailService.cs`
+  - Thêm `SendDiagnosticEmailAsync`.
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/GmailEmailService.cs`
+  - Thêm email diagnostic plain text.
+  - Rà lại template activation cho ngắn gọn, rõ nguồn gửi, không thêm HTML/tracking.
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/NhanSuService.cs`
+  - Chuẩn hóa xử lý exception theo hướng `GmailEmailService` log SMTP rồi throw message thân thiện; service xử lý chung và giữ nguyên hoàn tác token.
+- `QuanLyDuAn/QuanLyDuAn/Views/NhanSu/Index.cshtml`
+  - Thêm form `Gửi email kiểm tra` cho Admin.
+- `docs/nhansu.md`
+  - Cập nhật phần trạng thái này.
+
+## 2. Nội dung thông báo UI mới
+
+Thông báo tạo nhân sự mới khi SMTP không lỗi:
+
+```text
+Đã tạo nhân sự. Máy chủ thư đã chấp nhận yêu cầu gửi email kích hoạt đến địa chỉ đã đăng ký. Vui lòng kiểm tra Hộp thư đến, Spam, Quảng cáo hoặc Tất cả thư.
+```
+
+Thông báo gửi lại activation khi SMTP không lỗi:
+
+```text
+Máy chủ thư đã chấp nhận yêu cầu gửi lại email kích hoạt. Vui lòng kiểm tra Hộp thư đến, Spam, Quảng cáo hoặc Tất cả thư.
+```
+
+Thông báo email kiểm tra khi SMTP không lỗi:
+
+```text
+Máy chủ thư đã chấp nhận email kiểm tra đến [email đã che]. Vui lòng kiểm tra Hộp thư đến, Spam, Quảng cáo hoặc Tất cả thư.
+```
+
+Các thông báo này không dùng cụm “đã vào Inbox” hoặc “người nhận đã nhận được”.
+
+## 3. Ý nghĩa SMTP accepted
+
+`SendMailAsync` không throw và email xuất hiện trong mục **Đã gửi** chỉ chứng minh Gmail SMTP đã chấp nhận thao tác gửi từ tài khoản người gửi. Điều này không chứng minh thư đã vào Inbox người nhận.
+
+Các bước sau vẫn nằm ngoài xác nhận trực tiếp của ứng dụng:
+
+- Mail server người nhận chấp nhận thư.
+- Gmail/Outlook đưa thư vào Inbox.
+- Thư bị đưa vào Spam, Quảng cáo, Tất cả thư hoặc Thùng rác.
+- Thư bị filter/rule, blocked sender, quarantine hoặc bounce sau khi Gmail đã chấp nhận.
+
+## 4. Logging recipient đã che
+
+`GmailEmailService` tiếp tục log an toàn:
+
+- Recipient đã che.
+- Sender đã che.
+- SMTP host.
+- Port.
+- `SmtpException.StatusCode` khi lỗi.
+
+Không log:
+
+- App Password.
+- Token raw.
+- Full activation URL.
+- Body email chứa token.
+- Password người dùng.
+- User Secrets.
+
+## 5. Chế độ gửi email kiểm tra
+
+Đã thêm action:
+
+```text
+POST /NhanSu/GuiEmailKiemTra
+```
+
+Ràng buộc:
+
+- Chỉ người có quyền `NhanSu.Xem` và role `ADMIN`/`Admin` được dùng.
+- Có `[ValidateAntiForgeryToken]`.
+- Không lưu lịch sử gửi vào database.
+- Không chứa token hoặc URL trong nội dung email.
+
+Nội dung email:
+
+```text
+Tiêu đề: Kiểm tra gửi email từ hệ thống
+
+Đây là email kiểm tra từ hệ thống Quản lý dự án AI.
+Email này không chứa liên kết kích hoạt.
+```
+
+Mục tiêu kiểm thử:
+
+- Nếu email plain text cũng không thấy ở Inbox/Spam/Tất cả thư: ưu tiên kiểm tra địa chỉ nhận, filter, blocked sender, bounce hoặc chính sách hệ thống mail nhận.
+- Nếu email plain text nhận được nhưng email activation không thấy: tăng khả năng body/link activation bị filter.
+
+## 6. Template activation sau rà soát
+
+Email activation vẫn là plain text UTF-8, không HTML, không ảnh tracking, không link hiển thị khác URL thật.
+
+Nội dung đã chỉnh theo hướng:
+
+- Nói rõ tài khoản trên hệ thống Quản lý dự án AI đã được tạo.
+- Hiển thị tên đăng nhập.
+- Hướng dẫn mở link để đặt mật khẩu và kích hoạt.
+- Nêu thời hạn link và dùng một lần.
+- Nhắc bỏ qua nếu không yêu cầu tài khoản.
+
+Không thay đổi:
+
+- Route `Account/Activate`.
+- Token trong query string.
+- Thời hạn token.
+- Workflow kích hoạt.
+
+## 7. Xử lý exception sau chuẩn hóa
+
+Chọn hướng A:
+
+- `GmailEmailService` bắt `SmtpException`, log recipient đã che và `StatusCode`, rồi throw `InvalidOperationException` với message thân thiện.
+- `NhanSuService.GuiLaiEmailKichHoatAsync` dùng `catch (Exception)` để xử lý lỗi gửi, giữ nguyên logic hoàn tác token mới/khôi phục token cũ còn hạn.
+- Không để UI lộ thông tin kỹ thuật SMTP.
+
+## 8. Kịch bản kiểm thử đã thực hiện
+
+- Đã build solution bằng `dotnet build`.
+- Đã rà source bằng `rg` cho các chuỗi gửi mail và thông báo liên quan.
+- Chưa thực hiện được kiểm thử thực tế trên Gmail người nhận vì môi trường hiện tại không có quyền truy cập hộp thư và không chạy phiên Visual Studio tương tác.
+
+## 9. Kết quả thực tế
+
+- Build thành công.
+- Chức năng diagnostic đã có đường gọi riêng, không cần database.
+- Chưa xác nhận email plain text vào Inbox/Spam/Tất cả thư vì cần kiểm tra thủ công trên tài khoản nhận.
+- Chưa xác nhận activation email vào Inbox/Spam/Tất cả thư sau chỉnh template vì cần gửi thực tế.
+- Chưa xác nhận bounce vì cần kiểm tra thủ công trong Gmail người gửi.
+
+## 10. Hạn chế còn lại
+
+- SMTP accepted không đồng nghĩa delivered.
+- Ứng dụng chưa theo dõi bounce tự động.
+- Link HTTP private IP vẫn có nguy cơ bị lọc.
+- Development LAN chỉ phù hợp demo nội bộ.
+- Production nên dùng domain HTTPS thật.
+- Nếu email trong `Aspnetusers.Email` bị nhập sai nhưng vẫn đúng cú pháp, ứng dụng không tự biết người dùng đang kiểm tra một hộp thư khác.
+
+## 11. Khuyến nghị production
+
+- Dùng domain HTTPS hợp lệ cho `AccountActivation:AppBaseUrl`.
+- Cấu hình Gmail hoặc SMTP provider có uy tín gửi thư tốt hơn cho production.
+- Kiểm tra SPF/DKIM/DMARC nếu chuyển sang domain riêng.
+- Nếu cần tracking delivery thật, thiết kế outbox/bounce processing/webhook trong một hạng mục riêng có migration chính thức.
+
+## 12. Kết luận
+
+- Không phát hiện lỗi source mới cho thấy gửi sai recipient.
+- Đã giảm hiểu nhầm ở UI: hệ thống chỉ nói máy chủ thư đã chấp nhận yêu cầu gửi.
+- Đã có email diagnostic plain text để tách lỗi giao nhận chung khỏi nguy cơ template/link activation bị lọc.
+- Không sửa database, không tạo hoặc sửa migration, không đổi token activation, không đổi workflow kích hoạt.
+
+# TRẠNG THÁI SAU KHI XÓA CHỨC NĂNG GỬI EMAIL KIỂM TRA
+
+## 1. Lý do xóa
+
+Chức năng **Gửi email kiểm tra** chỉ được thêm để chẩn đoán delivery email trong giai đoạn rà soát. Sau khi xác nhận source không gửi sai recipient và SMTP Gmail đã chấp nhận thư, khu vực này không còn cần thiết trên màn hình Nhân sự và làm giao diện rối.
+
+## 2. File đã sửa
+
+- `QuanLyDuAn/QuanLyDuAn/Controllers/NhanSuController.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Interfaces/IEmailService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/GmailEmailService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Views/NhanSu/Index.cshtml`
+- `docs/nhansu.md`
+
+Không sửa `NhanSuService`, `_Table.cshtml`, `_Filter.cshtml`, `_Layout.cshtml`, `Program.cs`, `appsettings.json`, `appsettings.Development.json` ngoài việc đọc và rà soát.
+
+## 3. Thành phần giao diện đã xóa
+
+Đã xóa khỏi `Views/NhanSu/Index.cshtml`:
+
+- Ô nhập `Email kiểm tra`.
+- Nút `Gửi email kiểm tra`.
+- Form POST gọi action test.
+- Biến điều kiện `canSendDiagnosticEmail` chỉ phục vụ form test.
+
+Header danh sách Nhân sự trở lại theo cấu trúc:
+
+```text
+Danh sách nhân sự
+Xuất file
+Bảng nhân sự
+```
+
+## 4. Action/controller đã xóa
+
+Đã xóa khỏi `NhanSuController`:
+
+- Action POST `GuiEmailKiemTra`.
+- Permission check chỉ phục vụ action test.
+- TempData message chỉ phục vụ email test.
+- Helper `MaskEmail` trong controller vì chỉ còn dùng cho action test.
+- Dependency trực tiếp `IEmailService` trong `NhanSuController`.
+
+Các action `LuuNhanSu`, `GuiLaiEmailKichHoat`, `XoaNhanSu`, `KhoaTaiKhoan`, `MoKhoaTaiKhoan`, `XuatFile` được giữ nguyên.
+
+## 5. Interface/service đã xóa
+
+Đã xóa khỏi `IEmailService`:
+
+```csharp
+Task SendDiagnosticEmailAsync(string toEmail);
+```
+
+Đã xóa implementation tương ứng khỏi `GmailEmailService`.
+
+Các method còn giữ:
+
+- `SendAsync`
+- `SendAccountActivationEmailAsync`
+
+Helper `MaskEmail` trong `GmailEmailService` vẫn được giữ vì logging an toàn vẫn dùng để che recipient/sender.
+
+## 6. Luồng email kích hoạt được giữ nguyên
+
+Workflow không đổi:
+
+```text
+Admin tạo nhân sự
+→ Tạo tài khoản chờ kích hoạt
+→ Tạo activation token
+→ Gửi email kích hoạt
+→ Người dùng mở link
+→ Đặt mật khẩu
+→ EmailConfirmed = true
+→ Xóa token
+→ Đăng nhập
+```
+
+Không thay đổi token activation, hash token, thời hạn token, cooldown resend, route `Account/Activate`, `[AllowAnonymous]`, trạng thái tài khoản hoặc permission.
+
+## 7. Logging an toàn được giữ lại
+
+`GmailEmailService` vẫn log:
+
+- Recipient đã che.
+- Sender đã che.
+- SMTP host.
+- Port.
+- `SmtpException.StatusCode` khi lỗi.
+
+Không log token raw, full activation URL, App Password, body email chứa token, password người dùng hoặc User Secrets.
+
+## 8. Thông báo UI sau chỉnh sửa
+
+Thông báo tạo nhân sự mới khi SMTP không lỗi vẫn là:
+
+```text
+Đã tạo nhân sự. Máy chủ thư đã chấp nhận yêu cầu gửi email kích hoạt đến địa chỉ đã đăng ký. Vui lòng kiểm tra Hộp thư đến, Spam, Quảng cáo hoặc Tất cả thư.
+```
+
+Thông báo gửi lại activation khi SMTP không lỗi vẫn là:
+
+```text
+Máy chủ thư đã chấp nhận yêu cầu gửi lại email kích hoạt. Vui lòng kiểm tra Hộp thư đến, Spam, Quảng cáo hoặc Tất cả thư.
+```
+
+Không dùng các câu “người nhận đã nhận được email”, “email đã vào Inbox” hoặc “email đã giao thành công”.
+
+## 9. Kết quả build
+
+Đã chạy build sau khi xóa chức năng test email:
+
+```powershell
+dotnet build QuanLyDuAn\QuanLyDuAn.sln --no-restore
+```
+
+Kết quả: build thành công. Còn warning cũ `CS1998` trong `FileTienDoCongViecService.cs`, không phát sinh từ thay đổi xóa email test.
+
+## 10. Kết quả kiểm thử giao diện
+
+Đã kiểm tra bằng source:
+
+- Không còn form `GuiEmailKiemTra` trong `Views/NhanSu/Index.cshtml`.
+- Không còn ô `Email kiểm tra`.
+- Không còn nút `Gửi email kiểm tra`.
+- Header danh sách còn tiêu đề và nút xuất file theo permission.
+- `_Table.cshtml` vẫn giữ nút `Gửi kích hoạt` cho tài khoản chờ kích hoạt.
+- `_Filter.cshtml` không bị thay đổi.
+
+Chưa chạy trình duyệt tương tác trong lượt này, nên chưa xác nhận trực quan bằng screenshot.
+
+## 11. Kết quả kiểm thử gửi kích hoạt
+
+Đã kiểm tra bằng source:
+
+- `NhanSuService.SaveAsync` vẫn gọi `SendAccountActivationEmailAsync` sau khi commit transaction tạo nhân sự/tài khoản/token.
+- `NhanSuService.GuiLaiEmailKichHoatAsync` vẫn tạo token mới, gửi email, và hoàn tác/khôi phục token khi gửi lỗi.
+- `GmailEmailService` vẫn dùng `mail.To.Add(recipientAddress)` và `await smtp.SendMailAsync(mail)`.
+- Controller chỉ hiện success khi service không trả warning.
+
+Chưa gửi email thực tế trong lượt này vì không chạy phiên ứng dụng và không truy cập Gmail người gửi/người nhận.
+
+## 12. Hạn chế delivery còn lại
+
+Gmail Sent chỉ chứng minh SMTP accepted, không chứng minh thư đã vào Inbox.
+
+Nếu người nhận không thấy thư, vẫn cần kiểm tra thủ công:
+
+- Spam.
+- Quảng cáo.
+- Tất cả thư.
+- Filter/rule.
+- Blocked sender.
+- Forwarding.
+- Mail Delivery Subsystem.
+- `mailer-daemon`.
+- Bounce code.
+
+Không phát hiện lỗi source gửi sai recipient trong lần rà soát này.
+
+## 13. Xác nhận không đổi database
+
+- Không thêm bảng.
+- Không thêm cột.
+- Không tạo migration.
+- Không sửa migration.
+- Không sửa `ModelSnapshot`.
+- Không chạy `Add-Migration`.
+- Không chạy `Update-Database`.
+- Không thêm outbox, delivery log hoặc trạng thái email.
+
+## 14. Kết luận
+
+Đã xóa hoàn toàn chức năng diagnostic email khỏi source runtime và giao diện Nhân sự. Luồng email kích hoạt tài khoản vẫn được giữ nguyên, logging an toàn vẫn còn, và các vấn đề delivery phía Inbox/Spam/filter/bounce vẫn cần kiểm tra ngoài ứng dụng khi Gmail đã chấp nhận thư.
+# RÀ SOÁT TOÀN DIỆN CÁC YẾU TỐ ẢNH HƯỞNG ĐẾN EMAIL KÍCH HOẠT
+
+## 1. Hiện tượng thực tế đã xác nhận
+
+- Admin tạo nhân sự mới hoặc bấm `Gửi kích hoạt`.
+- Ứng dụng báo máy chủ thư đã chấp nhận yêu cầu gửi email.
+- Log an toàn có dạng `Bat dau gui email... Recipient=[đã che]... SmtpHost=smtp.gmail.com, Port=587` và `SMTP da chap nhan email`.
+- Gmail người gửi có bản sao thư trong mục **Đã gửi**.
+- Header bản sao phía người gửi có `Return-Path`, `Received ... by smtp.gmail.com with ESMTPSA`, `From`, `To`, `Content-Type: text/plain; charset=utf-8`, `Content-Transfer-Encoding: base64`.
+- Recipient trong `To` đúng.
+- `SenderEmail` và `Username` trong User Secrets được xác nhận giống nhau.
+- App Password hoạt động vì SMTP đã xác thực và Gmail SMTP đã chấp nhận thư.
+- Gửi thủ công từ Gmail Web đến cùng người nhận thì nhận được.
+- Gửi thủ công đúng link activation đầy đủ có `userId` và `token` thì vẫn nhận được.
+- Email activation do ứng dụng gửi qua SMTP không xuất hiện trong mailbox người nhận, kể cả tìm theo `rfc822msgid:`.
+- Hiện tượng phát sinh theo thời điểm: hôm trước cùng chức năng nhận bình thường, hôm nay mới phát sinh.
+
+Kết luận ở mức bằng chứng hiện có: source đã gửi được đến ranh giới Gmail SMTP accepted, nhưng chưa chứng minh thư đã được giao vào mailbox người nhận.
+
+## 2. Phạm vi source đã đọc
+
+Đã rà soát:
+
+- `Controllers/NhanSuController.cs`
+- `Controllers/AccountController.cs`
+- `Services/Interfaces/IEmailService.cs`
+- `Services/Interfaces/INhanSuService.cs`
+- `Services/Interfaces/IAccountService.cs`
+- `Services/Implementations/GmailEmailService.cs`
+- `Services/Implementations/NhanSuService.cs`
+- `Services/Implementations/AccountService.cs`
+- `Services/AccountActivationOptions.cs`
+- `Services/AccountActivationTokenHelper.cs`
+- `Services/CauHinhDichVu.cs`
+- `ViewModels/NhanSu/*`
+- `ViewModels/Account/*`
+- `Views/NhanSu/Index.cshtml`
+- `Views/NhanSu/_Form.cshtml`
+- `Views/NhanSu/_Table.cshtml`
+- `Views/NhanSu/_Filter.cshtml`
+- `Views/Account/Activate.cshtml`
+- `Views/Shared/_Layout.cshtml`
+- `Models/Entities/Aspnetusers.cs`
+- `Models/Entities/Aspnetusertokens.cs`
+- `Models/Entities/NguoiDung.cs`
+- `Data/QuanLyDuAnDbContext.cs`
+- `Program.cs`
+- `appsettings.json`
+- `appsettings.Development.json`
+- `Properties/launchSettings.json`
+- `QuanLyDuAn.csproj`
+- `docs/nhansu.md`
+
+Đã tìm các nhóm từ khóa liên quan `SendMailAsync`, `SmtpClient`, `MailMessage`, `MailAddress`, `SendAccountActivationEmailAsync`, `GuiLaiEmailKichHoat`, `TaoActivationUrl`, `EmailSettings`, `AccountActivation`, `SubjectEncoding`, `BodyEncoding`, `HeadersEncoding`, `AppBaseUrl`, `TokenLifetimeHours`, `ResendCooldownSeconds`.
+
+## 3. Luồng tạo nhân sự và gửi email
+
+Luồng thực tế:
+
+```text
+Views/NhanSu/_Form.cshtml
+→ NhanSuController.LuuNhanSu
+→ NhanSuService.SaveAsync
+→ kiểm tra chức danh/username/email/số điện thoại/role/Admin
+→ transaction Serializable
+→ tạo NGUOI_DUNG
+→ tạo AspNetUsers
+→ tạo AspNetUserRoles
+→ tạo AspNetUserTokens chứa hash activation token
+→ commit database
+→ TaoActivationUrl(userId, rawToken)
+→ SendAccountActivationEmailAsync(email, hoTen, userName, activationUrl, lifetimeHours)
+→ GmailEmailService.SendAsync
+→ SmtpClient.SendMailAsync
+→ controller hiển thị TempData
+```
+
+Nguồn recipient trong tạo mới là biến `email = model.Email.Trim()` được lưu vào `Aspnetusers.Email`, sau đó truyền trực tiếp vào `SendAccountActivationEmailAsync`. Source không dùng `NormalizedEmail` để gửi, không lấy email Admin và không lấy email người gửi làm recipient.
+
+Email được gửi sau khi transaction tạo nhân sự/tài khoản/token đã commit. Nếu SMTP lỗi sau commit, tài khoản vẫn ở trạng thái chờ kích hoạt và service trả warning để Admin dùng chức năng gửi lại.
+
+## 4. Luồng gửi lại email kích hoạt
+
+Luồng thực tế:
+
+```text
+Views/NhanSu/_Table.cshtml
+→ form POST GuiLaiEmailKichHoat(maNguoiDung)
+→ NhanSuController.GuiLaiEmailKichHoat
+→ NhanSuService.GuiLaiEmailKichHoatAsync
+→ join NGUOI_DUNG với AspNetUsers theo nd.Id == tk.Id
+→ lấy tk.Email
+→ kiểm tra khóa tài khoản/chưa kích hoạt/email/cooldown
+→ snapshot token cũ
+→ transaction Serializable
+→ xóa token activation cũ
+→ tạo token mới
+→ commit token mới
+→ TaoActivationUrl(data.Id, rawToken)
+→ SendAccountActivationEmailAsync(data.Email, hoTen, userName, activationUrl, lifetimeHours)
+→ nếu gửi lỗi: xóa token mới và khôi phục token cũ còn hạn nếu có
+```
+
+Recipient trong resend lấy từ `Aspnetusers.Email` của đúng tài khoản join theo `NguoiDung.Id`. Không thấy source lấy nhầm email sender, email Admin hoặc email của người đang đăng nhập. Không có retry tự động. Cooldown hiện lấy từ `AccountActivation:ResendCooldownSeconds`, mặc định 60 giây.
+
+## 5. Nguồn địa chỉ người nhận
+
+- Tạo mới: `model.Email.Trim()` → `Aspnetusers.Email` → biến `email` truyền vào email service.
+- Gửi lại: `tk.Email` từ `Aspnetusers` sau join với `NguoiDung` → `data.Email` truyền vào email service.
+- `GmailEmailService.SendAsync` tiếp tục `Trim()` recipient bằng `var recipientEmail = toEmail?.Trim()`.
+- `MailAddress.TryCreate(recipientEmail, out var recipientAddress)` kiểm tra cú pháp trước khi gửi.
+- `mail.To.Add(recipientAddress)` là nơi gán người nhận thực tế.
+
+Đánh giá: đã xác nhận đúng từ source. Nếu email trong DB sai với email người nhận thực tế thì ứng dụng vẫn gửi đúng dữ liệu DB; cần đối chiếu DB/log masked recipient với email thật ngoài source.
+
+## 6. Cấu hình GmailEmailService
+
+| Mục | Giá trị/source | Đánh giá | Nguy cơ |
+|---|---|---|---|
+| SMTP host | `EmailSettings:SmtpServer`, fallback `smtp.gmail.com` | Đúng với Gmail SMTP | Nếu User Secrets override sai thì sẽ lỗi SMTP, nhưng hiện Gmail accepted |
+| Port | `EmailSettings:Port`, fallback `587` | Đúng cho STARTTLS Gmail | Port sai thường gây exception, không khớp hiện tượng Sent có thư |
+| SenderEmail | `EmailSettings:SenderEmail.Trim()` | Đã xác nhận trùng Username | Nếu khác Username có thể giảm alignment, nhưng hiện đã xác nhận trùng |
+| SenderName | `EmailSettings:SenderName` hoặc `QuanLyDuAn AI` | Bình thường | Không phải nguyên nhân trực tiếp |
+| Username | `EmailSettings:Username.Trim()` | Đã xác nhận trùng SenderEmail | App Password hoạt động |
+| AppPassword | remove space + trim | Không log secret | Nếu sai sẽ auth fail, nhưng hiện SMTP accepted |
+| Recipient | tham số `toEmail` đã trim | Đúng | Cần đối chiếu email DB với email thật nếu người dùng báo không nhận |
+
+## 7. Cấu hình MailMessage
+
+| Thuộc tính | Giá trị thực tế | Nguồn cấu hình | Đánh giá | Nguy cơ |
+|---|---|---|---|---|
+| `From` | `new MailAddress(senderAddress.Address, senderName)` | `SenderEmail`, `SenderName` | Đúng | SenderName tiếng Việt/ASCII hỗn hợp không bất thường |
+| `To` | `mail.To.Add(recipientAddress)` | recipient đã trim | Đúng | Không thấy gửi về sender/Admin |
+| `CC` | Không set | Mặc định rỗng | Đúng | Không có |
+| `Bcc` | Không set | Mặc định rỗng | Đúng | Không có |
+| `ReplyToList` | Không set | Mặc định rỗng | Đúng | Không có Reply-To bất thường |
+| `Subject` | `Kích hoạt tài khoản Quản lý dự án AI` | hard-code trong activation method | Hợp lệ | Nhiều email cùng subject có thể bị gom conversation ở UI |
+| `Body` | Plain text tiếng Việt có username, lifetime và activation URL | template activation | Hợp lệ | Link HTTP/IP private + token dài có thể bị filter ở phía nhận |
+| `IsBodyHtml` | `false` | source | Đúng | Không có HTML ẩn/tracking |
+| `SubjectEncoding` | `Encoding.UTF8` | source | Đúng | Subject MIME encoded-word do thư viện tạo |
+| `BodyEncoding` | `Encoding.UTF8` | source | Đúng | Có thể dẫn tới base64 transfer encoding, bình thường |
+| `HeadersEncoding` | `Encoding.UTF8` | source | Đúng | Không thấy header custom |
+| `Priority` | Không set | mặc định Normal | Đúng | Không có |
+| `DeliveryNotificationOptions` | Không set | mặc định None | Bình thường | Không yêu cầu DSN, nên bounce/DSN không được ứng dụng theo dõi |
+| `Headers` | Không thêm custom header | source | Đúng | Không có `In-Reply-To`, `References`, custom `Message-ID` |
+
+`MailMessage` được tạo cục bộ trong mỗi lần gọi `SendAsync` và dispose bằng `using var`. Không thấy tái sử dụng object giữa nhiều email.
+
+## 8. Cấu hình SmtpClient
+
+| Thuộc tính | Giá trị thực tế | Đánh giá | Nguy cơ |
+|---|---|---|---|
+| `Host` | `smtp.gmail.com` từ config/fallback | Đúng | Không phải nguyên nhân nếu Gmail accepted |
+| `Port` | `587` | Đúng | Không phải nguyên nhân nếu Gmail accepted |
+| `EnableSsl` | `true` | Đúng cho Gmail STARTTLS | Không thấy lỗi TLS |
+| `UseDefaultCredentials` | `false` | Đúng | Không dùng credential Windows |
+| `Credentials` | `NetworkCredential(username, appPassword)` | Đúng | Secret không log |
+| `Timeout` | Không set, dùng mặc định `SmtpClient` | Bình thường | Nếu mạng treo có thể exception timeout; không khớp accepted |
+| `DeliveryMethod` | Không set, mặc định Network | Đúng | Không có pickup folder |
+| `TargetName` | Không set | Bình thường | Không có chỉ dấu lỗi |
+| `ClientCertificates` | Không set | Bình thường | Không cần cho Gmail |
+
+`SmtpClient` được tạo cục bộ trong mỗi lần gửi, không reuse giữa request và được dispose. `await smtp.SendMailAsync(mail)` được gọi trực tiếp, không fire-and-forget.
+
+## 9. DI lifetime và thread safety
+
+- `IEmailService` đăng ký `AddScoped<IEmailService, GmailEmailService>()`.
+- `INhanSuService` và `IAccountService` cũng đăng ký scoped.
+- `GmailEmailService` chỉ giữ `IConfiguration` và `ILogger`, không giữ recipient, body, `MailMessage` hay `SmtpClient` trong field.
+- `MailMessage` và `SmtpClient` là biến local theo từng lần gửi.
+
+Đánh giá: chưa thấy nguy cơ request sau dùng lại dữ liệu request trước. Với thiết kế hiện tại, thread-safety tốt hơn so với việc dùng singleton có state hoặc reuse `SmtpClient`.
+
+## 10. Xử lý exception và logging
+
+- `GmailEmailService.SendAsync` validate cấu hình, sender, recipient, subject, body trước khi gửi.
+- `SmtpException` được log với recipient đã che, operation, status code và exception type.
+- Sau đó service throw `InvalidOperationException` với thông điệp thân thiện.
+- `NhanSuService.SaveAsync` bắt exception gửi email sau commit và trả warning.
+- `NhanSuService.GuiLaiEmailKichHoatAsync` bắt exception gửi lại, log lỗi và hoàn tác/khôi phục token.
+- Log không chứa token raw, full activation URL, App Password, body email hoặc password.
+
+Điểm cần lưu ý ở UI tạo mới: khi `SaveAsync` trả warning, controller hiện vẫn set `TempData["Success"] = "Đã lưu nhân sự"` và thêm `TempData["Warning"]`. Đây là nguy cơ gây hiểu nhầm ở UI nếu SMTP lỗi, nhưng không giải thích hiện tượng Gmail accepted + Sent có thư.
+
+## 11. Phân tích header thực tế
+
+| Header | Nguồn tạo | Ý nghĩa | Kết luận |
+|---|---|---|---|
+| `Return-Path` | Gmail/SMTP envelope | Địa chỉ bounce/envelope sender | Khớp email gửi là tín hiệu alignment tốt |
+| `Received: ... smtp.gmail.com with ESMTPSA` | Gmail SMTP | Thư được nộp qua SMTP authenticated | Xác nhận Gmail SMTP accepted |
+| `From` | Source set từ `SenderEmail`, Gmail giữ lại | Người gửi hiển thị | Khớp tài khoản gửi |
+| `To` | Source set bằng `mail.To.Add` | Người nhận | Đã xác nhận đúng recipient |
+| `Subject` | Source set | Tiêu đề activation | Hợp lệ, cố định |
+| `Content-Type: text/plain; charset=utf-8` | `MailMessage`/SMTP MIME | Body plain text UTF-8 | Phù hợp source |
+| `Content-Transfer-Encoding: base64` | MIME encoder | Cách mã hóa body UTF-8 | Bình thường với tiếng Việt, không tự chứng minh lỗi |
+| `Message-ID` | Thư viện/Gmail SMTP, source không set custom | Định danh thư | Cần dùng đúng Message-ID bản gửi để tìm phía nhận |
+| `Date` / `X-Google-Original-Date` | `MailMessage`/Gmail | Thời điểm gửi | Ví dụ đang tương đương theo timezone |
+
+Header phía sender chưa có `Delivered-To`, `X-Received`, `Authentication-Results` của mailbox người nhận là bình thường, vì các header đó thường nằm trên bản sao recipient sau khi thư được giao. Bản sao trong Sent không đủ để chứng minh delivered.
+
+## 12. Phân tích Message-ID
+
+Source không thiết lập custom `Message-ID`, không thêm `In-Reply-To` và không thêm `References`. Vì vậy:
+
+- Message-ID không phải do code nghiệp vụ tự tạo.
+- Một lần SMTP accepted thường tương ứng một message riêng.
+- Tìm `rfc822msgid:` phía người nhận không thấy là bằng chứng mạnh rằng mailbox người nhận chưa có bản thư đó, nhưng chưa chỉ ra nguyên nhân nằm ở source.
+- Cần đối chiếu Message-ID của bản Sent và log thời điểm gửi để kiểm tra mỗi request chỉ sinh một thư.
+
+## 13. Phân tích Date và timezone
+
+Ví dụ:
+
+```text
+Date: Tue, 16 Jun 2026 23:07:14 -0700 (PDT)
+X-Google-Original-Date: 17 Jun 2026 13:07:15 +0700
+```
+
+Hai thời điểm này tương đương gần như cùng lúc: 23:07 PDT ngày 16/06/2026 tương ứng 13:07 ICT ngày 17/06/2026. Chênh lệch khoảng một giây không cho thấy đồng hồ hệ thống sai.
+
+Kết luận: timezone có thể làm người dùng tìm nhầm ngày trong giao diện Gmail, nhưng chưa có bằng chứng nó ảnh hưởng delivery.
+
+## 14. Phân tích Subject và conversation/threading
+
+Subject activation hiện cố định:
+
+```text
+Kích hoạt tài khoản Quản lý dự án AI
+```
+
+Không thấy source set `In-Reply-To`, `References` hoặc custom `Message-ID`. Gmail vẫn có thể gom conversation theo subject/participants ở tầng giao diện. Điều này có thể làm người nhận khó thấy email mới nếu nó bị xếp trong một thread cũ, nhưng không giải thích việc tìm theo `rfc822msgid:` không có kết quả.
+
+Phép thử sau này, nếu cần chẩn đoán UI/threading, có thể dùng nhánh thử nghiệm riêng với subject duy nhất, ví dụ:
+
+```text
+Kích hoạt tài khoản Quản lý dự án AI - {UserName}
+Kích hoạt tài khoản Quản lý dự án AI - {UserName} - {dd/MM/yyyy HH:mm:ss}
+```
+
+Đây chỉ là phép thử hiển thị/threading, không được khẳng định sẽ sửa delivery.
+
+## 15. Phân tích template/body/encoding
+
+Template hiện là plain text:
+
+```text
+Xin chào {recipientName},
+
+Tài khoản của bạn trên hệ thống Quản lý dự án AI đã được tạo.
+
+Tên đăng nhập: {userName}
+
+Để đặt mật khẩu và kích hoạt tài khoản, vui lòng mở liên kết sau trong thời hạn {lifetimeHours} giờ:
+{activationUrl}
+
+Liên kết này chỉ sử dụng được một lần.
+
+Nếu bạn không yêu cầu tài khoản này, vui lòng bỏ qua email.
+
+Trân trọng,
+Hệ thống Quản lý dự án AI
+```
+
+Đánh giá:
+
+- Không dùng HTML.
+- Không có ảnh, tracking pixel, text ẩn hoặc link hiển thị khác URL thật.
+- Có tiếng Việt UTF-8, vì vậy MIME/base64 là bình thường.
+- Có các cụm `kích hoạt tài khoản`, `đặt mật khẩu`, `liên kết`, và URL có token dài. Đây là nội dung có thể bị hệ thống lọc đánh giá khác email văn bản thường.
+- Tuy nhiên, người dùng đã thử gửi thủ công đúng link activation đầy đủ từ Gmail Web và vẫn nhận được. Vì vậy không được kết luận URL/token là nguyên nhân duy nhất.
+
+## 16. Phân tích activation URL và token
+
+- URL được tạo bởi `TaoActivationUrl` từ path route `Account/Activate` và `AccountActivation:AppBaseUrl`.
+- `AppBaseUrl` hiện là `http://192.168.2.27:5037` trong `appsettings.json` và `appsettings.Development.json`.
+- `Program.cs` validate `AppBaseUrl` là HTTP/HTTPS absolute URL và không dùng localhost/loopback.
+- Token raw chỉ xuất hiện trong URL email. Database lưu payload chứa SHA-256 hash, thời điểm tạo và hết hạn.
+- Link Development dùng HTTP + IP private LAN + query token dài. Đây là yếu tố có nguy cơ bị bộ lọc đánh giá khác domain HTTPS thật, nhưng bằng chứng gửi thủ công cùng link vẫn nhận được làm giả thuyết này chưa đủ chắc.
+
+## 17. Phân tích tần suất gửi và request đồng thời
+
+Các tình huống có thể tạo nhiều email:
+
+- Admin tạo nhiều nhân sự liên tiếp.
+- Bấm `Gửi kích hoạt` nhiều lần.
+- Double-click nút gửi lại.
+- Refresh/resubmit request POST.
+- Hai request đồng thời.
+
+Biện pháp hiện có:
+
+- Resend có cooldown `ResendCooldownSeconds`, hiện 60 giây.
+- Resend dùng transaction Serializable khi thay token.
+- Không có retry tự động trong `GmailEmailService`.
+- Không thấy chống double-submit phía UI.
+
+Đánh giá: gửi nhiều email giống nhau trong thời gian ngắn là nguy cơ có thể làm Gmail xử lý khác theo thời điểm, nhưng hiện chưa có log SMTP status hoặc thông báo Gmail xác nhận rate-limit/delay. Không được kết luận Gmail rate-limit khi chưa có bounce hoặc mã lỗi.
+
+## 18. Những điểm source đã xác nhận đúng
+
+- Recipient lấy từ `Aspnetusers.Email`.
+- Email được trim trước khi gửi.
+- `MailAddress.TryCreate` validate sender/recipient.
+- `mail.To.Add(recipientAddress)` gán đúng người nhận.
+- Không thấy gửi về sender/Admin/Bcc.
+- `await smtp.SendMailAsync(mail)` được gọi đúng.
+- `SmtpException` không bị nuốt rồi báo success trong email service.
+- `MailMessage` và `SmtpClient` tạo mới mỗi lần gửi.
+- `IEmailService` scoped, không giữ state recipient/body giữa request.
+- `SenderEmail` và `Username` được người dùng xác nhận giống nhau.
+- App Password hoạt động vì Gmail SMTP accepted.
+- Email activation là plain text UTF-8, không HTML ẩn/tracking.
+- Activation URL không dùng localhost.
+- Token không log raw và không lưu raw trong DB.
+
+## 19. Những nguy cơ còn tồn tại trong source
+
+- Tạo mới nhân sự nếu SMTP lỗi có thể vừa có `Success = "Đã lưu nhân sự"` vừa có `Warning`, dễ gây hiểu nhầm ở UI. Đây là nguy cơ thông báo, không phải nguyên nhân delivery khi SMTP accepted.
+- Không có client-side chống double-submit cho nút tạo/gửi lại.
+- Không theo dõi bounce tự động vì không có outbox/delivery webhook.
+- Không set `DeliveryNotificationOptions`; ứng dụng không yêu cầu DSN và không đọc mailbox bounce.
+- Subject cố định có thể bị Gmail gom conversation ở UI.
+- Link Development là HTTP private IP và token dài, có nguy cơ bị bộ lọc đánh giá khác domain HTTPS thật.
+
+## 20. Những yếu tố ngoài phạm vi source
+
+| Yếu tố | Trạng thái | Bằng chứng hiện có | Bằng chứng còn thiếu | Cách kiểm tra | Có thể sửa bằng source không |
+|---|---|---|---|---|---|
+| Gmail tạm trì hoãn giao thư SMTP | Có nguy cơ | SMTP accepted, Sent có thư nhưng recipient chưa thấy | Log/bounce/recipient header sau khi thư tới | Chờ vài giờ, tìm Message-ID, kiểm tra bounce | Không chắc; chỉ có thể giảm tần suất/nội dung |
+| Gmail Web và Gmail SMTP được xử lý khác nhau | Có nguy cơ | Gmail Web gửi thủ công nhận được, SMTP app không thấy | Bằng chứng policy/filter từ Gmail | So sánh header Web vs SMTP | Có thể tinh chỉnh template/domain nếu có bằng chứng |
+| Rate limit/anti-abuse tạm thời | Chưa đủ bằng chứng | Hiện tượng mới phát sinh theo ngày | SMTP/bounce/rate warning | Kiểm tra Mail Delivery Subsystem và log nhiều lần gửi | Không sửa khi chưa có mã lỗi |
+| Reputation tạm thời của tài khoản gửi | Chưa đủ bằng chứng | Sent accepted nhưng delivery khác thường | Cảnh báo Gmail hoặc bounce | Thử sau vài giờ, gửi tới nhiều Gmail/Outlook | Ngoài source |
+| Gmail conversation/threading | Có nguy cơ | Subject cố định | Người nhận có thread cũ chứa thư mới hay không | Tìm All Mail, thread, Message-ID | Có thể thử subject duy nhất sau này |
+| Filter/rule người nhận | Ngoài phạm vi source | Người nhận không thấy Inbox | Kiểm tra rule/blocked sender/forwarding | Kiểm tra Gmail settings người nhận | Không |
+| Bounce đến trễ | Chưa đủ bằng chứng | SMTP accepted không đảm bảo delivered | Email bounce trong sender mailbox | Tìm `mailer-daemon`, `Mail Delivery Subsystem` | Không, nếu không thêm hệ thống theo dõi |
+| Sự cố Gmail tạm thời theo thời điểm | Chưa đủ bằng chứng | Hôm trước được, hôm nay lỗi | Thông báo dịch vụ/Gmail status hoặc thử nhiều thời điểm | Lặp lại test sau vài giờ | Không |
+
+## 21. Ma trận giả thuyết nguyên nhân
+
+| Giả thuyết | Bằng chứng ủng hộ | Bằng chứng phản bác | Trạng thái | Khả năng | Cách kiểm tra tiếp | Có cần sửa source không |
+|---|---|---|---|---|---|---|
+| Sai recipient | Người nhận không thấy thư | Source lấy `Aspnetusers.Email`, trim, `To` header đúng | Đã loại trừ | Thấp | Đối chiếu DB/log masked/header To | Không |
+| SenderEmail khác Username | Có thể ảnh hưởng alignment | Người dùng xác nhận giống nhau, Return-Path/From khớp | Đã loại trừ | Thấp | Kiểm tra User Secrets thủ công | Không |
+| App Password sai | Có thể gây lỗi SMTP | SMTP accepted, Sent có thư | Đã loại trừ | Thấp | Không cần nếu vẫn accepted | Không |
+| SMTP auth thất bại | Có thể không gửi được | Header ESMTPSA và Sent có thư | Đã loại trừ | Thấp | Xem log SMTP error nếu có | Không |
+| `SendMailAsync` không await | Có thể báo success sớm | Source dùng `await smtp.SendMailAsync(mail)` | Đã loại trừ | Thấp | Đã đọc source | Không |
+| Exception bị nuốt | Có thể báo success sai | `SmtpException` log rồi throw; service/controller nhận warning/error | Đã loại trừ với email service | Thấp | Kiểm tra log khi cố tình sai cấu hình | Không trong bước này |
+| Email bị gửi về sender | Sent có thư | `mail.To.Add(recipientAddress)`, header `To` đúng recipient | Đã loại trừ | Thấp | Kiểm tra header To | Không |
+| MIME/UTF-8/Base64 lỗi | Base64 xuất hiện trong header | `text/plain; charset=utf-8`, source set UTF-8; Gmail Web nhận cùng nội dung link thủ công | Chưa đủ bằng chứng | Thấp-Trung bình | Decode body từ Sent và so với template | Chưa |
+| Date/time sai | Có thể xếp sai ngày | Date PDT và X-Google-Original-Date +0700 tương đương | Đã loại trừ | Thấp | So sánh UTC timestamp | Không |
+| Subject giống nhau bị thread | Subject cố định | Tìm `rfc822msgid` không thấy phía nhận | Có nguy cơ | Thấp-Trung bình | Kiểm tra All Mail/thread, thử subject duy nhất ở nhánh test | Chưa |
+| URL HTTP/IP LAN bị lọc | Link private IP + HTTP + token dài | Gửi thủ công cùng link từ Gmail Web vẫn nhận | Có nguy cơ | Trung bình | So sánh SMTP activation không link/domain HTTPS | Chưa |
+| Token dài bị lọc | Query token dài | Manual same full link nhận được | Chưa đủ bằng chứng | Thấp-Trung bình | Thử nội dung same token qua SMTP và Web | Chưa |
+| Nội dung activation bị lọc | Có cụm đặt mật khẩu/kích hoạt | Template plain text, không HTML ẩn; manual cùng link nhận | Có nguy cơ | Trung bình | So sánh header/body Web vs SMTP | Chưa |
+| Gửi nhiều thư giống nhau trong thời gian ngắn | Có resend/tạo nhiều account | Cooldown 60s, không có log rate-limit | Có nguy cơ | Trung bình | Kiểm tra log số lần gửi và Message-ID | Chưa |
+| Double submit/request đồng thời | UI không chống double-submit | Resend transaction/cooldown giảm rủi ro | Có nguy cơ | Thấp-Trung bình | Kiểm tra log nhiều request cùng MaNguoiDung | Có thể sau này |
+| Gmail SMTP accepted nhưng delivery bị trì hoãn | Sent có thư, recipient chưa thấy | Chưa có bounce/status từ Gmail | Ngoài phạm vi source | Trung bình-Cao | Chờ, tìm Message-ID sau vài giờ, bounce | Không |
+| Gmail Web và Gmail SMTP được xử lý khác nhau | Web manual nhận, SMTP app không | Chưa có policy chính thức | Ngoài phạm vi source | Trung bình-Cao | So sánh full headers Web vs SMTP | Không trực tiếp |
+| Mailbox người nhận không nhận thư SMTP tại thời điểm đó | Recipient không thấy kể cả rfc822msgid | Web manual nhận cùng ngày phản bác một phần | Ngoài phạm vi source | Trung bình | Gửi SMTP tới Gmail khác/Outlook | Không |
+| Bounce đến trễ | SMTP accepted vẫn có thể bounce sau | Chưa thấy bounce được cung cấp | Chưa đủ bằng chứng | Trung bình | Tìm `Mail Delivery Subsystem`, `mailer-daemon` sau vài giờ | Không |
+| Sự cố Gmail tạm thời | Hôm trước được, hôm nay lỗi | Chưa có trạng thái dịch vụ/bằng chứng ngoài | Ngoài phạm vi source | Trung bình | Thử lại sau vài giờ, nhiều recipient | Không |
+
+## 22. Kịch bản kiểm thử tiếp theo
+
+Chưa đánh dấu các test dưới đây là đã thực hiện trong lượt rà soát này:
+
+- TC01: Gửi một activation duy nhất sau vài giờ, không bấm resend liên tục.
+- TC02: Gửi activation đến một Gmail khác.
+- TC03: Tìm theo Message-ID trên người nhận bằng `rfc822msgid:`.
+- TC04: Kiểm tra mailer-daemon/bounce sau vài giờ ở Gmail người gửi.
+- TC05: So sánh header thư Gmail Web và SMTP cho cùng recipient/link.
+- TC06: Kiểm tra subject duy nhất trong một nhánh thử nghiệm riêng.
+- TC07: Theo dõi thời gian từ SMTP accepted đến mailbox received.
+- TC08: Kiểm tra có request gửi trùng trong log không.
+- TC09: Kiểm tra một lần gửi tương ứng đúng một Message-ID.
+- TC10: Kiểm tra DI lifetime và concurrent send; hiện source cho thấy service scoped và không giữ state.
+
+## 23. File có thể cần sửa ở bước sau
+
+Chỉ nên sửa khi có thêm bằng chứng:
+
+- `Services/Implementations/GmailEmailService.cs`: nếu cần thêm header an toàn, subject thử nghiệm, timeout rõ ràng hoặc logging không nhạy cảm bổ sung.
+- `Services/Implementations/NhanSuService.cs`: nếu cần chống concurrent/double submit chặt hơn hoặc giảm gửi lặp.
+- `Controllers/NhanSuController.cs`: nếu cần chỉnh thông báo UI tạo mới khi warning để tránh success + warning cùng lúc.
+- `Views/NhanSu/_Table.cshtml` hoặc JS module liên quan: nếu cần disable button sau submit.
+- `docs/nhansu.md`: tiếp tục ghi kết quả test thực tế.
+
+Không nên sửa các file này trong bước hiện tại vì yêu cầu chỉ phân tích và cập nhật tài liệu.
+
+## 24. Những phần không nên sửa
+
+- Không đổi `smtp.gmail.com`, port 587, TLS hoặc App Password khi SMTP đã accepted.
+- Không đổi recipient nếu header `To` và source đã đúng.
+- Không đổi token activation, thời hạn token, route `Account/Activate` hoặc `[AllowAnonymous]`.
+- Không thêm retry vô hạn, outbox, delivery tracking giả, bảng/cột/migration.
+- Không log token raw, full activation URL, App Password, body email chứa token hoặc User Secrets.
+- Không kết luận email đã vào Inbox chỉ vì có Sent hoặc SMTP accepted.
+
+## 25. Kết luận
+
+Rà soát source không phát hiện lỗi gửi sai recipient, không phát hiện `SendMailAsync` thiếu `await`, không phát hiện exception SMTP bị nuốt, không phát hiện `MailMessage` gửi về sender/Admin/Bcc, và không phát hiện state dùng lại giữa request.
+
+Với bằng chứng hiện có, ứng dụng đã gửi tới mức Gmail SMTP authenticated accepted. Hiện tượng thư có trong Sent nhưng không xuất hiện ở mailbox người nhận nhiều khả năng nằm ở giai đoạn sau SMTP accepted: delivery nội bộ Gmail, filter/spam/threading, bounce đến trễ, chính sách xử lý khác giữa Gmail Web và Gmail SMTP, tần suất gửi tự động theo thời điểm hoặc sự cố tạm thời ngoài source. Các giả thuyết này cần kiểm chứng bằng Message-ID, bounce, kiểm tra mailbox người nhận và so sánh header Web/SMTP trước khi quyết định sửa source.
+
+Trong lượt này chỉ cập nhật tài liệu, không sửa source runtime, không sửa database, không tạo hoặc sửa migration, không thay đổi workflow kích hoạt và không thay đổi token activation.

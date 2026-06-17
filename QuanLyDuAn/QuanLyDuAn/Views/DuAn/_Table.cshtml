@@ -1,5 +1,6 @@
 ﻿@model List<QuanLyDuAn.ViewModels.DuAn.DuAnViewModel>
 @using QuanLyDuAn.Constants
+@inject QuanLyDuAn.Services.Interfaces.IDanhMucCongViecScopeService DanhMucCongViecScopeService
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
@@ -117,7 +118,7 @@ else
                                 </a>
                             }
 
-                            @if (permissions.Contains(Permissions.DanhMucCongViec.Xem))
+                            @if (await DanhMucCongViecScopeService.CanAccessProjectAsync(User, duAn.MaDuAn, Permissions.DanhMucCongViec.Xem))
                             {
                                 <a asp-controller="DanhMucCongViec"
                                    asp-action="Index"

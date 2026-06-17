@@ -57,14 +57,19 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> TuChoi(int maDeXuatNs, string? lyDo, int? locMaDuAn, string? locTrangThai)
+        public async Task<IActionResult> TuChoi(
+            int maDeXuatNs,
+            int? locMaDuAn,
+            string? locTrangThai,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuyetNganSach.Duyet))
                 return Forbid();
 
             try
             {
-                await _service.RejectAsync(maDeXuatNs, lyDo);
+                await _service.RejectAsync(maDeXuatNs);
                 TempData["Success"] = "Đã từ chối đề xuất ngân sách.";
             }
             catch (Exception ex)
@@ -72,7 +77,7 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai, pageNumber, pageSize });
         }
     }
 }

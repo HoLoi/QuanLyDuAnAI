@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Data;
-using System.Net.Mail;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -646,19 +645,6 @@ namespace QuanLyDuAn.Services.Implementations
                     data.UserName ?? string.Empty,
                     activationUrl,
                     Math.Max(1, _activationOptions.TokenLifetimeHours));
-            }
-            catch (SmtpException ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "SMTP gui lai email kich hoat that bai. StatusCode: {StatusCode}, MaNguoiDung: {MaNguoiDung}",
-                    ex.StatusCode,
-                    data.MaNguoiDung);
-
-                var compensated = await HoanTacTokenResendKhiGuiEmailThatBaiAsync(data.Id, newTokenValue, previousTokenSnapshots);
-                return compensated
-                    ? "Không gửi được email kích hoạt. Hệ thống đã hoàn tác token mới để bạn có thể gửi lại ngay."
-                    : "Không gửi được email kích hoạt và chưa thể hoàn tác token mới. Vui lòng thử lại sau hoặc liên hệ quản trị hệ thống.";
             }
             catch (Exception ex)
             {

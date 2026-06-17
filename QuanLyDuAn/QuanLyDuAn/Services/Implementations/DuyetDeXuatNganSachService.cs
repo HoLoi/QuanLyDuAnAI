@@ -205,7 +205,7 @@ namespace QuanLyDuAn.Services.Implementations
             await transaction.CommitAsync();
         }
 
-        public async Task RejectAsync(int maDeXuatNs, string? lyDo)
+        public async Task RejectAsync(int maDeXuatNs)
         {
             var currentUserId = await GetCurrentUserIdAsync();
 
@@ -235,9 +235,7 @@ namespace QuanLyDuAn.Services.Implementations
                     NganSachSau = deXuat.NganSachCu,
                     NkNgayCapNhatNS = DateTime.Now,
                     NkTrangThaiNganSach = TrangThai.TuChoi,
-                    HanhDongNKNS = string.IsNullOrWhiteSpace(lyDo)
-                        ? $"Từ chối đề xuất ngân sách #{deXuat.MaDeXuatNS}"
-                        : $"Từ chối đề xuất ngân sách #{deXuat.MaDeXuatNS}. Lý do: {lyDo.Trim()}",
+                    HanhDongNKNS = $"Từ chối đề xuất ngân sách #{deXuat.MaDeXuatNS}",
                     ThoiGianNKNS = DateTime.Now
                 });
             }
@@ -246,9 +244,7 @@ namespace QuanLyDuAn.Services.Implementations
             {
                 MaDuAn = deXuat.MaDuAn,
                 MaNguoiDung = currentUserId,
-                NkHanhDongQLDA = string.IsNullOrWhiteSpace(lyDo)
-                    ? $"Từ chối đề xuất ngân sách #{deXuat.MaDeXuatNS}"
-                    : $"Từ chối đề xuất ngân sách #{deXuat.MaDeXuatNS}. Lý do: {lyDo.Trim()}",
+                NkHanhDongQLDA = $"Từ chối đề xuất ngân sách #{deXuat.MaDeXuatNS}",
                 NkThoiGianQLDA = DateTime.Now
             });
 

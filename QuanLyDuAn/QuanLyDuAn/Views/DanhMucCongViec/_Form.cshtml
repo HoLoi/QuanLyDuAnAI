@@ -4,6 +4,8 @@
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
     var tenDuAn = ViewBag.TenDuAn as string ?? string.Empty;
+    var coTheLuu = (ViewBag.CoTheThemDanhMuc as bool? ?? false)
+        || (ViewBag.CoTheSuaDanhMuc as bool? ?? false);
 }
 
 <form asp-action="LuuDanhMucCongViec" method="post" class="danh-muc-entry-form">
@@ -33,7 +35,7 @@
     </div>
 
     <div class="danh-muc-form-actions">
-        @if (permissions.Contains(Permissions.DanhMucCongViec.Them) || permissions.Contains(Permissions.DanhMucCongViec.Sua))
+        @if (coTheLuu)
         {
             <button type="submit" class="btn danh-muc-btn-primary">Lưu</button>
         }

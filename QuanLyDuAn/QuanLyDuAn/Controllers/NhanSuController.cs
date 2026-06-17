@@ -123,7 +123,7 @@ namespace QuanLyDuAn.Controllers
                 var laAdminDangThaoTac = User.IsInRole("ADMIN") || User.IsInRole("Admin");
                 var warning = await _service.SaveAsync(model, laAdminDangThaoTac);
                 TempData["Success"] = model.MaNguoiDung == null && string.IsNullOrWhiteSpace(warning)
-                    ? "Đã tạo nhân sự và gửi email kích hoạt đến địa chỉ đã đăng ký."
+                    ? "Đã tạo nhân sự. Máy chủ thư đã chấp nhận yêu cầu gửi email kích hoạt đến địa chỉ đã đăng ký. Vui lòng kiểm tra Hộp thư đến, Spam, Quảng cáo hoặc Tất cả thư."
                     : "Đã lưu nhân sự";
                 if (!string.IsNullOrWhiteSpace(warning))
                 {
@@ -155,7 +155,7 @@ namespace QuanLyDuAn.Controllers
                 var warning = await _service.GuiLaiEmailKichHoatAsync(maNguoiDung);
                 if (string.IsNullOrWhiteSpace(warning))
                 {
-                    TempData["Success"] = "Đã gửi lại email kích hoạt.";
+                    TempData["Success"] = "Máy chủ thư đã chấp nhận yêu cầu gửi lại email kích hoạt. Vui lòng kiểm tra Hộp thư đến, Spam, Quảng cáo hoặc Tất cả thư.";
                 }
                 else
                 {

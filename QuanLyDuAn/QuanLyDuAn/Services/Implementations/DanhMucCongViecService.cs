@@ -4,19 +4,24 @@ using QuanLyDuAn.Models.Entities;
 using QuanLyDuAn.Services.Interfaces;
 using QuanLyDuAn.ViewModels.Common;
 using QuanLyDuAn.ViewModels.DanhMucCongViec;
+using System.Security.Claims;
 
 namespace QuanLyDuAn.Services.Implementations
 {
     public class DanhMucCongViecService : IDanhMucCongViecService
     {
         private readonly QuanLyDuAnDbContext _context;
+        private readonly IDanhMucCongViecScopeService _scopeService;
 
-        public DanhMucCongViecService(QuanLyDuAnDbContext context)
+        public DanhMucCongViecService(
+            QuanLyDuAnDbContext context,
+            IDanhMucCongViecScopeService scopeService)
         {
             _context = context;
+            _scopeService = scopeService;
         }
 
-        public async Task<List<DanhMucCongViecViewModel>> GetAllAsync(string? tuKhoa, int? maDuAn)
+        private async Task<List<DanhMucCongViecViewModel>> GetAllAsync(string? tuKhoa, int? maDuAn)
         {
             var query = (
                 from dm in _context.DanhMucCongViec
@@ -53,7 +58,7 @@ namespace QuanLyDuAn.Services.Implementations
             return await query.ToListAsync();
         }
 
-        public async Task<PagedResultViewModel<DanhMucCongViecViewModel>> GetPagedAsync(string? tuKhoa, int? maDuAn, int pageNumber = 1, int pageSize = 20)
+        private async Task<PagedResultViewModel<DanhMucCongViecViewModel>> GetPagedCoreAsync(string? tuKhoa, int? maDuAn, int pageNumber = 1, int pageSize = 20)
         {
             var query = (
                 from dm in _context.DanhMucCongViec
@@ -103,6 +108,14 @@ namespace QuanLyDuAn.Services.Implementations
             };
         }
 
+        public async Task<PagedResultViewModel<DanhMucCongViecViewModel>> GetPagedAsync(ClaimsPrincipal user, string? tuKhoa, int maDuAn, int pageNumber = 1, int pageSize = 20)
+        {
+            if (!await _scopeService.CanAccessProjectAsync(user, maDuAn, QuanLyDuAn.Constants.Permissions.DanhMucCongViec.Xem))
+                throw new UnauthorizedAccessException("Bạn không có quyền truy cập danh mục công việc của dự án này.");
+
+            return await GetPagedCoreAsync(tuKhoa, maDuAn, pageNumber, pageSize);
+        }
+
         public async Task<DanhMucCongViecCreateUpdateViewModel?> GetByIdAsync(int id)
         {
             return await _context.DanhMucCongViec
@@ -117,10 +130,22 @@ namespace QuanLyDuAn.Services.Implementations
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<DuAnOptionViewModel>> GetDuAnOptionsAsync()
+        public async Task<int?> GetMaDuAnByDanhMucIdAsync(int id)
         {
+            return await _context.DanhMucCongViec
+                .Where(x => x.MaDanhMucCV == id && x.IsDeleted != true)
+                .Select(x => (int?)x.MaDuAn)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<DuAnOptionViewModel>> GetDuAnOptionsAsync(ClaimsPrincipal user, string permission)
+        {
+            var projectIds = await _scopeService.GetAccessibleProjectIdsAsync(user, permission);
+            if (projectIds.Count == 0)
+                return new List<DuAnOptionViewModel>();
+
             return await _context.DuAn
-                .Where(x => x.IsDeleted != true)
+                .Where(x => x.IsDeleted != true && projectIds.Contains(x.MaDuAn))
                 .OrderBy(x => x.TenDuAn)
                 .Select(x => new DuAnOptionViewModel
                 {
@@ -130,12 +155,19 @@ namespace QuanLyDuAn.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task SaveAsync(DanhMucCongViecCreateUpdateViewModel model)
+        public async Task SaveAsync(ClaimsPrincipal user, DanhMucCongViecCreateUpdateViewModel model)
         {
             if (!model.MaDuAn.HasValue || model.MaDuAn.Value <= 0)
                 throw new Exception("Vui lòng chọn dự án hợp lệ.");
 
             var maDuAn = model.MaDuAn.Value;
+            var permission = model.MaDanhMucCV == null
+                ? QuanLyDuAn.Constants.Permissions.DanhMucCongViec.Them
+                : QuanLyDuAn.Constants.Permissions.DanhMucCongViec.Sua;
+
+            if (!await _scopeService.CanAccessProjectAsync(user, maDuAn, permission))
+                throw new UnauthorizedAccessException("Bạn không có quyền thao tác danh mục công việc của dự án này.");
+
             var tenDanhMuc = (model.TenDanhMucCV ?? string.Empty).Trim();
             var moTaDanhMuc = (model.MoTaDanhMucCV ?? string.Empty).Trim();
 
@@ -177,6 +209,9 @@ namespace QuanLyDuAn.Services.Implementations
                 if (entity == null)
                     throw new Exception("Không tìm thấy danh mục công việc.");
 
+                if (!await _scopeService.CanAccessProjectAsync(user, entity.MaDuAn, QuanLyDuAn.Constants.Permissions.DanhMucCongViec.Sua))
+                    throw new UnauthorizedAccessException("Bạn không có quyền thao tác danh mục công việc của dự án này.");
+
                 if (entity.MaDuAn != maDuAn)
                 {
                     var dangCoCongViec = await _context.CongViec
@@ -194,19 +229,22 @@ namespace QuanLyDuAn.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(ClaimsPrincipal user, int id)
         {
-            var dangDuocSuDung = await _context.CongViec
-                .AnyAsync(x => x.MaDanhMucCV == id && x.IsDeleted != true);
-
-            if (dangDuocSuDung)
-                throw new Exception("Không thể xóa: danh mục công việc đang có công việc liên kết.");
-
             var entity = await _context.DanhMucCongViec
                 .FirstOrDefaultAsync(x => x.MaDanhMucCV == id && x.IsDeleted != true);
 
             if (entity == null)
                 throw new Exception("Không tìm thấy danh mục công việc.");
+
+            if (!await _scopeService.CanAccessProjectAsync(user, entity.MaDuAn, QuanLyDuAn.Constants.Permissions.DanhMucCongViec.Xoa))
+                throw new UnauthorizedAccessException("Bạn không có quyền xóa danh mục công việc của dự án này.");
+
+            var dangDuocSuDung = await _context.CongViec
+                .AnyAsync(x => x.MaDanhMucCV == id && x.IsDeleted != true);
+
+            if (dangDuocSuDung)
+                throw new Exception("Không thể xóa: danh mục công việc đang có công việc liên kết.");
 
             entity.IsDeleted = true;
             entity.DeletedAt = DateTime.UtcNow;

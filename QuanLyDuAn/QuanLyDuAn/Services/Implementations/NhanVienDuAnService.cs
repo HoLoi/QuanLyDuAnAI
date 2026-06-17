@@ -57,31 +57,44 @@ namespace QuanLyDuAn.Services.Implementations
                 from nvda in _context.NhanVienDuAn
                 join nd in _context.NguoiDung on nvda.MaNguoiDung equals nd.MaNguoiDung
                 where nvda.MaDuAn == maDuAn && nd.IsDeleted != true
-                select new NhanVienDuAnItemViewModel
+                select new
                 {
-                    MaNguoiDung = nvda.MaNguoiDung,
-                    HoTenNguoiDung = nd.HoTenNguoiDung ?? $"Nhân viên {nd.MaNguoiDung}",
-                    VaiTroTrongDuAn = nvda.VaiTroTrongDuAn ?? TrangThai.VaiTroMember,
-                    NgayThamGiaDuAn = nvda.NgayThamGiaDuAn,
-                    ThuocTeamPhuTrach = _context.NhanVienTeam.Any(nvt =>
-                        assignedTeamIds.Contains(nvt.MaTeam) && nvt.MaNguoiDung == nvda.MaNguoiDung),
-                    TenTeamPhuTrach = string.Join(
-                        ", ",
-                        (from nvt in _context.NhanVienTeam
-                         join team in _context.Team on nvt.MaTeam equals team.MaTeam
-                         where assignedTeamIds.Contains(nvt.MaTeam) && nvt.MaNguoiDung == nvda.MaNguoiDung
-                         select team.TenTeam ?? $"Team {team.MaTeam}").Distinct())
+                    NhanVienDuAn = nvda,
+                    NguoiDung = nd
                 };
 
             var totalItems = await danhSachNhanVienQuery.CountAsync();
             var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
 
             vm.DanhSachNhanVienPhuTrach = await danhSachNhanVienQuery
-                .OrderBy(x => x.HoTenNguoiDung)
-                .ThenBy(x => x.MaNguoiDung)
+                .OrderBy(x => x.NguoiDung.HoTenNguoiDung)
+                .ThenBy(x => x.NguoiDung.MaNguoiDung)
                 .Skip((pagination.PageNumber - 1) * pagination.PageSize)
                 .Take(pagination.PageSize)
+                .Select(x => new NhanVienDuAnItemViewModel
+                {
+                    MaNguoiDung = x.NhanVienDuAn.MaNguoiDung,
+                    HoTenNguoiDung = x.NguoiDung.HoTenNguoiDung ?? string.Empty,
+                    VaiTroTrongDuAn = x.NhanVienDuAn.VaiTroTrongDuAn ?? TrangThai.VaiTroMember,
+                    NgayThamGiaDuAn = x.NhanVienDuAn.NgayThamGiaDuAn,
+                    ThuocTeamPhuTrach = _context.NhanVienTeam.Any(nvt =>
+                        assignedTeamIds.Contains(nvt.MaTeam) && nvt.MaNguoiDung == x.NhanVienDuAn.MaNguoiDung),
+                    TenTeamPhuTrach = string.Join(
+                        ", ",
+                        (from nvt in _context.NhanVienTeam
+                         join team in _context.Team on nvt.MaTeam equals team.MaTeam
+                         where assignedTeamIds.Contains(nvt.MaTeam) && nvt.MaNguoiDung == x.NhanVienDuAn.MaNguoiDung
+                         select team.TenTeam ?? $"Team {team.MaTeam}").Distinct())
+                })
                 .ToListAsync();
+
+            foreach (var item in vm.DanhSachNhanVienPhuTrach)
+            {
+                item.HoTenNguoiDung = string.IsNullOrWhiteSpace(item.HoTenNguoiDung)
+                    ? $"Nhân viên {item.MaNguoiDung}"
+                    : item.HoTenNguoiDung;
+            }
+
             vm.Pagination = pagination;
 
             var assignedIds = await _context.NhanVienDuAn

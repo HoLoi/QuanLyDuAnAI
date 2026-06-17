@@ -12,15 +12,18 @@ namespace QuanLyDuAn.Controllers
         private readonly IDanhMucCongViecService _service;
         private readonly IPermissionHelper _permission;
         private readonly IPhanQuyenService _phanQuyenService;
+        private readonly IDanhMucCongViecScopeService _scopeService;
 
         public DanhMucCongViecController(
             IDanhMucCongViecService service,
             IPermissionHelper permission,
-            IPhanQuyenService phanQuyenService)
+            IPhanQuyenService phanQuyenService,
+            IDanhMucCongViecScopeService scopeService)
         {
             _service = service;
             _permission = permission;
             _phanQuyenService = phanQuyenService;
+            _scopeService = scopeService;
         }
 
         [HttpGet]
@@ -35,8 +38,11 @@ namespace QuanLyDuAn.Controllers
                 return RedirectToAction("Index", "DuAn");
             }
 
+            if (!await _scopeService.CanAccessProjectAsync(User, locMaDuAn.Value, Permissions.DanhMucCongViec.Xem))
+                return Forbid();
+
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
-            var duAnOptions = await _service.GetDuAnOptionsAsync();
+            var duAnOptions = await _service.GetDuAnOptionsAsync(User, Permissions.DanhMucCongViec.Xem);
             var selectedProject = duAnOptions.FirstOrDefault(x => x.MaDuAn == locMaDuAn.Value);
 
             if (selectedProject == null)
@@ -45,7 +51,10 @@ namespace QuanLyDuAn.Controllers
                 return RedirectToAction("Index", "DuAn");
             }
 
-            var paged = await _service.GetPagedAsync(tuKhoa, locMaDuAn, pageNumber, pageSize);
+            var paged = await _service.GetPagedAsync(User, tuKhoa, locMaDuAn.Value, pageNumber, pageSize);
+            var canCreate = await _scopeService.CanAccessProjectAsync(User, selectedProject.MaDuAn, Permissions.DanhMucCongViec.Them);
+            var canEdit = await _scopeService.CanAccessProjectAsync(User, selectedProject.MaDuAn, Permissions.DanhMucCongViec.Sua);
+            var canDelete = await _scopeService.CanAccessProjectAsync(User, selectedProject.MaDuAn, Permissions.DanhMucCongViec.Xoa);
 
             var vm = new DanhMucCongViecPageViewModel
             {
@@ -60,7 +69,11 @@ namespace QuanLyDuAn.Controllers
                 TuKhoa = tuKhoa,
                 LocMaDuAn = locMaDuAn,
                 Pagination = paged.Pagination,
-                Permissions = permissions
+                Permissions = permissions,
+                CoTheXemDanhMuc = true,
+                CoTheThemDanhMuc = canCreate,
+                CoTheSuaDanhMuc = canEdit,
+                CoTheXoaDanhMuc = canDelete
             };
 
             return View(vm);
@@ -85,9 +98,19 @@ namespace QuanLyDuAn.Controllers
                 return RedirectToAction(nameof(Index), new { tuKhoa, locMaDuAn });
             }
 
+            var maDuAnThucTe = form.MaDuAn;
+            if (!maDuAnThucTe.HasValue || maDuAnThucTe.Value <= 0)
+                return NotFound();
+
+            if (locMaDuAn.Value != maDuAnThucTe.Value)
+                return Forbid();
+
+            if (!await _scopeService.CanAccessProjectAsync(User, maDuAnThucTe.Value, Permissions.DanhMucCongViec.Sua))
+                return Forbid();
+
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
-            var duAnOptions = await _service.GetDuAnOptionsAsync();
-            var selectedProject = duAnOptions.FirstOrDefault(x => x.MaDuAn == locMaDuAn.Value);
+            var duAnOptions = await _service.GetDuAnOptionsAsync(User, Permissions.DanhMucCongViec.Xem);
+            var selectedProject = duAnOptions.FirstOrDefault(x => x.MaDuAn == maDuAnThucTe.Value);
 
             if (selectedProject == null)
             {
@@ -96,7 +119,9 @@ namespace QuanLyDuAn.Controllers
             }
 
             form.MaDuAn = selectedProject.MaDuAn;
-            var paged = await _service.GetPagedAsync(tuKhoa, locMaDuAn, pageNumber, pageSize);
+            var paged = await _service.GetPagedAsync(User, tuKhoa, maDuAnThucTe.Value, pageNumber, pageSize);
+            var canCreate = await _scopeService.CanAccessProjectAsync(User, selectedProject.MaDuAn, Permissions.DanhMucCongViec.Them);
+            var canDelete = await _scopeService.CanAccessProjectAsync(User, selectedProject.MaDuAn, Permissions.DanhMucCongViec.Xoa);
 
             var vm = new DanhMucCongViecPageViewModel
             {
@@ -106,9 +131,13 @@ namespace QuanLyDuAn.Controllers
                 DanhSachDuAn = duAnOptions,
                 Form = form,
                 TuKhoa = tuKhoa,
-                LocMaDuAn = locMaDuAn,
+                LocMaDuAn = maDuAnThucTe,
                 Pagination = paged.Pagination,
-                Permissions = permissions
+                Permissions = permissions,
+                CoTheXemDanhMuc = true,
+                CoTheThemDanhMuc = canCreate,
+                CoTheSuaDanhMuc = true,
+                CoTheXoaDanhMuc = canDelete
             };
 
             return View("Index", vm);
@@ -118,8 +147,33 @@ namespace QuanLyDuAn.Controllers
         public async Task<IActionResult> LuuDanhMucCongViec(DanhMucCongViecPageViewModel vm)
         {
             var model = vm.Form;
+            if (model == null)
+                return BadRequest();
 
-            var selectedMaDuAn = vm.LocMaDuAn ?? model.MaDuAn;
+            var isCreate = model.MaDanhMucCV == null;
+            var permission = isCreate ? Permissions.DanhMucCongViec.Them : Permissions.DanhMucCongViec.Sua;
+            if (!await _permission.HasPermissionAsync(User, permission))
+                return Forbid();
+
+            int? originalMaDuAn = null;
+            if (!isCreate)
+            {
+                var maDanhMucCv = model.MaDanhMucCV!.Value;
+                originalMaDuAn = await _service.GetMaDuAnByDanhMucIdAsync(maDanhMucCv);
+                if (!originalMaDuAn.HasValue)
+                    return NotFound();
+
+                if (vm.LocMaDuAn.HasValue && vm.LocMaDuAn.Value != originalMaDuAn.Value)
+                    return Forbid();
+
+                if (!await _scopeService.CanAccessProjectAsync(User, originalMaDuAn.Value, permission))
+                    return Forbid();
+            }
+
+            var selectedMaDuAn = isCreate
+                ? (vm.LocMaDuAn ?? model.MaDuAn)
+                : (model.MaDuAn ?? originalMaDuAn);
+
             if (!selectedMaDuAn.HasValue)
             {
                 TempData["Error"] = "Vui lòng chọn dự án để quản lý danh mục công việc.";
@@ -127,41 +181,33 @@ namespace QuanLyDuAn.Controllers
             }
 
             model.MaDuAn = selectedMaDuAn.Value;
-            var duAnOptions = await _service.GetDuAnOptionsAsync();
+            if (!await _scopeService.CanAccessProjectAsync(User, selectedMaDuAn.Value, permission))
+                return Forbid();
+
+            var duAnOptions = await _service.GetDuAnOptionsAsync(User, Permissions.DanhMucCongViec.Xem);
             var selectedProject = duAnOptions.FirstOrDefault(x => x.MaDuAn == selectedMaDuAn.Value);
 
             if (selectedProject == null)
             {
-                TempData["Error"] = "Không tìm thấy dự án.";
-                return RedirectToAction("Index", "DuAn");
+                return Forbid();
             }
 
             if (!ModelState.IsValid)
             {
-                var paged = await _service.GetPagedAsync(vm.TuKhoa, selectedMaDuAn);
+                var paged = await _service.GetPagedAsync(User, vm.TuKhoa, selectedMaDuAn.Value);
                 vm.MaDuAn = selectedProject.MaDuAn;
                 vm.TenDuAn = selectedProject.TenDuAn;
                 vm.DanhSach = paged.Items;
                 vm.DanhSachDuAn = duAnOptions;
                 vm.Pagination = paged.Pagination;
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+                await GanCoQuyenThaoTacAsync(vm, selectedMaDuAn.Value);
                 return View("Index", vm);
-            }
-
-            if (model.MaDanhMucCV == null)
-            {
-                if (!await _permission.HasPermissionAsync(User, Permissions.DanhMucCongViec.Them))
-                    return Forbid();
-            }
-            else
-            {
-                if (!await _permission.HasPermissionAsync(User, Permissions.DanhMucCongViec.Sua))
-                    return Forbid();
             }
 
             try
             {
-                await _service.SaveAsync(model);
+                await _service.SaveAsync(User, model);
                 TempData["Success"] = "Đã lưu danh mục công việc.";
                 return RedirectToAction(nameof(Index), new
                 {
@@ -169,16 +215,21 @@ namespace QuanLyDuAn.Controllers
                     locMaDuAn = selectedMaDuAn
                 });
             }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
             catch (Exception ex)
             {
                 ModelState.AddModelError("Form.TenDanhMucCV", ex.Message);
-                var paged = await _service.GetPagedAsync(vm.TuKhoa, selectedMaDuAn);
+                var paged = await _service.GetPagedAsync(User, vm.TuKhoa, selectedMaDuAn.Value);
                 vm.MaDuAn = selectedProject.MaDuAn;
                 vm.TenDuAn = selectedProject.TenDuAn;
                 vm.DanhSach = paged.Items;
                 vm.DanhSachDuAn = duAnOptions;
                 vm.Pagination = paged.Pagination;
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+                await GanCoQuyenThaoTacAsync(vm, selectedMaDuAn.Value);
                 return View("Index", vm);
             }
         }
@@ -191,8 +242,12 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                await _service.DeleteAsync(maDanhMucCV);
+                await _service.DeleteAsync(User, maDanhMucCV);
                 TempData["Success"] = "Đã xóa danh mục công việc.";
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
             }
             catch (Exception ex)
             {
@@ -204,6 +259,14 @@ namespace QuanLyDuAn.Controllers
                 tuKhoa,
                 locMaDuAn
             });
+        }
+
+        private async Task GanCoQuyenThaoTacAsync(DanhMucCongViecPageViewModel vm, int maDuAn)
+        {
+            vm.CoTheXemDanhMuc = await _scopeService.CanAccessProjectAsync(User, maDuAn, Permissions.DanhMucCongViec.Xem);
+            vm.CoTheThemDanhMuc = await _scopeService.CanAccessProjectAsync(User, maDuAn, Permissions.DanhMucCongViec.Them);
+            vm.CoTheSuaDanhMuc = await _scopeService.CanAccessProjectAsync(User, maDuAn, Permissions.DanhMucCongViec.Sua);
+            vm.CoTheXoaDanhMuc = await _scopeService.CanAccessProjectAsync(User, maDuAn, Permissions.DanhMucCongViec.Xoa);
         }
     }
 }
