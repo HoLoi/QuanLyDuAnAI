@@ -1,15 +1,16 @@
 ﻿.app-sidebar {
     position: sticky;
     top: 0;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden;
     width: 272px;
     padding: 1rem 0.85rem 1.15rem;
     border-right: 1px solid #dce5f2;
     background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     box-shadow: 0 14px 32px rgba(49, 72, 102, 0.08);
-    scrollbar-width: thin;
-    scrollbar-color: #c9d7ee transparent;
+    transition: width 0.24s ease, padding 0.24s ease;
 }
 
 .app-sidebar::-webkit-scrollbar {
@@ -21,15 +22,104 @@
     background: #c9d7ee;
 }
 
-.brand-wrap {
+.sidebar-brand-area {
+    flex-shrink: 0;
     margin-bottom: 1.1rem;
+}
+
+.brand-wrap {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    padding: 0.72rem;
     border-radius: 0.95rem;
     background: linear-gradient(130deg, rgba(105, 108, 255, 0.18), rgba(3, 195, 236, 0.16));
     border: 1px solid rgba(105, 108, 255, 0.22);
+    overflow: hidden;
+    transition: justify-content 0.24s ease, padding 0.24s ease;
+}
+
+.brand-logo {
+    width: 2.3rem;
+    height: 2.3rem;
+    flex: 0 0 2.3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.8rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, #5d74f7 0%, #03b8df 100%);
+}
+
+.brand-text {
+    min-width: 0;
+    overflow: hidden;
+    transition: opacity 0.18s ease, max-width 0.24s ease;
+}
+
+.brand-title,
+.brand-subtitle {
+    white-space: nowrap;
+}
+
+.sidebar-collapse-toggle {
+    width: 100%;
+    min-height: 2.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.72rem;
+    padding: 0.58rem 0.8rem;
+    border: 1px solid #d6e1f1;
+    border-radius: 0.78rem;
+    color: #3a5272;
+    background: linear-gradient(180deg, #ffffff, #eef4ff);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-collapse-toggle:hover,
+.sidebar-collapse-toggle:focus-visible {
+    color: #314b72;
+    border-color: #aebfdd;
+    box-shadow: 0 8px 18px rgba(67, 89, 113, 0.16);
+    outline: 0;
+}
+
+.sidebar-collapse-toggle i {
+    width: 1.8rem;
+    flex: 0 0 1.8rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.sidebar-collapse-text {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.92rem;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .side-nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     gap: 0.7rem;
+    padding-right: 0.1rem;
+    scrollbar-width: thin;
+    scrollbar-color: #c9d7ee transparent;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: #c9d7ee;
 }
 
 .sidebar-section {
@@ -59,7 +149,8 @@
     color: #3a4f6c;
     background: transparent;
     text-decoration: none;
-    transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+    overflow: hidden;
+    transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease, padding 0.24s ease, gap 0.24s ease;
 }
 
 .sidebar-menu-icon {
@@ -83,6 +174,10 @@
     font-size: 0.92rem;
     font-weight: 600;
     letter-spacing: 0.01em;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 0.18s ease, max-width 0.24s ease;
 }
 
 .sidebar-menu-link:hover,
@@ -156,8 +251,39 @@
     font-size: 1.28rem;
 }
 
+.sidebar-footer {
+    flex-shrink: 0;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #dce5f2;
+}
+
 .sidebar-backdrop {
     display: none;
+}
+
+.sidebar-floating-tooltip {
+    position: fixed;
+    z-index: 1060;
+    max-width: 240px;
+    padding: 0.38rem 0.55rem;
+    border-radius: 0.45rem;
+    color: #ffffff;
+    background: #1f2f49;
+    box-shadow: 0 10px 24px rgba(31, 47, 73, 0.22);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-0.25rem);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.sidebar-floating-tooltip.show {
+    opacity: 1;
+    transform: translateX(0);
 }
 
 @media (max-width: 991.98px) {
@@ -205,10 +331,93 @@
     body.sidebar-open {
         overflow: hidden;
     }
+
+    .sidebar-collapse-toggle {
+        display: none;
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
 }
 
 @media (min-width: 992px) {
     .sidebar-toggle {
         display: none;
     }
+
+    body.sidebar-collapsed .app-sidebar {
+        width: 76px;
+        padding: 0.9rem 0.55rem 1rem;
+    }
+
+    body.sidebar-collapsed .sidebar-brand-area {
+        display: flex;
+        justify-content: center;
+    }
+
+    body.sidebar-collapsed .brand-wrap {
+        width: 100%;
+        justify-content: center;
+        padding: 0.62rem 0;
+    }
+
+    body.sidebar-collapsed .brand-text,
+    body.sidebar-collapsed .brand-title,
+    body.sidebar-collapsed .brand-subtitle,
+    body.sidebar-collapsed .sidebar-section-title,
+    body.sidebar-collapsed .sidebar-menu-text {
+        display: none;
+    }
+
+    body.sidebar-collapsed .sidebar-collapse-toggle {
+        min-height: 2.75rem;
+        justify-content: center;
+        gap: 0;
+        padding: 0.46rem;
+    }
+
+    body.sidebar-collapsed .sidebar-collapse-text {
+        display: none;
+    }
+
+    body.sidebar-collapsed .side-nav {
+        gap: 0.36rem;
+    }
+
+    body.sidebar-collapsed .sidebar-section {
+        gap: 0.3rem;
+        padding-top: 0.16rem;
+    }
+
+    body.sidebar-collapsed .sidebar-section + .sidebar-section {
+        margin-top: 0.42rem;
+        padding-top: 0.42rem;
+        border-top: 1px solid #e4ecf7;
+    }
+
+    body.sidebar-collapsed .sidebar-menu-link {
+        min-height: 2.75rem;
+        justify-content: center;
+        gap: 0;
+        padding: 0.46rem;
+        border-radius: 0.72rem;
+        overflow: visible;
+    }
+
+    body.sidebar-collapsed .sidebar-menu-link:hover,
+    body.sidebar-collapsed .sidebar-menu-link:focus-visible {
+        transform: none;
+    }
+
+    body.sidebar-collapsed .sidebar-menu-icon {
+        margin: 0;
+    }
+
+    body.sidebar-collapsed .sidebar-menu-link.sidebar-active::before {
+        left: -0.42rem;
+        top: 0.55rem;
+        bottom: 0.55rem;
+    }
+
 }

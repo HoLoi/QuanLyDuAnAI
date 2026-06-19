@@ -310,25 +310,6 @@
     line-height: 1.45;
 }
 
-.duyet-de-xuat-cong-viec-reject-form {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.42rem;
-    margin-top: 0.1rem;
-}
-
-.duyet-de-xuat-cong-viec-reject-form .form-control {
-    min-height: 34px;
-    border-radius: 0.58rem;
-    border-color: #d6e0ef;
-    box-shadow: none;
-}
-
-.duyet-de-xuat-cong-viec-reject-form .form-control:focus {
-    border-color: #9cb2d8;
-    box-shadow: 0 0 0 0.18rem rgba(105, 108, 255, 0.12);
-}
-
 .duyet-de-xuat-cong-viec-action-reject {
     border-color: #e5a8a8;
     background: #fff2f2;

@@ -20,7 +20,6 @@ namespace QuanLyDuAn.ViewModels.ChiTietCongViec
 
         public DateTime? NgayKetThucCTCV { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn trạng thái chi tiết công việc.")]
         [MaxLength(50, ErrorMessage = "Trạng thái chi tiết công việc không hợp lệ.")]
         public string TrangThaiCTCV { get; set; } = string.Empty;
     }

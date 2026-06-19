@@ -26,6 +26,30 @@
             _ => "bi-play-circle"
         };
     }
+
+    string GetAssignmentText(int soNguoi)
+    {
+        return soNguoi <= 0
+            ? "Chưa phân công"
+            : $"Đã phân công · {soNguoi} người";
+    }
+
+    string GetAssignmentBadgeClass(int soNguoi)
+    {
+        return soNguoi > 0 ? "bg-success" : "bg-secondary";
+    }
+
+    string GetDetailCountText(int soLuong)
+    {
+        return soLuong <= 0
+            ? "Chưa có chi tiết"
+            : $"{soLuong} chi tiết";
+    }
+
+    string GetDetailCountBadgeClass(int soLuong)
+    {
+        return soLuong > 0 ? "bg-info text-dark" : "bg-light text-muted border";
+    }
 }
 
 @if (Model.Count == 0)
@@ -46,6 +70,8 @@ else
                     <th class="col-meta">Mức độ / Chi phí</th>
                     <th class="col-time">Mốc thời gian</th>
                     <th class="col-status">Trạng thái</th>
+                    <th class="col-assignment">Phân công</th>
+                    <th class="col-detail-count">Chi tiết công việc</th>
                     <th class="col-actions">Thao tác</th>
                 </tr>
             </thead>
@@ -85,6 +111,16 @@ else
                             <span class="workflow-badge @item.CssTrangThai">
                                 <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
                                 @item.TrangThaiHienThi
+                            </span>
+                        </td>
+                        <td class="col-assignment">
+                            <span class="badge @GetAssignmentBadgeClass(item.SoNguoiDuocPhanCong)">
+                                @GetAssignmentText(item.SoNguoiDuocPhanCong)
+                            </span>
+                        </td>
+                        <td class="col-detail-count">
+                            <span class="badge @GetDetailCountBadgeClass(item.SoLuongChiTietCongViec)">
+                                @GetDetailCountText(item.SoLuongChiTietCongViec)
                             </span>
                         </td>
                         <td class="col-actions table-actions task-actions-cell">
@@ -164,6 +200,8 @@ else
                     <div><span>Danh mục</span><strong>@item.TenDanhMucCV</strong></div>
                     <div><span>Mức độ</span><strong>@item.TenMucDo</strong></div>
                     <div><span>Chi phí</span><strong>@item.ChiPhiDaChi.ToString("N0")</strong></div>
+                    <div><span>Phân công</span><strong>@GetAssignmentText(item.SoNguoiDuocPhanCong)</strong></div>
+                    <div><span>Chi tiết công việc</span><strong>@GetDetailCountText(item.SoLuongChiTietCongViec)</strong></div>
                     <div><span>Bắt đầu</span><strong>@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</strong></div>
                     <div><span>Kết thúc dự kiến</span><strong>@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</strong></div>
                 </div>

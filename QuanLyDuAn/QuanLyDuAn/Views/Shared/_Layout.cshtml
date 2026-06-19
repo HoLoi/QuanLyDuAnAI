@@ -41,7 +41,6 @@
     var canNganSach = grantedPermissions.Contains(Permissions.NganSach.Xem);
     var canDeXuatNganSach = grantedPermissions.Contains(Permissions.DeXuatNganSach.Xem);
     var canDuyetNganSach = grantedPermissions.Contains(Permissions.DuyetNganSach.Xem);
-    var canChiPhi = grantedPermissions.Contains(Permissions.ChiPhi.Xem);
 
     // ===== AI =====
     var canAi = grantedPermissions.Contains(Permissions.AI.Xem);
@@ -85,17 +84,34 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="@(isAuthenticated ? "layout-authenticated" : "layout-guest")">
+    @if (isAuthenticated)
+    {
+        <script>
+            (function () {
+                try {
+                    var query = window.matchMedia("(min-width: 992px)");
+                    if (query.matches && window.localStorage.getItem("QuanLyDuAnAI.sidebar.collapsed") === "true") {
+                        document.body.classList.add("sidebar-collapsed");
+                    }
+                } catch (error) {
+                    document.body.classList.remove("sidebar-collapsed");
+                }
+            })();
+        </script>
+    }
     <div class="app-shell">
         @if (isAuthenticated)
         {
             <aside class="app-sidebar" id="appSidebar">
-                <a asp-controller="Dashboard" asp-action="Index" class="brand-wrap text-decoration-none">
-                    <span class="brand-logo"><i class="bi bi-rocket-takeoff-fill"></i></span>
-                    <div>
-                        <h1 class="brand-title">QuanLyDuAn AI</h1>
-                        <p class="brand-subtitle">Project Intelligence</p>
-                    </div>
-                </a>
+                <div class="sidebar-brand-area">
+                    <a asp-controller="Dashboard" asp-action="Index" class="brand-wrap text-decoration-none" aria-label="QuanLyDuAn AI">
+                        <span class="brand-logo"><i class="bi bi-rocket-takeoff-fill"></i></span>
+                        <div class="brand-text">
+                            <h1 class="brand-title">QuanLyDuAn AI</h1>
+                            <p class="brand-subtitle">Project Intelligence</p>
+                        </div>
+                    </a>
+                </div>
 
                 <nav class="side-nav sidebar-menu">
                     @if (canDashboard || canNhanSu || canChucDanh || canNhom || canPhanQuyen)
@@ -198,7 +214,7 @@
                         </div>
                     }
 
-                    @if (canDeXuatNganSach || canDuyetNganSach || canNganSach || canChiPhi)
+                    @if (canDuyetNganSach || canNganSach)
                     {
                         <div class="sidebar-section">
                             <div class="sidebar-section-title">TÀI CHÍNH</div>
@@ -216,14 +232,6 @@
                                 <a asp-controller="NganSach" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("NganSach") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-wallet2"></i></span>
                                     <span class="sidebar-menu-text">Ngân sách</span>
-                                </a>
-                            }
-
-                            @if (canChiPhi)
-                            {
-                                <a asp-controller="ChiPhi" asp-action="Index" class="side-link sidebar-menu-link @(IsActiveController("ChiPhi") ? "active sidebar-active" : string.Empty)">
-                                    <span class="sidebar-menu-icon"><i class="bi bi-cash-stack"></i></span>
-                                    <span class="sidebar-menu-text">Chi phí</span>
                                 </a>
                             }
                         </div>
@@ -303,6 +311,19 @@
                         </div>
                     }
                 </nav>
+
+                <div class="sidebar-footer">
+                    <button type="button"
+                            class="sidebar-collapse-toggle"
+                            data-sidebar-collapse-toggle
+                            aria-controls="appSidebar"
+                            aria-expanded="true"
+                            aria-label="Thu gọn menu"
+                            title="Thu gọn menu">
+                        <i class="bi bi-chevron-double-left" aria-hidden="true"></i>
+                        <span class="sidebar-collapse-text">Thu gọn menu</span>
+                    </button>
+                </div>
             </aside>
             <button type="button" class="sidebar-backdrop" data-sidebar-dismiss aria-label="Đóng menu"></button>
         }
@@ -383,14 +404,8 @@
 
     <script>
         (function () {
-            var toggleButtons = document.querySelectorAll("[data-sidebar-toggle]");
-            var dismissButtons = document.querySelectorAll("[data-sidebar-dismiss]");
             var accountDropdown = document.querySelector("[data-account-dropdown]");
             var accountToggle = document.querySelector("[data-account-toggle]");
-
-            function setSidebarState(isOpen) {
-                document.body.classList.toggle("sidebar-open", isOpen);
-            }
 
             function setAccountMenuState(isOpen) {
                 if (!accountDropdown || !accountToggle) {
@@ -400,18 +415,6 @@
                 accountDropdown.classList.toggle("open", isOpen);
                 accountToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
             }
-
-            toggleButtons.forEach(function (button) {
-                button.addEventListener("click", function () {
-                    setSidebarState(!document.body.classList.contains("sidebar-open"));
-                });
-            });
-
-            dismissButtons.forEach(function (button) {
-                button.addEventListener("click", function () {
-                    setSidebarState(false);
-                });
-            });
 
             if (accountDropdown && accountToggle) {
                 accountToggle.addEventListener("click", function (event) {
@@ -429,14 +432,7 @@
 
             document.addEventListener("keydown", function (event) {
                 if (event.key === "Escape") {
-                    setSidebarState(false);
                     setAccountMenuState(false);
-                }
-            });
-
-            window.addEventListener("resize", function () {
-                if (window.innerWidth >= 992) {
-                    setSidebarState(false);
                 }
             });
         })();
@@ -444,6 +440,7 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/layout/sidebar.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

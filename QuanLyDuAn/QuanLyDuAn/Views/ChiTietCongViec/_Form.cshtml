@@ -4,14 +4,6 @@
 @{
     var permissions = Model.Permissions;
     bool canShowForm = permissions.Contains(Permissions.ChiTietCongViec.Them) && Model.CoTheCapNhat;
-    var trangThaiOptions = new[]
-    {
-        TrangThai.ChuaBatDau,
-        TrangThai.DangThucHien,
-        TrangThai.BiCanCan,
-        TrangThai.TamDung,
-        TrangThai.HoanThanh
-    };
 }
 
 @if (canShowForm)
@@ -35,13 +27,8 @@
         </div>
 
         <div class="form-field">
-            <label for="TrangThaiCTCV">Trạng thái</label>
-            <select id="TrangThaiCTCV" class="form-select" name="TrangThaiCTCV" required>
-                @foreach (var item in trangThaiOptions)
-                {
-                    <option value="@item" selected="@(TrangThai.EqualsValue(Model.Form.TrangThaiCTCV, item))">@TrangThai.ToDisplay(item)</option>
-                }
-            </select>
+            <label>Trạng thái khi tạo</label>
+            <div class="form-control bg-light text-muted">@TrangThai.ToDisplay(TrangThai.ChuaBatDau)</div>
         </div>
 
         <div class="form-actions">

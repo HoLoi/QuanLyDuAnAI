@@ -53,11 +53,11 @@ namespace QuanLyDuAn.Services.Implementations
                 {
                     MaCongViec = cv.MaCongViec,
                     MaDanhMucCV = dm.MaDanhMucCV,
-                    TenDanhMucCV = dm.TenDanhMucCV ?? $"Danh mục {dm.MaDanhMucCV}",
+                    TenDanhMucCV = dm.TenDanhMucCV ?? string.Empty,
                     MaDuAn = da.MaDuAn,
-                    TenDuAn = da.TenDuAn ?? $"Dự án {da.MaDuAn}",
+                    TenDuAn = da.TenDuAn ?? string.Empty,
                     MaMucDo = md.MaMucDo,
-                    TenMucDo = md.TenMucDo ?? $"Mức độ {md.MaMucDo}",
+                    TenMucDo = md.TenMucDo ?? string.Empty,
                     TenCongViec = cv.TenCongViec ?? string.Empty,
                     MoTaCongViec = cv.MoTaCongViec ?? string.Empty,
                     NgayBatDauCongViec = cv.NgayBatDauCongViec,
@@ -154,6 +154,9 @@ namespace QuanLyDuAn.Services.Implementations
 
             var danhSach = await danhSachQuery.ToListAsync();
 
+            GanTenHienThiMacDinh(danhSach);
+            await GanSoNguoiDuocPhanCongAsync(danhSach);
+            await GanSoLuongChiTietCongViecAsync(danhSach);
             await GanCoThePhanCongCongViecAsync(danhSach, currentUserId, isManager, isEmployee, isAdmin);
             await GanCoTheXuLyTrangThaiCongViecAsync(danhSach, currentUserId);
             GanThongTinWorkflowUi(danhSach);
@@ -231,6 +234,91 @@ namespace QuanLyDuAn.Services.Implementations
                 "Mở lại công việc");
 
             await _context.SaveChangesAsync();
+        }
+
+        private async Task GanSoNguoiDuocPhanCongAsync(List<CongViecItemViewModel> danhSach)
+        {
+            var maCongViecIds = danhSach
+                .Select(x => x.MaCongViec)
+                .Distinct()
+                .ToList();
+
+            if (maCongViecIds.Count == 0)
+            {
+                return;
+            }
+
+            var soNguoiTheoCongViec = await (
+                from pc in _context.PhanCongCongViec
+                join nd in _context.NguoiDung on pc.MaNguoiDung equals nd.MaNguoiDung
+                where maCongViecIds.Contains(pc.MaCongViec)
+                      && nd.IsDeleted != true
+                group pc by pc.MaCongViec into g
+                select new
+                {
+                    MaCongViec = g.Key,
+                    SoNguoi = g.Select(x => x.MaNguoiDung).Distinct().Count()
+                })
+                .ToDictionaryAsync(x => x.MaCongViec, x => x.SoNguoi);
+
+            foreach (var item in danhSach)
+            {
+                item.SoNguoiDuocPhanCong = soNguoiTheoCongViec.TryGetValue(item.MaCongViec, out var soNguoi)
+                    ? soNguoi
+                    : 0;
+            }
+        }
+
+        private static void GanTenHienThiMacDinh(List<CongViecItemViewModel> danhSach)
+        {
+            foreach (var item in danhSach)
+            {
+                if (string.IsNullOrWhiteSpace(item.TenDanhMucCV))
+                {
+                    item.TenDanhMucCV = $"Danh mục {item.MaDanhMucCV}";
+                }
+
+                if (string.IsNullOrWhiteSpace(item.TenDuAn))
+                {
+                    item.TenDuAn = $"Dự án {item.MaDuAn}";
+                }
+
+                if (string.IsNullOrWhiteSpace(item.TenMucDo))
+                {
+                    item.TenMucDo = $"Mức độ {item.MaMucDo}";
+                }
+            }
+        }
+
+        private async Task GanSoLuongChiTietCongViecAsync(List<CongViecItemViewModel> danhSach)
+        {
+            var maCongViecIds = danhSach
+                .Select(x => x.MaCongViec)
+                .Distinct()
+                .ToList();
+
+            if (maCongViecIds.Count == 0)
+            {
+                return;
+            }
+
+            var soChiTietTheoCongViec = await _context.CtCongViec
+                .Where(x => maCongViecIds.Contains(x.MaCongViec)
+                            && x.IsDeleted != true)
+                .GroupBy(x => x.MaCongViec)
+                .Select(g => new
+                {
+                    MaCongViec = g.Key,
+                    SoLuong = g.Count()
+                })
+                .ToDictionaryAsync(x => x.MaCongViec, x => x.SoLuong);
+
+            foreach (var item in danhSach)
+            {
+                item.SoLuongChiTietCongViec = soChiTietTheoCongViec.TryGetValue(item.MaCongViec, out var soLuong)
+                    ? soLuong
+                    : 0;
+            }
         }
 
         private async Task GanCoThePhanCongCongViecAsync(
@@ -427,14 +515,24 @@ namespace QuanLyDuAn.Services.Implementations
                 query = query.Where(x => allowedProjectIds.Contains(x.MaDuAn));
             }
 
-            return await query
+            var options = await query
                 .OrderBy(x => x.TenDuAn)
                 .Select(x => new CongViecDuAnOptionViewModel
                 {
                     MaDuAn = x.MaDuAn,
-                    TenDuAn = x.TenDuAn ?? $"Dự án {x.MaDuAn}"
+                    TenDuAn = x.TenDuAn ?? string.Empty
                 })
                 .ToListAsync();
+
+            foreach (var option in options)
+            {
+                if (string.IsNullOrWhiteSpace(option.TenDuAn))
+                {
+                    option.TenDuAn = $"Dự án {option.MaDuAn}";
+                }
+            }
+
+            return options;
         }
 
         private async Task<int> GetCurrentUserIdAsync()

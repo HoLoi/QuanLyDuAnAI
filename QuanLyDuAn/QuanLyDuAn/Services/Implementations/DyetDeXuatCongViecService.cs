@@ -236,7 +236,7 @@ namespace QuanLyDuAn.Services.Implementations
             await transaction.CommitAsync();
         }
 
-        public async Task RejectAsync(int maDeXuatCv, string? lyDo)
+        public async Task RejectAsync(int maDeXuatCv)
         {
             var currentUserId = await GetCurrentUserIdAsync();
 
@@ -255,15 +255,11 @@ namespace QuanLyDuAn.Services.Implementations
             deXuat.MaNguoiDungDuyet = currentUserId;
             deXuat.NgayDuyetDeXuatCongViec = DateTime.Now;
 
-            var lyDoTuChoi = string.IsNullOrWhiteSpace(lyDo)
-                ? string.Empty
-                : $". Lý do: {lyDo.Trim()}";
-
             _context.NhatKyQuanLyDuAn.Add(new NhatKyQuanLyDuAn
             {
                 MaDuAn = deXuat.MaDuAn,
                 MaNguoiDung = currentUserId,
-                NkHanhDongQLDA = $"Từ chối đề xuất công việc #{deXuat.MaDeXuatCV}{lyDoTuChoi}",
+                NkHanhDongQLDA = $"Từ chối đề xuất công việc #{deXuat.MaDeXuatCV}",
                 NkThoiGianQLDA = DateTime.Now
             });
 

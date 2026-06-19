@@ -13,6 +13,8 @@
         public string TrangThaiHienThi { get; set; } = string.Empty;
         public string CssTrangThai { get; set; } = string.Empty;
         public string? ThongDiepWorkflow { get; set; }
+        public int SoNguoiDuocPhanCong { get; set; }
+        public bool DaPhanCong => SoNguoiDuocPhanCong > 0;
         public bool CoThePhanCongChiTietCongViec { get; set; }
     }
 }

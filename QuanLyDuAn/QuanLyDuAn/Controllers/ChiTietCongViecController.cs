@@ -147,7 +147,7 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Tên chi tiết", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TenCTCV },
                     new() { Header = "Nội dung", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).NoiDungChiTietCV },
                     new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDate(((ChiTietCongViecItemViewModel)row).NgayBatDauCTCV) },
-                    new() { Header = "Ngày kết thúc", ValueSelector = row => ExportSupport.FormatDate(((ChiTietCongViecItemViewModel)row).NgayKetThucCTCV) },
+                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDate(((ChiTietCongViecItemViewModel)row).NgayKetThucCTCV) },
                     new() { Header = "Trạng thái", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TrangThaiHienThi }
                 },
                 Rows = rows

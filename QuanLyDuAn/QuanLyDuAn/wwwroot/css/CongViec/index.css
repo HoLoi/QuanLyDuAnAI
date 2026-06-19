@@ -284,7 +284,13 @@
     font-size: 0.86rem;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
     gap: 0.36rem;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
     transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
@@ -297,6 +303,14 @@
 .cong-viec-page .btn-filter-apply:hover {
     background: #2563eb;
     border-color: #2563eb;
+    color: #fff;
+}
+
+.cong-viec-page .btn-filter-apply:focus-visible,
+.cong-viec-page .btn-filter-reset:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.35);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.14);
 }
 
 .cong-viec-page .btn-filter-reset {
@@ -308,12 +322,14 @@
 .cong-viec-page .btn-filter-reset:hover {
     background: #eef2f7;
     border-color: #cfd8e3;
+    color: #1e293b;
+    text-decoration: none;
 }
 
 .cong-viec-page .workflow-table {
     margin: 0;
     width: 100%;
-    min-width: 0;
+    min-width: 1280px;
     table-layout: fixed;
 }
 
@@ -335,19 +351,33 @@
 }
 
 .cong-viec-page .workflow-table .col-project {
-    width: 19%;
+    width: 14%;
 }
 
 .cong-viec-page .workflow-table .col-task {
-    width: 24%;
+    width: 20%;
 }
 
 .cong-viec-page .workflow-table .col-meta {
-    width: 16%;
+    width: 12%;
 }
 
 .cong-viec-page .workflow-table .col-time {
-    width: 17%;
+    width: 13%;
+}
+
+.cong-viec-page .workflow-table .col-status {
+    width: 10%;
+}
+
+.cong-viec-page .workflow-table .col-assignment {
+    width: 12%;
+    min-width: 9rem;
+}
+
+.cong-viec-page .workflow-table .col-detail-count {
+    width: 11%;
+    min-width: 8.5rem;
 }
 
 .cong-viec-page .workflow-table tbody tr:hover {
@@ -381,7 +411,7 @@
 }
 
 .cong-viec-page .col-actions {
-    width: 16%;
+    width: 13%;
     min-width: 10.2rem;
 }
 
@@ -638,4 +668,3 @@
         grid-template-columns: 1fr;
     }
 }
-

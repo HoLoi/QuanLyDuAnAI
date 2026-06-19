@@ -58,6 +58,7 @@ wwwroot\css\YeuCauDoiQuanLy\index.css
 wwwroot\favicon.ico
 wwwroot\js\ai\charts.js
 wwwroot\js\approval\index.js
+wwwroot\js\layout\sidebar.js
 wwwroot\js\phanquyen\index.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap.css

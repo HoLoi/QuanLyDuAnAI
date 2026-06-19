@@ -69,6 +69,8 @@ namespace QuanLyDuAn.Services.Implementations
                     CoThePhanCongChiTietCongViec = coThePhanCongChiTietCongViec
                 })
                 .ToListAsync();
+
+            await GanSoNguoiDuocPhanCongAsync(danhSach);
             GanThongTinWorkflowUi(danhSach);
 
             var trangThaiCongViec = TrangThai.ToCode(congViec.TrangThaiCongViec);
@@ -102,6 +104,39 @@ namespace QuanLyDuAn.Services.Implementations
             };
         }
 
+        private async Task GanSoNguoiDuocPhanCongAsync(List<ChiTietCongViecItemViewModel> danhSach)
+        {
+            var maChiTietIds = danhSach
+                .Select(x => x.MaChiTietCV)
+                .Distinct()
+                .ToList();
+
+            if (maChiTietIds.Count == 0)
+            {
+                return;
+            }
+
+            var soNguoiTheoChiTiet = await (
+                from pc in _context.PhanCongCtCongViec
+                join nd in _context.NguoiDung on pc.MaNguoiDung equals nd.MaNguoiDung
+                where maChiTietIds.Contains(pc.MaChiTietCV)
+                      && nd.IsDeleted != true
+                group pc by pc.MaChiTietCV into g
+                select new
+                {
+                    MaChiTietCV = g.Key,
+                    SoNguoi = g.Select(x => x.MaNguoiDung).Distinct().Count()
+                })
+                .ToDictionaryAsync(x => x.MaChiTietCV, x => x.SoNguoi);
+
+            foreach (var item in danhSach)
+            {
+                item.SoNguoiDuocPhanCong = soNguoiTheoChiTiet.TryGetValue(item.MaChiTietCV, out var soNguoi)
+                    ? soNguoi
+                    : 0;
+            }
+        }
+
         public async Task AddAsync(ChiTietCongViecCreateUpdateViewModel form)
         {
             var congViec = await LayCongViecAsync(form.MaCongViec);
@@ -110,8 +145,6 @@ namespace QuanLyDuAn.Services.Implementations
             await KiemTraTrangThaiCongViecTruocKhiThemAsync(congViec);
             var currentUserId = await GetCurrentUserIdAsync();
 
-            var trangThai = TrangThai.ToCode(form.TrangThaiCTCV);
-
             var entity = new CtCongViec
             {
                 MaCongViec = form.MaCongViec,
@@ -119,19 +152,29 @@ namespace QuanLyDuAn.Services.Implementations
                 NoiDungChiTietCV = form.NoiDungChiTietCV.Trim(),
                 NgayTaoCTCV = DateTime.Now,
                 NgayBatDauCTCV = form.NgayBatDauCTCV!.Value.Date,
-                NgayKetThucCTCV = TrangThai.LaHoanThanhCongViec(trangThai) ? DateTime.Now : null,
-                TrangThaiCTCV = trangThai,
+                NgayKetThucCTCV = null,
+                TrangThaiCTCV = TrangThai.ChuaBatDau,
                 IsDeleted = false
             };
 
-            _context.CtCongViec.Add(entity);
-            await _context.SaveChangesAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                _context.CtCongViec.Add(entity);
+                await _context.SaveChangesAsync();
 
-            await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
-                congViec.MaCongViec,
-                currentUserId,
-                "Thêm chi tiết công việc");
-            await _context.SaveChangesAsync();
+                await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                    congViec.MaCongViec,
+                    currentUserId,
+                    "Thêm chi tiết công việc");
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task UpdateAsync(ChiTietCongViecCreateUpdateViewModel form)
@@ -154,21 +197,27 @@ namespace QuanLyDuAn.Services.Implementations
             if (entity == null)
                 throw new Exception("Không tìm thấy chi tiết công việc cần cập nhật.");
 
-            var trangThai = TrangThai.ToCode(form.TrangThaiCTCV);
-
             entity.TenCTCV = string.IsNullOrWhiteSpace(form.TenCTCV) ? null : form.TenCTCV.Trim();
             entity.NoiDungChiTietCV = form.NoiDungChiTietCV.Trim();
             entity.NgayBatDauCTCV = form.NgayBatDauCTCV!.Value.Date;
-            entity.NgayKetThucCTCV = TrangThai.LaHoanThanhCongViec(trangThai) ? DateTime.Now : null;
-            entity.TrangThaiCTCV = trangThai;
 
-            await _context.SaveChangesAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
 
-            await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
-                congViec.MaCongViec,
-                currentUserId,
-                "Cập nhật chi tiết công việc");
-            await _context.SaveChangesAsync();
+                await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                    congViec.MaCongViec,
+                    currentUserId,
+                    "Cập nhật chi tiết công việc");
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task RemoveAsync(int maCongViec, int maChiTietCv)
@@ -187,16 +236,26 @@ namespace QuanLyDuAn.Services.Implementations
             if (entity == null)
                 throw new Exception("Không tìm thấy chi tiết công việc cần xóa.");
 
-            entity.IsDeleted = true;
-            entity.DeletedAt = DateTime.Now;
-            entity.DeletedBy = currentUserId;
-            await _context.SaveChangesAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                entity.IsDeleted = true;
+                entity.DeletedAt = DateTime.Now;
+                entity.DeletedBy = currentUserId;
+                await _context.SaveChangesAsync();
 
-            await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
-                congViec.MaCongViec,
-                currentUserId,
-                "Xóa chi tiết công việc");
-            await _context.SaveChangesAsync();
+                await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                    congViec.MaCongViec,
+                    currentUserId,
+                    "Xóa chi tiết công việc");
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         private static void KiemTraDuLieuDauVao(ChiTietCongViecCreateUpdateViewModel form, CongViec congViec)
@@ -216,9 +275,6 @@ namespace QuanLyDuAn.Services.Implementations
             if (!form.NgayBatDauCTCV.HasValue)
                 throw new Exception("Vui lòng chọn ngày bắt đầu.");
 
-            if (string.IsNullOrWhiteSpace(form.TrangThaiCTCV))
-                throw new Exception("Vui lòng chọn trạng thái chi tiết công việc.");
-
             if (congViec.NgayBatDauCongViec.HasValue
                 && form.NgayBatDauCTCV.Value.Date < congViec.NgayBatDauCongViec.Value.Date)
             {
@@ -231,18 +287,6 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Ngày bắt đầu chi tiết công việc không được sau ngày kết thúc dự kiến của công việc.");
             }
 
-            var trangThai = TrangThai.ToCode(form.TrangThaiCTCV);
-            var trangThaiHopLe = new[]
-            {
-                TrangThai.ChuaBatDau,
-                TrangThai.DangThucHien,
-                TrangThai.BiCanCan,
-                TrangThai.TamDung,
-                TrangThai.HoanThanh
-            };
-
-            if (!trangThaiHopLe.Any(x => TrangThai.EqualsValue(x, trangThai)))
-                throw new Exception("Trạng thái chi tiết công việc không hợp lệ.");
         }
 
         private async Task<CongViec> LayCongViecAsync(int maCongViec)

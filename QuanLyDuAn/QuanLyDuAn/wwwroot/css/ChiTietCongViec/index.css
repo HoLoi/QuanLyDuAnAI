@@ -253,6 +253,8 @@
 
 .chi-tiet-dashboard .chi-tiet-table {
     margin: 0;
+    width: 100%;
+    min-width: 1120px;
 }
 
 .chi-tiet-dashboard .chi-tiet-table thead th {
@@ -274,6 +276,11 @@
 .col-actions {
     min-width: 16.8rem;
     width: 16.8rem;
+}
+
+.col-assignment {
+    min-width: 10rem;
+    width: 10rem;
 }
 
 .chi-tiet-dashboard .table-actions {
@@ -411,6 +418,14 @@
     font-size: 1.3rem;
     display: block;
     margin-bottom: 0.3rem;
+}
+
+.chi-tiet-dashboard .chi-tiet-table-wrapper {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 @media (max-width: 1199.98px) {

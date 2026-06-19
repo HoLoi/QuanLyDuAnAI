@@ -6,15 +6,6 @@
     bool canEdit = permissions.Contains(Permissions.ChiTietCongViec.Sua) && Model.CoTheCapNhat;
     bool canDelete = permissions.Contains(Permissions.ChiTietCongViec.Xoa) && Model.CoTheCapNhat;
 
-    var trangThaiOptions = new[]
-    {
-        TrangThai.ChuaBatDau,
-        TrangThai.DangThucHien,
-        TrangThai.BiCanCan,
-        TrangThai.TamDung,
-        TrangThai.HoanThanh
-    };
-
     string GetStatusIcon(string cssTrangThai)
     {
         return cssTrangThai switch
@@ -27,6 +18,18 @@
             "workflow-idle" => "bi-circle",
             _ => "bi-play-circle"
         };
+    }
+
+    string GetAssignmentText(int soNguoi)
+    {
+        return soNguoi <= 0
+            ? "Chưa phân công"
+            : $"Đã phân công · {soNguoi} người";
+    }
+
+    string GetAssignmentBadgeClass(int soNguoi)
+    {
+        return soNguoi > 0 ? "bg-success" : "bg-secondary";
     }
 }
 
@@ -46,9 +49,10 @@ else
                     <th>Tên CTCV</th>
                     <th>Nội dung</th>
                     <th class="col-date">Ngày bắt đầu</th>
-                    <th class="col-date">Ngày kết thúc</th>
+                    <th class="col-date">Ngày hoàn thành thực tế</th>
                     <th class="col-date">Ngày tạo</th>
                     <th class="col-status">Trạng thái</th>
+                    <th class="col-assignment">Phân công</th>
                     <th class="col-actions">Thao tác</th>
                 </tr>
             </thead>
@@ -66,6 +70,11 @@ else
                             <span class="workflow-badge @item.CssTrangThai">
                                 <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
                                 @item.TrangThaiHienThi
+                            </span>
+                        </td>
+                        <td class="col-assignment">
+                            <span class="badge @GetAssignmentBadgeClass(item.SoNguoiDuocPhanCong)">
+                                @GetAssignmentText(item.SoNguoiDuocPhanCong)
                             </span>
                         </td>
                         <td class="col-actions table-actions">
@@ -99,7 +108,7 @@ else
                     @if (canEdit)
                     {
                         <tr class="collapse-row">
-                            <td colspan="7" class="p-0 border-0">
+                            <td colspan="8" class="p-0 border-0">
                                 <div class="collapse" id="@collapseId">
                                     <form asp-action="Sua" method="post" class="edit-inline-form">
                                         <input type="hidden" name="MaChiTietCV" value="@item.MaChiTietCV" />
@@ -118,13 +127,14 @@ else
                                             <input type="date" class="form-control" name="NgayBatDauCTCV" value="@item.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
                                         </div>
                                         <div class="form-field">
-                                            <label>Trạng thái</label>
-                                            <select class="form-select" name="TrangThaiCTCV" required>
-                                                @foreach (var status in trangThaiOptions)
-                                                {
-                                                    <option value="@status" selected="@(TrangThai.EqualsValue(item.TrangThaiCTCV, status))">@TrangThai.ToDisplay(status)</option>
-                                                }
-                                            </select>
+                                            <label>Trạng thái hiện tại</label>
+                                            <div>
+                                                <span class="workflow-badge @item.CssTrangThai">
+                                                    <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                                                    @item.TrangThaiHienThi
+                                                </span>
+                                            </div>
+                                            <small class="text-muted">Trạng thái được cập nhật thông qua báo cáo tiến độ đã được duyệt.</small>
                                         </div>
                                         <div class="form-actions">
                                             <button type="submit" class="btn btn-form-primary btn-sm">
@@ -162,8 +172,9 @@ else
 
                 <div class="mobile-meta">
                     <div><span>Bắt đầu</span><strong>@item.NgayBatDauCTCV?.ToString("dd/MM/yyyy")</strong></div>
-                    <div><span>Kết thúc</span><strong>@item.NgayKetThucCTCV?.ToString("dd/MM/yyyy")</strong></div>
+                    <div><span>Hoàn thành thực tế</span><strong>@item.NgayKetThucCTCV?.ToString("dd/MM/yyyy")</strong></div>
                     <div><span>Ngày tạo</span><strong>@item.NgayTaoCTCV?.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                    <div><span>Phân công</span><strong>@GetAssignmentText(item.SoNguoiDuocPhanCong)</strong></div>
                 </div>
 
                 <div class="mobile-actions">
@@ -214,13 +225,14 @@ else
                                 <input type="date" class="form-control" name="NgayBatDauCTCV" value="@item.NgayBatDauCTCV?.ToString("yyyy-MM-dd")" required />
                             </div>
                             <div class="form-field">
-                                <label>Trạng thái</label>
-                                <select class="form-select" name="TrangThaiCTCV" required>
-                                    @foreach (var status in trangThaiOptions)
-                                    {
-                                        <option value="@status" selected="@(TrangThai.EqualsValue(item.TrangThaiCTCV, status))">@TrangThai.ToDisplay(status)</option>
-                                    }
-                                </select>
+                                <label>Trạng thái hiện tại</label>
+                                <div>
+                                    <span class="workflow-badge @item.CssTrangThai">
+                                        <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                                        @item.TrangThaiHienThi
+                                    </span>
+                                </div>
+                                <small class="text-muted">Trạng thái được cập nhật thông qua báo cáo tiến độ đã được duyệt.</small>
                             </div>
                             <button type="submit" class="btn btn-form-primary btn-sm w-100">
                                 <i class="bi bi-check2"></i>
