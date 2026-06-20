@@ -32,6 +32,21 @@ namespace QuanLyDuAn.Services.Implementations
             public List<AiRelatedReasonItemViewModel>? DanhSachNguyenNhanLienQuan { get; set; }
         }
 
+        private sealed class AiDelayAnalysisContext
+        {
+            public int MaDuAn { get; set; }
+            public string? TrangThaiDuAn { get; set; }
+            public DateTime? NgayKetThucDuAn { get; set; }
+            public DateTime? NgayHoanThanhThucTeDuAn { get; set; }
+            public bool LaManagerHienTai { get; set; }
+            public bool CoQuyenPhanTich { get; set; }
+            public bool CoQuyenXacNhan { get; set; }
+            public bool LaPhanTichTamThoi { get; set; }
+            public bool LaPhanTichChinhThuc { get; set; }
+            public bool DuAnKhongTre { get; set; }
+            public string? LyDoKhongThePhanTich { get; set; }
+        }
+
         public AiService(
             QuanLyDuAnDbContext context,
             IAiApiService aiApiService,
@@ -753,6 +768,118 @@ namespace QuanLyDuAn.Services.Implementations
             return vm;
         }
 
+        public async Task<AiProjectDelayAnalysisPanelViewModel> LayPhanTichNguyenNhanDuAnAsync(int maDuAn, CancellationToken cancellationToken = default)
+        {
+            var panel = new AiProjectDelayAnalysisPanelViewModel
+            {
+                MaDuAn = maDuAn,
+                BadgeTinhTrang = "Chưa áp dụng"
+            };
+
+            var context = await LayNguCanhPhanTichAsync(maDuAn, cancellationToken);
+            panel.CoThePhanTich = context.CoQuyenPhanTich
+                                  && context.LaManagerHienTai
+                                  && (context.LaPhanTichTamThoi || context.LaPhanTichChinhThuc);
+            panel.LaPhanTichTamThoi = context.LaPhanTichTamThoi;
+            panel.LaPhanTichChinhThuc = context.LaPhanTichChinhThuc;
+            panel.BadgeLoaiPhanTich = context.LaPhanTichTamThoi ? "Tạm thời" : context.LaPhanTichChinhThuc ? "Chính thức" : string.Empty;
+            panel.BadgeTinhTrang = context.LaPhanTichTamThoi
+                ? "Đang trễ"
+                : context.LaPhanTichChinhThuc
+                    ? "Hoàn thành trễ"
+                    : context.DuAnKhongTre
+                        ? "Dự án không trễ"
+                        : "Chưa áp dụng";
+            panel.ThongBao = context.LyDoKhongThePhanTich;
+
+            await NapKetQuaPhanTichGanNhatChoPanelAsync(panel, maDuAn, cancellationToken);
+            await NapXacNhanNguyenNhanChoPanelAsync(panel, maDuAn, cancellationToken);
+            panel.CoTheXacNhan = context.CoQuyenXacNhan
+                                 && context.LaManagerHienTai
+                                 && context.LaPhanTichChinhThuc
+                                 && panel.KetQua?.MaDMNguyenNhanDuDoan.HasValue == true;
+            return panel;
+        }
+
+        public async Task<AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>> PhanTichNguyenNhanDuAnAsync(int maDuAn, CancellationToken cancellationToken = default)
+        {
+            var context = await LayNguCanhPhanTichAsync(maDuAn, cancellationToken);
+            var permissionError = KiemTraQuyenPhanTich(context);
+            if (permissionError != null)
+            {
+                return permissionError;
+            }
+
+            AiDataset? dataset = null;
+            AiProjectFeatureSnapshotViewModel? snapshot = null;
+            if (context.LaPhanTichChinhThuc)
+            {
+                dataset = await LayHoacLamMoiDatasetChinhThucAsync(maDuAn, cancellationToken);
+                if (dataset?.LaDuAnTre != true)
+                {
+                    return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
+                    {
+                        ThanhCong = false,
+                        ThongBao = "Dự án không trễ.",
+                        Loi = []
+                    };
+                }
+            }
+            else if (context.LaPhanTichTamThoi)
+            {
+                snapshot = await _aiDatasetService.BuildFeatureSnapshotAsync(maDuAn, cancellationToken);
+                if (snapshot == null)
+                {
+                    return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
+                    {
+                        ThanhCong = false,
+                        ThongBao = "Chưa đủ dữ liệu phân tích.",
+                        Loi = []
+                    };
+                }
+            }
+            else
+            {
+                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
+                {
+                    ThanhCong = false,
+                    ThongBao = context.LyDoKhongThePhanTich ?? "Dự án không trễ.",
+                    Loi = []
+                };
+            }
+
+            var input = context.LaPhanTichChinhThuc
+                ? TaoInputTuDataset(maDuAn, dataset!)
+                : TaoInputTuSnapshot(snapshot!);
+
+            var result = await GoiFastApiPhanTichAsync(input, cancellationToken);
+            if (!result.ThanhCong || result.DuLieu == null)
+            {
+                return result;
+            }
+
+            result.DuLieu.LaKetQuaTamThoi = context.LaPhanTichTamThoi;
+            result.DuLieu.LaKetQuaChinhThuc = context.LaPhanTichChinhThuc;
+            result.DuLieu.ThoiGianPhanTich = DateTime.Now;
+
+            if (!await LaNguyenNhanDuDoanHopLeAsync(result.DuLieu.MaDMNguyenNhanDuDoan, cancellationToken))
+            {
+                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không xác định được nguyên nhân phù hợp.",
+                    Loi = []
+                };
+            }
+
+            if (context.LaPhanTichChinhThuc)
+            {
+                await LuuKetQuaPhanTichAsync(maDuAn, dataset!, result.DuLieu, cancellationToken);
+            }
+
+            return result;
+        }
+
         public async Task<AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>> DuDoanDuAnAsync(AiPredictPageViewModel input, CancellationToken cancellationToken = default)
         {
             if (input.MaDuAn <= 0)
@@ -765,83 +892,7 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            input = await BoSungFeatureTuDatasetNeuCanAsync(input, cancellationToken);
-            var dataset = await _context.AiDataset
-                .Where(x => x.MaDuAn == input.MaDuAn)
-                .OrderByDescending(x => x.NgayTongHop ?? DateTime.MinValue)
-                .ThenByDescending(x => x.MaData)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (dataset == null)
-            {
-                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
-                {
-                    ThanhCong = false,
-                    ThongBao = "Chưa có dữ liệu AI_DATASET cho dự án này.",
-                    Loi = ["Vui lòng tổng hợp dataset trước."]
-                };
-            }
-
-            var freshness = await KiemTraCanTongHopLaiDatasetAsync(input.MaDuAn, dataset.NgayTongHop, cancellationToken);
-            if (freshness.CanTongHopLai)
-            {
-                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
-                {
-                    ThanhCong = false,
-                    ThongBao = "AI_DATASET của dự án đã cũ so với dữ liệu nghiệp vụ mới nhất.",
-                    Loi =
-                    [
-                        $"AI_DATASET tổng hợp lúc {DinhDangMocThoiGian(dataset.NgayTongHop)}.",
-                        $"Dữ liệu nghiệp vụ mới nhất lúc {DinhDangMocThoiGian(freshness.ThoiDiemDuLieuNghiepVuMoiNhat)}.",
-                        "Vui lòng bấm Tổng hợp dataset và phân tích lại."
-                    ]
-                };
-            }
-
-            if (dataset.LaDuAnTre != true)
-            {
-                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
-                {
-                    ThanhCong = false,
-                    ThongBao = ThongBaoDuAnKhongTre,
-                    Loi = []
-                };
-            }
-
-            GanFeatureTuDataset(input, dataset);
-            input.LaDuAnTre = dataset.LaDuAnTre;
-
-            var danhMucRows = await _context.DmNguyenNhan
-                .OrderBy(x => x.MaDMNguyenNhan)
-                .Select(x => new
-                {
-                    x.MaDMNguyenNhan,
-                    x.TenNguyenNhan
-                })
-                .ToListAsync(cancellationToken);
-            var danhMuc = danhMucRows.Select(x => new AiReasonCatalogItemViewModel
-            {
-                MaDMNguyenNhan = x.MaDMNguyenNhan.ToString(CultureInfo.InvariantCulture),
-                TenNguyenNhan = string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan
-            }).ToList();
-
-            var request = new AiAnalyzeDelayReasonRequestViewModel
-            {
-                MaDuAn = input.MaDuAn,
-                Feature = MapFeature(input),
-                DanhMucNguyenNhan = danhMuc,
-                ReasonConfidenceThreshold = 0.6
-            };
-
-            var result = await _aiApiService.DuDoanDuAnAsync(request, cancellationToken);
-            if (!result.ThanhCong || result.DuLieu == null)
-            {
-                return result;
-            }
-            result.DuLieu = HauKiemKetQuaNguyenNhan(result.DuLieu, request.Feature, danhMuc);
-
-            await LuuKetQuaPhanTichAsync(input.MaDuAn, dataset, result.DuLieu, cancellationToken);
-            return result;
+            return await PhanTichNguyenNhanDuAnAsync(input.MaDuAn, cancellationToken);
         }
 
         public async Task<AiOperationResultViewModel<AiTestReasonResponseViewModel>> TestPredictAsync(AiPredictPageViewModel input, string? modelFile, CancellationToken cancellationToken = default)
@@ -913,13 +964,9 @@ namespace QuanLyDuAn.Services.Implementations
 
             var roleFlags = await GetCurrentUserRoleFlagsAsync(cancellationToken);
             var currentUserId = await GetCurrentUserIdAsync(cancellationToken);
-            var user = _httpContextAccessor.HttpContext?.User;
-            var coQuyenXacNhanTheoClaim = user?.Claims
-                .Where(x => !string.IsNullOrWhiteSpace(x.Value))
-                .Select(x => x.Value.Trim())
-                .Contains(Permissions.AI.XacNhan, StringComparer.OrdinalIgnoreCase) == true;
+            var coQuyenXacNhanTheoClaim = HasPermissionClaim(Permissions.AI.XacNhan);
 
-            if (!roleFlags.IsManager && !coQuyenXacNhanTheoClaim)
+            if (!roleFlags.IsManager || roleFlags.IsAdmin || !coQuyenXacNhanTheoClaim)
             {
                 return new AiOperationResultViewModel<bool>
                 {
@@ -929,8 +976,18 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            var tonTaiDuAn = await _context.DuAn.AnyAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true, cancellationToken);
-            if (!tonTaiDuAn)
+            var duAn = await _context.DuAn
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    x.MaNguoiDung,
+                    x.TrangThaiDuAn,
+                    x.NgayKetThucDuAn,
+                    x.NgayHoanThanhThucTeDuAn
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            if (duAn == null)
             {
                 return new AiOperationResultViewModel<bool>
                 {
@@ -940,20 +997,28 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            var coQuyenTheoScopeDuAn = await _context.DuAn
-                .AnyAsync(x =>
-                    x.MaDuAn == maDuAn
-                    && x.IsDeleted != true
-                    && (x.MaNguoiDung == currentUserId
-                        || _context.NhanVienDuAn.Any(nv => nv.MaDuAn == x.MaDuAn && nv.MaNguoiDung == currentUserId)),
-                    cancellationToken);
-            if (!coQuyenTheoScopeDuAn)
+            if (duAn.MaNguoiDung != currentUserId)
             {
                 return new AiOperationResultViewModel<bool>
                 {
                     ThanhCong = false,
                     ThongBao = "Bạn không có quyền xác nhận nguyên nhân cho dự án này.",
-                    Loi = ["Chỉ được xác nhận dự án bạn quản lý hoặc đang phụ trách."]
+                    Loi = ["Chỉ Manager hiện tại của dự án được xác nhận."]
+                };
+            }
+
+            var duAnHoanThanhTre = (TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn)
+                                    || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru))
+                                   && duAn.NgayKetThucDuAn.HasValue
+                                   && duAn.NgayHoanThanhThucTeDuAn.HasValue
+                                   && duAn.NgayHoanThanhThucTeDuAn.Value.Date > duAn.NgayKetThucDuAn.Value.Date;
+            if (!duAnHoanThanhTre)
+            {
+                return new AiOperationResultViewModel<bool>
+                {
+                    ThanhCong = false,
+                    ThongBao = "Dự án không trễ.",
+                    Loi = []
                 };
             }
 
@@ -981,6 +1046,21 @@ namespace QuanLyDuAn.Services.Implementations
                     ThanhCong = false,
                     ThongBao = "Dự án hiện không trễ, không cần xác nhận nguyên nhân.",
                     Loi = ["LaDuAnTre=0 nên hệ thống không cho xác nhận nguyên nhân trễ."]
+                };
+            }
+
+            var coKetQuaChinhThucHopLe = await _context.AiKetQua
+                .AnyAsync(x => x.MaDuAn == maDuAn
+                               && x.MaData == datasetMoiNhat.MaData
+                               && x.MaDMNguyenNhan == maDmNguyenNhanInt,
+                    cancellationToken);
+            if (!coKetQuaChinhThucHopLe)
+            {
+                return new AiOperationResultViewModel<bool>
+                {
+                    ThanhCong = false,
+                    ThongBao = "Chưa có kết quả phân tích chính thức hợp lệ.",
+                    Loi = []
                 };
             }
 
@@ -1015,7 +1095,6 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             datasetMoiNhat.MaDMNguyenNhan = maDmNguyenNhanInt;
-            datasetMoiNhat.NgayTongHop = DateTime.Now;
             datasetMoiNhat.GhiChuDataset = "Đã đồng bộ nguyên nhân xác nhận từ Manager.";
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -1025,6 +1104,322 @@ namespace QuanLyDuAn.Services.Implementations
                 DuLieu = true,
                 ThongBao = "Đã lưu xác nhận nguyên nhân từ Manager."
             };
+        }
+
+        private async Task<AiDelayAnalysisContext> LayNguCanhPhanTichAsync(int maDuAn, CancellationToken cancellationToken)
+        {
+            var roleFlags = await GetCurrentUserRoleFlagsAsync(cancellationToken);
+            var currentUserId = await GetCurrentUserIdAsync(cancellationToken);
+            var coQuyenPhanTich = HasPermissionClaim(Permissions.AI.PhanTichNguyenNhan);
+            var coQuyenXacNhan = HasPermissionClaim(Permissions.AI.XacNhan);
+
+            var duAn = await _context.DuAn
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    x.MaNguoiDung,
+                    x.TrangThaiDuAn,
+                    x.NgayKetThucDuAn,
+                    x.NgayHoanThanhThucTeDuAn
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (duAn == null)
+            {
+                return new AiDelayAnalysisContext
+                {
+                    MaDuAn = maDuAn,
+                    LyDoKhongThePhanTich = "Không tìm thấy dự án."
+                };
+            }
+
+            var laManagerHienTai = roleFlags.IsManager && !roleFlags.IsAdmin && duAn.MaNguoiDung == currentUserId;
+            var homNay = DateTime.Today;
+            var coNgayKetThuc = duAn.NgayKetThucDuAn.HasValue;
+            var daQuaHan = coNgayKetThuc && homNay > duAn.NgayKetThucDuAn!.Value.Date;
+            var daHoanThanh = TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn);
+            var laLuuTru = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru);
+            var hoanThanhTre = (daHoanThanh || laLuuTru)
+                               && duAn.NgayKetThucDuAn.HasValue
+                               && duAn.NgayHoanThanhThucTeDuAn.HasValue
+                               && duAn.NgayHoanThanhThucTeDuAn.Value.Date > duAn.NgayKetThucDuAn.Value.Date;
+            var trangThaiTamThoiHopLe = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.DangThucHien)
+                                        || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh);
+            var tamThoi = !daHoanThanh && !laLuuTru && trangThaiTamThoiHopLe && daQuaHan;
+
+            var context = new AiDelayAnalysisContext
+            {
+                MaDuAn = duAn.MaDuAn,
+                TrangThaiDuAn = duAn.TrangThaiDuAn,
+                NgayKetThucDuAn = duAn.NgayKetThucDuAn,
+                NgayHoanThanhThucTeDuAn = duAn.NgayHoanThanhThucTeDuAn,
+                LaManagerHienTai = laManagerHienTai,
+                CoQuyenPhanTich = coQuyenPhanTich,
+                CoQuyenXacNhan = coQuyenXacNhan,
+                LaPhanTichTamThoi = tamThoi,
+                LaPhanTichChinhThuc = hoanThanhTre,
+                DuAnKhongTre = (daHoanThanh || laLuuTru) && !hoanThanhTre
+            };
+
+            context.LyDoKhongThePhanTich = XacDinhThongBaoKhongThePhanTich(context, coNgayKetThuc, daQuaHan, daHoanThanh, laLuuTru);
+            return context;
+        }
+
+        private static string? XacDinhThongBaoKhongThePhanTich(
+            AiDelayAnalysisContext context,
+            bool coNgayKetThuc,
+            bool daQuaHan,
+            bool daHoanThanh,
+            bool laLuuTru)
+        {
+            if (context.LaPhanTichTamThoi || context.LaPhanTichChinhThuc)
+            {
+                return null;
+            }
+
+            if (!coNgayKetThuc)
+            {
+                return "Chưa đủ dữ liệu phân tích.";
+            }
+
+            if (context.DuAnKhongTre)
+            {
+                return "Dự án không trễ.";
+            }
+
+            if (!daQuaHan && !daHoanThanh && !laLuuTru)
+            {
+                return "Dự án chưa quá hạn.";
+            }
+
+            return "Dự án không trễ.";
+        }
+
+        private static AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>? KiemTraQuyenPhanTich(AiDelayAnalysisContext context)
+        {
+            if (!context.CoQuyenPhanTich)
+            {
+                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
+                {
+                    ThanhCong = false,
+                    ThongBao = "Bạn không có quyền thực hiện.",
+                    Loi = []
+                };
+            }
+
+            if (!context.LaManagerHienTai)
+            {
+                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
+                {
+                    ThanhCong = false,
+                    ThongBao = "Không thuộc phạm vi dự án.",
+                    Loi = []
+                };
+            }
+
+            return null;
+        }
+
+        private async Task<AiDataset?> LayHoacLamMoiDatasetChinhThucAsync(int maDuAn, CancellationToken cancellationToken)
+        {
+            var dataset = await LayDatasetMoiNhatAsync(maDuAn, cancellationToken);
+            var canRefresh = dataset == null;
+            if (dataset != null)
+            {
+                var freshness = await KiemTraCanTongHopLaiDatasetAsync(maDuAn, dataset.NgayTongHop, cancellationToken);
+                canRefresh = freshness.CanTongHopLai;
+            }
+
+            if (canRefresh)
+            {
+                await _aiDatasetService.TongHopDatasetChoDuAnAsync(maDuAn, cancellationToken);
+                dataset = await LayDatasetMoiNhatAsync(maDuAn, cancellationToken);
+            }
+
+            return dataset;
+        }
+
+        private Task<AiDataset?> LayDatasetMoiNhatAsync(int maDuAn, CancellationToken cancellationToken)
+            => _context.AiDataset
+                .Where(x => x.MaDuAn == maDuAn)
+                .OrderByDescending(x => x.NgayTongHop ?? DateTime.MinValue)
+                .ThenByDescending(x => x.MaData)
+                .FirstOrDefaultAsync(cancellationToken);
+
+        private static AiPredictPageViewModel TaoInputTuDataset(int maDuAn, AiDataset dataset)
+        {
+            var input = new AiPredictPageViewModel { MaDuAn = maDuAn, LaDuAnTre = dataset.LaDuAnTre };
+            GanFeatureTuDataset(input, dataset);
+            return input;
+        }
+
+        private static AiPredictPageViewModel TaoInputTuSnapshot(AiProjectFeatureSnapshotViewModel snapshot)
+        {
+            return new AiPredictPageViewModel
+            {
+                MaDuAn = snapshot.MaDuAn,
+                LaDuAnTre = snapshot.LaDuAnTre,
+                SoNhanVienDuAn = snapshot.SoNhanVienDuAn,
+                TongSoCongViec = snapshot.TongSoCongViec,
+                SoCongViecTre = snapshot.SoCongViecTre,
+                TyLeCongViecTre = snapshot.TyLeCongViecTre,
+                ChiPhiDuKien = (double)snapshot.ChiPhiDuKien,
+                ChiPhiThucTe = (double)snapshot.ChiPhiThucTe,
+                ChenhLechChiPhi = (double)snapshot.ChenhLechChiPhi,
+                SoLanThayDoiNhanSu = snapshot.SoLanThayDoiNhanSu,
+                SoLanThayDoiQuanLy = snapshot.SoLanThayDoiQuanLy,
+                SoNgayTreTienDo = snapshot.SoNgayTreTienDo,
+                SoDeXuatCongViecChoDuyet = snapshot.SoDeXuatCongViecChoDuyet,
+                SoDeXuatCongViecBiTuChoi = snapshot.SoDeXuatCongViecBiTuChoi,
+                ThoiGianDuyetCongViecTrungBinh = snapshot.ThoiGianDuyetCongViecTrungBinh,
+                SoDeXuatNganSachChoDuyet = snapshot.SoDeXuatNganSachChoDuyet,
+                SoDeXuatNganSachBiTuChoi = snapshot.SoDeXuatNganSachBiTuChoi,
+                ThoiGianDuyetNganSachTrungBinh = snapshot.ThoiGianDuyetNganSachTrungBinh,
+                SoBaoCaoTienDoChoDuyet = snapshot.SoBaoCaoTienDoChoDuyet,
+                SoBaoCaoTienDoBiTuChoi = snapshot.SoBaoCaoTienDoBiTuChoi,
+                SoBaoCaoTienDoYeuCauBoSung = snapshot.SoBaoCaoTienDoYeuCauBoSung,
+                TyLeBaoCaoTienDoBiTuChoi = snapshot.TyLeBaoCaoTienDoBiTuChoi,
+                SoLanCapNhatTienDo = snapshot.SoLanCapNhatTienDo,
+                SoNgayChamCapNhatTienDo = snapshot.SoNgayChamCapNhatTienDo
+            };
+        }
+
+        private async Task<AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>> GoiFastApiPhanTichAsync(
+            AiPredictPageViewModel input,
+            CancellationToken cancellationToken)
+        {
+            var danhMuc = await LayDanhMucNguyenNhanAsync(cancellationToken);
+            var request = new AiAnalyzeDelayReasonRequestViewModel
+            {
+                MaDuAn = input.MaDuAn,
+                Feature = MapFeature(input),
+                DanhMucNguyenNhan = danhMuc,
+                ReasonConfidenceThreshold = 0.6
+            };
+
+            var result = await _aiApiService.DuDoanDuAnAsync(request, cancellationToken);
+            if (result.ThanhCong && result.DuLieu != null)
+            {
+                result.DuLieu = HauKiemKetQuaNguyenNhan(result.DuLieu, request.Feature, danhMuc);
+            }
+
+            return result;
+        }
+
+        private async Task<List<AiReasonCatalogItemViewModel>> LayDanhMucNguyenNhanAsync(CancellationToken cancellationToken)
+        {
+            var danhMucRows = await _context.DmNguyenNhan
+                .OrderBy(x => x.MaDMNguyenNhan)
+                .Select(x => new
+                {
+                    x.MaDMNguyenNhan,
+                    x.TenNguyenNhan
+                })
+                .ToListAsync(cancellationToken);
+
+            return danhMucRows.Select(x => new AiReasonCatalogItemViewModel
+            {
+                MaDMNguyenNhan = x.MaDMNguyenNhan.ToString(CultureInfo.InvariantCulture),
+                TenNguyenNhan = string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan
+            }).ToList();
+        }
+
+        private Task<bool> LaNguyenNhanDuDoanHopLeAsync(int? maDmNguyenNhan, CancellationToken cancellationToken)
+        {
+            if (!maDmNguyenNhan.HasValue || maDmNguyenNhan.Value <= 0)
+            {
+                return Task.FromResult(false);
+            }
+
+            return _context.DmNguyenNhan.AnyAsync(x => x.MaDMNguyenNhan == maDmNguyenNhan.Value, cancellationToken);
+        }
+
+        private async Task NapKetQuaPhanTichGanNhatChoPanelAsync(
+            AiProjectDelayAnalysisPanelViewModel panel,
+            int maDuAn,
+            CancellationToken cancellationToken)
+        {
+            var duLieuAi = await (
+                from kq in _context.AiKetQua
+                join dm in _context.DmNguyenNhan on kq.MaDMNguyenNhan equals dm.MaDMNguyenNhan into dmJoin
+                from dm in dmJoin.DefaultIfEmpty()
+                join model in _context.AiModel on kq.MaModel equals model.MaModel into modelJoin
+                from model in modelJoin.DefaultIfEmpty()
+                where kq.MaDuAn == maDuAn
+                orderby kq.ThoiGianDuDoanKetQua descending, kq.MaAiKetQua descending
+                select new
+                {
+                    kq.MaDMNguyenNhan,
+                    TenNguyenNhan = dm != null ? dm.TenNguyenNhan : null,
+                    kq.DoTinCayKetQua,
+                    kq.ThoiGianDuDoanKetQua,
+                    kq.ReasonSource,
+                    ModelNguyenNhan = model != null ? model.TenModel : null,
+                    kq.CanhBaoNguyenNhan,
+                    kq.NoiDungPhanTich
+                }).FirstOrDefaultAsync(cancellationToken);
+
+            if (duLieuAi == null)
+            {
+                return;
+            }
+
+            var duLieuNoiDung = ParseStoredNoiDungPhanTich(duLieuAi.NoiDungPhanTich);
+            panel.ThoiGianPhanTich = duLieuAi.ThoiGianDuDoanKetQua;
+            panel.KetQua = new AiAnalyzeDelayReasonResponseViewModel
+            {
+                MaDMNguyenNhanDuDoan = duLieuAi.MaDMNguyenNhan,
+                TenNguyenNhanDuDoan = string.IsNullOrWhiteSpace(duLieuAi.TenNguyenNhan) ? null : duLieuAi.TenNguyenNhan,
+                DoTinCayKetQua = ChuanHoaDoTinCay(duLieuAi.DoTinCayKetQua),
+                MucPhuHop = duLieuNoiDung.MucPhuHop,
+                DanhSachNguyenNhanLienQuan = duLieuNoiDung.DanhSachNguyenNhanLienQuan,
+                ReasonSource = string.IsNullOrWhiteSpace(duLieuAi.ReasonSource) ? "RuleFallback" : duLieuAi.ReasonSource,
+                ModelNguyenNhanUsed = duLieuAi.ModelNguyenNhan,
+                CanhBaoNguyenNhan = duLieuAi.CanhBaoNguyenNhan,
+                NoiDungPhanTich = duLieuNoiDung.NoiDungPhanTich,
+                LaKetQuaChinhThuc = true,
+                ThoiGianPhanTich = duLieuAi.ThoiGianDuDoanKetQua
+            };
+        }
+
+        private async Task NapXacNhanNguyenNhanChoPanelAsync(
+            AiProjectDelayAnalysisPanelViewModel panel,
+            int maDuAn,
+            CancellationToken cancellationToken)
+        {
+            var xacNhan = await (
+                from nn in _context.AiNguyenNhan
+                join dm in _context.DmNguyenNhan on nn.MaDMNguyenNhan equals dm.MaDMNguyenNhan into dmJoin
+                from dm in dmJoin.DefaultIfEmpty()
+                where nn.MaDuAn == maDuAn && nn.IsDeleted != true
+                orderby nn.NgayXacNhan descending, nn.MaAINguyenNhan descending
+                select new
+                {
+                    nn.MaDMNguyenNhan,
+                    TenNguyenNhan = dm != null ? dm.TenNguyenNhan : null,
+                    nn.DoTinCay,
+                    nn.NgayXacNhan
+                }).FirstOrDefaultAsync(cancellationToken);
+
+            if (xacNhan == null)
+            {
+                return;
+            }
+
+            panel.MaDMNguyenNhanDaXacNhan = xacNhan.MaDMNguyenNhan;
+            panel.NguyenNhanDaXacNhan = xacNhan.TenNguyenNhan;
+            panel.DoTinCayDaXacNhan = xacNhan.DoTinCay;
+            panel.ThoiGianXacNhan = xacNhan.NgayXacNhan;
+        }
+
+        private bool HasPermissionClaim(string permission)
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            return user?.Claims
+                .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                .Select(x => x.Value.Trim())
+                .Contains(permission, StringComparer.OrdinalIgnoreCase) == true;
         }
 
         private async Task LuuThongTinModelAsync(AiTrainResponseViewModel trainResult, bool activateAfterTrain, CancellationToken cancellationToken)
@@ -1114,13 +1509,6 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             var maDmNguyenNhan = phanTich.MaDMNguyenNhanDuDoan ?? 0;
-            if (maDmNguyenNhan <= 0)
-            {
-                maDmNguyenNhan = await _context.DmNguyenNhan
-                    .OrderBy(x => x.MaDMNguyenNhan)
-                    .Select(x => x.MaDMNguyenNhan)
-                    .FirstOrDefaultAsync(cancellationToken);
-            }
             if (maDmNguyenNhan <= 0)
             {
                 return;

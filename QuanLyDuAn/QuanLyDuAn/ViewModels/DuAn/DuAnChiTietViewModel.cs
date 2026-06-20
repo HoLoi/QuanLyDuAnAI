@@ -1,5 +1,7 @@
 namespace QuanLyDuAn.ViewModels.DuAn
 {
+    using QuanLyDuAn.ViewModels.Ai;
+
     public class DuAnChiTietViewModel
     {
         public int MaDuAn { get; set; }
@@ -42,6 +44,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public List<DuAnRecentFileViewModel> TepGanDay { get; set; } = new();
         public List<DuAnMemberPreviewViewModel> ThanhVienNoiBat { get; set; } = new();
         public List<DuAnActivityPreviewViewModel> HoatDongGanDay { get; set; } = new();
+        public AiProjectDelayAnalysisPanelViewModel? PhanTichNguyenNhanTre { get; set; }
 
         public string? TuKhoa { get; set; }
         public int? LocMaLoaiDuAn { get; set; }

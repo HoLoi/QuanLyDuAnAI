@@ -157,7 +157,14 @@ namespace QuanLyDuAn.Controllers
                 return View(vm);
             }
 
-            TempData["Success"] = "Đã phân tích nguyên nhân trễ và lưu kết quả AI_KET_QUA.";
+            if (result.DuLieu?.LaKetQuaTamThoi == true)
+            {
+                vm.KetQuaPhanTich = result.DuLieu;
+                TempData["Success"] = "Đã phân tích.";
+                return View(vm);
+            }
+
+            TempData["Success"] = "Đã phân tích.";
             if (result.Loi.Count > 0)
             {
                 TempData["Warning"] = string.Join(" ", result.Loi);

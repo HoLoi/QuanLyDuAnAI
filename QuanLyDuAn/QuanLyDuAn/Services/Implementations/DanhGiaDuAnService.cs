@@ -540,100 +540,12 @@ namespace QuanLyDuAn.Services.Implementations
 
         public async Task<DanhGiaDuAnAiInsightViewModel> PhanTichAiDuAnAsync(int maDuAn, CancellationToken cancellationToken = default)
         {
-            KiemTraQuyenTheoClaim(Permissions.DanhGiaDuAn.DanhGia, Permissions.DanhGiaDuAn.Sua);
-
             if (maDuAn <= 0)
             {
                 throw new Exception("Dự án không hợp lệ.");
             }
 
-            var currentUserId = await GetCurrentUserIdAsync();
-            var roleFlags = await GetCurrentUserRoleFlagsAsync();
-            KiemTraKhongChoAdminTacNghiep(roleFlags);
-
-            if (!roleFlags.IsManager)
-            {
-                throw new Exception("Chỉ Manager mới được phân tích AI cho dự án.");
-            }
-
-            var duAn = await _context.DuAn
-                .FirstOrDefaultAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true, cancellationToken);
-            if (duAn == null)
-            {
-                throw new Exception("Không tìm thấy dự án.");
-            }
-
-            var coDuAnTheoScope = duAn.MaNguoiDung == currentUserId
-                                  || await _context.NhanVienDuAn.AnyAsync(x =>
-                                      x.MaDuAn == maDuAn && x.MaNguoiDung == currentUserId, cancellationToken);
-            if (!coDuAnTheoScope)
-            {
-                throw new Exception("Bạn không có quyền phân tích AI cho dự án này.");
-            }
-
-            var thongKeHienTai = await XayDungThongKeDuAnAsync(maDuAn, cancellationToken);
-            var trangThaiThucTe = XacDinhTrangThaiThucTeTienDo(thongKeHienTai);
-            if (trangThaiThucTe == TrangThaiThucTeTienDo.HoanThanhDungHan)
-            {
-                thongKeHienTai.CoDuLieuAi = false;
-                thongKeHienTai.DuAnBiTreTheoAi = false;
-                thongKeHienTai.TenNguyenNhanAiDuDoan = NguyenNhanKhongTre;
-                thongKeHienTai.DoTinCayAi = null;
-                thongKeHienTai.ThoiGianDuDoanAi = null;
-                thongKeHienTai.TrangThaiDuLieuAi = ThongBaoDuAnDungHanKhongCanPhanTich;
-                thongKeHienTai.CoThePhanTichAi = false;
-                thongKeHienTai.CanPhanTichAi = false;
-                thongKeHienTai.TuDongPhanTichAi = false;
-                thongKeHienTai.LyDoCanPhanTichAi = ThongBaoDuAnDungHanKhongCanPhanTich;
-                return BuildAiInsightViewModelAsync(thongKeHienTai);
-            }
-
-            var dataset = await _context.AiDataset
-                .Where(x => x.MaDuAn == maDuAn)
-                .OrderByDescending(x => x.MaData)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (dataset == null)
-            {
-                await _aiDatasetService.TongHopDatasetChoDuAnAsync(maDuAn, cancellationToken);
-                dataset = await _context.AiDataset
-                    .Where(x => x.MaDuAn == maDuAn)
-                    .OrderByDescending(x => x.MaData)
-                    .FirstOrDefaultAsync(cancellationToken);
-            }
-
-            if (dataset == null)
-            {
-                throw new Exception("Chưa có dữ liệu AI_DATASET cho dự án này.");
-            }
-
-            if (dataset.LaDuAnTre != true)
-            {
-                var thongKeKhongTre = await XayDungThongKeDuAnAsync(maDuAn, cancellationToken);
-                thongKeKhongTre.CoThePhanTichAi = false;
-                thongKeKhongTre.CanPhanTichAi = false;
-                thongKeKhongTre.TuDongPhanTichAi = false;
-                thongKeKhongTre.LyDoCanPhanTichAi = "Dự án hiện chưa được xác định là trễ, không cần phân tích nguyên nhân trễ.";
-                thongKeKhongTre.CanhBaoDuLieuAi = "Dự án hiện chưa được xác định là trễ, không cần phân tích nguyên nhân trễ.";
-                return BuildAiInsightViewModelAsync(thongKeKhongTre);
-            }
-
-            var request = new AiPredictPageViewModel
-            {
-                MaDuAn = maDuAn,
-                SoNhanVienDuAn = dataset.SoNhanVienDuAn ?? 0,
-                TongSoCongViec = dataset.TongSoCongViec ?? 0,
-                SoCongViecTre = dataset.SoCongViecTre ?? 0,
-                TyLeCongViecTre = dataset.TyLeCongViecTre ?? 0,
-                ChiPhiDuKien = (double)(dataset.ChiPhiDuKien ?? 0m),
-                ChiPhiThucTe = (double)(dataset.ChiPhiThucTe ?? 0m),
-                ChenhLechChiPhi = (double)(dataset.ChenhLechChiPhi ?? 0m),
-                SoLanThayDoiNhanSu = dataset.SoLanThayDoiNhanSu ?? 0,
-                SoLanThayDoiQuanLy = dataset.SoLanThayDoiQuanLy ?? 0,
-                SoNgayTreTienDo = dataset.SoNgayTreTienDo ?? 0
-            };
-
-            var predictResult = await _aiService.DuDoanDuAnAsync(request, cancellationToken);
+            var predictResult = await _aiService.PhanTichNguyenNhanDuAnAsync(maDuAn, cancellationToken);
             if (!predictResult.ThanhCong)
             {
                 var chiTiet = predictResult.Loi.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
@@ -652,6 +564,17 @@ namespace QuanLyDuAn.Services.Implementations
             var thongKe = await XayDungThongKeDuAnAsync(maDuAn, cancellationToken);
             if (duLieuPhanTich != null)
             {
+                thongKe.CoDuLieuAi = true;
+                thongKe.DuAnBiTreTheoAi = true;
+                thongKe.MaDmNguyenNhanAiDuDoan = duLieuPhanTich.MaDMNguyenNhanDuDoan;
+                thongKe.TenNguyenNhanAiDuDoan = duLieuPhanTich.TenNguyenNhanDuDoan;
+                thongKe.DoTinCayAi = duLieuPhanTich.DoTinCayKetQua;
+                thongKe.ThoiGianDuDoanAi = duLieuPhanTich.ThoiGianPhanTich ?? DateTime.Now;
+                thongKe.NguonNguyenNhanAi = duLieuPhanTich.ReasonSource == "NguyenNhanModel" ? "Mô hình" : "Quy tắc";
+                thongKe.TenModelNguyenNhanAi = string.IsNullOrWhiteSpace(duLieuPhanTich.ModelNguyenNhanUsed)
+                    ? "Quy tắc"
+                    : duLieuPhanTich.ModelNguyenNhanUsed;
+                thongKe.TrangThaiDuLieuAi = "Đã phân tích.";
                 thongKe.MucPhuHopAi = string.IsNullOrWhiteSpace(duLieuPhanTich.MucPhuHop)
                     ? XacDinhMucPhuHopTuDoTinCay(thongKe.DoTinCayAi)
                     : duLieuPhanTich.MucPhuHop.Trim();
@@ -677,71 +600,21 @@ namespace QuanLyDuAn.Services.Implementations
 
         public async Task XacNhanNguyenNhanAsync(int maDuAn, int maDmNguyenNhan, double? doTinCay)
         {
-            KiemTraQuyenTheoClaim(Permissions.AI.XacNhan, Permissions.DanhGiaDuAn.DanhGia);
-
             if (maDuAn <= 0)
             {
                 throw new Exception("Dự án không hợp lệ.");
             }
 
-            var currentUserId = await GetCurrentUserIdAsync();
-            var roleFlags = await GetCurrentUserRoleFlagsAsync();
-            KiemTraKhongChoAdminTacNghiep(roleFlags);
-
-            var duAn = await _context.DuAn
-                .FirstOrDefaultAsync(x => x.MaDuAn == maDuAn && x.IsDeleted != true);
-            if (duAn == null)
+            var result = await _aiService.XacNhanNguyenNhanAsync(
+                maDuAn,
+                maDmNguyenNhan.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                doTinCay);
+            if (!result.ThanhCong)
             {
-                throw new Exception("Không tìm thấy dự án.");
+                throw new Exception(string.IsNullOrWhiteSpace(result.ThongBao)
+                    ? "Bạn không có quyền thực hiện."
+                    : result.ThongBao);
             }
-
-            var coDuAnTheoScope = duAn.MaNguoiDung == currentUserId
-                                  || await _context.NhanVienDuAn.AnyAsync(x =>
-                                      x.MaDuAn == maDuAn && x.MaNguoiDung == currentUserId);
-            var coQuyenXacNhanTheoRoleHoacClaim = roleFlags.IsManager || CoQuyenTheoClaim(Permissions.AI.XacNhan);
-            if (!coDuAnTheoScope || !coQuyenXacNhanTheoRoleHoacClaim)
-            {
-                throw new Exception("Bạn không có quyền xác nhận nguyên nhân cho dự án này.");
-            }
-
-            var tonTaiDanhMuc = await _context.DmNguyenNhan.AnyAsync(x => x.MaDMNguyenNhan == maDmNguyenNhan);
-            if (!tonTaiDanhMuc)
-            {
-                throw new Exception("Nguyên nhân xác nhận không hợp lệ.");
-            }
-
-            var thongKeAi = await XayDungThongKeDuAnAsync(maDuAn);
-            if (thongKeAi.DuAnBiTreTheoAi != true)
-            {
-                throw new Exception("Dự án không trễ nên không cần xác nhận nguyên nhân.");
-            }
-
-            var duLieuXacNhan = await _context.AiNguyenNhan
-                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
-                .OrderByDescending(x => x.MaAINguyenNhan)
-                .FirstOrDefaultAsync();
-
-            if (duLieuXacNhan == null)
-            {
-                duLieuXacNhan = new AiNguyenNhan
-                {
-                    MaDuAn = maDuAn,
-                    MaDMNguyenNhan = maDmNguyenNhan,
-                    DoTinCay = doTinCay,
-                    IsDeleted = false
-                };
-                _context.AiNguyenNhan.Add(duLieuXacNhan);
-            }
-            else
-            {
-                duLieuXacNhan.MaDMNguyenNhan = maDmNguyenNhan;
-                duLieuXacNhan.DoTinCay = doTinCay;
-                duLieuXacNhan.IsDeleted = false;
-                duLieuXacNhan.DeletedAt = null;
-                duLieuXacNhan.DeletedBy = null;
-            }
-
-            await _context.SaveChangesAsync();
         }
 
         public async Task LuuDanhGiaAsync(DanhGiaDuAnFormViewModel form)

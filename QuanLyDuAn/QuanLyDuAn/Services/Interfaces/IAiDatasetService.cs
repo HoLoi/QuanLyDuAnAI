@@ -11,6 +11,7 @@ namespace QuanLyDuAn.Services.Interfaces
 
         Task<AiDatasetTongHopResultViewModel> TongHopDatasetAsync(CancellationToken cancellationToken = default);
         Task<AiDatasetTongHopResultViewModel> TongHopDatasetChoDuAnAsync(int maDuAn, CancellationToken cancellationToken = default);
+        Task<AiProjectFeatureSnapshotViewModel?> BuildFeatureSnapshotAsync(int maDuAn, CancellationToken cancellationToken = default);
         Task<AiDatasetQualitySummaryViewModel> KiemTraChatLuongDatasetAsync(CancellationToken cancellationToken = default);
         Task<List<AiDatasetRowViewModel>> LayDatasetHopLeDeTrainAsync(CancellationToken cancellationToken = default);
         Task<AiReasonTrainingQualitySummaryViewModel> KiemTraChatLuongDatasetNguyenNhanAsync(CancellationToken cancellationToken = default);

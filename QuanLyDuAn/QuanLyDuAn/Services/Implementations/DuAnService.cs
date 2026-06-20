@@ -347,7 +347,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             var congViecTreHan = await queryCongViec
                 .CountAsync(x => x.cv.NgayKetThucCVDuKien.HasValue
-                                 && x.cv.NgayKetThucCVDuKien.Value < DateTime.Now
+                                 && x.cv.NgayKetThucCVDuKien.Value.Date < DateTime.Today
                                  && !trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty));
 
             decimal? tiLeHoanThanh = null;
@@ -1254,6 +1254,26 @@ namespace QuanLyDuAn.Services.Implementations
             project.TrangThaiDuAn = TrangThai.DangThucHien;
             project.NgayHoanThanhThucTeDuAn = null;
             project.GhiChuDuAn = lyDo.Trim();
+
+            var now = DateTime.Now;
+            var xacNhanNguyenNhanCu = await _context.AiNguyenNhan
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
+                .ToListAsync();
+            foreach (var item in xacNhanNguyenNhanCu)
+            {
+                item.IsDeleted = true;
+                item.DeletedAt = now;
+                item.DeletedBy = currentUserId;
+            }
+
+            var datasets = await _context.AiDataset
+                .Where(x => x.MaDuAn == maDuAn && x.MaDMNguyenNhan.HasValue)
+                .ToListAsync();
+            foreach (var dataset in datasets)
+            {
+                dataset.MaDMNguyenNhan = null;
+                dataset.GhiChuDataset = "Đã bỏ nhãn xác nhận do dự án được mở lại.";
+            }
 
             _context.NhatKyQuanLyDuAn.Add(new NhatKyQuanLyDuAn
             {

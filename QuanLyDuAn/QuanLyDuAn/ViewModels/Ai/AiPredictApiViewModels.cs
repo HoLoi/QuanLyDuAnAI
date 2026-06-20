@@ -65,6 +65,9 @@ namespace QuanLyDuAn.ViewModels.Ai
         public string? ModelNguyenNhanUsed { get; set; }
         public string? CanhBaoNguyenNhan { get; set; }
         public string? NoiDungPhanTich { get; set; }
+        public bool LaKetQuaTamThoi { get; set; }
+        public bool LaKetQuaChinhThuc { get; set; }
+        public DateTime? ThoiGianPhanTich { get; set; }
     }
 
     public class AiRelatedReasonItemViewModel

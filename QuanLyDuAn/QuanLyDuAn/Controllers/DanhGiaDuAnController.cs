@@ -156,7 +156,7 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgayDanhGia,
             DateTime? denNgayDanhGia)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.AI.XacNhan, Permissions.DanhGiaDuAn.DanhGia))
+            if (!await _permission.HasPermissionAsync(User, Permissions.AI.XacNhan))
             {
                 return Forbid();
             }
@@ -178,7 +178,7 @@ namespace QuanLyDuAn.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PhanTichAiDuAn(int maDuAn, CancellationToken cancellationToken)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.DanhGiaDuAn.DanhGia, Permissions.DanhGiaDuAn.Sua))
+            if (!await _permission.HasPermissionAsync(User, Permissions.AI.PhanTichNguyenNhan))
             {
                 return Forbid();
             }

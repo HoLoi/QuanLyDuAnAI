@@ -169,6 +169,93 @@
                 </div>
             </div>
 
+            @{
+                var aiPanel = Model.PhanTichNguyenNhanTre;
+                var aiResult = aiPanel?.KetQua;
+                var aiSourceText = aiResult?.ReasonSource == "NguyenNhanModel" ? "Mô hình" : "Quy tắc";
+                var aiTrustText = !string.IsNullOrWhiteSpace(aiResult?.MucPhuHop)
+                    ? aiResult!.MucPhuHop
+                    : "Chưa có";
+                var aiAnalyzeButtonText = aiResult == null ? "Phân tích" : "Phân tích lại";
+            }
+            <div class="section-card app-section-card reveal mt-4 reveal-delay-180" id="phan-tich-nguyen-nhan-tre">
+                <div class="ai-delay-head">
+                    <div>
+                        <div class="section-title mb-1">Phân tích nguyên nhân trễ</div>
+                        <div class="ai-delay-badges">
+                            <span class="badge ai-delay-badge">@((aiPanel?.BadgeTinhTrang) ?? "Chưa áp dụng")</span>
+                            @if (!string.IsNullOrWhiteSpace(aiPanel?.BadgeLoaiPhanTich))
+                            {
+                                <span class="badge ai-delay-badge ai-delay-badge-soft">@aiPanel.BadgeLoaiPhanTich</span>
+                            }
+                            @if (aiResult != null)
+                            {
+                                <span class="badge ai-delay-badge ai-delay-badge-soft">@(aiResult.ReasonSource == "NguyenNhanModel" ? "Dùng mô hình" : "Dùng quy tắc")</span>
+                                <span class="badge ai-delay-badge @(aiPanel?.MaDMNguyenNhanDaXacNhan.HasValue == true ? "ai-delay-badge-ok" : "ai-delay-badge-soft")">
+                                    @(aiPanel?.MaDMNguyenNhanDaXacNhan.HasValue == true ? "Đã xác nhận" : "Chưa xác nhận")
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    @if (aiPanel?.CoThePhanTich == true)
+                    {
+                        <form asp-action="PhanTichNguyenNhanTre" method="post" class="m-0">
+                            <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                            <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                            <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                            <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                            <input type="hidden" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
+                            <button type="submit" class="btn-action btn-confirm">@aiAnalyzeButtonText</button>
+                        </form>
+                    }
+                </div>
+
+                @if (aiResult != null)
+                {
+                    <div class="ai-delay-result">
+                        <div class="ai-delay-item">
+                            <span>Nguyên nhân gợi ý</span>
+                            <strong>@(string.IsNullOrWhiteSpace(aiResult.TenNguyenNhanDuDoan) ? "Chưa xác định" : aiResult.TenNguyenNhanDuDoan)</strong>
+                        </div>
+                        <div class="ai-delay-item">
+                            <span>Độ tin cậy</span>
+                            <strong>@aiTrustText</strong>
+                        </div>
+                        <div class="ai-delay-item">
+                            <span>Nguồn</span>
+                            <strong>@aiSourceText</strong>
+                        </div>
+                        <div class="ai-delay-item">
+                            <span>Thời gian</span>
+                            <strong>@((aiPanel?.ThoiGianPhanTich ?? aiResult.ThoiGianPhanTich)?.ToString("dd/MM/yyyy HH:mm") ?? "-")</strong>
+                        </div>
+                    </div>
+                    @if (aiPanel?.CoTheXacNhan == true && aiResult.MaDMNguyenNhanDuDoan.HasValue)
+                    {
+                        <form asp-action="XacNhanNguyenNhanTre" method="post" class="ai-delay-confirm" onsubmit="return confirm('Xác nhận nguyên nhân này?');">
+                            <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
+                            <input type="hidden" name="maDmNguyenNhan" value="@aiResult.MaDMNguyenNhanDuDoan.Value" />
+                            <input type="hidden" name="doTinCay" value="@aiResult.DoTinCayKetQua.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                            <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
+                            <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
+                            <input type="hidden" name="locTrangThaiDuAn" value="@Model.LocTrangThaiDuAn" />
+                            <input type="hidden" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
+                            <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
+                            <button type="submit" class="btn-action btn-subtle">Xác nhận nguyên nhân</button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state empty-state-panel">
+                        <div class="empty-state-text">@(string.IsNullOrWhiteSpace(aiPanel?.ThongBao) ? "Chưa có kết quả phân tích." : aiPanel.ThongBao)</div>
+                    </div>
+                }
+            </div>
+
             <div class="section-card app-section-card reveal mt-4 reveal-delay-200">
                 <div class="section-title">Tổng quan hoạt động</div>
                 <div class="preview-grid">

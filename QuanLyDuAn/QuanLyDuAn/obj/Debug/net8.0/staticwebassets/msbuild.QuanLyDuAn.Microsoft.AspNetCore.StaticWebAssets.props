@@ -570,8 +570,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>o0scs5xwgj</Fingerprint>
-      <Integrity>2PiQhGGA/twNOx0g5YD1/iRxPjSGzVSychy0+W8k6co=</Integrity>
+      <Fingerprint>xsd8d137m4</Fingerprint>
+      <Integrity>H0cbtwbIlRHQkJRyoy5q2EYAsCCp0JaRWcBH6nBsHLM=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuAn\details.css'))</OriginalItemSpec>

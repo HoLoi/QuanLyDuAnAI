@@ -137,6 +137,17 @@ namespace QuanLyDuAn.Services.Implementations
             return await TongHopNoiBoAsync([maDuAn], cancellationToken);
         }
 
+        public async Task<AiProjectFeatureSnapshotViewModel?> BuildFeatureSnapshotAsync(int maDuAn, CancellationToken cancellationToken = default)
+        {
+            if (maDuAn <= 0)
+            {
+                return null;
+            }
+
+            var snapshots = await BuildFeatureSnapshotsAsync([maDuAn], chiNhanTrangThaiChinhThuc: false, cancellationToken);
+            return snapshots.FirstOrDefault();
+        }
+
         public async Task<AiDatasetQualitySummaryViewModel> KiemTraChatLuongDatasetAsync(CancellationToken cancellationToken = default)
         {
             var rows = await _context.AiDataset
@@ -354,6 +365,57 @@ namespace QuanLyDuAn.Services.Implementations
                 return result;
             }
 
+            var snapshots = await BuildFeatureSnapshotsAsync(projectIds, chiNhanTrangThaiChinhThuc: true, cancellationToken);
+            var snapshotMap = snapshots.ToDictionary(x => x.MaDuAn);
+            var duAnSet = projectIds.ToHashSet();
+            var datasetRows = await _context.AiDataset
+                .Where(x => duAnSet.Contains(x.MaDuAn))
+                .OrderByDescending(x => x.NgayTongHop ?? DateTime.MinValue)
+                .ThenByDescending(x => x.MaData)
+                .ToListAsync(cancellationToken);
+            var datasetMap = datasetRows.GroupBy(x => x.MaDuAn).ToDictionary(x => x.Key, x => x.First());
+
+            foreach (var maDuAn in projectIds)
+            {
+                if (!snapshotMap.TryGetValue(maDuAn, out var snapshot))
+                {
+                    result.SoDuAnBoQua++;
+                    continue;
+                }
+
+                if (datasetMap.TryGetValue(maDuAn, out var existing))
+                {
+                    GanSnapshotVaoDataset(existing, snapshot);
+                    result.SoDuAnCapNhat++;
+                    continue;
+                }
+
+                var created = new AiDataset();
+                GanSnapshotVaoDataset(created, snapshot);
+                _context.AiDataset.Add(created);
+                result.SoDuAnTaoMoi++;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            result.ThongBao.Add("Đã tổng hợp dữ liệu nghiệp vụ vào AI_DATASET.");
+            _logger.LogInformation(
+                "Tong hop AI_DATASET xong. Xu ly {Tong}, tao moi {TaoMoi}, cap nhat {CapNhat}.",
+                result.TongSoDuAnXuLy,
+                result.SoDuAnTaoMoi,
+                result.SoDuAnCapNhat);
+            return result;
+        }
+
+        private async Task<List<AiProjectFeatureSnapshotViewModel>> BuildFeatureSnapshotsAsync(
+            List<int> projectIds,
+            bool chiNhanTrangThaiChinhThuc,
+            CancellationToken cancellationToken)
+        {
+            if (projectIds.Count == 0)
+            {
+                return [];
+            }
+
             var approvedStatuses = TrangThai.GetCommonStatusVariants(TrangThai.DaDuyet);
             var choDuyetStatuses = TrangThai.GetCommonStatusVariants(TrangThai.ChoDuyet);
             var tuChoiStatuses = TrangThai.GetCommonStatusVariants(TrangThai.TuChoi);
@@ -417,9 +479,7 @@ namespace QuanLyDuAn.Services.Implementations
                 .ToDictionary(x => x.Key, x => x.Count());
 
             var yeuCauDoiQuanLyTheoDuAn = await _context.YeuCauDoiQuanLy
-                .Where(x =>
-                    x.IsDeleted != true
-                    && duAnSet.Contains(x.MaDuAn))
+                .Where(x => x.IsDeleted != true && duAnSet.Contains(x.MaDuAn))
                 .Select(x => new
                 {
                     x.MaDuAn,
@@ -491,24 +551,16 @@ namespace QuanLyDuAn.Services.Implementations
                 .Select(g => g.OrderByDescending(x => x.NgayXacNhan ?? DateTime.MinValue).ThenByDescending(x => x.MaAINguyenNhan).First())
                 .ToDictionaryAsync(x => x.MaDuAn, x => x.MaDMNguyenNhan, cancellationToken);
 
-            var datasetRows = await _context.AiDataset
-                .Where(x => duAnSet.Contains(x.MaDuAn))
-                .OrderByDescending(x => x.NgayTongHop ?? DateTime.MinValue)
-                .ThenByDescending(x => x.MaData)
-                .ToListAsync(cancellationToken);
-            var datasetMap = datasetRows.GroupBy(x => x.MaDuAn).ToDictionary(x => x.Key, x => x.First());
-
+            var snapshots = new List<AiProjectFeatureSnapshotViewModel>();
             foreach (var maDuAn in projectIds)
             {
                 if (!duAnSnapshots.TryGetValue(maDuAn, out var duAnSnapshot))
                 {
-                    result.SoDuAnBoQua++;
                     continue;
                 }
 
-                if (!LaTrangThaiDuAnChoPhepTongHopAi(duAnSnapshot.TrangThaiDuAn))
+                if (chiNhanTrangThaiChinhThuc && !LaTrangThaiDuAnChoPhepTongHopAi(duAnSnapshot.TrangThaiDuAn))
                 {
-                    result.SoDuAnBoQua++;
                     continue;
                 }
 
@@ -552,25 +604,17 @@ namespace QuanLyDuAn.Services.Implementations
                         .DefaultIfEmpty(0)
                         .Max();
 
-                var soNhanVienDuAn = soNhanVienTheoDuAn.GetValueOrDefault(maDuAn, 0);
-                var chiPhiDuKien = nganSachDuKienTheoDuAn.GetValueOrDefault(maDuAn, 0m);
-                var chiPhiThucTe = chiPhiTheoDuAn.GetValueOrDefault(maDuAn, 0m);
-                var chenhLechChiPhi = chiPhiThucTe - chiPhiDuKien;
-                var soLanThayDoiNhanSu = soLanThayDoiNhanSuTheoDuAn.GetValueOrDefault(maDuAn, 0);
-                var soLanThayDoiQuanLy = soLanDoiQuanLyTheoDuAn.GetValueOrDefault(maDuAn, 0);
-
                 deXuatCongViecMap.TryGetValue(maDuAn, out var deXuatCongViecCuaDuAn);
                 deXuatCongViecCuaDuAn ??= [];
                 var soDeXuatCongViecChoDuyet = deXuatCongViecCuaDuAn.Count(x =>
                     choDuyetStatuses.Contains(x.TrangThaiCongViecDeXuat ?? string.Empty));
                 var soDeXuatCongViecBiTuChoi = deXuatCongViecCuaDuAn.Count(x =>
                     tuChoiStatuses.Contains(x.TrangThaiCongViecDeXuat ?? string.Empty));
-                var thoiGianDuyetCongViecTrungBinh = deXuatCongViecCuaDuAn
+                var thoiGianDuyetCongViecTrungBinh = Math.Round(deXuatCongViecCuaDuAn
                     .Where(x => x.NgayDeXuatCongViec.HasValue && x.NgayDuyetDeXuatCongViec.HasValue)
                     .Select(x => Math.Max(0d, (x.NgayDuyetDeXuatCongViec!.Value - x.NgayDeXuatCongViec!.Value).TotalDays))
                     .DefaultIfEmpty(0d)
-                    .Average();
-                thoiGianDuyetCongViecTrungBinh = Math.Round(thoiGianDuyetCongViecTrungBinh, 2);
+                    .Average(), 2);
 
                 deXuatNganSachMap.TryGetValue(maDuAn, out var deXuatNganSachCuaDuAn);
                 deXuatNganSachCuaDuAn ??= [];
@@ -578,12 +622,11 @@ namespace QuanLyDuAn.Services.Implementations
                     choDuyetStatuses.Contains(x.TrangThaiDeXuat ?? string.Empty));
                 var soDeXuatNganSachBiTuChoi = deXuatNganSachCuaDuAn.Count(x =>
                     tuChoiStatuses.Contains(x.TrangThaiDeXuat ?? string.Empty));
-                var thoiGianDuyetNganSachTrungBinh = deXuatNganSachCuaDuAn
+                var thoiGianDuyetNganSachTrungBinh = Math.Round(deXuatNganSachCuaDuAn
                     .Where(x => x.NgayDeXuat.HasValue && x.NgayDuyet.HasValue)
                     .Select(x => Math.Max(0d, (x.NgayDuyet!.Value - x.NgayDeXuat!.Value).TotalDays))
                     .DefaultIfEmpty(0d)
-                    .Average();
-                thoiGianDuyetNganSachTrungBinh = Math.Round(thoiGianDuyetNganSachTrungBinh, 2);
+                    .Average(), 2);
 
                 baoCaoTienDoMap.TryGetValue(maDuAn, out var baoCaoTienDoCuaDuAn);
                 baoCaoTienDoCuaDuAn ??= [];
@@ -619,50 +662,27 @@ namespace QuanLyDuAn.Services.Implementations
                     ? maLyDoXacNhan
                     : (int?)null;
 
-                if (datasetMap.TryGetValue(maDuAn, out var existing))
-                {
-                    existing.SoNhanVienDuAn = soNhanVienDuAn;
-                    existing.TongSoCongViec = tongSoCongViec;
-                    existing.SoCongViecTre = soCongViecTre;
-                    existing.TyLeCongViecTre = tyLeCongViecTre;
-                    existing.ChiPhiDuKien = chiPhiDuKien;
-                    existing.ChiPhiThucTe = chiPhiThucTe;
-                    existing.ChenhLechChiPhi = chenhLechChiPhi;
-                    existing.SoLanThayDoiNhanSu = soLanThayDoiNhanSu;
-                    existing.SoLanThayDoiQuanLy = soLanThayDoiQuanLy;
-                    existing.SoNgayTreTienDo = soNgayTreTienDo;
-                    existing.SoDeXuatCongViecChoDuyet = soDeXuatCongViecChoDuyet;
-                    existing.SoDeXuatCongViecBiTuChoi = soDeXuatCongViecBiTuChoi;
-                    existing.ThoiGianDuyetCongViecTrungBinh = thoiGianDuyetCongViecTrungBinh;
-                    existing.SoDeXuatNganSachChoDuyet = soDeXuatNganSachChoDuyet;
-                    existing.SoDeXuatNganSachBiTuChoi = soDeXuatNganSachBiTuChoi;
-                    existing.ThoiGianDuyetNganSachTrungBinh = thoiGianDuyetNganSachTrungBinh;
-                    existing.SoBaoCaoTienDoChoDuyet = soBaoCaoTienDoChoDuyet;
-                    existing.SoBaoCaoTienDoBiTuChoi = soBaoCaoTienDoBiTuChoi;
-                    existing.SoBaoCaoTienDoYeuCauBoSung = soBaoCaoTienDoYeuCauBoSung;
-                    existing.TyLeBaoCaoTienDoBiTuChoi = tyLeBaoCaoTienDoBiTuChoi;
-                    existing.SoLanCapNhatTienDo = soLanCapNhatTienDo;
-                    existing.SoNgayChamCapNhatTienDo = soNgayChamCapNhatTienDo;
-                    existing.LaDuAnTre = laDuAnTre;
-                    existing.MaDMNguyenNhan = maDmNguyenNhan;
-                    existing.NgayTongHop = thoiDiemTongHop;
-                    existing.GhiChuDataset = "Tổng hợp tự động từ dữ liệu nghiệp vụ.";
-                    result.SoDuAnCapNhat++;
-                    continue;
-                }
-
-                _context.AiDataset.Add(new AiDataset
+                var chiPhiDuKien = nganSachDuKienTheoDuAn.GetValueOrDefault(maDuAn, 0m);
+                var chiPhiThucTe = chiPhiTheoDuAn.GetValueOrDefault(maDuAn, 0m);
+                snapshots.Add(new AiProjectFeatureSnapshotViewModel
                 {
                     MaDuAn = maDuAn,
-                    SoNhanVienDuAn = soNhanVienDuAn,
+                    TrangThaiDuAn = duAnSnapshot.TrangThaiDuAn,
+                    PhanTramHoanThanh = duAnSnapshot.PhanTramHoanThanh,
+                    NgayKetThucDuAn = duAnSnapshot.NgayKetThucDuAn,
+                    NgayHoanThanhThucTeDuAn = duAnSnapshot.NgayHoanThanhThucTeDuAn,
+                    ThoiDiemTongHop = thoiDiemTongHop,
+                    LaDuAnTre = laDuAnTre,
+                    MaDMNguyenNhan = maDmNguyenNhan,
+                    SoNhanVienDuAn = soNhanVienTheoDuAn.GetValueOrDefault(maDuAn, 0),
                     TongSoCongViec = tongSoCongViec,
                     SoCongViecTre = soCongViecTre,
                     TyLeCongViecTre = tyLeCongViecTre,
                     ChiPhiDuKien = chiPhiDuKien,
                     ChiPhiThucTe = chiPhiThucTe,
-                    ChenhLechChiPhi = chenhLechChiPhi,
-                    SoLanThayDoiNhanSu = soLanThayDoiNhanSu,
-                    SoLanThayDoiQuanLy = soLanThayDoiQuanLy,
+                    ChenhLechChiPhi = chiPhiThucTe - chiPhiDuKien,
+                    SoLanThayDoiNhanSu = soLanThayDoiNhanSuTheoDuAn.GetValueOrDefault(maDuAn, 0),
+                    SoLanThayDoiQuanLy = soLanDoiQuanLyTheoDuAn.GetValueOrDefault(maDuAn, 0),
                     SoNgayTreTienDo = soNgayTreTienDo,
                     SoDeXuatCongViecChoDuyet = soDeXuatCongViecChoDuyet,
                     SoDeXuatCongViecBiTuChoi = soDeXuatCongViecBiTuChoi,
@@ -675,23 +695,42 @@ namespace QuanLyDuAn.Services.Implementations
                     SoBaoCaoTienDoYeuCauBoSung = soBaoCaoTienDoYeuCauBoSung,
                     TyLeBaoCaoTienDoBiTuChoi = tyLeBaoCaoTienDoBiTuChoi,
                     SoLanCapNhatTienDo = soLanCapNhatTienDo,
-                    SoNgayChamCapNhatTienDo = soNgayChamCapNhatTienDo,
-                    LaDuAnTre = laDuAnTre,
-                    MaDMNguyenNhan = maDmNguyenNhan,
-                    NgayTongHop = thoiDiemTongHop,
-                    GhiChuDataset = "Tổng hợp tự động từ dữ liệu nghiệp vụ."
+                    SoNgayChamCapNhatTienDo = soNgayChamCapNhatTienDo
                 });
-                result.SoDuAnTaoMoi++;
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
-            result.ThongBao.Add("Đã tổng hợp dữ liệu nghiệp vụ vào AI_DATASET.");
-            _logger.LogInformation(
-                "Tong hop AI_DATASET xong. Xu ly {Tong}, tao moi {TaoMoi}, cap nhat {CapNhat}.",
-                result.TongSoDuAnXuLy,
-                result.SoDuAnTaoMoi,
-                result.SoDuAnCapNhat);
-            return result;
+            return snapshots;
+        }
+
+        private static void GanSnapshotVaoDataset(AiDataset dataset, AiProjectFeatureSnapshotViewModel snapshot)
+        {
+            dataset.MaDuAn = snapshot.MaDuAn;
+            dataset.SoNhanVienDuAn = snapshot.SoNhanVienDuAn;
+            dataset.TongSoCongViec = snapshot.TongSoCongViec;
+            dataset.SoCongViecTre = snapshot.SoCongViecTre;
+            dataset.TyLeCongViecTre = snapshot.TyLeCongViecTre;
+            dataset.ChiPhiDuKien = snapshot.ChiPhiDuKien;
+            dataset.ChiPhiThucTe = snapshot.ChiPhiThucTe;
+            dataset.ChenhLechChiPhi = snapshot.ChenhLechChiPhi;
+            dataset.SoLanThayDoiNhanSu = snapshot.SoLanThayDoiNhanSu;
+            dataset.SoLanThayDoiQuanLy = snapshot.SoLanThayDoiQuanLy;
+            dataset.SoNgayTreTienDo = snapshot.SoNgayTreTienDo;
+            dataset.SoDeXuatCongViecChoDuyet = snapshot.SoDeXuatCongViecChoDuyet;
+            dataset.SoDeXuatCongViecBiTuChoi = snapshot.SoDeXuatCongViecBiTuChoi;
+            dataset.ThoiGianDuyetCongViecTrungBinh = snapshot.ThoiGianDuyetCongViecTrungBinh;
+            dataset.SoDeXuatNganSachChoDuyet = snapshot.SoDeXuatNganSachChoDuyet;
+            dataset.SoDeXuatNganSachBiTuChoi = snapshot.SoDeXuatNganSachBiTuChoi;
+            dataset.ThoiGianDuyetNganSachTrungBinh = snapshot.ThoiGianDuyetNganSachTrungBinh;
+            dataset.SoBaoCaoTienDoChoDuyet = snapshot.SoBaoCaoTienDoChoDuyet;
+            dataset.SoBaoCaoTienDoBiTuChoi = snapshot.SoBaoCaoTienDoBiTuChoi;
+            dataset.SoBaoCaoTienDoYeuCauBoSung = snapshot.SoBaoCaoTienDoYeuCauBoSung;
+            dataset.TyLeBaoCaoTienDoBiTuChoi = snapshot.TyLeBaoCaoTienDoBiTuChoi;
+            dataset.SoLanCapNhatTienDo = snapshot.SoLanCapNhatTienDo;
+            dataset.SoNgayChamCapNhatTienDo = snapshot.SoNgayChamCapNhatTienDo;
+            dataset.LaDuAnTre = snapshot.LaDuAnTre;
+            dataset.MaDMNguyenNhan = snapshot.MaDMNguyenNhan;
+            dataset.NgayTongHop = snapshot.ThoiDiemTongHop;
+            dataset.GhiChuDataset = "Tổng hợp tự động từ dữ liệu nghiệp vụ.";
         }
 
         private static string[] LayTrangThaiChoPhepTongHopAi()

@@ -121,7 +121,7 @@
                 </div>
                 <div class="ai-stat-card">
                     <span class="ai-stat-label">Nguồn gợi ý</span>
-                    <strong class="ai-stat-value">@(Model.KetQuaPhanTich.ReasonSource == "NguyenNhanModel" ? "Model nguyên nhân" : "Luật gợi ý")</strong>
+                    <strong class="ai-stat-value">@(Model.KetQuaPhanTich.ReasonSource == "NguyenNhanModel" ? "Mô hình" : "Quy tắc")</strong>
                 </div>
                 <div class="ai-stat-card">
                     <span class="ai-stat-label">Model nguyên nhân</span>
@@ -140,7 +140,7 @@
                 <div class="ai-warning-soft">@Model.KetQuaPhanTich.CanhBaoNguyenNhan</div>
             }
 
-            @if (Model.KetQuaPhanTich.MaDMNguyenNhanDuDoan.HasValue)
+            @if (!Model.KetQuaPhanTich.LaKetQuaTamThoi && Model.KetQuaPhanTich.MaDMNguyenNhanDuDoan.HasValue)
             {
                 <form asp-action="XacNhanNguyenNhan" method="post" class="ai-inline-form">
                     @Html.AntiForgeryToken()
@@ -160,7 +160,7 @@
             <dl class="ai-dl">
                 <div><dt>Độ tin cậy dự đoán cho mẫu hiện tại</dt><dd>@Model.KetQuaTestPhanTich.Confidence.ToString("P0")</dd></div>
                 <div><dt>Nguyên nhân gợi ý</dt><dd>@Model.KetQuaTestPhanTich.SuggestedReason</dd></div>
-                <div><dt>Nguồn nguyên nhân</dt><dd>@(Model.KetQuaTestPhanTich.ReasonSource == "NguyenNhanModel" ? "Model nguyên nhân" : "Luật gợi ý")</dd></div>
+                <div><dt>Nguồn nguyên nhân</dt><dd>@(Model.KetQuaTestPhanTich.ReasonSource == "NguyenNhanModel" ? "Mô hình" : "Quy tắc")</dd></div>
                 <div><dt>Model dùng để thử</dt><dd>@Model.KetQuaTestPhanTich.ModelUsed</dd></div>
                 <div><dt>Độ chính xác kiểm thử của model</dt><dd>@(Model.DoChinhXacKiemThuModelNguyenNhan.HasValue ? Model.DoChinhXacKiemThuModelNguyenNhan.Value.ToString("P2") : "Chưa có dữ liệu")</dd></div>
                 <div><dt>Giải thích</dt><dd>@Model.KetQuaTestPhanTich.Explanation</dd></div>

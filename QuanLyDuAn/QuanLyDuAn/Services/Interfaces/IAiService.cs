@@ -17,6 +17,8 @@ namespace QuanLyDuAn.Services.Interfaces
         Task<AiOperationResultViewModel<AiModelDeleteResultViewModel>> XoaModelAsync(string modelFile, CancellationToken cancellationToken = default);
 
         Task<AiPredictPageViewModel> KhoiTaoTrangPredictAsync(int? maDuAn, CancellationToken cancellationToken = default);
+        Task<AiProjectDelayAnalysisPanelViewModel> LayPhanTichNguyenNhanDuAnAsync(int maDuAn, CancellationToken cancellationToken = default);
+        Task<AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>> PhanTichNguyenNhanDuAnAsync(int maDuAn, CancellationToken cancellationToken = default);
         Task<AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>> DuDoanDuAnAsync(AiPredictPageViewModel input, CancellationToken cancellationToken = default);
         Task<AiOperationResultViewModel<AiTestReasonResponseViewModel>> TestPredictAsync(AiPredictPageViewModel input, string? modelFile, CancellationToken cancellationToken = default);
         Task<AiOperationResultViewModel<bool>> XacNhanNguyenNhanAsync(int maDuAn, string maDmNguyenNhan, double? doTinCay, CancellationToken cancellationToken = default);

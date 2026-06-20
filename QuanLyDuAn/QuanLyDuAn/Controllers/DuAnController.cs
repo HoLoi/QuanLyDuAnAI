@@ -18,19 +18,22 @@ namespace QuanLyDuAn.Controllers
         private readonly IPermissionHelper _permission;
         private readonly IPhanQuyenService _phanQuyenService;
         private readonly IExportFileService _exportFileService;
+        private readonly IAiService _aiService;
 
         public DuAnController(
             IDuAnService service,
             IFileDuAnService fileDuAnService,
             IPermissionHelper permission,
             IPhanQuyenService phanQuyenService,
-            IExportFileService exportFileService)
+            IExportFileService exportFileService,
+            IAiService aiService)
         {
             _service = service;
             _fileDuAnService = fileDuAnService;
             _permission = permission;
             _phanQuyenService = phanQuyenService;
             _exportFileService = exportFileService;
+            _aiService = aiService;
         }
 
         [HttpGet]
@@ -117,15 +120,89 @@ namespace QuanLyDuAn.Controllers
             vm.TuNgay = tuNgay;
             vm.DenNgay = denNgay;
             vm.LocTheoNgay = locTheoNgay;
-            var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
-            vm.Permissions = permissions;
-
-            var currentUserId = TryGetCurrentUserId();
-            vm.CoTheQuanLyFile = currentUserId.HasValue
-                                 && currentUserId.Value == vm.MaNguoiDung
-                                 && permissions.Contains(Permissions.DuAn.Sua);
+            await GanNguCanhDetailsAsync(vm);
 
             return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PhanTichNguyenNhanTre(
+            int maDuAn,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay,
+            CancellationToken cancellationToken)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.AI.PhanTichNguyenNhan))
+                return Forbid();
+
+            var result = await _aiService.PhanTichNguyenNhanDuAnAsync(maDuAn, cancellationToken);
+            if (!result.ThanhCong)
+            {
+                TempData["Error"] = string.IsNullOrWhiteSpace(result.ThongBao)
+                    ? "Không kết nối được dịch vụ AI."
+                    : result.ThongBao;
+                return RedirectToAction(nameof(Details), new { id = maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay });
+            }
+
+            var vm = await _service.GetChiTietAsync(maDuAn);
+            if (vm == null)
+            {
+                TempData["Error"] = "Không tìm thấy dự án.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            vm.TuKhoa = tuKhoa;
+            vm.LocMaLoaiDuAn = locMaLoaiDuAn;
+            vm.LocTrangThaiDuAn = locTrangThaiDuAn;
+            vm.TuNgay = tuNgay;
+            vm.DenNgay = denNgay;
+            vm.LocTheoNgay = locTheoNgay;
+            await GanNguCanhDetailsAsync(vm);
+            if (vm.PhanTichNguyenNhanTre != null)
+            {
+                vm.PhanTichNguyenNhanTre.KetQua = result.DuLieu;
+                vm.PhanTichNguyenNhanTre.ThoiGianPhanTich = result.DuLieu?.ThoiGianPhanTich ?? DateTime.Now;
+            }
+
+            TempData["Success"] = "Đã phân tích.";
+            return View("Details", vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XacNhanNguyenNhanTre(
+            int maDuAn,
+            string maDmNguyenNhan,
+            double? doTinCay,
+            string? tuKhoa,
+            int? locMaLoaiDuAn,
+            string? locTrangThaiDuAn,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? locTheoNgay,
+            CancellationToken cancellationToken)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.AI.XacNhan))
+                return Forbid();
+
+            var result = await _aiService.XacNhanNguyenNhanAsync(maDuAn, maDmNguyenNhan, doTinCay, cancellationToken);
+            if (result.ThanhCong)
+            {
+                TempData["Success"] = "Đã xác nhận nguyên nhân.";
+            }
+            else
+            {
+                TempData["Error"] = string.IsNullOrWhiteSpace(result.ThongBao)
+                    ? "Bạn không có quyền thực hiện."
+                    : result.ThongBao;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay });
         }
 
         [HttpGet]
@@ -596,6 +673,18 @@ namespace QuanLyDuAn.Controllers
 
             var result = _exportFileService.Export(exportRequest);
             return File(result.Content, result.ContentType, result.FileName);
+        }
+
+        private async Task GanNguCanhDetailsAsync(DuAnChiTietViewModel vm)
+        {
+            var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+            vm.Permissions = permissions;
+
+            var currentUserId = TryGetCurrentUserId();
+            vm.CoTheQuanLyFile = currentUserId.HasValue
+                                 && currentUserId.Value == vm.MaNguoiDung
+                                 && permissions.Contains(Permissions.DuAn.Sua);
+            vm.PhanTichNguyenNhanTre = await _aiService.LayPhanTichNguyenNhanDuAnAsync(vm.MaDuAn);
         }
 
         private int? TryGetCurrentUserId()
