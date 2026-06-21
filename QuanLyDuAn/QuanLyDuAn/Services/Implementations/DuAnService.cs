@@ -33,7 +33,8 @@ namespace QuanLyDuAn.Services.Implementations
             string? trangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             var currentUserId = await GetCurrentUserIdAsync();
             var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
@@ -122,7 +123,11 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            return await query.ToListAsync();
+            query = ApplyDeadlineFilter(query, locTinhTrangThoiHan, DateTime.Today);
+
+            var items = await query.ToListAsync();
+            await GanTinhTrangThoiHanAsync(items);
+            return items;
         }
 
         public async Task<PagedResultViewModel<DuAnViewModel>> GetPagedAsync(
@@ -132,6 +137,7 @@ namespace QuanLyDuAn.Services.Implementations
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
             int pageNumber = 1,
             int pageSize = PaginationViewModel.DefaultPageSize)
         {
@@ -221,6 +227,8 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
+            query = ApplyDeadlineFilter(query, locTinhTrangThoiHan, DateTime.Today);
+
             var totalItems = await query.CountAsync();
             var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
             var items = await query
@@ -228,6 +236,8 @@ namespace QuanLyDuAn.Services.Implementations
                 .Skip(pagination.Skip)
                 .Take(pagination.PageSize)
                 .ToListAsync();
+
+            await GanTinhTrangThoiHanAsync(items);
 
             return new PagedResultViewModel<DuAnViewModel>
             {
@@ -303,7 +313,6 @@ namespace QuanLyDuAn.Services.Implementations
 
             int? soNgayConLai = null;
             var isSapDenHan = false;
-            var isQuaHan = false;
             if (duAn.NgayKetThucDuAn.HasValue)
             {
                 var diffDays = (duAn.NgayKetThucDuAn.Value.Date - DateTime.Today).Days;
@@ -312,12 +321,9 @@ namespace QuanLyDuAn.Services.Implementations
                 var isCompleted = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.HoanThanh)
                                   || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru);
 
-                if (!isCompleted)
+                if (!isCompleted && diffDays >= 0 && diffDays <= 7)
                 {
-                    if (diffDays < 0)
-                        isQuaHan = true;
-                    else if (diffDays <= 7)
-                        isSapDenHan = true;
+                    isSapDenHan = true;
                 }
             }
 
@@ -345,10 +351,14 @@ namespace QuanLyDuAn.Services.Implementations
             var congViecChuaBatDau = await queryCongViec
                 .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiChuaBatDau.Contains(x.cv.TrangThaiCongViec));
 
+            var today = DateTime.Today;
             var congViecTreHan = await queryCongViec
                 .CountAsync(x => x.cv.NgayKetThucCVDuKien.HasValue
-                                 && x.cv.NgayKetThucCVDuKien.Value.Date < DateTime.Today
-                                 && !trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty));
+                                 && ((trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty)
+                                      && x.cv.NgayKetThucCVThucTe.HasValue
+                                      && x.cv.NgayKetThucCVThucTe.Value.Date > x.cv.NgayKetThucCVDuKien.Value.Date)
+                                     || (!trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty)
+                                         && x.cv.NgayKetThucCVDuKien.Value.Date < today)));
 
             decimal? tiLeHoanThanh = null;
             var tiLeHoanThanhCap = 0m;
@@ -554,6 +564,15 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            var deadlineSource = new DuAnViewModel
+            {
+                TrangThaiDuAn = duAn.TrangThaiDuAn ?? string.Empty,
+                NgayKetThucDuAn = duAn.NgayKetThucDuAn,
+                NgayHoanThanhThucTeDuAn = duAn.NgayHoanThanhThucTeDuAn,
+                SoCongViecTre = congViecTreHan
+            };
+            DuAnDeadlineStatusHelper.Apply(deadlineSource, today);
+
             return new DuAnChiTietViewModel
             {
                 MaDuAn = duAn.MaDuAn,
@@ -580,7 +599,18 @@ namespace QuanLyDuAn.Services.Implementations
                 HasApprovedBudget = hasApprovedBudget,
                 SoNgayConLai = soNgayConLai,
                 IsSapDenHan = isSapDenHan,
-                IsQuaHan = isQuaHan,
+                IsQuaHan = deadlineSource.IsQuaHan,
+                IsHoanThanhTre = deadlineSource.IsHoanThanhTre,
+                IsHoanThanhDungHan = deadlineSource.IsHoanThanhDungHan,
+                CoCongViecTre = deadlineSource.CoCongViecTre,
+                IsConHan = deadlineSource.IsConHan,
+                IsChuaXacDinh = deadlineSource.IsChuaXacDinh,
+                IsKhongDanhGia = deadlineSource.IsKhongDanhGia,
+                SoNgayTre = deadlineSource.SoNgayTre,
+                SoCongViecTre = deadlineSource.SoCongViecTre,
+                MaTinhTrangThoiHan = deadlineSource.MaTinhTrangThoiHan,
+                TinhTrangThoiHan = deadlineSource.TinhTrangThoiHan,
+                CssTinhTrangThoiHan = deadlineSource.CssTinhTrangThoiHan,
                 TienDoCongViec = new DuAnWorkStatusSummaryViewModel
                 {
                     TongCongViec = soLuongCongViec,
@@ -1313,6 +1343,121 @@ namespace QuanLyDuAn.Services.Implementations
         #endregion
 
         #region Helper Methods
+
+        private IQueryable<DuAnViewModel> ApplyDeadlineFilter(
+            IQueryable<DuAnViewModel> query,
+            string? locTinhTrangThoiHan,
+            DateTime today)
+        {
+            var filter = DuAnDeadlineStatusHelper.NormalizeFilter(locTinhTrangThoiHan);
+            if (filter == null)
+            {
+                return query;
+            }
+
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var trangThaiLuuTru = TrangThai.GetCommonStatusVariants(TrangThai.LuuTru);
+            var trangThaiDaHuy = TrangThai.GetCommonStatusVariants(TrangThai.DaHuy);
+            var maDuAnCoCongViecTre = TaoQueryMaDuAnCoCongViecTre(today);
+
+            return filter switch
+            {
+                DuAnDeadlineStatusHelper.FilterDangQuaHan => query.Where(x =>
+                    x.NgayKetThucDuAn.HasValue
+                    && x.NgayKetThucDuAn.Value.Date < today.Date
+                    && !trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
+                    && !trangThaiLuuTru.Contains(x.TrangThaiDuAn)
+                    && !trangThaiDaHuy.Contains(x.TrangThaiDuAn)),
+
+                DuAnDeadlineStatusHelper.FilterCoCongViecTre => query.Where(x =>
+                    x.NgayKetThucDuAn.HasValue
+                    && x.NgayKetThucDuAn.Value.Date >= today.Date
+                    && !trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
+                    && !trangThaiLuuTru.Contains(x.TrangThaiDuAn)
+                    && !trangThaiDaHuy.Contains(x.TrangThaiDuAn)
+                    && maDuAnCoCongViecTre.Contains(x.MaDuAn)),
+
+                DuAnDeadlineStatusHelper.FilterHoanThanhTre => query.Where(x =>
+                    x.NgayKetThucDuAn.HasValue
+                    && x.NgayHoanThanhThucTeDuAn.HasValue
+                    && x.NgayHoanThanhThucTeDuAn.Value.Date > x.NgayKetThucDuAn.Value.Date
+                    && (trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
+                        || trangThaiLuuTru.Contains(x.TrangThaiDuAn))),
+
+                DuAnDeadlineStatusHelper.FilterHoanThanhDungHan => query.Where(x =>
+                    x.NgayKetThucDuAn.HasValue
+                    && x.NgayHoanThanhThucTeDuAn.HasValue
+                    && x.NgayHoanThanhThucTeDuAn.Value.Date <= x.NgayKetThucDuAn.Value.Date
+                    && (trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
+                        || trangThaiLuuTru.Contains(x.TrangThaiDuAn))),
+
+                DuAnDeadlineStatusHelper.FilterConHan => query.Where(x =>
+                    x.NgayKetThucDuAn.HasValue
+                    && x.NgayKetThucDuAn.Value.Date >= today.Date
+                    && !trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
+                    && !trangThaiLuuTru.Contains(x.TrangThaiDuAn)
+                    && !trangThaiDaHuy.Contains(x.TrangThaiDuAn)
+                    && !maDuAnCoCongViecTre.Contains(x.MaDuAn)),
+
+                _ => query
+            };
+        }
+
+        private IQueryable<int> TaoQueryMaDuAnCoCongViecTre(DateTime today)
+        {
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+
+            return (from cv in _context.CongViec
+                    join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                    where cv.IsDeleted != true
+                          && dm.IsDeleted != true
+                          && cv.NgayKetThucCVDuKien.HasValue
+                          && ((trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                               && cv.NgayKetThucCVThucTe.HasValue
+                               && cv.NgayKetThucCVThucTe.Value.Date > cv.NgayKetThucCVDuKien.Value.Date)
+                              || (!trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                                  && cv.NgayKetThucCVDuKien.Value.Date < today.Date))
+                    select dm.MaDuAn).Distinct();
+        }
+
+        private async Task GanTinhTrangThoiHanAsync(List<DuAnViewModel> items)
+        {
+            if (items.Count == 0)
+            {
+                return;
+            }
+
+            var today = DateTime.Today;
+            var maDuAn = items.Select(x => x.MaDuAn).Distinct().ToList();
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+
+            var soCongViecTreTheoDuAn = await (from cv in _context.CongViec
+                                               join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                                               where maDuAn.Contains(dm.MaDuAn)
+                                                     && cv.IsDeleted != true
+                                                     && dm.IsDeleted != true
+                                                     && cv.NgayKetThucCVDuKien.HasValue
+                                                     && ((trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                                                          && cv.NgayKetThucCVThucTe.HasValue
+                                                          && cv.NgayKetThucCVThucTe.Value.Date > cv.NgayKetThucCVDuKien.Value.Date)
+                                                         || (!trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                                                             && cv.NgayKetThucCVDuKien.Value.Date < today))
+                                               group cv by dm.MaDuAn into g
+                                               select new
+                                               {
+                                                   MaDuAn = g.Key,
+                                                   SoCongViecTre = g.Count()
+                                               })
+                .ToDictionaryAsync(x => x.MaDuAn, x => x.SoCongViecTre);
+
+            foreach (var item in items)
+            {
+                item.SoCongViecTre = soCongViecTreTheoDuAn.TryGetValue(item.MaDuAn, out var soCongViecTre)
+                    ? soCongViecTre
+                    : 0;
+                DuAnDeadlineStatusHelper.Apply(item, today);
+            }
+        }
 
         private async Task<int> GetCurrentUserIdAsync()
         {

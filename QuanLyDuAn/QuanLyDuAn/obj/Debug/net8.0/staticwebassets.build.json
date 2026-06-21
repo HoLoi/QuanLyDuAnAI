@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "7MHF+CMaCDBgCZNpOUL39stnArauLuOizLr8UTsLglQ=",
+  "Hash": "eMPTKVh5YxMuQmZuvMJCnQUS/jPsdvwVqkwA/TwZCJs=",
   "Source": "QuanLyDuAn",
   "BasePath": "_content/QuanLyDuAn",
   "Mode": "Default",
@@ -724,8 +724,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "xsd8d137m4",
-      "Integrity": "H0cbtwbIlRHQkJRyoy5q2EYAsCCp0JaRWcBH6nBsHLM=",
+      "Fingerprint": "ix8oj1sbs3",
+      "Integrity": "yqUS8eCsjzjxNN2epY8ra1QHWiWWMUa7Ndv2MsrF37o=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\DuAn\\details.css"
@@ -745,8 +745,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "zij3v9g3t1",
-      "Integrity": "ZXfGqTVcugjz8x7rCY8QEVb4ne0rc4woCktcj/zgQ/Q=",
+      "Fingerprint": "8unspa4isd",
+      "Integrity": "sEjcbwsMYXEPuOL4dE4o8SH4Ty3WmR5KTs32r/0kUtM=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\DuAn\\index.css"
@@ -5532,7 +5532,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "29499"
+          "Value": "30055"
         },
         {
           "Name": "Content-Type",
@@ -5540,11 +5540,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"H0cbtwbIlRHQkJRyoy5q2EYAsCCp0JaRWcBH6nBsHLM=\""
+          "Value": "\"yqUS8eCsjzjxNN2epY8ra1QHWiWWMUa7Ndv2MsrF37o=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 20 Jun 2026 10:10:51 GMT"
+          "Value": "Sun, 21 Jun 2026 13:50:56 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -5554,12 +5554,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-H0cbtwbIlRHQkJRyoy5q2EYAsCCp0JaRWcBH6nBsHLM="
+          "Value": "sha256-yqUS8eCsjzjxNN2epY8ra1QHWiWWMUa7Ndv2MsrF37o="
         }
       ]
     },
     {
-      "Route": "css/DuAn/details.xsd8d137m4.css",
+      "Route": "css/DuAn/details.ix8oj1sbs3.css",
       "AssetFile": "E:\\D\\Luan Van\\dvl18\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\DuAn\\details.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -5569,7 +5569,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "29499"
+          "Value": "30055"
         },
         {
           "Name": "Content-Type",
@@ -5577,11 +5577,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"H0cbtwbIlRHQkJRyoy5q2EYAsCCp0JaRWcBH6nBsHLM=\""
+          "Value": "\"yqUS8eCsjzjxNN2epY8ra1QHWiWWMUa7Ndv2MsrF37o=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Sat, 20 Jun 2026 10:10:51 GMT"
+          "Value": "Sun, 21 Jun 2026 13:50:56 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -5591,7 +5591,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "xsd8d137m4"
+          "Value": "ix8oj1sbs3"
         },
         {
           "Name": "label",
@@ -5599,7 +5599,52 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-H0cbtwbIlRHQkJRyoy5q2EYAsCCp0JaRWcBH6nBsHLM="
+          "Value": "sha256-yqUS8eCsjzjxNN2epY8ra1QHWiWWMUa7Ndv2MsrF37o="
+        }
+      ]
+    },
+    {
+      "Route": "css/DuAn/index.8unspa4isd.css",
+      "AssetFile": "E:\\D\\Luan Van\\dvl18\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\DuAn\\index.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "13343"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"sEjcbwsMYXEPuOL4dE4o8SH4Ty3WmR5KTs32r/0kUtM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 21 Jun 2026 13:50:20 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "8unspa4isd"
+        },
+        {
+          "Name": "label",
+          "Value": "css/DuAn/index.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-sEjcbwsMYXEPuOL4dE4o8SH4Ty3WmR5KTs32r/0kUtM="
         }
       ]
     },
@@ -5614,7 +5659,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "12174"
+          "Value": "13343"
         },
         {
           "Name": "Content-Type",
@@ -5622,11 +5667,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"ZXfGqTVcugjz8x7rCY8QEVb4ne0rc4woCktcj/zgQ/Q=\""
+          "Value": "\"sEjcbwsMYXEPuOL4dE4o8SH4Ty3WmR5KTs32r/0kUtM=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 25 May 2026 16:00:16 GMT"
+          "Value": "Sun, 21 Jun 2026 13:50:20 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -5636,52 +5681,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-ZXfGqTVcugjz8x7rCY8QEVb4ne0rc4woCktcj/zgQ/Q="
-        }
-      ]
-    },
-    {
-      "Route": "css/DuAn/index.zij3v9g3t1.css",
-      "AssetFile": "E:\\D\\Luan Van\\dvl18\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\wwwroot\\css\\DuAn\\index.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "12174"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"ZXfGqTVcugjz8x7rCY8QEVb4ne0rc4woCktcj/zgQ/Q=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Mon, 25 May 2026 16:00:16 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "zij3v9g3t1"
-        },
-        {
-          "Name": "label",
-          "Value": "css/DuAn/index.css"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-ZXfGqTVcugjz8x7rCY8QEVb4ne0rc4woCktcj/zgQ/Q="
+          "Value": "sha256-sEjcbwsMYXEPuOL4dE4o8SH4Ty3WmR5KTs32r/0kUtM="
         }
       ]
     },

@@ -18,5 +18,17 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public int SoLuongTeam { get; set; }
         public int SoLuongThanhVien { get; set; }
         public bool HasApprovedBudget { get; set; }
+        public bool IsQuaHan { get; set; }
+        public bool IsHoanThanhTre { get; set; }
+        public bool IsHoanThanhDungHan { get; set; }
+        public bool CoCongViecTre { get; set; }
+        public bool IsConHan { get; set; }
+        public bool IsChuaXacDinh { get; set; }
+        public bool IsKhongDanhGia { get; set; }
+        public int SoNgayTre { get; set; }
+        public int SoCongViecTre { get; set; }
+        public string MaTinhTrangThoiHan { get; set; } = string.Empty;
+        public string TinhTrangThoiHan { get; set; } = string.Empty;
+        public string CssTinhTrangThoiHan { get; set; } = string.Empty;
     }
 }

@@ -14,6 +14,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public DateTime? TuNgay { get; set; }
         public DateTime? DenNgay { get; set; }
         public string? LocTheoNgay { get; set; }
+        public string? LocTinhTrangThoiHan { get; set; }
         public HashSet<string> Permissions { get; set; } = new();
     }
 }

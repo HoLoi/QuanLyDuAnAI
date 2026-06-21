@@ -11,6 +11,7 @@
     DateTime? tuNgay = ViewBag.TuNgay as DateTime?;
     DateTime? denNgay = ViewBag.DenNgay as DateTime?;
     string? locTheoNgay = ViewBag.LocTheoNgay as string;
+    string? locTinhTrangThoiHan = ViewBag.LocTinhTrangThoiHan as string;
 
     var danhSach = Model ?? new List<QuanLyDuAn.ViewModels.DuAn.DuAnViewModel>();
 
@@ -65,11 +66,29 @@ else
                         </td>
                         <td>@duAn.TenLoaiDuAn</td>
                         <td class="col-date">@duAn.NgayTaoDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td class="col-date">@duAn.NgayBatDauDuAn?.ToString("dd/MM/yyyy") - @duAn.NgayKetThucDuAn?.ToString("dd/MM/yyyy")</td>
-                        <td class="col-status">
-                            <span class="du-an-status-badge @LayCssTrangThai(duAn.TrangThaiDuAn)">
-                                @TrangThai.ToDisplay(duAn.TrangThaiDuAn)
+                        <td class="col-date">
+                            @duAn.NgayBatDauDuAn?.ToString("dd/MM/yyyy")
+                            -
+                            <span class="du-an-end-date @(duAn.IsQuaHan || duAn.IsHoanThanhTre ? "is-late" : string.Empty)">
+                                @(duAn.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "-")
+                                @if (duAn.IsQuaHan || duAn.IsHoanThanhTre)
+                                {
+                                    <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                                }
                             </span>
+                        </td>
+                        <td class="col-status">
+                            <div class="du-an-status-stack">
+                                <span class="du-an-status-badge @LayCssTrangThai(duAn.TrangThaiDuAn)">
+                                    @TrangThai.ToDisplay(duAn.TrangThaiDuAn)
+                                </span>
+                                @if (!string.IsNullOrWhiteSpace(duAn.TinhTrangThoiHan))
+                                {
+                                    <span class="du-an-deadline-badge @duAn.CssTinhTrangThoiHan">
+                                        @duAn.TinhTrangThoiHan
+                                    </span>
+                                }
+                            </div>
                         </td>
                         <td class="col-count">
                             <div class="du-an-member-count">@duAn.SoLuongTeam / @duAn.SoLuongThanhVien</div>
@@ -95,6 +114,7 @@ else
                                    asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-locTheoNgay="@locTheoNgay"
+                                   asp-route-locTinhTrangThoiHan="@locTinhTrangThoiHan"
                                    class="btn btn-action btn-subtle">
                                     <i class="bi bi-eye"></i>
                                     <span>Chi tiết</span>
@@ -112,6 +132,7 @@ else
                                    asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-locTheoNgay="@locTheoNgay"
+                                   asp-route-locTinhTrangThoiHan="@locTinhTrangThoiHan"
                                    class="btn btn-action btn-subtle">
                                     <i class="bi bi-diagram-3"></i>
                                     <span>Nhóm phụ trách</span>
@@ -140,6 +161,7 @@ else
                                    asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-locTheoNgay="@locTheoNgay"
+                                   asp-route-locTinhTrangThoiHan="@locTinhTrangThoiHan"
                                    class="btn btn-action btn-subtle">
                                     <i class="bi bi-people"></i>
                                     <span>Thành viên</span>
@@ -179,6 +201,7 @@ else
                                    asp-route-tuNgay="@tuNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-denNgay="@denNgay?.ToString("yyyy-MM-dd")"
                                    asp-route-locTheoNgay="@locTheoNgay"
+                                   asp-route-locTinhTrangThoiHan="@locTinhTrangThoiHan"
                                    class="btn btn-action btn-reopen">
                                     <i class="bi bi-pencil-square"></i>
                                     <span>Sửa</span>
@@ -195,6 +218,7 @@ else
                                     <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
+                                    <input type="hidden" name="locTinhTrangThoiHan" value="@locTinhTrangThoiHan" />
                                     <button type="submit" class="btn btn-action btn-danger-soft">
                                         <i class="bi bi-trash"></i>
                                         <span>Xóa</span>

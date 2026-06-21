@@ -189,7 +189,7 @@
 }
 
 .du-an-filter-grid-main {
-    grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(180px, 1fr));
+    grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(170px, 1fr));
 }
 
 .du-an-filter-grid-time {
@@ -390,6 +390,66 @@
     background: #f4f6fa;
     color: #607389;
     border-color: rgba(96, 115, 137, 0.22);
+}
+
+.du-an-status-stack {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+.du-an-deadline-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.15;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.du-an-deadline-badge.is-late {
+    background: #fff0f0;
+    color: #b42318;
+    border-color: rgba(180, 35, 24, 0.22);
+}
+
+.du-an-deadline-badge.is-work-late {
+    background: #fff6e5;
+    color: #b85b00;
+    border-color: rgba(184, 91, 0, 0.24);
+}
+
+.du-an-deadline-badge.is-on-time {
+    background: #eaf8ee;
+    color: #247a3d;
+    border-color: rgba(36, 122, 61, 0.2);
+}
+
+.du-an-deadline-badge.is-unknown,
+.du-an-deadline-badge.is-neutral {
+    background: #f4f6fa;
+    color: #65758a;
+    border-color: rgba(101, 117, 138, 0.2);
+}
+
+.du-an-end-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.du-an-end-date.is-late {
+    color: #b42318;
+    font-weight: 700;
+}
+
+.du-an-end-date.is-late i {
+    font-size: 0.78rem;
 }
 
 .du-an-member-count {

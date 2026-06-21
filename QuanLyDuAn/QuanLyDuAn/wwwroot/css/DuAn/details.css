@@ -102,6 +102,31 @@
     border-color: rgba(105, 108, 255, 0.25);
 }
 
+.chip-deadline.is-late {
+    background: rgba(180, 35, 24, 0.1);
+    border-color: rgba(180, 35, 24, 0.22);
+    color: #b42318;
+}
+
+.chip-deadline.is-work-late {
+    background: rgba(184, 91, 0, 0.1);
+    border-color: rgba(184, 91, 0, 0.24);
+    color: #b85b00;
+}
+
+.chip-deadline.is-on-time {
+    background: rgba(36, 122, 61, 0.1);
+    border-color: rgba(36, 122, 61, 0.2);
+    color: #247a3d;
+}
+
+.chip-deadline.is-unknown,
+.chip-deadline.is-neutral {
+    background: rgba(101, 117, 138, 0.1);
+    border-color: rgba(101, 117, 138, 0.2);
+    color: #65758a;
+}
+
 .progress-rail {
     height: 10px;
     background: rgba(255, 255, 255, 0.7);

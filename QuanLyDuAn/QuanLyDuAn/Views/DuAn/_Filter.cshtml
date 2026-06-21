@@ -1,11 +1,13 @@
 ﻿@model QuanLyDuAn.ViewModels.DuAn.DuAnPageViewModel
 @using QuanLyDuAn.Constants
+@using QuanLyDuAn.ViewModels.DuAn
 
 @{
     var danhSachLoaiDuAn = ViewBag.DanhSachLoaiDuAn as List<QuanLyDuAn.ViewModels.DuAn.LoaiDuAnOptionViewModel>
                           ?? new List<QuanLyDuAn.ViewModels.DuAn.LoaiDuAnOptionViewModel>();
 
     var locTrangThai = Model.LocTrangThaiDuAn;
+    var locTinhTrangThoiHan = DuAnDeadlineStatusHelper.NormalizeFilter(Model.LocTinhTrangThoiHan);
 }
 
 <form asp-action="Index" method="get" class="du-an-filter-form">
@@ -37,6 +39,18 @@
                 <option value="@TrangThai.HoanThanh" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.HoanThanh) ? "selected" : null)">@TrangThai.HoanThanhHienThi</option>
                 <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.TamDung) ? "selected" : null)">@TrangThai.TamDungHienThi</option>
                 <option value="@TrangThai.LuuTru" selected="@(TrangThai.EqualsValue(locTrangThai, TrangThai.LuuTru) ? "selected" : null)">@TrangThai.LuuTruHienThi</option>
+            </select>
+        </div>
+
+        <div class="du-an-filter-field">
+            <label class="form-label">Tình trạng thời hạn</label>
+            <select name="locTinhTrangThoiHan" class="form-select">
+                <option value="">Tất cả tình trạng</option>
+                <option value="@DuAnDeadlineStatusHelper.FilterDangQuaHan" selected="@(locTinhTrangThoiHan == DuAnDeadlineStatusHelper.FilterDangQuaHan ? "selected" : null)">Đang quá hạn</option>
+                <option value="@DuAnDeadlineStatusHelper.FilterCoCongViecTre" selected="@(locTinhTrangThoiHan == DuAnDeadlineStatusHelper.FilterCoCongViecTre ? "selected" : null)">Có công việc trễ</option>
+                <option value="@DuAnDeadlineStatusHelper.FilterHoanThanhTre" selected="@(locTinhTrangThoiHan == DuAnDeadlineStatusHelper.FilterHoanThanhTre ? "selected" : null)">Hoàn thành trễ</option>
+                <option value="@DuAnDeadlineStatusHelper.FilterHoanThanhDungHan" selected="@(locTinhTrangThoiHan == DuAnDeadlineStatusHelper.FilterHoanThanhDungHan ? "selected" : null)">Hoàn thành đúng hạn</option>
+                <option value="@DuAnDeadlineStatusHelper.FilterConHan" selected="@(locTinhTrangThoiHan == DuAnDeadlineStatusHelper.FilterConHan ? "selected" : null)">Còn hạn</option>
             </select>
         </div>
     </div>

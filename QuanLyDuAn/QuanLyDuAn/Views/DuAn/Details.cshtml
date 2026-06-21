@@ -44,6 +44,8 @@
                         || Model.SoLuongCongViec == 0
                         || Model.IsSapDenHan
                         || Model.IsQuaHan
+                        || Model.IsHoanThanhTre
+                        || Model.CoCongViecTre
                         || (canSeeBudget && !Model.HasApprovedBudget);
 }
 
@@ -63,6 +65,7 @@
                     <div class="project-meta">
                         <span class="chip">Loại: @Model.TenLoaiDuAn</span>
                         <span class="chip chip-status">Trạng thái: @TrangThai.ToDisplay(Model.TrangThaiDuAn)</span>
+                        <span class="chip chip-deadline @Model.CssTinhTrangThoiHan">Thời hạn: @Model.TinhTrangThoiHan</span>
                         <span class="chip chip-progress">Tiến độ: @Model.PhanTramHoanThanh%</span>
                     </div>
                 </div>
@@ -74,6 +77,7 @@
                        asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
                        asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")"
                        asp-route-locTheoNgay="@Model.LocTheoNgay"
+                       asp-route-locTinhTrangThoiHan="@Model.LocTinhTrangThoiHan"
                        class="btn detail-header-btn detail-header-btn-back btn-action btn-subtle">Quay lại danh sách</a>
                     @if (permissions.Contains(Permissions.DuAn.Sua))
                     {
@@ -85,6 +89,7 @@
                            asp-route-tuNgay="@Model.TuNgay?.ToString("yyyy-MM-dd")"
                            asp-route-denNgay="@Model.DenNgay?.ToString("yyyy-MM-dd")"
                            asp-route-locTheoNgay="@Model.LocTheoNgay"
+                           asp-route-locTinhTrangThoiHan="@Model.LocTinhTrangThoiHan"
                            class="btn detail-header-btn detail-header-btn-edit btn-action btn-confirm">Sửa dự án</a>
                     }
                     @if (canShowYeuCauDoiQuanLyButton)
@@ -107,6 +112,7 @@
                             <input type="hidden" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
+                            <input type="hidden" name="locTinhTrangThoiHan" value="@Model.LocTinhTrangThoiHan" />
                             <button type="submit" class="btn detail-header-btn detail-header-btn-confirm btn-action btn-confirm">
                                 Xác nhận hoàn thành
                             </button>
@@ -207,6 +213,7 @@
                             <input type="hidden" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
+                            <input type="hidden" name="locTinhTrangThoiHan" value="@Model.LocTinhTrangThoiHan" />
                             <button type="submit" class="btn-action btn-confirm">@aiAnalyzeButtonText</button>
                         </form>
                     }
@@ -244,6 +251,7 @@
                             <input type="hidden" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
+                            <input type="hidden" name="locTinhTrangThoiHan" value="@Model.LocTinhTrangThoiHan" />
                             <button type="submit" class="btn-action btn-subtle">Xác nhận nguyên nhân</button>
                         </form>
                     }
@@ -683,6 +691,14 @@
                             @if (Model.IsQuaHan)
                             {
                                 <li><i class="bi bi-exclamation-diamond"></i> Đã trễ hạn @if (Model.SoNgayConLai.HasValue) {<text>(quá @Math.Abs(Model.SoNgayConLai.Value) ngày)</text>}.</li>
+                            }
+                            @if (Model.IsHoanThanhTre)
+                            {
+                                <li><i class="bi bi-exclamation-diamond"></i> Hoàn thành trễ @Model.SoNgayTre ngày.</li>
+                            }
+                            @if (!Model.IsQuaHan && !Model.IsHoanThanhTre && Model.CoCongViecTre)
+                            {
+                                <li><i class="bi bi-exclamation-triangle-fill"></i> Có @Model.SoCongViecTre công việc trễ.</li>
                             }
                             @if (canSeeBudget && !Model.HasApprovedBudget)
                             {

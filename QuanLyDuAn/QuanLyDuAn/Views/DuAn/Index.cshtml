@@ -26,6 +26,7 @@
     ViewBag.TuNgay = Model.TuNgay;
     ViewBag.DenNgay = Model.DenNgay;
     ViewBag.LocTheoNgay = Model.LocTheoNgay;
+    ViewBag.LocTinhTrangThoiHan = Model.LocTinhTrangThoiHan;
 }
 
 @section Styles {
@@ -130,7 +131,8 @@
                         ["locTrangThaiDuAn"] = Model.LocTrangThaiDuAn,
                         ["tuNgay"] = Model.TuNgay?.ToString("yyyy-MM-dd"),
                         ["denNgay"] = Model.DenNgay?.ToString("yyyy-MM-dd"),
-                        ["locTheoNgay"] = Model.LocTheoNgay
+                        ["locTheoNgay"] = Model.LocTheoNgay,
+                        ["locTinhTrangThoiHan"] = Model.LocTinhTrangThoiHan
                     }
                 };
                 <partial name="_ExportDropdown" model="exportVm" />

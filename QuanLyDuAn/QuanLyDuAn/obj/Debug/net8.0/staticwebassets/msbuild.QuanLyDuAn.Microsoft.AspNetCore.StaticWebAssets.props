@@ -570,8 +570,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>xsd8d137m4</Fingerprint>
-      <Integrity>H0cbtwbIlRHQkJRyoy5q2EYAsCCp0JaRWcBH6nBsHLM=</Integrity>
+      <Fingerprint>ix8oj1sbs3</Fingerprint>
+      <Integrity>yqUS8eCsjzjxNN2epY8ra1QHWiWWMUa7Ndv2MsrF37o=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuAn\details.css'))</OriginalItemSpec>
@@ -588,8 +588,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>zij3v9g3t1</Fingerprint>
-      <Integrity>ZXfGqTVcugjz8x7rCY8QEVb4ne0rc4woCktcj/zgQ/Q=</Integrity>
+      <Fingerprint>8unspa4isd</Fingerprint>
+      <Integrity>sEjcbwsMYXEPuOL4dE4o8SH4Ty3WmR5KTs32r/0kUtM=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuAn\index.css'))</OriginalItemSpec>

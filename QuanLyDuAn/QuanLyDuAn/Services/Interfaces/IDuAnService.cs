@@ -11,7 +11,8 @@ namespace QuanLyDuAn.Services.Interfaces
             string? trangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay);
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan);
         Task<PagedResultViewModel<DuAnViewModel>> GetPagedAsync(
             string? tuKhoa,
             int? maLoaiDuAn,
@@ -19,6 +20,7 @@ namespace QuanLyDuAn.Services.Interfaces
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
             int pageNumber = 1,
             int pageSize = 20);
         Task<DuAnChiTietViewModel?> GetChiTietAsync(int id);

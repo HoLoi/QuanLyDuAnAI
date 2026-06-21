@@ -44,6 +44,7 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
             int pageNumber = 1,
             int pageSize = 20)
         {
@@ -52,7 +53,7 @@ namespace QuanLyDuAn.Controllers
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
 
-            var paged = await _service.GetPagedAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, pageNumber, pageSize);
+            var paged = await _service.GetPagedAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan, pageNumber, pageSize);
 
             var vm = new DuAnPageViewModel
             {
@@ -66,6 +67,7 @@ namespace QuanLyDuAn.Controllers
                 TuNgay = tuNgay,
                 DenNgay = denNgay,
                 LocTheoNgay = locTheoNgay,
+                LocTinhTrangThoiHan = locTinhTrangThoiHan,
                 Permissions = permissions
             };
 
@@ -80,7 +82,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
@@ -95,7 +98,8 @@ namespace QuanLyDuAn.Controllers
                     locTrangThaiDuAn,
                     tuNgay,
                     denNgay,
-                    locTheoNgay
+                    locTheoNgay,
+                    locTinhTrangThoiHan
                 });
             }
 
@@ -110,7 +114,8 @@ namespace QuanLyDuAn.Controllers
                     locTrangThaiDuAn,
                     tuNgay,
                     denNgay,
-                    locTheoNgay
+                    locTheoNgay,
+                    locTinhTrangThoiHan
                 });
             }
 
@@ -120,6 +125,7 @@ namespace QuanLyDuAn.Controllers
             vm.TuNgay = tuNgay;
             vm.DenNgay = denNgay;
             vm.LocTheoNgay = locTheoNgay;
+            vm.LocTinhTrangThoiHan = locTinhTrangThoiHan;
             await GanNguCanhDetailsAsync(vm);
 
             return View(vm);
@@ -135,6 +141,7 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
             CancellationToken cancellationToken)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.AI.PhanTichNguyenNhan))
@@ -146,7 +153,7 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = string.IsNullOrWhiteSpace(result.ThongBao)
                     ? "Không kết nối được dịch vụ AI."
                     : result.ThongBao;
-                return RedirectToAction(nameof(Details), new { id = maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay });
+                return RedirectToAction(nameof(Details), new { id = maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan });
             }
 
             var vm = await _service.GetChiTietAsync(maDuAn);
@@ -162,6 +169,7 @@ namespace QuanLyDuAn.Controllers
             vm.TuNgay = tuNgay;
             vm.DenNgay = denNgay;
             vm.LocTheoNgay = locTheoNgay;
+            vm.LocTinhTrangThoiHan = locTinhTrangThoiHan;
             await GanNguCanhDetailsAsync(vm);
             if (vm.PhanTichNguyenNhanTre != null)
             {
@@ -185,6 +193,7 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
             CancellationToken cancellationToken)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.AI.XacNhan))
@@ -202,7 +211,7 @@ namespace QuanLyDuAn.Controllers
                     : result.ThongBao;
             }
 
-            return RedirectToAction(nameof(Details), new { id = maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay });
+            return RedirectToAction(nameof(Details), new { id = maDuAn, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan });
         }
 
         [HttpGet]
@@ -213,9 +222,10 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
-            return await Details(id, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay);
+            return await Details(id, tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan);
         }
 
         [HttpPost]
@@ -227,7 +237,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -251,7 +262,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -264,7 +276,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -288,7 +301,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -301,7 +315,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
@@ -325,7 +340,8 @@ namespace QuanLyDuAn.Controllers
                     locTrangThaiDuAn,
                     tuNgay,
                     denNgay,
-                    locTheoNgay
+                    locTheoNgay,
+                    locTinhTrangThoiHan
                 });
             }
         }
@@ -338,7 +354,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -347,14 +364,14 @@ namespace QuanLyDuAn.Controllers
             if (form == null)
             {
                 TempData["Error"] = "Không tìm thấy dự án.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan });
             }
 
             var permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
 
             var vm = new DuAnPageViewModel
             {
-                DanhSach = (await _service.GetPagedAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay)).Items,
+                DanhSach = (await _service.GetPagedAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan)).Items,
                 Form = form,
                 DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync(),
                 TuKhoa = tuKhoa,
@@ -363,6 +380,7 @@ namespace QuanLyDuAn.Controllers
                 TuNgay = tuNgay,
                 DenNgay = denNgay,
                 LocTheoNgay = locTheoNgay,
+                LocTinhTrangThoiHan = locTinhTrangThoiHan,
                 Permissions = permissions
             };
 
@@ -376,7 +394,7 @@ namespace QuanLyDuAn.Controllers
 
             if (!ModelState.IsValid)
             {
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay);
+                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay, vm.LocTinhTrangThoiHan);
                 vm.DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
@@ -404,13 +422,14 @@ namespace QuanLyDuAn.Controllers
                     locTrangThaiDuAn = vm.LocTrangThaiDuAn,
                     tuNgay = vm.TuNgay,
                     denNgay = vm.DenNgay,
-                    locTheoNgay = vm.LocTheoNgay
+                    locTheoNgay = vm.LocTheoNgay,
+                    locTinhTrangThoiHan = vm.LocTinhTrangThoiHan
                 });
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay);
+                vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaLoaiDuAn, vm.LocTrangThaiDuAn, vm.TuNgay, vm.DenNgay, vm.LocTheoNgay, vm.LocTinhTrangThoiHan);
                 vm.DanhSachLoaiDuAn = await _service.GetLoaiDuAnOptionsAsync();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
@@ -425,7 +444,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Xoa))
                 return Forbid();
@@ -447,7 +467,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -459,7 +480,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -481,7 +503,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -493,7 +516,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -515,7 +539,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -528,7 +553,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -550,7 +576,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -563,7 +590,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -585,7 +613,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -597,7 +626,8 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuAn.Sua))
                 return Forbid();
@@ -619,7 +649,8 @@ namespace QuanLyDuAn.Controllers
                 locTrangThaiDuAn,
                 tuNgay,
                 denNgay,
-                locTheoNgay
+                locTheoNgay,
+                locTinhTrangThoiHan
             });
         }
 
@@ -631,12 +662,13 @@ namespace QuanLyDuAn.Controllers
             string? locTrangThaiDuAn,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
                 return Forbid();
 
-            var rows = (await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay))
+            var rows = (await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan))
                 .Cast<object>()
                 .ToList();
 
@@ -649,6 +681,7 @@ namespace QuanLyDuAn.Controllers
                     ("Từ khóa", tuKhoa),
                     ("Loại dự án", locMaLoaiDuAn?.ToString()),
                     ("Trạng thái", TrangThai.ToDisplay(locTrangThaiDuAn)),
+                    ("Tình trạng thời hạn", DuAnDeadlineStatusHelper.ToDisplayFilter(locTinhTrangThoiHan)),
                     ("Lọc theo ngày", ExportSupport.ResolveTextOrDefault(locTheoNgay, "Ngày tạo")),
                     ("Từ ngày", ExportSupport.FormatDate(tuNgay)),
                     ("Đến ngày", ExportSupport.FormatDate(denNgay))),
@@ -665,6 +698,7 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDate(((DuAnViewModel)row).NgayHoanThanhThucTeDuAn) },
                     new() { Header = "Tiến độ", ValueSelector = row => $"{((DuAnViewModel)row).PhanTramHoanThanh}%" },
                     new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((DuAnViewModel)row).TrangThaiDuAn) },
+                    new() { Header = "Tình trạng thời hạn", ValueSelector = row => ((DuAnViewModel)row).TinhTrangThoiHan },
                     new() { Header = "Số team", ValueSelector = row => ((DuAnViewModel)row).SoLuongTeam.ToString() },
                     new() { Header = "Số thành viên", ValueSelector = row => ((DuAnViewModel)row).SoLuongThanhVien.ToString() }
                 },
