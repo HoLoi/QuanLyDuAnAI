@@ -1,6 +1,7 @@
 ﻿from __future__ import annotations
 
 from datetime import datetime
+from math import ceil
 from time import perf_counter
 
 import pandas as pd
@@ -22,15 +23,28 @@ def train_decision_tree(
 
     class_counts = y.value_counts().to_dict()
     min_class_count = min(class_counts.values()) if class_counts else 0
-    can_stratify = len(class_counts) >= 2 and min_class_count >= 2
-    stratify_value = y if can_stratify else None
+    class_count = len(class_counts)
+    if class_count < 2:
+        raise ValueError("Cần tối thiểu 2 lớp nguyên nhân để train model.")
+    if min_class_count < 2:
+        raise ValueError("Mỗi lớp nguyên nhân cần tối thiểu 2 dòng để chia train/test.")
+
+    requested_test_count = ceil(len(x) * test_size)
+    adjusted_test_size = test_size
+    test_size_was_adjusted = False
+    if requested_test_count < class_count:
+        adjusted_test_count = class_count
+        if len(x) - adjusted_test_count < class_count:
+            raise ValueError("Không đủ dữ liệu để chia train/test có stratify cho tất cả lớp nguyên nhân.")
+        adjusted_test_size = adjusted_test_count
+        test_size_was_adjusted = True
 
     x_train, x_test, y_train, y_test = train_test_split(
         x,
         y,
-        test_size=test_size,
+        test_size=adjusted_test_size,
         random_state=random_state,
-        stratify=stratify_value,
+        stratify=y,
     )
 
     start = perf_counter()
@@ -62,6 +76,9 @@ def train_decision_tree(
         "class_distribution": distribution,
         "train_size": int(len(x_train)),
         "test_size": int(len(x_test)),
+        "requested_test_size": test_size,
+        "effective_test_size": float(len(x_test) / len(x)),
+        "test_size_was_adjusted": test_size_was_adjusted,
         "train_time_ms": duration_ms,
         "train_time_utc": datetime.utcnow().isoformat() + "Z",
         "model_type": MODEL_ALGORITHM,

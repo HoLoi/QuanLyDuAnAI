@@ -44,6 +44,13 @@ namespace QuanLyDuAn.ViewModels.Ai
         public double? RecallWeighted { get; set; }
         public double? F1Weighted { get; set; }
         public Dictionary<string, int> ClassDistribution { get; set; } = [];
+        public int ValidRowsBeforeClassFilter { get; set; }
+        public int UsedRows { get; set; }
+        public int AccumulatingRows { get; set; }
+        public int EligibleClassCount { get; set; }
+        public int AccumulatingClassCount { get; set; }
+        public Dictionary<string, int> UsedClassDistribution { get; set; } = [];
+        public Dictionary<string, int> DroppedClassDistribution { get; set; } = [];
         public string? DecisionTreeText { get; set; }
         public List<string> WarningMessages { get; set; } = [];
         public bool SuggestedIsActive { get; set; }

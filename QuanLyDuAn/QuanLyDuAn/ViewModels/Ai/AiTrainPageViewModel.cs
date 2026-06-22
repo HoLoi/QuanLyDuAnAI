@@ -23,5 +23,6 @@ namespace QuanLyDuAn.ViewModels.Ai
         public bool CoTheTrainNguyenNhan { get; set; }
         public Dictionary<int, string> TenNguyenNhanTheoMa { get; set; } = [];
         public Dictionary<string, int> PhanBoNguyenNhanDataset { get; set; } = [];
+        public List<AiReasonClassDistributionRowViewModel> PhanBoNguyenNhanTrain { get; set; } = [];
     }
 }

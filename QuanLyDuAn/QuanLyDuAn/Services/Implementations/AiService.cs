@@ -290,12 +290,13 @@ namespace QuanLyDuAn.Services.Implementations
         {
             var vm = new AiTrainPageViewModel();
             var qualitySummary = await _aiDatasetService.KiemTraChatLuongDatasetAsync(cancellationToken);
-            var qualityReason = await _aiDatasetService.KiemTraChatLuongDatasetNguyenNhanAsync(cancellationToken);
+            var phanLoaiReason = await _aiDatasetService.PhanLoaiDatasetNguyenNhanDeTrainAsync(cancellationToken);
+            var qualityReason = phanLoaiReason.ThongKe;
 
             vm.TongDongDataset = qualitySummary.TongSoDong;
             vm.TongDongDuAnTre = qualitySummary.SoMauDuAnTre;
             vm.TongDongCoNguyenNhanXacNhan = qualitySummary.SoDongCoNguyenNhan;
-            vm.TongDongDatasetNguyenNhan = qualityReason.SoDongHopLeTrain;
+            vm.TongDongDatasetNguyenNhan = qualityReason.SoDongDuocDungTrain;
             vm.CoTheTrainNguyenNhan = qualityReason.DuDieuKienTrain;
             vm.BaoCaoDatasetNguyenNhanGanNhat = qualityReason;
             var tenNguyenNhanRows = await _context.DmNguyenNhan
@@ -305,7 +306,11 @@ namespace QuanLyDuAn.Services.Implementations
                 x => x.MaDMNguyenNhan,
                 x => string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan);
             vm.TenNguyenNhanTheoMa = tenNguyenNhanTheoMa;
-            vm.PhanBoNguyenNhanDataset = qualityReason.PhanBoTheoNguyenNhan
+            var phanBoTatCa = qualityReason.PhanBoLopDuDieuKien
+                .Concat(qualityReason.PhanBoLopDangTichLuy)
+                .GroupBy(x => x.Key)
+                .ToDictionary(x => x.Key, x => x.Sum(v => v.Value));
+            vm.PhanBoNguyenNhanDataset = qualityReason.PhanBoLopDuDieuKien
                 .Select(x =>
                 {
                     var ten = int.TryParse(x.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var maDm)
@@ -316,6 +321,27 @@ namespace QuanLyDuAn.Services.Implementations
                 })
                 .GroupBy(x => x.Ten)
                 .ToDictionary(g => g.Key, g => g.Sum(x => x.SoLuong));
+            vm.PhanBoNguyenNhanTrain = phanBoTatCa
+                .Select(x =>
+                {
+                    var maDm = int.TryParse(x.Key, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                        ? parsed
+                        : 0;
+                    var ten = maDm > 0 && tenNguyenNhanTheoMa.TryGetValue(maDm, out var tenMap)
+                        ? tenMap
+                        : $"Nguyên nhân #{x.Key}";
+                    return new AiReasonClassDistributionRowViewModel
+                    {
+                        MaDMNguyenNhan = maDm,
+                        TenNguyenNhan = ten,
+                        SoDong = x.Value,
+                        DuDieuKien = qualityReason.PhanBoLopDuDieuKien.ContainsKey(x.Key)
+                    };
+                })
+                .OrderByDescending(x => x.DuDieuKien)
+                .ThenByDescending(x => x.SoDong)
+                .ThenBy(x => x.MaDMNguyenNhan)
+                .ToList();
             vm.KhuyenNghiTrainNguyenNhan = new AiTrainRecommendationViewModel
             {
                 NenTrain = qualityReason.DuDieuKienTrain,
@@ -331,7 +357,11 @@ namespace QuanLyDuAn.Services.Implementations
 
             if (!vm.CoTheTrainNguyenNhan)
             {
-                vm.CanhBao = "Chưa đủ dữ liệu để huấn luyện model nguyên nhân trễ.";
+                vm.CanhBao = "Chưa đủ 30 dòng hoặc 2 nguyên nhân để huấn luyện.";
+            }
+            else if (qualityReason.SoLopDangTichLuy > 0)
+            {
+                vm.CanhBao = "Một số nguyên nhân đang tiếp tục tích lũy dữ liệu.";
             }
 
             var modelList = await _aiApiService.LayDanhSachModelAsync(ModelTypeNguyenNhan, cancellationToken);
@@ -406,7 +436,8 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            var quality = await _aiDatasetService.KiemTraChatLuongDatasetNguyenNhanAsync(cancellationToken);
+            var phanLoai = await _aiDatasetService.PhanLoaiDatasetNguyenNhanDeTrainAsync(cancellationToken);
+            var quality = phanLoai.ThongKe;
             if (!quality.DuDieuKienTrain)
             {
                 return new AiOperationResultViewModel<AiTrainResponseViewModel>
@@ -417,8 +448,7 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            var datasetHopLe = await _aiDatasetService.LayDatasetNguyenNhanHopLeDeTrainAsync(cancellationToken);
-            var trainDataset = BuildReasonTrainDataset(datasetHopLe);
+            var trainDataset = BuildReasonTrainDataset(phanLoai.TapDuocDungTrain);
             if (trainDataset.Count == 0)
             {
                 return new AiOperationResultViewModel<AiTrainResponseViewModel>

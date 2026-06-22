@@ -213,10 +213,41 @@ namespace QuanLyDuAn.Services.Implementations
                 && x.SoLanCapNhatTienDo.HasValue
                 && x.SoNgayChamCapNhatTienDo.HasValue);
 
-            var phanBoTheoNguyenNhan = rows
-                .Where(x => x.LaDuAnTre == true && x.MaDMNguyenNhan.HasValue)
+            var rowsHopLeTrain = rows
+                .Where(x =>
+                    x.LaDuAnTre == true
+                    && x.MaDMNguyenNhan.HasValue
+                    && x.SoNhanVienDuAn.HasValue
+                    && x.TongSoCongViec.HasValue
+                    && x.SoCongViecTre.HasValue
+                    && x.TyLeCongViecTre.HasValue
+                    && x.ChiPhiDuKien.HasValue
+                    && x.ChiPhiThucTe.HasValue
+                    && x.ChenhLechChiPhi.HasValue
+                    && x.SoLanThayDoiNhanSu.HasValue
+                    && x.SoLanThayDoiQuanLy.HasValue
+                    && x.SoNgayTreTienDo.HasValue
+                    && x.SoDeXuatCongViecChoDuyet.HasValue
+                    && x.SoDeXuatCongViecBiTuChoi.HasValue
+                    && x.ThoiGianDuyetCongViecTrungBinh.HasValue
+                    && x.SoDeXuatNganSachChoDuyet.HasValue
+                    && x.SoDeXuatNganSachBiTuChoi.HasValue
+                    && x.ThoiGianDuyetNganSachTrungBinh.HasValue
+                    && x.SoBaoCaoTienDoChoDuyet.HasValue
+                    && x.SoBaoCaoTienDoBiTuChoi.HasValue
+                    && x.SoBaoCaoTienDoYeuCauBoSung.HasValue
+                    && x.TyLeBaoCaoTienDoBiTuChoi.HasValue
+                    && x.SoLanCapNhatTienDo.HasValue
+                    && x.SoNgayChamCapNhatTienDo.HasValue)
+                .ToList();
+
+            var phanBoTheoNguyenNhan = rowsHopLeTrain
                 .GroupBy(x => x.MaDMNguyenNhan!.Value)
                 .ToDictionary(x => x.Key, x => x.Count());
+            var phanBoLopDuDieuKien = phanBoTheoNguyenNhan
+                .Where(x => x.Value >= MinReasonRowsPerClass)
+                .ToDictionary(x => x.Key, x => x.Value);
+            var soDongDuocDungTrain = phanBoLopDuDieuKien.Values.Sum();
 
             var lyDoKhongDat = new List<string>();
             if (tongSoDong == 0)
@@ -224,19 +255,14 @@ namespace QuanLyDuAn.Services.Implementations
                 lyDoKhongDat.Add("Dataset đang rỗng.");
             }
 
-            if (soDongHopLeTrain < MinReasonTrainRows)
+            if (soDongDuocDungTrain < MinReasonTrainRows)
             {
-                lyDoKhongDat.Add($"Số dòng hợp lệ train nguyên nhân là {soDongHopLeTrain}, nhỏ hơn {MinReasonTrainRows}.");
+                lyDoKhongDat.Add($"Số dòng dùng train nguyên nhân sau lọc lớp là {soDongDuocDungTrain}, nhỏ hơn {MinReasonTrainRows}.");
             }
 
-            if (phanBoTheoNguyenNhan.Count < MinReasonClasses)
+            if (phanBoLopDuDieuKien.Count < MinReasonClasses)
             {
-                lyDoKhongDat.Add($"Cần ít nhất {MinReasonClasses} lớp nguyên nhân khác nhau.");
-            }
-
-            if (phanBoTheoNguyenNhan.Count > 0 && phanBoTheoNguyenNhan.Values.Min() < MinReasonRowsPerClass)
-            {
-                lyDoKhongDat.Add($"Mỗi nguyên nhân cần tối thiểu {MinReasonRowsPerClass} dòng.");
+                lyDoKhongDat.Add($"Cần ít nhất {MinReasonClasses} nguyên nhân đủ điều kiện để train.");
             }
 
             return new AiDatasetQualitySummaryViewModel
@@ -244,13 +270,13 @@ namespace QuanLyDuAn.Services.Implementations
                 TongSoDong = tongSoDong,
                 SoDongDuLabel = soDongDuLabel,
                 SoDongThieuLabel = soDongThieuLabel,
-                SoDongHopLeTrain = soDongHopLeTrain,
+                SoDongHopLeTrain = soDongDuocDungTrain,
                 SoMauDuAnTre = soMauDuAnTre,
                 SoMauKhongTre = soMauKhongTre,
                 SoDongCoNguyenNhan = soDongCoNguyenNhan,
                 MinTrainRows = MinReasonTrainRows,
                 DuDieuKienTrain = lyDoKhongDat.Count == 0,
-                PhanBoTheoNguyenNhan = phanBoTheoNguyenNhan.ToDictionary(x => x.Key.ToString(CultureInfo.InvariantCulture), x => x.Value),
+                PhanBoTheoNguyenNhan = phanBoLopDuDieuKien.ToDictionary(x => x.Key.ToString(CultureInfo.InvariantCulture), x => x.Value),
                 LyDoKhongDat = lyDoKhongDat,
                 GhiChuChatLuongDuLieu = []
             };
@@ -261,54 +287,14 @@ namespace QuanLyDuAn.Services.Implementations
 
         public async Task<AiReasonTrainingQualitySummaryViewModel> KiemTraChatLuongDatasetNguyenNhanAsync(CancellationToken cancellationToken = default)
         {
+            var phanLoai = await PhanLoaiDatasetNguyenNhanDeTrainAsync(cancellationToken);
+            return phanLoai.ThongKe;
+        }
+
+        public async Task<AiReasonTrainingDatasetClassificationViewModel> PhanLoaiDatasetNguyenNhanDeTrainAsync(CancellationToken cancellationToken = default)
+        {
             var rows = await LayDatasetNguyenNhanHopLeDeTrainAsync(cancellationToken);
-            var tongSoDong = rows.Count;
-            var phanBo = rows
-                .Where(x => x.MaDMNguyenNhan.HasValue)
-                .GroupBy(x => x.MaDMNguyenNhan!.Value)
-                .ToDictionary(x => x.Key, x => x.Count());
-
-            var soLoai = phanBo.Count;
-            var minRows = soLoai > 0 ? phanBo.Values.Min() : 0;
-            var maxRows = soLoai > 0 ? phanBo.Values.Max() : 0;
-            var imbalanceRatio = minRows > 0 ? Math.Round((double)maxRows / minRows, 4) : 0d;
-
-            var lyDoKhongDat = new List<string>();
-            if (tongSoDong < MinReasonTrainRows)
-            {
-                lyDoKhongDat.Add($"Số dòng hợp lệ train nguyên nhân là {tongSoDong}, nhỏ hơn {MinReasonTrainRows}.");
-            }
-
-            if (soLoai < MinReasonClasses)
-            {
-                lyDoKhongDat.Add($"Số loại nguyên nhân hiện có là {soLoai}, nhỏ hơn {MinReasonClasses}.");
-            }
-
-            if (soLoai > 0 && minRows < MinReasonRowsPerClass)
-            {
-                lyDoKhongDat.Add($"Mỗi nguyên nhân cần tối thiểu {MinReasonRowsPerClass} dòng, hiện nhỏ nhất là {minRows}.");
-            }
-
-            var ghiChu = new List<string>();
-            if (imbalanceRatio >= 3d)
-            {
-                ghiChu.Add($"Dataset bị lệch lớp (imbalance ratio={imbalanceRatio:0.##}).");
-            }
-
-            return new AiReasonTrainingQualitySummaryViewModel
-            {
-                TongSoDongJoin = tongSoDong,
-                SoDongHopLeTrain = tongSoDong,
-                SoLoaiNguyenNhan = soLoai,
-                MinTrainRows = MinReasonTrainRows,
-                MinLoaiNguyenNhan = MinReasonClasses,
-                MinDongMoiLoai = MinReasonRowsPerClass,
-                DuDieuKienTrain = lyDoKhongDat.Count == 0,
-                PhanBoTheoNguyenNhan = phanBo.ToDictionary(x => x.Key.ToString(CultureInfo.InvariantCulture), x => x.Value),
-                ImbalanceRatio = imbalanceRatio,
-                LyDoKhongDat = lyDoKhongDat,
-                GhiChuChatLuongDuLieu = ghiChu
-            };
+            return PhanLoaiDatasetNguyenNhanDeTrain(rows);
         }
 
         public async Task<List<AiDatasetRowViewModel>> LayDatasetNguyenNhanHopLeDeTrainAsync(CancellationToken cancellationToken = default)
@@ -350,6 +336,86 @@ namespace QuanLyDuAn.Services.Implementations
                 .ToListAsync(cancellationToken);
 
             return rows.Where(HasDuFeature).ToList();
+        }
+
+        private static AiReasonTrainingDatasetClassificationViewModel PhanLoaiDatasetNguyenNhanDeTrain(List<AiDatasetRowViewModel> rows)
+        {
+            var phanBo = rows
+                .Where(x => x.MaDMNguyenNhan.HasValue)
+                .GroupBy(x => x.MaDMNguyenNhan!.Value)
+                .ToDictionary(x => x.Key, x => x.Count());
+            var phanBoDuDieuKien = phanBo
+                .Where(x => x.Value >= MinReasonRowsPerClass)
+                .ToDictionary(x => x.Key, x => x.Value);
+            var phanBoDangTichLuy = phanBo
+                .Where(x => x.Value < MinReasonRowsPerClass)
+                .ToDictionary(x => x.Key, x => x.Value);
+            var maDuDieuKien = phanBoDuDieuKien.Keys.ToHashSet();
+            var tapDuocDungTrain = rows
+                .Where(x => x.MaDMNguyenNhan.HasValue && maDuDieuKien.Contains(x.MaDMNguyenNhan.Value))
+                .ToList();
+            var tapDangTichLuy = rows
+                .Where(x => x.MaDMNguyenNhan.HasValue && !maDuDieuKien.Contains(x.MaDMNguyenNhan.Value))
+                .ToList();
+
+            var minRows = phanBoDuDieuKien.Count > 0 ? phanBoDuDieuKien.Values.Min() : 0;
+            var maxRows = phanBoDuDieuKien.Count > 0 ? phanBoDuDieuKien.Values.Max() : 0;
+            var imbalanceRatio = minRows > 0 ? Math.Round((double)maxRows / minRows, 4) : 0d;
+            var soDongDuocDungTrain = tapDuocDungTrain.Count;
+            var soLopDuDieuKien = phanBoDuDieuKien.Count;
+
+            var lyDoKhongDat = new List<string>();
+            if (soDongDuocDungTrain < MinReasonTrainRows)
+            {
+                lyDoKhongDat.Add($"Chưa đủ {MinReasonTrainRows} dòng hoặc {MinReasonClasses} nguyên nhân để huấn luyện.");
+            }
+
+            if (soLopDuDieuKien < MinReasonClasses)
+            {
+                lyDoKhongDat.Add($"Số nguyên nhân đủ điều kiện là {soLopDuDieuKien}, nhỏ hơn {MinReasonClasses}.");
+            }
+
+            var ghiChu = new List<string>();
+            if (phanBoDangTichLuy.Count > 0)
+            {
+                ghiChu.Add("Một số nguyên nhân đang tiếp tục tích lũy dữ liệu.");
+            }
+
+            if (imbalanceRatio >= 3d)
+            {
+                ghiChu.Add($"Dataset bị lệch lớp (imbalance ratio={imbalanceRatio:0.##}).");
+            }
+
+            var thongKe = new AiReasonTrainingQualitySummaryViewModel
+            {
+                TongSoDongJoin = rows.Count,
+                SoDongHopLeTrain = soDongDuocDungTrain,
+                SoDongHopLeTruocLocLop = rows.Count,
+                SoDongDuocDungTrain = soDongDuocDungTrain,
+                SoDongDangTichLuy = tapDangTichLuy.Count,
+                SoLoaiNguyenNhan = soLopDuDieuKien,
+                SoLopDuDieuKien = soLopDuDieuKien,
+                SoLopDangTichLuy = phanBoDangTichLuy.Count,
+                TongSoLopCoDuLieu = phanBo.Count,
+                MinTrainRows = MinReasonTrainRows,
+                MinLoaiNguyenNhan = MinReasonClasses,
+                MinDongMoiLoai = MinReasonRowsPerClass,
+                DuDieuKienTrain = soDongDuocDungTrain >= MinReasonTrainRows && soLopDuDieuKien >= MinReasonClasses,
+                PhanBoTheoNguyenNhan = phanBoDuDieuKien.ToDictionary(x => x.Key.ToString(CultureInfo.InvariantCulture), x => x.Value),
+                PhanBoLopDuDieuKien = phanBoDuDieuKien.ToDictionary(x => x.Key.ToString(CultureInfo.InvariantCulture), x => x.Value),
+                PhanBoLopDangTichLuy = phanBoDangTichLuy.ToDictionary(x => x.Key.ToString(CultureInfo.InvariantCulture), x => x.Value),
+                ImbalanceRatio = imbalanceRatio,
+                LyDoKhongDat = lyDoKhongDat,
+                GhiChuChatLuongDuLieu = ghiChu
+            };
+
+            return new AiReasonTrainingDatasetClassificationViewModel
+            {
+                TapHopLeTruocLocLop = rows,
+                TapDuocDungTrain = tapDuocDungTrain,
+                TapDangTichLuy = tapDangTichLuy,
+                ThongKe = thongKe
+            };
         }
 
         private async Task<AiDatasetTongHopResultViewModel> TongHopNoiBoAsync(List<int> projectIds, CancellationToken cancellationToken)

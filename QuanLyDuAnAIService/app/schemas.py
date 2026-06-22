@@ -65,6 +65,11 @@ class DatasetValidateResponse(StrictBaseModel):
     soDongThieuDuLieu: int
     soDongDuAnTre: int
     soDongCoNguyenNhan: int
+    validRowsBeforeClassFilter: int = 0
+    usedRows: int = 0
+    accumulatingRows: int = 0
+    eligibleClassCount: int = 0
+    accumulatingClassCount: int = 0
     canhBaoDataset: list[str] = Field(default_factory=list)
 
 
@@ -75,6 +80,13 @@ class DatasetQualityReportResponse(StrictBaseModel):
     soDongThieuFeature: int
     tyLeNullTungFeature: dict[str, float]
     tyLeClass: dict[str, float]
+    validRowsBeforeClassFilter: int = 0
+    usedRows: int = 0
+    accumulatingRows: int = 0
+    eligibleClassCount: int = 0
+    accumulatingClassCount: int = 0
+    usedClassDistribution: dict[str, int] = Field(default_factory=dict)
+    droppedClassDistribution: dict[str, int] = Field(default_factory=dict)
     duTrainHayKhong: bool
     warningMessages: list[str]
     blockingErrors: list[str]
@@ -122,6 +134,13 @@ class TrainResponse(StrictBaseModel):
     recallWeighted: float | None = None
     f1Weighted: float | None = None
     classDistribution: dict[str, int]
+    validRowsBeforeClassFilter: int = 0
+    usedRows: int = 0
+    accumulatingRows: int = 0
+    eligibleClassCount: int = 0
+    accumulatingClassCount: int = 0
+    usedClassDistribution: dict[str, int] = Field(default_factory=dict)
+    droppedClassDistribution: dict[str, int] = Field(default_factory=dict)
     decisionTreeText: str | None = None
     warningMessages: list[str]
     suggestedIsActive: bool

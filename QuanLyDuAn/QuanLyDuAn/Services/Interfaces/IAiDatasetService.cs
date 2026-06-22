@@ -16,5 +16,6 @@ namespace QuanLyDuAn.Services.Interfaces
         Task<List<AiDatasetRowViewModel>> LayDatasetHopLeDeTrainAsync(CancellationToken cancellationToken = default);
         Task<AiReasonTrainingQualitySummaryViewModel> KiemTraChatLuongDatasetNguyenNhanAsync(CancellationToken cancellationToken = default);
         Task<List<AiDatasetRowViewModel>> LayDatasetNguyenNhanHopLeDeTrainAsync(CancellationToken cancellationToken = default);
+        Task<AiReasonTrainingDatasetClassificationViewModel> PhanLoaiDatasetNguyenNhanDeTrainAsync(CancellationToken cancellationToken = default);
     }
 }

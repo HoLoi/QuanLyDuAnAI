@@ -1145,3 +1145,147 @@ Chỉ là danh sách chuẩn bị cho bước sau, chưa sửa code ở bước 
 | `QuanLyDuAnAIService/app/ml/decision_tree_model.py` | `train_decision_tree` | Có thể giữ nguyên; chỉ cần test biên split/stratify |
 | `QuanLyDuAnAIService/app/ml/model_storage.py` | `list_models` | Nếu cần expose số lớp hỗ trợ rõ hơn từ `class_distribution` |
 | `QuanLyDuAnAIService/app/services/prediction_service.py` | `_get_ranked_probabilities`, `suggest_reason` | Không cần sửa mapping lớp; chỉ cân nhắc cảnh báo nguồn `RuleFallback` nếu UI yêu cầu |
+
+## 29. Các thay đổi đã triển khai
+
+Đã sửa luồng huấn luyện model nguyên nhân trễ để một nguyên nhân dưới 5 dòng không còn chặn toàn bộ lần train nếu các nguyên nhân còn lại đã đủ điều kiện.
+
+Phía MVC:
+
+- Giữ `LayDatasetNguyenNhanHopLeDeTrainAsync` là tập hợp lệ nền: dự án trễ, có `MaDMNguyenNhan`, đủ 22 feature.
+- Thêm `PhanLoaiDatasetNguyenNhanDeTrainAsync` để tách `TapHopLeTruocLocLop`, `TapDuocDungTrain`, `TapDangTichLuy`.
+- `KiemTraChatLuongDatasetNguyenNhanAsync` dùng thống kê sau lọc lớp để quyết định `DuDieuKienTrain`.
+- `AiService.TrainAsync` build payload từ `TapDuocDungTrain`, không gửi lớp dưới 5 dòng sang FastAPI.
+- `Views/Ai/Train.cshtml` hiển thị dòng hợp lệ, dòng dùng train, số nguyên nhân đủ điều kiện và số nguyên nhân đang tích lũy.
+
+Phía FastAPI:
+
+- Thêm helper `reason_dataset_policy.py` dùng chung cho train, quality report và train recommendation.
+- `_validate_reason_dataset` lọc dòng thiếu feature, label không hợp lệ, lớp dưới 5 dòng, sau đó kiểm tra lại 30 dòng và 2 lớp.
+- `ValidationService.quality_report`, `train_recommendation`, `validate_dataset` dùng cùng quy tắc với `/model/train`.
+- `TrainResponse` và quality response có thêm metadata trước/sau lọc lớp.
+- Metadata model mới ghi `class_distribution`, `confusion_matrix_labels`, `used_class_distribution`, `dropped_class_distribution` theo tập thực sự dùng train.
+
+Không thay đổi database, không tạo migration, không chỉnh schema, không sửa seed SQL.
+
+## 30. Luồng huấn luyện sau chỉnh sửa
+
+Luồng MVC hiện tại:
+
+```text
+Đọc AI_DATASET
+-> chỉ lấy dự án trễ
+-> chỉ lấy dòng có MaDMNguyenNhan
+-> chỉ lấy dòng đủ 22 feature
+-> nhóm theo MaDMNguyenNhan
+-> lớp >= 5 dòng đưa vào TapDuocDungTrain
+-> lớp < 5 dòng đưa vào TapDangTichLuy
+-> kiểm tra TapDuocDungTrain >= 30 dòng và >= 2 lớp
+-> BuildReasonTrainDataset từ TapDuocDungTrain
+-> gọi FastAPI /model/train
+```
+
+Luồng FastAPI hiện tại:
+
+```text
+Validate schema Pydantic
+-> loại dòng không phải dự án trễ nếu có LaDuAnTre khác 1/true
+-> loại dòng thiếu feature
+-> loại dòng thiếu hoặc sai MaDMNguyenNhan
+-> nhóm theo MaDMNguyenNhan
+-> loại tạm lớp < MIN_REASON_ROWS_PER_CLASS
+-> kiểm tra lại MIN_REASON_TRAIN_ROWS và MIN_REASON_CLASS_COUNT
+-> train DecisionTreeClassifier bằng mã MaDMNguyenNhan thật
+```
+
+## 31. Quy tắc lọc lớp đang áp dụng
+
+Ngưỡng hiện tại:
+
+```text
+MinReasonTrainRows = 30
+MinReasonClasses = 2
+MinReasonRowsPerClass = 5
+```
+
+Điều kiện cuối cùng:
+
+```text
+SoDongDuocDungTrain >= 30
+SoLopDuDieuKien >= 2
+Mỗi lớp trong TapDuocDungTrain >= 5 dòng
+```
+
+Các lớp dưới 5 dòng:
+
+- Không bị xóa.
+- Không đổi nhãn.
+- Không chuyển sang `Khác`.
+- Không nhân bản hoặc tạo dữ liệu giả.
+- Không gửi vào payload train hiện tại.
+- Vẫn nằm trong `AI_DATASET` và tiếp tục tích lũy cho lần train sau.
+
+Nhãn train vẫn là `MaDMNguyenNhan`. MVC và FastAPI không map mã nguyên nhân sang index `0..n-1`. Prediction vẫn dùng `model.predict(frame)[0]`, còn xác suất được map theo `model.classes_`.
+
+## 32. Các file đã chỉnh sửa
+
+MVC:
+
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/AiDatasetService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Implementations/AiService.cs`
+- `QuanLyDuAn/QuanLyDuAn/Services/Interfaces/IAiDatasetService.cs`
+- `QuanLyDuAn/QuanLyDuAn/ViewModels/Ai/AiDatasetManagementViewModels.cs`
+- `QuanLyDuAn/QuanLyDuAn/ViewModels/Ai/AiTrainPageViewModel.cs`
+- `QuanLyDuAn/QuanLyDuAn/ViewModels/Ai/AiDatasetApiViewModels.cs`
+- `QuanLyDuAn/QuanLyDuAn/ViewModels/Ai/AiModelApiViewModels.cs`
+- `QuanLyDuAn/QuanLyDuAn/Views/Ai/Train.cshtml`
+
+FastAPI:
+
+- `QuanLyDuAnAIService/app/services/reason_dataset_policy.py`
+- `QuanLyDuAnAIService/app/services/model_service.py`
+- `QuanLyDuAnAIService/app/services/validation_service.py`
+- `QuanLyDuAnAIService/app/schemas.py`
+- `QuanLyDuAnAIService/app/ml/decision_tree_model.py`
+
+Tài liệu:
+
+- `docs/huanluyenmodelnguyennhantre.md`
+
+## 33. Kết quả build và kiểm thử
+
+Đã chạy:
+
+```text
+dotnet build QuanLyDuAn/QuanLyDuAn.sln
+```
+
+Kết quả: build thành công. Có 2 warning CS1998 sẵn có trong `FileTienDoCongViecService.cs`, không thuộc phạm vi thay đổi này.
+
+Đã chạy:
+
+```text
+python -m compileall app
+```
+
+Kết quả: compile Python thành công.
+
+Đã kiểm thử FastAPI bằng route handler trực tiếp với `MODEL_DIR` tạm, không ghi database và không dùng thư mục model thật:
+
+- Case 1: `10, 8, 7, 6, 2, 1` -> dùng train 31 dòng, 4 lớp, train được, lớp 2 và 1 dòng bị đưa vào `droppedClassDistribution`.
+- Case 2: `6, 6, 2` -> sau lọc còn 12 dòng, không train.
+- Case 3: `35, 2` -> sau lọc còn 1 lớp, không train.
+- Case 4: `15, 15, 1` -> sau lọc còn 30 dòng, 2 lớp, train được.
+- Case 5: mã lớp không liên tục `[1, 3, 5, 8]` -> metadata `confusionMatrixLabels` giữ `[1, 3, 5, 8]`, `classDistribution` chỉ có các lớp được train.
+- Case 6: một lớp đúng 5 dòng -> lớp được đưa vào train, split không lỗi.
+- Case 7: payload có một dòng thiếu feature -> FastAPI loại dòng lỗi, lớp còn dưới 5 bị loại, kiểm tra lại và trả lỗi rõ.
+- Kiểm tra `quality-report`, `train-recommendation`, `/model/train`, `test-reason` dùng cùng logic sau lọc.
+
+Không chạy được `fastapi.testclient.TestClient` vì môi trường Python hiện thiếu package `httpx`. Đã thay bằng gọi trực tiếp route handler để đi qua cùng code xử lý endpoint.
+
+## 34. Các giới hạn còn lại
+
+- Chưa kiểm thử runtime qua trình duyệt MVC thật và chưa gọi HTTP thật tới FastAPI vì không khởi động server trong lượt sửa này.
+- Chưa kiểm thử với dữ liệu SQL thật; toàn bộ kiểm thử nghiệp vụ dùng dữ liệu giả trong bộ nhớ, đúng ràng buộc không tạo hoặc sửa dữ liệu database.
+- Màn quản lý model chưa bổ sung hiển thị "Hỗ trợ N nguyên nhân" để tránh mở rộng phạm vi UI không bắt buộc.
+- Model cũ thiếu metadata mới vẫn được giữ tương thích qua các field default/optional; số liệu lớp hỗ trợ đầy đủ nhất vẫn nằm trong metadata model mới.

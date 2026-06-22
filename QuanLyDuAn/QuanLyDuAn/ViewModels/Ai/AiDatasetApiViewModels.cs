@@ -49,6 +49,11 @@ namespace QuanLyDuAn.ViewModels.Ai
         public int SoDongThieuDuLieu { get; set; }
         public int SoDongDuAnTre { get; set; }
         public int SoDongCoNguyenNhan { get; set; }
+        public int ValidRowsBeforeClassFilter { get; set; }
+        public int UsedRows { get; set; }
+        public int AccumulatingRows { get; set; }
+        public int EligibleClassCount { get; set; }
+        public int AccumulatingClassCount { get; set; }
         public List<string> CanhBaoDataset { get; set; } = [];
     }
 
@@ -60,6 +65,13 @@ namespace QuanLyDuAn.ViewModels.Ai
         public int SoDongThieuFeature { get; set; }
         public Dictionary<string, double> TyLeNullTungFeature { get; set; } = [];
         public Dictionary<string, double> TyLeClass { get; set; } = [];
+        public int ValidRowsBeforeClassFilter { get; set; }
+        public int UsedRows { get; set; }
+        public int AccumulatingRows { get; set; }
+        public int EligibleClassCount { get; set; }
+        public int AccumulatingClassCount { get; set; }
+        public Dictionary<string, int> UsedClassDistribution { get; set; } = [];
+        public Dictionary<string, int> DroppedClassDistribution { get; set; } = [];
         public bool DuTrainHayKhong { get; set; }
         public List<string> WarningMessages { get; set; } = [];
         public List<string> BlockingErrors { get; set; } = [];

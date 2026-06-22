@@ -5,6 +5,7 @@
     ViewData["Title"] = "Huấn luyện model nguyên nhân";
     var phanBoKeys = Model.PhanBoNguyenNhanDataset.Keys.ToList();
     var phanBoValues = Model.PhanBoNguyenNhanDataset.Values.ToList();
+    var baoCao = Model.BaoCaoDatasetNguyenNhanGanNhat;
 }
 
 @section Styles {
@@ -43,7 +44,10 @@
             <div><dt>Tổng dòng AI_DATASET</dt><dd>@Model.TongDongDataset</dd></div>
             <div><dt>Dòng dự án trễ</dt><dd>@Model.TongDongDuAnTre</dd></div>
             <div><dt>Dòng có nguyên nhân xác nhận</dt><dd>@Model.TongDongCoNguyenNhanXacNhan</dd></div>
-            <div><dt>Dòng hợp lệ để train</dt><dd>@Model.TongDongDatasetNguyenNhan</dd></div>
+            <div><dt>Dòng hợp lệ</dt><dd>@(baoCao?.SoDongHopLeTruocLocLop ?? Model.TongDongDatasetNguyenNhan)</dd></div>
+            <div><dt>Dòng dùng train</dt><dd>@(baoCao?.SoDongDuocDungTrain ?? Model.TongDongDatasetNguyenNhan)</dd></div>
+            <div><dt>Nguyên nhân đủ điều kiện</dt><dd>@(baoCao?.SoLopDuDieuKien ?? 0)/@(baoCao?.TongSoLopCoDuLieu ?? 0)</dd></div>
+            <div><dt>Nguyên nhân đang tích lũy</dt><dd>@(baoCao?.SoLopDangTichLuy ?? 0)</dd></div>
             <div><dt>Đủ điều kiện train</dt><dd>@(Model.CoTheTrainNguyenNhan ? "Có" : "Không")</dd></div>
         </dl>
 
@@ -67,11 +71,37 @@
     <div class="ai-grid ai-grid-2">
         <article class="ai-panel-card app-section-card">
             <h2>Phân bố nguyên nhân trong dataset</h2>
-            @if (Model.PhanBoNguyenNhanDataset.Any())
+            @if (Model.PhanBoNguyenNhanTrain.Any())
             {
-                <div class="ai-chart-shell ai-chart-shell-sm">
-                    <canvas id="reasonDistributionChart"></canvas>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Nguyên nhân</th>
+                                <th class="text-end">Số dòng</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.PhanBoNguyenNhanTrain)
+                            {
+                                <tr>
+                                    <td>@row.TenNguyenNhan</td>
+                                    <td class="text-end">@row.SoDong</td>
+                                    <td>
+                                        <span class="badge @(row.DuDieuKien ? "bg-success" : "bg-secondary")">@row.TrangThai</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
+                @if (Model.PhanBoNguyenNhanDataset.Any())
+                {
+                    <div class="ai-chart-shell ai-chart-shell-sm">
+                        <canvas id="reasonDistributionChart"></canvas>
+                    </div>
+                }
             }
             else
             {

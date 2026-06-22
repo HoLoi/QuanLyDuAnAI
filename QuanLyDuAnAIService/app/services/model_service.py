@@ -6,16 +6,14 @@ from threading import Lock
 
 import sklearn
 
-from app.config import settings
 from app.constants import (
-    DELAY_STATUS_COLUMN,
     FEATURE_COLUMNS,
     MODEL_FILE_PREFIX,
     MODEL_TYPE_REASON,
     REASON_LABEL_COLUMN,
 )
 from app.ml.decision_tree_model import train_decision_tree
-from app.ml.feature_builder import build_training_frames, get_missing_features, rows_to_dicts
+from app.ml.feature_builder import build_training_frames
 from app.ml.model_inspector import validate_model_file
 from app.ml.model_storage import (
     copy_model_as_default,
@@ -41,6 +39,7 @@ from app.schemas import (
 )
 from app.services.model_compare_service import ModelCompareService
 from app.services.prediction_service import PredictionService
+from app.services.reason_dataset_policy import build_blocking_errors, classify_reason_dataset
 
 
 class ModelService:
@@ -169,73 +168,16 @@ class ModelService:
         return model
 
     def _validate_reason_dataset(self, request: TrainRequest) -> tuple[list[dict], list[str]]:
-        records = rows_to_dicts(request.dataset)
-        valid_records: list[dict] = []
-        warnings: list[str] = []
-
-        dropped_not_delay = 0
-        dropped_missing_label = 0
-        dropped_missing_feature = 0
-
-        for record in records:
-            is_tre = record.get(DELAY_STATUS_COLUMN)
-            if is_tre not in (None, 1, True):
-                dropped_not_delay += 1
-                continue
-
-            if get_missing_features(record):
-                dropped_missing_feature += 1
-                continue
-
-            reason_label = record.get(REASON_LABEL_COLUMN)
-            try:
-                reason_label = int(reason_label)
-            except Exception:
-                dropped_missing_label += 1
-                continue
-
-            if reason_label <= 0:
-                dropped_missing_label += 1
-                continue
-
-            normalized = dict(record)
-            normalized[REASON_LABEL_COLUMN] = reason_label
-            valid_records.append(normalized)
-
-        if dropped_not_delay > 0:
-            warnings.append(f"Đã bỏ {dropped_not_delay} dòng không thuộc nhóm LaDuAnTre=1.")
-        if dropped_missing_feature > 0:
-            warnings.append(f"Đã bỏ {dropped_missing_feature} dòng thiếu feature train.")
-        if dropped_missing_label > 0:
-            warnings.append(f"Đã bỏ {dropped_missing_label} dòng thiếu hoặc sai MaDMNguyenNhan.")
-
-        if len(valid_records) < settings.min_reason_train_rows:
-            raise ValueError(
-                f"Dataset nguyên nhân chưa đủ số dòng: {len(valid_records)} < MIN_REASON_TRAIN_ROWS ({settings.min_reason_train_rows})."
-            )
-
-        class_counts: dict[int, int] = {}
-        for row in valid_records:
-            key = int(row[REASON_LABEL_COLUMN])
-            class_counts[key] = class_counts.get(key, 0) + 1
-
-        if len(class_counts) < settings.min_reason_class_count:
-            raise ValueError(
-                f"Dataset nguyên nhân cần ít nhất {settings.min_reason_class_count} lớp nguyên nhân khác nhau."
-            )
-
-        min_rows = min(class_counts.values()) if class_counts else 0
-        if min_rows < settings.min_reason_rows_per_class:
-            raise ValueError(
-                "Dataset nguyên nhân mất cân bằng: "
-                f"mỗi nguyên nhân cần >= {settings.min_reason_rows_per_class} dòng, hiện nhỏ nhất là {min_rows}."
-            )
-
-        return valid_records, warnings
+        classification = classify_reason_dataset(request.dataset, allow_missing_delay_flag=True)
+        blocking_errors = build_blocking_errors(classification)
+        if blocking_errors:
+            raise ValueError(blocking_errors[0])
+        return classification.used_records, classification.warnings
 
     def train_model(self, request: TrainRequest) -> TrainResponse:
         model_type = self._normalize_model_type(request.modelType)
         records, warning_messages = self._validate_reason_dataset(request)
+        dataset_stats = classify_reason_dataset(request.dataset, allow_missing_delay_flag=True)
         x, y = build_training_frames(records, label_column=REASON_LABEL_COLUMN)
         model_description = "DecisionTreeClassifier cho phân tích nguyên nhân trễ dự án"
 
@@ -263,6 +205,13 @@ class ModelService:
             "feature_list": FEATURE_COLUMNS,
             "label_column": REASON_LABEL_COLUMN,
             "class_distribution": result["class_distribution"],
+            "valid_rows_before_class_filter": dataset_stats.valid_rows_before_class_filter,
+            "used_rows": dataset_stats.used_rows,
+            "accumulating_rows": dataset_stats.accumulating_rows,
+            "eligible_class_count": dataset_stats.eligible_class_count,
+            "accumulating_class_count": dataset_stats.accumulating_class_count,
+            "used_class_distribution": dataset_stats.used_class_distribution,
+            "dropped_class_distribution": dataset_stats.dropped_class_distribution,
             "feature_importance": result["feature_importance"],
             "classification_report": classification_report,
             "precision_macro": precision_macro,
@@ -275,6 +224,9 @@ class ModelService:
             "python_version": platform.python_version(),
             "train_size": result["train_size"],
             "test_size": result["test_size"],
+            "requested_test_size": result["requested_test_size"],
+            "effective_test_size": result["effective_test_size"],
+            "test_size_was_adjusted": result["test_size_was_adjusted"],
             "confusion_matrix": result["confusion_matrix"],
             "confusion_matrix_labels": result["confusion_matrix_labels"],
             "decision_tree_text": result["decision_tree_text"],
@@ -287,6 +239,13 @@ class ModelService:
             "featureList": FEATURE_COLUMNS,
             "labelColumn": REASON_LABEL_COLUMN,
             "classDistribution": result["class_distribution"],
+            "validRowsBeforeClassFilter": dataset_stats.valid_rows_before_class_filter,
+            "usedRows": dataset_stats.used_rows,
+            "accumulatingRows": dataset_stats.accumulating_rows,
+            "eligibleClassCount": dataset_stats.eligible_class_count,
+            "accumulatingClassCount": dataset_stats.accumulating_class_count,
+            "usedClassDistribution": dataset_stats.used_class_distribution,
+            "droppedClassDistribution": dataset_stats.dropped_class_distribution,
             "featureImportance": result["feature_importance"],
             "classificationReport": classification_report,
             "precisionMacro": precision_macro,
@@ -297,6 +256,9 @@ class ModelService:
             "f1Weighted": f1_weighted,
             "trainSize": result["train_size"],
             "testSize": result["test_size"],
+            "requestedTestSize": result["requested_test_size"],
+            "effectiveTestSize": result["effective_test_size"],
+            "testSizeWasAdjusted": result["test_size_was_adjusted"],
             "confusionMatrix": result["confusion_matrix"],
             "confusionMatrixLabels": result["confusion_matrix_labels"],
             "decisionTreeText": result["decision_tree_text"],
@@ -334,6 +296,13 @@ class ModelService:
             recallWeighted=recall_weighted,
             f1Weighted=f1_weighted,
             classDistribution=result["class_distribution"],
+            validRowsBeforeClassFilter=dataset_stats.valid_rows_before_class_filter,
+            usedRows=dataset_stats.used_rows,
+            accumulatingRows=dataset_stats.accumulating_rows,
+            eligibleClassCount=dataset_stats.eligible_class_count,
+            accumulatingClassCount=dataset_stats.accumulating_class_count,
+            usedClassDistribution=dataset_stats.used_class_distribution,
+            droppedClassDistribution=dataset_stats.dropped_class_distribution,
             decisionTreeText=result["decision_tree_text"],
             warningMessages=warning_messages,
             suggestedIsActive=suggested_is_active,
