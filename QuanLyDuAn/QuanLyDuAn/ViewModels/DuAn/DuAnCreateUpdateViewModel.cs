@@ -38,11 +38,11 @@ namespace QuanLyDuAn.ViewModels.DuAn
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Validate end date >= start date
-            if (NgayBatDauDuAn.HasValue && NgayKetThucDuAn.HasValue && NgayKetThucDuAn < NgayBatDauDuAn)
+            // Validate full timestamp order for project schedule
+            if (NgayBatDauDuAn.HasValue && NgayKetThucDuAn.HasValue && NgayKetThucDuAn <= NgayBatDauDuAn)
             {
                 yield return new ValidationResult(
-                    "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.",
+                    "Ngày kết thúc phải sau ngày bắt đầu.",
                     new[] { nameof(NgayKetThucDuAn) });
             }
 

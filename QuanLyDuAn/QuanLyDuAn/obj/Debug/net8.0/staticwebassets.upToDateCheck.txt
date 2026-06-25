@@ -119,6 +119,7 @@ wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
 wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
 wwwroot\uploads\avatars\avatar_1_20260524190347_3da100e6698c4784b43b26034fc93ca7.jpg
+wwwroot\uploads\avatars\avatar_18_20260622201054_f376962e79434f35a2325608d52a8f58.jpg
 wwwroot\uploads\duan\2\2f7f4153823742128c08326eef7055ba.pdf
 wwwroot\uploads\duan\2\9cf1116bc5c2466299787cf51d7cde2f.pdf
 wwwroot\uploads\duan\2\b058cd1763c64c9294a047989b82a9a2.docx

@@ -184,8 +184,8 @@ namespace QuanLyDuAn.Services.Implementations
             if (!model.NgayBatDauCongViecDeXuat.HasValue || !model.NgayKetThucCVDeXuatDuKien.HasValue)
                 throw new Exception("Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc dự kiến.");
 
-            if (model.NgayKetThucCVDeXuatDuKien < model.NgayBatDauCongViecDeXuat)
-                throw new Exception("Ngày kết thúc dự kiến phải lớn hơn hoặc bằng ngày bắt đầu.");
+            if (model.NgayKetThucCVDeXuatDuKien <= model.NgayBatDauCongViecDeXuat)
+                throw new Exception("Ngày kết thúc dự kiến phải sau ngày bắt đầu.");
 
             if (string.IsNullOrWhiteSpace(model.TenCongViecDeXuat))
                 throw new Exception("Tên công việc đề xuất không được để trống.");
@@ -205,10 +205,10 @@ namespace QuanLyDuAn.Services.Implementations
 
             EnsureProjectAllowsWorkProposal(duAn.TrangThaiDuAn);
 
-            if (duAn.NgayBatDauDuAn.HasValue && model.NgayBatDauCongViecDeXuat.Value.Date < duAn.NgayBatDauDuAn.Value.Date)
+            if (duAn.NgayBatDauDuAn.HasValue && model.NgayBatDauCongViecDeXuat.Value < duAn.NgayBatDauDuAn.Value)
                 throw new Exception("Ngày bắt đầu đề xuất không được sớm hơn ngày bắt đầu dự án.");
 
-            if (duAn.NgayKetThucDuAn.HasValue && model.NgayKetThucCVDeXuatDuKien.Value.Date > duAn.NgayKetThucDuAn.Value.Date)
+            if (duAn.NgayKetThucDuAn.HasValue && model.NgayKetThucCVDeXuatDuKien.Value > duAn.NgayKetThucDuAn.Value)
                 throw new Exception("Ngày kết thúc đề xuất không được muộn hơn ngày kết thúc dự án.");
 
             var nganSachHienTai = await _context.NganSach

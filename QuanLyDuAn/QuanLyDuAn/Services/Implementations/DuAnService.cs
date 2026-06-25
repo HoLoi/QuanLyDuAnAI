@@ -123,7 +123,7 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            query = ApplyDeadlineFilter(query, locTinhTrangThoiHan, DateTime.Today);
+            query = ApplyDeadlineFilter(query, locTinhTrangThoiHan, DateTime.Now);
 
             var items = await query.ToListAsync();
             await GanTinhTrangThoiHanAsync(items);
@@ -227,7 +227,7 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            query = ApplyDeadlineFilter(query, locTinhTrangThoiHan, DateTime.Today);
+            query = ApplyDeadlineFilter(query, locTinhTrangThoiHan, DateTime.Now);
 
             var totalItems = await query.CountAsync();
             var pagination = PaginationViewModel.Create(pageNumber, pageSize, totalItems);
@@ -246,9 +246,39 @@ namespace QuanLyDuAn.Services.Implementations
             };
         }
 
+        public async Task<bool> CanAccessAsync(int maDuAn)
+        {
+            if (maDuAn <= 0)
+            {
+                return false;
+            }
+
+            var currentUserId = await GetCurrentUserIdAsync();
+            var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
+
+            var query = _context.DuAn
+                .AsNoTracking()
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true);
+
+            if (isManager)
+            {
+                query = query.Where(x => x.MaNguoiDung == currentUserId);
+            }
+            else if (isEmployee)
+            {
+                query = query.Where(x => _context.NhanVienDuAn.Any(nv =>
+                    nv.MaDuAn == x.MaDuAn && nv.MaNguoiDung == currentUserId));
+            }
+
+            return await query.AnyAsync();
+        }
+
         public async Task<DuAnChiTietViewModel?> GetChiTietAsync(int id)
         {
-            var duAn = await (from da in _context.DuAn
+            var currentUserId = await GetCurrentUserIdAsync();
+            var (isManager, isEmployee) = await GetCurrentUserRoleFlagsAsync();
+
+            var duAnQuery = from da in _context.DuAn.AsNoTracking()
                               join loai in _context.LoaiDuAn on da.MaLoaiDuAn equals loai.MaLoaiDuAn
                               where da.MaDuAn == id && da.IsDeleted != true
                               select new
@@ -266,7 +296,19 @@ namespace QuanLyDuAn.Services.Implementations
                                   da.PhanTramHoanThanh,
                                   da.GhiChuDuAn,
                                   da.MaNguoiDung
-                              }).FirstOrDefaultAsync();
+                              };
+
+            if (isManager)
+            {
+                duAnQuery = duAnQuery.Where(x => x.MaNguoiDung == currentUserId);
+            }
+            else if (isEmployee)
+            {
+                duAnQuery = duAnQuery.Where(x => _context.NhanVienDuAn.Any(nv =>
+                    nv.MaDuAn == x.MaDuAn && nv.MaNguoiDung == currentUserId));
+            }
+
+            var duAn = await duAnQuery.FirstOrDefaultAsync();
 
             if (duAn == null)
                 return null;
@@ -277,19 +319,35 @@ namespace QuanLyDuAn.Services.Implementations
                 .FirstOrDefaultAsync();
 
             var queryCongViec = _context.CongViec
-                .Join(_context.DanhMucCongViec, cv => cv.MaDanhMucCV, dm => dm.MaDanhMucCV, (cv, dm) => new { cv, dm })
+                .AsNoTracking()
+                .Join(_context.DanhMucCongViec.AsNoTracking(), cv => cv.MaDanhMucCV, dm => dm.MaDanhMucCV, (cv, dm) => new { cv, dm })
                 .Where(x => x.dm.MaDuAn == id && x.dm.IsDeleted != true && x.cv.IsDeleted != true);
 
-            var soLuongCongViec = await queryCongViec.CountAsync();
+            var now = DateTime.Now;
+            var congViecThongKe = await queryCongViec
+                .Select(x => new
+                {
+                    x.cv.MaCongViec,
+                    x.cv.TenCongViec,
+                    x.dm.TenDanhMucCV,
+                    x.dm.MaDanhMucCV,
+                    x.cv.TrangThaiCongViec,
+                    x.cv.NgayTaoCongViec,
+                    x.cv.NgayKetThucCVDuKien,
+                    x.cv.NgayKetThucCVThucTe
+                })
+                .ToListAsync();
+
+            var soLuongCongViec = congViecThongKe.Count;
 
             var soLuongChiTietCongViec = await _context.CtCongViec
                 .Join(queryCongViec, ct => ct.MaCongViec, x => x.cv.MaCongViec, (ct, x) => new { ct })
                 .CountAsync(x => x.ct.IsDeleted != true);
 
-            var maCongViecDauTien = await queryCongViec
-                .OrderBy(x => x.cv.MaCongViec)
-                .Select(x => (int?)x.cv.MaCongViec)
-                .FirstOrDefaultAsync();
+            var maCongViecDauTien = congViecThongKe
+                .OrderBy(x => x.MaCongViec)
+                .Select(x => (int?)x.MaCongViec)
+                .FirstOrDefault();
 
             var danhSachFile = await _context.FileDuAn
                 .Where(x => x.MaDuAn == id && x.IsDeleted != true)
@@ -315,7 +373,7 @@ namespace QuanLyDuAn.Services.Implementations
             var isSapDenHan = false;
             if (duAn.NgayKetThucDuAn.HasValue)
             {
-                var diffDays = (duAn.NgayKetThucDuAn.Value.Date - DateTime.Today).Days;
+                var diffDays = (int)Math.Floor((duAn.NgayKetThucDuAn.Value - now).TotalDays);
                 soNgayConLai = diffDays;
 
                 var isCompleted = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.HoanThanh)
@@ -327,38 +385,74 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
-            var trangThaiHoanThanh = new[]
+            var congViecHoanThanh = 0;
+            var congViecDangThucHien = 0;
+            var congViecTamDung = 0;
+            var congViecChuaBatDau = 0;
+            var congViecBiCanTro = 0;
+            var congViecChoXacNhan = 0;
+            var congViecDangQuaHan = 0;
+            var congViecHoanThanhDungHan = 0;
+            var congViecHoanThanhTre = 0;
+            var congViecHoanThanhThieuDuLieuNgay = 0;
+
+            foreach (var congViec in congViecThongKe)
             {
-                TrangThai.HoanThanh,
-                TrangThai.HoanThanhHienThi,
-                TrangThai.Done,
-                TrangThai.Completed
-            };
+                var trangThaiCongViec = congViec.TrangThaiCongViec;
+                var laHoanThanh = TrangThai.LaHoanThanhCongViec(trangThaiCongViec);
+                var laDaHuy = TrangThai.EqualsValue(trangThaiCongViec, TrangThai.DaHuy);
+                var laChoXacNhan = TrangThai.EqualsValue(trangThaiCongViec, TrangThai.ChoXacNhanHoanThanh);
 
-            var trangThaiDangThucHien = TrangThai.GetCommonStatusVariants(TrangThai.DangThucHien);
-            var trangThaiTamDung = TrangThai.GetCommonStatusVariants(TrangThai.TamDung);
-            var trangThaiChuaBatDau = TrangThai.GetCommonStatusVariants(TrangThai.ChuaBatDau);
+                if (laHoanThanh)
+                {
+                    congViecHoanThanh++;
 
-            var congViecHoanThanh = await queryCongViec
-                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec));
+                    if (!congViec.NgayKetThucCVDuKien.HasValue || !congViec.NgayKetThucCVThucTe.HasValue)
+                    {
+                        congViecHoanThanhThieuDuLieuNgay++;
+                    }
+                    else if (congViec.NgayKetThucCVThucTe.Value <= congViec.NgayKetThucCVDuKien.Value)
+                    {
+                        congViecHoanThanhDungHan++;
+                    }
+                    else
+                    {
+                        congViecHoanThanhTre++;
+                    }
+                }
 
-            var congViecDangThucHien = await queryCongViec
-                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiDangThucHien.Contains(x.cv.TrangThaiCongViec));
+                if (TrangThai.EqualsValue(trangThaiCongViec, TrangThai.DangThucHien))
+                {
+                    congViecDangThucHien++;
+                }
+                else if (TrangThai.EqualsValue(trangThaiCongViec, TrangThai.TamDung))
+                {
+                    congViecTamDung++;
+                }
+                else if (TrangThai.EqualsValue(trangThaiCongViec, TrangThai.ChuaBatDau))
+                {
+                    congViecChuaBatDau++;
+                }
+                else if (TrangThai.EqualsValue(trangThaiCongViec, TrangThai.BiCanCan))
+                {
+                    congViecBiCanTro++;
+                }
+                else if (laChoXacNhan)
+                {
+                    congViecChoXacNhan++;
+                }
 
-            var congViecTamDung = await queryCongViec
-                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiTamDung.Contains(x.cv.TrangThaiCongViec));
+                if (!laHoanThanh
+                    && !laDaHuy
+                    && congViec.NgayKetThucCVDuKien.HasValue
+                    && congViec.NgayKetThucCVDuKien.Value < now
+                    && !(laChoXacNhan && congViec.NgayKetThucCVThucTe.HasValue))
+                {
+                    congViecDangQuaHan++;
+                }
+            }
 
-            var congViecChuaBatDau = await queryCongViec
-                .CountAsync(x => x.cv.TrangThaiCongViec != null && trangThaiChuaBatDau.Contains(x.cv.TrangThaiCongViec));
-
-            var today = DateTime.Today;
-            var congViecTreHan = await queryCongViec
-                .CountAsync(x => x.cv.NgayKetThucCVDuKien.HasValue
-                                 && ((trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty)
-                                      && x.cv.NgayKetThucCVThucTe.HasValue
-                                      && x.cv.NgayKetThucCVThucTe.Value.Date > x.cv.NgayKetThucCVDuKien.Value.Date)
-                                     || (!trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty)
-                                         && x.cv.NgayKetThucCVDuKien.Value.Date < today)));
+            var congViecTreHan = congViecDangQuaHan + congViecHoanThanhTre;
 
             decimal? tiLeHoanThanh = null;
             var tiLeHoanThanhCap = 0m;
@@ -368,21 +462,37 @@ namespace QuanLyDuAn.Services.Implementations
                 tiLeHoanThanhCap = Math.Min(tiLeHoanThanh.Value, 100m);
             }
 
-            var congViecGanDay = await queryCongViec
-                .OrderByDescending(x => x.cv.NgayTaoCongViec ?? DateTime.MinValue)
-                .ThenByDescending(x => x.cv.MaCongViec)
+            decimal? tyLeHoanThanhDungHan = null;
+            var tyLeHoanThanhDungHanCap = 0m;
+            var tongHoanThanhCoDuNgay = congViecHoanThanhDungHan + congViecHoanThanhTre;
+            if (tongHoanThanhCoDuNgay > 0)
+            {
+                tyLeHoanThanhDungHan = Math.Round((decimal)congViecHoanThanhDungHan / tongHoanThanhCoDuNgay * 100m, 1);
+                tyLeHoanThanhDungHanCap = Math.Min(tyLeHoanThanhDungHan.Value, 100m);
+            }
+
+            var congViecGanDay = congViecThongKe
+                .OrderByDescending(x => x.NgayTaoCongViec ?? DateTime.MinValue)
+                .ThenByDescending(x => x.MaCongViec)
                 .Take(5)
                 .Select(x => new DuAnRecentWorkItemViewModel
                 {
-                    MaCongViec = x.cv.MaCongViec,
-                    TenCongViec = x.cv.TenCongViec ?? string.Empty,
-                    TenDanhMucCV = x.dm.TenDanhMucCV ?? $"Danh mục {x.dm.MaDanhMucCV}",
-                    TrangThaiCongViec = x.cv.TrangThaiCongViec ?? string.Empty,
-                    NgayTaoCongViec = x.cv.NgayTaoCongViec,
-                    NgayKetThucDuKien = x.cv.NgayKetThucCVDuKien
+                    MaCongViec = x.MaCongViec,
+                    TenCongViec = x.TenCongViec ?? string.Empty,
+                    TenDanhMucCV = x.TenDanhMucCV ?? $"Danh mục {x.MaDanhMucCV}",
+                    TrangThaiCongViec = x.TrangThaiCongViec ?? string.Empty,
+                    NgayTaoCongViec = x.NgayTaoCongViec,
+                    NgayKetThucDuKien = x.NgayKetThucCVDuKien,
+                    NgayKetThucThucTe = x.NgayKetThucCVThucTe
                 })
-                .ToListAsync();
+                .ToList();
 
+            foreach (var congViec in congViecGanDay)
+            {
+                GanTinhTrangThoiHanCongViec(congViec, now);
+            }
+
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
             var deadlineGanNhat = await queryCongViec
                 .Where(x => x.cv.NgayKetThucCVDuKien.HasValue
                             && !trangThaiHoanThanh.Contains(x.cv.TrangThaiCongViec ?? string.Empty))
@@ -398,7 +508,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             if (deadlineGanNhat?.NgayKetThucDuKien != null)
             {
-                deadlineGanNhat.SoNgayConLai = (deadlineGanNhat.NgayKetThucDuKien.Value.Date - DateTime.Today).Days;
+                deadlineGanNhat.SoNgayConLai = (int)Math.Floor((deadlineGanNhat.NgayKetThucDuKien.Value - now).TotalDays);
             }
 
             var tongNganSachDaDuyet = await _context.NganSach
@@ -564,14 +674,22 @@ namespace QuanLyDuAn.Services.Implementations
                 }
             }
 
+            var congViecVuotHanDuAn = duAn.NgayKetThucDuAn.HasValue
+                ? congViecThongKe.Count(x =>
+                    TrangThai.LaHoanThanhCongViec(x.TrangThaiCongViec)
+                    && x.NgayKetThucCVThucTe.HasValue
+                    && x.NgayKetThucCVThucTe.Value > duAn.NgayKetThucDuAn.Value)
+                : 0;
+
             var deadlineSource = new DuAnViewModel
             {
                 TrangThaiDuAn = duAn.TrangThaiDuAn ?? string.Empty,
                 NgayKetThucDuAn = duAn.NgayKetThucDuAn,
                 NgayHoanThanhThucTeDuAn = duAn.NgayHoanThanhThucTeDuAn,
-                SoCongViecTre = congViecTreHan
+                SoCongViecTre = congViecTreHan,
+                SoCongViecVuotHanDuAn = congViecVuotHanDuAn
             };
-            DuAnDeadlineStatusHelper.Apply(deadlineSource, today);
+            DuAnDeadlineStatusHelper.Apply(deadlineSource, now);
 
             return new DuAnChiTietViewModel
             {
@@ -617,10 +735,18 @@ namespace QuanLyDuAn.Services.Implementations
                     CongViecHoanThanh = congViecHoanThanh,
                     CongViecDangThucHien = congViecDangThucHien,
                     CongViecTreHan = congViecTreHan,
+                    CongViecDangQuaHan = congViecDangQuaHan,
+                    CongViecHoanThanhDungHan = congViecHoanThanhDungHan,
+                    CongViecHoanThanhTre = congViecHoanThanhTre,
+                    CongViecHoanThanhThieuDuLieuNgay = congViecHoanThanhThieuDuLieuNgay,
+                    CongViecBiCanTro = congViecBiCanTro,
+                    CongViecChoXacNhan = congViecChoXacNhan,
                     CongViecTamDung = congViecTamDung,
                     CongViecChuaBatDau = congViecChuaBatDau,
                     TiLeHoanThanh = tiLeHoanThanh,
-                    TiLeHoanThanhCap = tiLeHoanThanhCap
+                    TiLeHoanThanhCap = tiLeHoanThanhCap,
+                    TyLeHoanThanhDungHan = tyLeHoanThanhDungHan,
+                    TyLeHoanThanhDungHanCap = tyLeHoanThanhDungHanCap
                 },
                 NganSachTongHop = new DuAnBudgetSummaryViewModel
                 {
@@ -1344,10 +1470,108 @@ namespace QuanLyDuAn.Services.Implementations
 
         #region Helper Methods
 
+        private static void GanTinhTrangThoiHanCongViec(DuAnRecentWorkItemViewModel congViec, DateTime homNay)
+        {
+            var laHoanThanh = TrangThai.LaHoanThanhCongViec(congViec.TrangThaiCongViec);
+            var laChoXacNhan = TrangThai.EqualsValue(congViec.TrangThaiCongViec, TrangThai.ChoXacNhanHoanThanh);
+
+            if (TrangThai.EqualsValue(congViec.TrangThaiCongViec, TrangThai.DaHuy))
+            {
+                congViec.MaTinhTrangThoiHan = "khong-danh-gia";
+                congViec.TinhTrangThoiHan = "Không đánh giá";
+                congViec.CssTinhTrangThoiHan = "is-neutral";
+                return;
+            }
+
+            if (laHoanThanh)
+            {
+                GanKetQuaHoanThanhCongViec(congViec, "Hoàn thành");
+                return;
+            }
+
+            if (laChoXacNhan && congViec.NgayKetThucThucTe.HasValue)
+            {
+                GanKetQuaHoanThanhCongViec(congViec, "Hoàn tất");
+                if (congViec.CssTinhTrangThoiHan == "is-completed-on-time")
+                {
+                    congViec.TinhTrangThoiHan = "Hoàn tất đúng hạn, chờ xác nhận";
+                    congViec.CssTinhTrangThoiHan = "is-pending";
+                }
+                else if (congViec.CssTinhTrangThoiHan == "is-completed-late")
+                {
+                    congViec.TinhTrangThoiHan = $"Hoàn tất trễ {congViec.SoNgayTre} ngày, chờ xác nhận";
+                    congViec.CssTinhTrangThoiHan = "is-pending-late";
+                }
+
+                return;
+            }
+
+            if (!congViec.NgayKetThucDuKien.HasValue)
+            {
+                congViec.MaTinhTrangThoiHan = "thieu-du-lieu";
+                congViec.TinhTrangThoiHan = "Chưa có hạn";
+                congViec.CssTinhTrangThoiHan = "is-missing";
+                return;
+            }
+
+            var soGioConLai = (congViec.NgayKetThucDuKien.Value - homNay).TotalHours;
+            if (soGioConLai < 0)
+            {
+                congViec.SoNgayTre = TinhSoNgayTre(congViec.NgayKetThucDuKien.Value, homNay);
+                congViec.MaTinhTrangThoiHan = "dang-qua-han";
+                congViec.TinhTrangThoiHan = $"Đang quá hạn {congViec.SoNgayTre} ngày";
+                congViec.CssTinhTrangThoiHan = "is-overdue";
+                return;
+            }
+
+            if (soGioConLai < 24)
+            {
+                congViec.MaTinhTrangThoiHan = "den-han-hom-nay";
+                congViec.TinhTrangThoiHan = "Đến hạn hôm nay";
+                congViec.CssTinhTrangThoiHan = "is-near";
+                return;
+            }
+
+            congViec.MaTinhTrangThoiHan = "con-han";
+            congViec.TinhTrangThoiHan = "Còn hạn";
+            congViec.CssTinhTrangThoiHan = "is-on-track";
+        }
+
+        private static void GanKetQuaHoanThanhCongViec(DuAnRecentWorkItemViewModel congViec, string prefix)
+        {
+            if (!congViec.NgayKetThucDuKien.HasValue || !congViec.NgayKetThucThucTe.HasValue)
+            {
+                congViec.MaTinhTrangThoiHan = "thieu-du-lieu";
+                congViec.TinhTrangThoiHan = "Chưa đủ dữ liệu";
+                congViec.CssTinhTrangThoiHan = "is-missing";
+                return;
+            }
+
+            var soNgayTre = TinhSoNgayTre(congViec.NgayKetThucDuKien.Value, congViec.NgayKetThucThucTe.Value);
+            if (soNgayTre <= 0)
+            {
+                congViec.MaTinhTrangThoiHan = "hoan-thanh-dung-han";
+                congViec.TinhTrangThoiHan = $"{prefix} đúng hạn";
+                congViec.CssTinhTrangThoiHan = "is-completed-on-time";
+                return;
+            }
+
+            congViec.SoNgayTre = soNgayTre;
+            congViec.MaTinhTrangThoiHan = "hoan-thanh-tre";
+            congViec.TinhTrangThoiHan = $"{prefix} trễ {soNgayTre} ngày";
+            congViec.CssTinhTrangThoiHan = "is-completed-late";
+        }
+
+        private static int TinhSoNgayTre(DateTime han, DateTime thucTe)
+        {
+            var soNgay = (thucTe - han).TotalDays;
+            return soNgay > 0 ? Math.Max(1, (int)Math.Ceiling(soNgay)) : 0;
+        }
+
         private IQueryable<DuAnViewModel> ApplyDeadlineFilter(
             IQueryable<DuAnViewModel> query,
             string? locTinhTrangThoiHan,
-            DateTime today)
+            DateTime now)
         {
             var filter = DuAnDeadlineStatusHelper.NormalizeFilter(locTinhTrangThoiHan);
             if (filter == null)
@@ -1358,20 +1582,21 @@ namespace QuanLyDuAn.Services.Implementations
             var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
             var trangThaiLuuTru = TrangThai.GetCommonStatusVariants(TrangThai.LuuTru);
             var trangThaiDaHuy = TrangThai.GetCommonStatusVariants(TrangThai.DaHuy);
-            var maDuAnCoCongViecTre = TaoQueryMaDuAnCoCongViecTre(today);
+            var maDuAnCoCongViecTre = TaoQueryMaDuAnCoCongViecTre(now);
+            var maDuAnCoCongViecVuotHanDuAn = TaoQueryMaDuAnCoCongViecVuotHanDuAn();
 
             return filter switch
             {
                 DuAnDeadlineStatusHelper.FilterDangQuaHan => query.Where(x =>
                     x.NgayKetThucDuAn.HasValue
-                    && x.NgayKetThucDuAn.Value.Date < today.Date
+                    && x.NgayKetThucDuAn.Value < now
                     && !trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
                     && !trangThaiLuuTru.Contains(x.TrangThaiDuAn)
                     && !trangThaiDaHuy.Contains(x.TrangThaiDuAn)),
 
                 DuAnDeadlineStatusHelper.FilterCoCongViecTre => query.Where(x =>
                     x.NgayKetThucDuAn.HasValue
-                    && x.NgayKetThucDuAn.Value.Date >= today.Date
+                    && x.NgayKetThucDuAn.Value >= now
                     && !trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
                     && !trangThaiLuuTru.Contains(x.TrangThaiDuAn)
                     && !trangThaiDaHuy.Contains(x.TrangThaiDuAn)
@@ -1380,20 +1605,22 @@ namespace QuanLyDuAn.Services.Implementations
                 DuAnDeadlineStatusHelper.FilterHoanThanhTre => query.Where(x =>
                     x.NgayKetThucDuAn.HasValue
                     && x.NgayHoanThanhThucTeDuAn.HasValue
-                    && x.NgayHoanThanhThucTeDuAn.Value.Date > x.NgayKetThucDuAn.Value.Date
+                    && x.NgayHoanThanhThucTeDuAn.Value > x.NgayKetThucDuAn.Value
                     && (trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
-                        || trangThaiLuuTru.Contains(x.TrangThaiDuAn))),
+                        || trangThaiLuuTru.Contains(x.TrangThaiDuAn))
+                    && maDuAnCoCongViecTre.Contains(x.MaDuAn)
+                    && maDuAnCoCongViecVuotHanDuAn.Contains(x.MaDuAn)),
 
                 DuAnDeadlineStatusHelper.FilterHoanThanhDungHan => query.Where(x =>
                     x.NgayKetThucDuAn.HasValue
                     && x.NgayHoanThanhThucTeDuAn.HasValue
-                    && x.NgayHoanThanhThucTeDuAn.Value.Date <= x.NgayKetThucDuAn.Value.Date
+                    && x.NgayHoanThanhThucTeDuAn.Value <= x.NgayKetThucDuAn.Value
                     && (trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
                         || trangThaiLuuTru.Contains(x.TrangThaiDuAn))),
 
                 DuAnDeadlineStatusHelper.FilterConHan => query.Where(x =>
                     x.NgayKetThucDuAn.HasValue
-                    && x.NgayKetThucDuAn.Value.Date >= today.Date
+                    && x.NgayKetThucDuAn.Value >= now
                     && !trangThaiHoanThanh.Contains(x.TrangThaiDuAn)
                     && !trangThaiLuuTru.Contains(x.TrangThaiDuAn)
                     && !trangThaiDaHuy.Contains(x.TrangThaiDuAn)
@@ -1403,7 +1630,7 @@ namespace QuanLyDuAn.Services.Implementations
             };
         }
 
-        private IQueryable<int> TaoQueryMaDuAnCoCongViecTre(DateTime today)
+        private IQueryable<int> TaoQueryMaDuAnCoCongViecTre(DateTime now)
         {
             var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
 
@@ -1414,9 +1641,26 @@ namespace QuanLyDuAn.Services.Implementations
                           && cv.NgayKetThucCVDuKien.HasValue
                           && ((trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
                                && cv.NgayKetThucCVThucTe.HasValue
-                               && cv.NgayKetThucCVThucTe.Value.Date > cv.NgayKetThucCVDuKien.Value.Date)
+                               && cv.NgayKetThucCVThucTe.Value > cv.NgayKetThucCVDuKien.Value)
                               || (!trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
-                                  && cv.NgayKetThucCVDuKien.Value.Date < today.Date))
+                                  && cv.NgayKetThucCVDuKien.Value < now))
+                    select dm.MaDuAn).Distinct();
+        }
+
+        private IQueryable<int> TaoQueryMaDuAnCoCongViecVuotHanDuAn()
+        {
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+
+            return (from cv in _context.CongViec
+                    join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                    join da in _context.DuAn on dm.MaDuAn equals da.MaDuAn
+                    where cv.IsDeleted != true
+                          && dm.IsDeleted != true
+                          && da.IsDeleted != true
+                          && da.NgayKetThucDuAn.HasValue
+                          && cv.NgayKetThucCVThucTe.HasValue
+                          && trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                          && cv.NgayKetThucCVThucTe.Value > da.NgayKetThucDuAn.Value
                     select dm.MaDuAn).Distinct();
         }
 
@@ -1427,7 +1671,7 @@ namespace QuanLyDuAn.Services.Implementations
                 return;
             }
 
-            var today = DateTime.Today;
+            var now = DateTime.Now;
             var maDuAn = items.Select(x => x.MaDuAn).Distinct().ToList();
             var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
 
@@ -1439,9 +1683,9 @@ namespace QuanLyDuAn.Services.Implementations
                                                      && cv.NgayKetThucCVDuKien.HasValue
                                                      && ((trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
                                                           && cv.NgayKetThucCVThucTe.HasValue
-                                                          && cv.NgayKetThucCVThucTe.Value.Date > cv.NgayKetThucCVDuKien.Value.Date)
+                                                          && cv.NgayKetThucCVThucTe.Value > cv.NgayKetThucCVDuKien.Value)
                                                          || (!trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
-                                                             && cv.NgayKetThucCVDuKien.Value.Date < today))
+                                                             && cv.NgayKetThucCVDuKien.Value < now))
                                                group cv by dm.MaDuAn into g
                                                select new
                                                {
@@ -1450,12 +1694,34 @@ namespace QuanLyDuAn.Services.Implementations
                                                })
                 .ToDictionaryAsync(x => x.MaDuAn, x => x.SoCongViecTre);
 
+            var soCongViecVuotHanTheoDuAn = await (from cv in _context.CongViec
+                                                   join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                                                   join da in _context.DuAn on dm.MaDuAn equals da.MaDuAn
+                                                   where maDuAn.Contains(dm.MaDuAn)
+                                                         && cv.IsDeleted != true
+                                                         && dm.IsDeleted != true
+                                                         && da.IsDeleted != true
+                                                         && da.NgayKetThucDuAn.HasValue
+                                                         && cv.NgayKetThucCVThucTe.HasValue
+                                                         && trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                                                         && cv.NgayKetThucCVThucTe.Value > da.NgayKetThucDuAn.Value
+                                                   group cv by dm.MaDuAn into g
+                                                   select new
+                                                   {
+                                                       MaDuAn = g.Key,
+                                                       SoCongViecVuotHanDuAn = g.Count()
+                                                   })
+                .ToDictionaryAsync(x => x.MaDuAn, x => x.SoCongViecVuotHanDuAn);
+
             foreach (var item in items)
             {
                 item.SoCongViecTre = soCongViecTreTheoDuAn.TryGetValue(item.MaDuAn, out var soCongViecTre)
                     ? soCongViecTre
                     : 0;
-                DuAnDeadlineStatusHelper.Apply(item, today);
+                item.SoCongViecVuotHanDuAn = soCongViecVuotHanTheoDuAn.TryGetValue(item.MaDuAn, out var soCongViecVuotHanDuAn)
+                    ? soCongViecVuotHanDuAn
+                    : 0;
+                DuAnDeadlineStatusHelper.Apply(item, now);
             }
         }
 
@@ -1591,7 +1857,7 @@ namespace QuanLyDuAn.Services.Implementations
             return TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn)
                 && duAn.NgayKetThucDuAn.HasValue
                 && duAn.NgayHoanThanhThucTeDuAn.HasValue
-                && duAn.NgayHoanThanhThucTeDuAn.Value.Date <= duAn.NgayKetThucDuAn.Value.Date;
+                && duAn.NgayHoanThanhThucTeDuAn.Value <= duAn.NgayKetThucDuAn.Value;
         }
 
         private async Task<bool> CanDeleteNoRelatedDataAsync(int maDuAn)

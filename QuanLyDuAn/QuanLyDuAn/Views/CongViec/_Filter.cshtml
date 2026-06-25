@@ -1,5 +1,6 @@
 ﻿@model QuanLyDuAn.ViewModels.CongViec.CongViecPageViewModel
 @using QuanLyDuAn.Constants
+@using QuanLyDuAn.ViewModels.CongViec
 
 <form asp-action="Index" method="get" class="workflow-filter">
     <div class="workflow-filter-head">
@@ -40,6 +41,18 @@
                 <option value="@TrangThai.TamDung" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.TamDung))">@TrangThai.TamDungHienThi</option>
                 <option value="@TrangThai.BiCanCan" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.BiCanCan))">@TrangThai.BiCanCanHienThi</option>
                 <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
+            </select>
+        </div>
+
+        <div class="filter-field">
+            <label for="locTinhTrangThoiHan">Tình trạng thời hạn</label>
+            <select id="locTinhTrangThoiHan" name="locTinhTrangThoiHan" class="form-select">
+                <option value="">Tất cả tình trạng</option>
+                <option value="@CongViecDeadlineStatus.FilterQuaHan" selected="@(Model.LocTinhTrangThoiHan == CongViecDeadlineStatus.FilterQuaHan)">Đang quá hạn</option>
+                <option value="@CongViecDeadlineStatus.FilterChoXacNhanTre" selected="@(Model.LocTinhTrangThoiHan == CongViecDeadlineStatus.FilterChoXacNhanTre)">Chờ xác nhận trễ</option>
+                <option value="@CongViecDeadlineStatus.FilterHoanThanhTre" selected="@(Model.LocTinhTrangThoiHan == CongViecDeadlineStatus.FilterHoanThanhTre)">Hoàn thành trễ</option>
+                <option value="@CongViecDeadlineStatus.FilterHoanThanhDungHan" selected="@(Model.LocTinhTrangThoiHan == CongViecDeadlineStatus.FilterHoanThanhDungHan)">Hoàn thành đúng hạn</option>
+                <option value="@CongViecDeadlineStatus.FilterConHan" selected="@(Model.LocTinhTrangThoiHan == CongViecDeadlineStatus.FilterConHan)">Còn hạn</option>
             </select>
         </div>
     </div>

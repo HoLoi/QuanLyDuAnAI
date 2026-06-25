@@ -1,0 +1,283 @@
+{
+  "model_file": "decision_tree_reason_20260623_135044.joblib",
+  "model_type": "DecisionTreeClassifier",
+  "algorithm": "DecisionTreeClassifier",
+  "model_category": "NguyenNhan",
+  "accuracy": 0.8571428571428571,
+  "train_time": "2026-06-23T13:50:44.703033Z",
+  "train_time_ms": 8,
+  "feature_list": [
+    "SoNhanVienDuAn",
+    "TongSoCongViec",
+    "SoCongViecTre",
+    "TyLeCongViecTre",
+    "ChiPhiDuKien",
+    "ChiPhiThucTe",
+    "ChenhLechChiPhi",
+    "SoLanThayDoiNhanSu",
+    "SoLanThayDoiQuanLy",
+    "SoNgayTreTienDo",
+    "SoDeXuatCongViecChoDuyet",
+    "SoDeXuatCongViecBiTuChoi",
+    "ThoiGianDuyetCongViecTrungBinh",
+    "SoDeXuatNganSachChoDuyet",
+    "SoDeXuatNganSachBiTuChoi",
+    "ThoiGianDuyetNganSachTrungBinh",
+    "SoBaoCaoTienDoChoDuyet",
+    "SoBaoCaoTienDoBiTuChoi",
+    "SoBaoCaoTienDoYeuCauBoSung",
+    "TyLeBaoCaoTienDoBiTuChoi",
+    "SoLanCapNhatTienDo",
+    "SoNgayChamCapNhatTienDo"
+  ],
+  "label_column": "MaDMNguyenNhan",
+  "class_distribution": {
+    "2": 49,
+    "1": 13,
+    "6": 5
+  },
+  "valid_rows_before_class_filter": 67,
+  "used_rows": 67,
+  "accumulating_rows": 0,
+  "eligible_class_count": 3,
+  "accumulating_class_count": 0,
+  "used_class_distribution": {
+    "1": 13,
+    "2": 49,
+    "6": 5
+  },
+  "dropped_class_distribution": {},
+  "feature_importance": {
+    "SoNhanVienDuAn": 0.0,
+    "TongSoCongViec": 0.0,
+    "SoCongViecTre": 0.0,
+    "TyLeCongViecTre": 0.0,
+    "ChiPhiDuKien": 0.0,
+    "ChiPhiThucTe": 0.0791382252559727,
+    "ChenhLechChiPhi": 0.0,
+    "SoLanThayDoiNhanSu": 0.0,
+    "SoLanThayDoiQuanLy": 0.10227093725387244,
+    "SoNgayTreTienDo": 0.0,
+    "SoDeXuatCongViecChoDuyet": 0.0,
+    "SoDeXuatCongViecBiTuChoi": 0.7654630778777537,
+    "ThoiGianDuyetCongViecTrungBinh": 0.05312775961240118,
+    "SoDeXuatNganSachChoDuyet": 0.0,
+    "SoDeXuatNganSachBiTuChoi": 0.0,
+    "ThoiGianDuyetNganSachTrungBinh": 0.0,
+    "SoBaoCaoTienDoChoDuyet": 0.0,
+    "SoBaoCaoTienDoBiTuChoi": 0.0,
+    "SoBaoCaoTienDoYeuCauBoSung": 0.0,
+    "TyLeBaoCaoTienDoBiTuChoi": 0.0,
+    "SoLanCapNhatTienDo": 0.0,
+    "SoNgayChamCapNhatTienDo": 0.0
+  },
+  "classification_report": {
+    "1": {
+      "precision": 0.6666666666666666,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.6666666666666666,
+      "support": 3.0
+    },
+    "2": {
+      "precision": 0.9,
+      "recall": 0.9,
+      "f1-score": 0.9,
+      "support": 10.0
+    },
+    "6": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "accuracy": 0.8571428571428571,
+    "macro avg": {
+      "precision": 0.8555555555555555,
+      "recall": 0.8555555555555555,
+      "f1-score": 0.8555555555555555,
+      "support": 14.0
+    },
+    "weighted avg": {
+      "precision": 0.8571428571428571,
+      "recall": 0.8571428571428571,
+      "f1-score": 0.8571428571428571,
+      "support": 14.0
+    }
+  },
+  "precision_macro": 0.8555555555555555,
+  "recall_macro": 0.8555555555555555,
+  "f1_macro": 0.8555555555555555,
+  "precision_weighted": 0.8571428571428571,
+  "recall_weighted": 0.8571428571428571,
+  "f1_weighted": 0.8571428571428571,
+  "sklearn_version": "1.7.2",
+  "python_version": "3.10.11",
+  "train_size": 53,
+  "test_size": 14,
+  "requested_test_size": 0.2,
+  "effective_test_size": 0.208955223880597,
+  "test_size_was_adjusted": false,
+  "confusion_matrix": [
+    [
+      2,
+      1,
+      0
+    ],
+    [
+      1,
+      9,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "confusion_matrix_labels": [
+    1,
+    2,
+    6
+  ],
+  "decision_tree_text": "|--- SoDeXuatCongViecBiTuChoi <= 0.50\n|   |--- ChiPhiThucTe <= 46575000.00\n|   |   |--- class: 6\n|   |--- ChiPhiThucTe >  46575000.00\n|   |   |--- class: 1\n|--- SoDeXuatCongViecBiTuChoi >  0.50\n|   |--- SoLanThayDoiQuanLy <= 0.50\n|   |   |--- ThoiGianDuyetCongViecTrungBinh <= 0.34\n|   |   |   |--- class: 2\n|   |   |--- ThoiGianDuyetCongViecTrungBinh >  0.34\n|   |   |   |--- SoDeXuatCongViecBiTuChoi <= 2.00\n|   |   |   |   |--- class: 1\n|   |   |   |--- SoDeXuatCongViecBiTuChoi >  2.00\n|   |   |   |   |--- class: 2\n|   |--- SoLanThayDoiQuanLy >  0.50\n|   |   |--- SoDeXuatCongViecBiTuChoi <= 2.00\n|   |   |   |--- class: 6\n|   |   |--- SoDeXuatCongViecBiTuChoi >  2.00\n|   |   |   |--- class: 2\n",
+  "requested_by_user_id": "183fc6cc4618405baffeb6078f3b5a08",
+  "requested_by_user_name": "admin",
+  "train_note": "train 520 du an Fix",
+  "created_at": "2026-06-23T13:50:44.708015Z",
+  "modelType": "NguyenNhan",
+  "modelFile": "decision_tree_reason_20260623_135044.joblib",
+  "featureList": [
+    "SoNhanVienDuAn",
+    "TongSoCongViec",
+    "SoCongViecTre",
+    "TyLeCongViecTre",
+    "ChiPhiDuKien",
+    "ChiPhiThucTe",
+    "ChenhLechChiPhi",
+    "SoLanThayDoiNhanSu",
+    "SoLanThayDoiQuanLy",
+    "SoNgayTreTienDo",
+    "SoDeXuatCongViecChoDuyet",
+    "SoDeXuatCongViecBiTuChoi",
+    "ThoiGianDuyetCongViecTrungBinh",
+    "SoDeXuatNganSachChoDuyet",
+    "SoDeXuatNganSachBiTuChoi",
+    "ThoiGianDuyetNganSachTrungBinh",
+    "SoBaoCaoTienDoChoDuyet",
+    "SoBaoCaoTienDoBiTuChoi",
+    "SoBaoCaoTienDoYeuCauBoSung",
+    "TyLeBaoCaoTienDoBiTuChoi",
+    "SoLanCapNhatTienDo",
+    "SoNgayChamCapNhatTienDo"
+  ],
+  "labelColumn": "MaDMNguyenNhan",
+  "classDistribution": {
+    "2": 49,
+    "1": 13,
+    "6": 5
+  },
+  "validRowsBeforeClassFilter": 67,
+  "usedRows": 67,
+  "accumulatingRows": 0,
+  "eligibleClassCount": 3,
+  "accumulatingClassCount": 0,
+  "usedClassDistribution": {
+    "1": 13,
+    "2": 49,
+    "6": 5
+  },
+  "droppedClassDistribution": {},
+  "featureImportance": {
+    "SoNhanVienDuAn": 0.0,
+    "TongSoCongViec": 0.0,
+    "SoCongViecTre": 0.0,
+    "TyLeCongViecTre": 0.0,
+    "ChiPhiDuKien": 0.0,
+    "ChiPhiThucTe": 0.0791382252559727,
+    "ChenhLechChiPhi": 0.0,
+    "SoLanThayDoiNhanSu": 0.0,
+    "SoLanThayDoiQuanLy": 0.10227093725387244,
+    "SoNgayTreTienDo": 0.0,
+    "SoDeXuatCongViecChoDuyet": 0.0,
+    "SoDeXuatCongViecBiTuChoi": 0.7654630778777537,
+    "ThoiGianDuyetCongViecTrungBinh": 0.05312775961240118,
+    "SoDeXuatNganSachChoDuyet": 0.0,
+    "SoDeXuatNganSachBiTuChoi": 0.0,
+    "ThoiGianDuyetNganSachTrungBinh": 0.0,
+    "SoBaoCaoTienDoChoDuyet": 0.0,
+    "SoBaoCaoTienDoBiTuChoi": 0.0,
+    "SoBaoCaoTienDoYeuCauBoSung": 0.0,
+    "TyLeBaoCaoTienDoBiTuChoi": 0.0,
+    "SoLanCapNhatTienDo": 0.0,
+    "SoNgayChamCapNhatTienDo": 0.0
+  },
+  "classificationReport": {
+    "1": {
+      "precision": 0.6666666666666666,
+      "recall": 0.6666666666666666,
+      "f1-score": 0.6666666666666666,
+      "support": 3.0
+    },
+    "2": {
+      "precision": 0.9,
+      "recall": 0.9,
+      "f1-score": 0.9,
+      "support": 10.0
+    },
+    "6": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1.0
+    },
+    "accuracy": 0.8571428571428571,
+    "macro avg": {
+      "precision": 0.8555555555555555,
+      "recall": 0.8555555555555555,
+      "f1-score": 0.8555555555555555,
+      "support": 14.0
+    },
+    "weighted avg": {
+      "precision": 0.8571428571428571,
+      "recall": 0.8571428571428571,
+      "f1-score": 0.8571428571428571,
+      "support": 14.0
+    }
+  },
+  "precisionMacro": 0.8555555555555555,
+  "recallMacro": 0.8555555555555555,
+  "f1Macro": 0.8555555555555555,
+  "precisionWeighted": 0.8571428571428571,
+  "recallWeighted": 0.8571428571428571,
+  "f1Weighted": 0.8571428571428571,
+  "trainSize": 53,
+  "testSize": 14,
+  "requestedTestSize": 0.2,
+  "effectiveTestSize": 0.208955223880597,
+  "testSizeWasAdjusted": false,
+  "confusionMatrix": [
+    [
+      2,
+      1,
+      0
+    ],
+    [
+      1,
+      9,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "confusionMatrixLabels": [
+    1,
+    2,
+    6
+  ],
+  "decisionTreeText": "|--- SoDeXuatCongViecBiTuChoi <= 0.50\n|   |--- ChiPhiThucTe <= 46575000.00\n|   |   |--- class: 6\n|   |--- ChiPhiThucTe >  46575000.00\n|   |   |--- class: 1\n|--- SoDeXuatCongViecBiTuChoi >  0.50\n|   |--- SoLanThayDoiQuanLy <= 0.50\n|   |   |--- ThoiGianDuyetCongViecTrungBinh <= 0.34\n|   |   |   |--- class: 2\n|   |   |--- ThoiGianDuyetCongViecTrungBinh >  0.34\n|   |   |   |--- SoDeXuatCongViecBiTuChoi <= 2.00\n|   |   |   |   |--- class: 1\n|   |   |   |--- SoDeXuatCongViecBiTuChoi >  2.00\n|   |   |   |   |--- class: 2\n|   |--- SoLanThayDoiQuanLy >  0.50\n|   |   |--- SoDeXuatCongViecBiTuChoi <= 2.00\n|   |   |   |--- class: 6\n|   |   |--- SoDeXuatCongViecBiTuChoi >  2.00\n|   |   |   |--- class: 2\n",
+  "createdAt": "2026-06-23T13:50:44.708015Z",
+  "trainNote": "train 520 du an Fix"
+}

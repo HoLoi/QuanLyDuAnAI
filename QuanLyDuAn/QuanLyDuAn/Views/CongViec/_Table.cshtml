@@ -9,6 +9,7 @@
     DateTime? tuNgay = ViewBag.TuNgay as DateTime?;
     DateTime? denNgay = ViewBag.DenNgay as DateTime?;
     string? locTheoNgay = ViewBag.LocTheoNgay as string;
+    string? locTinhTrangThoiHan = ViewBag.LocTinhTrangThoiHan as string;
 
     bool canWorkflowMutate = permissions.Contains(Permissions.TienDo.Duyet)
                              || permissions.Contains(Permissions.DuyetDeXuatCongViec.Duyet);
@@ -100,18 +101,30 @@ else
                         <td class="col-time">
                             <div class="meta-line">
                                 <span class="meta-label">Bắt đầu:</span>
-                                <span>@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</span>
+                                <span>@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy HH:mm")</span>
                             </div>
                             <div class="meta-line">
-                                <span class="meta-label">Kết thúc:</span>
-                                <span>@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</span>
+                                <span class="meta-label">Hạn:</span>
+                                <span class="@(item.IsQuaHan || item.IsHoanThanhTre ? "deadline-date-late" : string.Empty)">@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy HH:mm")</span>
                             </div>
+                            @if (item.NgayKetThucCVThucTe.HasValue)
+                            {
+                                <div class="meta-line">
+                                    <span class="meta-label">Hoàn tất:</span>
+                                    <span>@item.NgayKetThucCVThucTe?.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            }
                         </td>
                         <td class="col-status">
-                            <span class="workflow-badge @item.CssTrangThai">
-                                <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
-                                @item.TrangThaiHienThi
-                            </span>
+                            <div class="status-stack">
+                                <span class="workflow-badge @item.CssTrangThai">
+                                    <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                                    @item.TrangThaiHienThi
+                                </span>
+                                <span class="deadline-badge @item.CssTinhTrangThoiHan">
+                                    @item.TinhTrangThoiHan
+                                </span>
+                            </div>
                         </td>
                         <td class="col-assignment">
                             <span class="badge @GetAssignmentBadgeClass(item.SoNguoiDuocPhanCong)">
@@ -148,6 +161,7 @@ else
                                     <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
+                                    <input type="hidden" name="locTinhTrangThoiHan" value="@locTinhTrangThoiHan" />
                                     <button type="submit" class="btn btn-action btn-confirm">
                                         <i class="bi bi-check2-circle"></i>
                                         Xác nhận hoàn thành
@@ -164,6 +178,7 @@ else
                                     <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
+                                    <input type="hidden" name="locTinhTrangThoiHan" value="@locTinhTrangThoiHan" />
                                     <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do mở lại" required />
                                     <button type="submit" class="btn btn-action btn-reopen">
                                         <i class="bi bi-arrow-counterclockwise"></i>
@@ -187,10 +202,15 @@ else
                         <p class="task-mobile-id">Công việc #@item.MaCongViec</p>
                         <h3>@item.TenCongViec</h3>
                     </div>
-                    <span class="workflow-badge @item.CssTrangThai">
-                        <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
-                        @item.TrangThaiHienThi
-                    </span>
+                    <div class="task-mobile-status-stack">
+                        <span class="workflow-badge @item.CssTrangThai">
+                            <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                            @item.TrangThaiHienThi
+                        </span>
+                        <span class="deadline-badge @item.CssTinhTrangThoiHan">
+                            @item.TinhTrangThoiHan
+                        </span>
+                    </div>
                 </div>
 
                 <p class="task-mobile-desc">@item.MoTaCongViec</p>
@@ -202,8 +222,12 @@ else
                     <div><span>Chi phí</span><strong>@item.ChiPhiDaChi.ToString("N0")</strong></div>
                     <div><span>Phân công</span><strong>@GetAssignmentText(item.SoNguoiDuocPhanCong)</strong></div>
                     <div><span>Chi tiết công việc</span><strong>@GetDetailCountText(item.SoLuongChiTietCongViec)</strong></div>
-                    <div><span>Bắt đầu</span><strong>@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy")</strong></div>
-                    <div><span>Kết thúc dự kiến</span><strong>@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy")</strong></div>
+                    <div><span>Bắt đầu</span><strong>@item.NgayBatDauCongViec?.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                    <div><span>Hạn</span><strong class="@(item.IsQuaHan || item.IsHoanThanhTre ? "deadline-date-late" : string.Empty)">@item.NgayKetThucCVDuKien?.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                    @if (item.NgayKetThucCVThucTe.HasValue)
+                    {
+                        <div><span>Hoàn tất</span><strong>@item.NgayKetThucCVThucTe?.ToString("dd/MM/yyyy HH:mm")</strong></div>
+                    }
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(item.ThongDiepWorkflow))
@@ -236,6 +260,7 @@ else
                             <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
+                            <input type="hidden" name="locTinhTrangThoiHan" value="@locTinhTrangThoiHan" />
                             <button type="submit" class="btn btn-action btn-confirm w-100">
                                 <i class="bi bi-check2-circle"></i>
                                 Xác nhận hoàn thành
@@ -252,6 +277,7 @@ else
                             <input type="hidden" name="tuNgay" value="@tuNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="denNgay" value="@denNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="locTheoNgay" value="@locTheoNgay" />
+                            <input type="hidden" name="locTinhTrangThoiHan" value="@locTinhTrangThoiHan" />
                             <input type="text" name="lyDo" class="form-control form-control-sm" placeholder="Lý do mở lại" required />
                             <button type="submit" class="btn btn-action btn-reopen w-100">
                                 <i class="bi bi-arrow-counterclockwise"></i>

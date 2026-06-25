@@ -96,6 +96,7 @@ namespace QuanLyDuAn.Services.Implementations
             KiemTraQuyenTheoClaim(Permissions.DanhGiaDuAn.Xem);
             var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgayDanhGia, denNgayDanhGia);
             var denNgayDocQuyen = denNgayLoc?.AddDays(1);
+            var now = DateTime.Now;
 
             var currentUserId = await GetCurrentUserIdAsync();
             var roleFlags = await GetCurrentUserRoleFlagsAsync();
@@ -220,6 +221,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             var duAnIds = duAnRows.Select(x => x.MaDuAn).Distinct().ToList();
             var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var trangThaiChoXacNhanHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.ChoXacNhanHoanThanh);
 
             var thongKeCongViecRows = await (
                 from cv in _context.CongViec
@@ -249,9 +251,15 @@ namespace QuanLyDuAn.Services.Implementations
                             .FirstOrDefault(),
                         SoCongViecTre = g.Count(x =>
                             x.NgayKetThucCVDuKien.HasValue
-                            && x.NgayKetThucCVDuKien.Value < DateTime.Now
-                            && (x.TrangThaiCongViec == null
-                                || !trangThaiHoanThanh.Contains(x.TrangThaiCongViec)))
+                            && ((x.NgayKetThucCVThucTe.HasValue
+                                    && x.NgayKetThucCVThucTe.Value > x.NgayKetThucCVDuKien.Value
+                                    && x.TrangThaiCongViec != null
+                                    && (trangThaiHoanThanh.Contains(x.TrangThaiCongViec)
+                                        || trangThaiChoXacNhanHoanThanh.Contains(x.TrangThaiCongViec)))
+                                || (x.NgayKetThucCVDuKien.Value < now
+                                    && (x.TrangThaiCongViec == null
+                                        || (!trangThaiHoanThanh.Contains(x.TrangThaiCongViec)
+                                            && !trangThaiChoXacNhanHoanThanh.Contains(x.TrangThaiCongViec))))))
                     });
 
             var danhGiaRows = await (
@@ -1042,8 +1050,9 @@ namespace QuanLyDuAn.Services.Implementations
                 return thongKeRong;
             }
 
-            var homNay = DateTime.Now.Date;
+            var now = DateTime.Now;
             var trangThaiHoanThanhCongViec = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var trangThaiChoXacNhanHoanThanhCongViec = TrangThai.GetCommonStatusVariants(TrangThai.ChoXacNhanHoanThanh);
             var trangThaiBiCanTro = TrangThai.GetCommonStatusVariants(TrangThai.BiCanCan);
             var trangThaiChoDuyet = TrangThai.GetCommonStatusVariants(TrangThai.ChoDuyet);
             var trangThaiDaDuyet = TrangThai.GetCommonStatusVariants(TrangThai.DaDuyet);
@@ -1071,15 +1080,17 @@ namespace QuanLyDuAn.Services.Implementations
             var soCongViecChuaHoanThanh = Math.Max(0, soCongViec - soCongViecHoanThanh);
             var soCongViecDangTreHan = congViecRows.Count(x =>
                 x.NgayKetThucCVDuKien.HasValue
-                && x.NgayKetThucCVDuKien.Value.Date < homNay
+                && x.NgayKetThucCVDuKien.Value < now
                 && (x.TrangThaiCongViec == null
-                    || !trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec)));
+                    || (!trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec)
+                        && !trangThaiChoXacNhanHoanThanhCongViec.Contains(x.TrangThaiCongViec))));
             var soCongViecHoanThanhTreHan = congViecRows.Count(x =>
                 x.NgayKetThucCVDuKien.HasValue
                 && x.NgayKetThucCVThucTe.HasValue
-                && x.NgayKetThucCVThucTe.Value.Date > x.NgayKetThucCVDuKien.Value.Date
+                && x.NgayKetThucCVThucTe.Value > x.NgayKetThucCVDuKien.Value
                 && x.TrangThaiCongViec != null
-                && trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec));
+                && (trangThaiHoanThanhCongViec.Contains(x.TrangThaiCongViec)
+                    || trangThaiChoXacNhanHoanThanhCongViec.Contains(x.TrangThaiCongViec)));
             var tongCongViecTreHan = soCongViecDangTreHan + soCongViecHoanThanhTreHan;
             var tyLeCongViecTreHan = TinhTyLe(tongCongViecTreHan, soCongViec);
             var ngayKetThucThucTeFallback = congViecRows
@@ -1113,11 +1124,7 @@ namespace QuanLyDuAn.Services.Implementations
             var soChiTietBiCanTro = chiTietRows.Count(x =>
                 x.TrangThaiCTCV != null
                 && trangThaiBiCanTro.Contains(x.TrangThaiCTCV));
-            var soChiTietTreHan = chiTietRows.Count(x =>
-                x.NgayKetThucCTCV.HasValue
-                && x.NgayKetThucCTCV.Value.Date < homNay
-                && (x.TrangThaiCTCV == null
-                    || !trangThaiHoanThanhCongViec.Contains(x.TrangThaiCTCV)));
+            var soChiTietTreHan = 0;
             var tyLeChiTietHoanThanh = TinhTyLe(soChiTietHoanThanh, soChiTiet);
 
             var baoCaoTienDoRows = await _context.TienDoCongViec
@@ -1125,7 +1132,8 @@ namespace QuanLyDuAn.Services.Implementations
                 .Select(x => new
                 {
                     x.TrangThaiTienDo,
-                    x.ThoiGianCapNhat
+                    x.ThoiGianCapNhat,
+                    x.MaTienDo
                 })
                 .ToListAsync(cancellationToken);
             var soBaoCaoTienDo = baoCaoTienDoRows.Count;
@@ -1136,22 +1144,20 @@ namespace QuanLyDuAn.Services.Implementations
             var tyLeBaoCaoTienDoBiTuChoi = TinhTyLe(soBaoCaoTienDoBiTuChoi, soBaoCaoTienDo);
             var lanBaoCaoMoiNhat = baoCaoTienDoRows
                 .Where(x => x.ThoiGianCapNhat.HasValue)
+                .OrderByDescending(x => x.ThoiGianCapNhat)
+                .ThenByDescending(x => x.MaTienDo)
                 .Select(x => x.ThoiGianCapNhat)
-                .OrderByDescending(x => x)
                 .FirstOrDefault();
             var soBaoCaoMoiNhat = 0;
             if (lanBaoCaoMoiNhat.HasValue)
             {
-                var batDauNgay = lanBaoCaoMoiNhat.Value.Date;
-                var ketThucNgay = batDauNgay.AddDays(1);
                 soBaoCaoMoiNhat = baoCaoTienDoRows.Count(x =>
                     x.ThoiGianCapNhat.HasValue
-                    && x.ThoiGianCapNhat.Value >= batDauNgay
-                    && x.ThoiGianCapNhat.Value < ketThucNgay);
+                    && x.ThoiGianCapNhat.Value == lanBaoCaoMoiNhat.Value);
             }
-            var mocChamCapNhatTienDo = duAn.NgayKetThucDuAn?.Date ?? homNay;
+            var mocChamCapNhatTienDo = duAn.NgayKetThucDuAn ?? now;
             var soNgayChamCapNhatTienDo = lanBaoCaoMoiNhat.HasValue
-                ? Math.Max(0, (mocChamCapNhatTienDo - lanBaoCaoMoiNhat.Value.Date).Days)
+                ? TinhSoNgayTre(lanBaoCaoMoiNhat.Value, mocChamCapNhatTienDo)
                 : (int?)null;
 
             var tyLe = soCongViec <= 0 ? 0d : Math.Round((double)soCongViecHoanThanh / soCongViec * 100d, 2);
@@ -1258,7 +1264,7 @@ namespace QuanLyDuAn.Services.Implementations
                 PhanTramHoanThanh = Math.Clamp(duAn.PhanTramHoanThanh ?? 0, 0, 100),
                 TongCongViec = soCongViec,
                 CongViecHoanThanh = soCongViecHoanThanh,
-                CongViecTreHan = soCongViecDangTreHan,
+                CongViecTreHan = tongCongViecTreHan,
                 CongViecChuaHoanThanh = soCongViecChuaHoanThanh,
                 CongViecDangTreHan = soCongViecDangTreHan,
                 CongViecHoanThanhTreHan = soCongViecHoanThanhTreHan,
@@ -1497,41 +1503,47 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             thongKe.ChuaCoMocKetThucDuKien = false;
-            var homNay = DateTime.Now.Date;
-            var ngayDuKien = thongKe.NgayKetThucDuAn.Value.Date;
+            var now = DateTime.Now;
+            var ngayDuKien = thongKe.NgayKetThucDuAn.Value;
             var laDuAnHoanThanh = TrangThai.EqualsValue(thongKe.TrangThaiDuAn, TrangThai.HoanThanh)
                                   || TrangThai.EqualsValue(thongKe.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh)
                                   || thongKe.PhanTramHoanThanh >= 100;
 
             if (laDuAnHoanThanh && thongKe.NgayKetThucThucTeDuAn.HasValue)
             {
-                var doLechNgay = (thongKe.NgayKetThucThucTeDuAn.Value.Date - ngayDuKien).Days;
-                if (doLechNgay > 0)
+                var soNgayTre = TinhSoNgayTre(ngayDuKien, thongKe.NgayKetThucThucTeDuAn.Value);
+                if (soNgayTre > 0)
                 {
-                    thongKe.SoNgayQuaHan = doLechNgay;
+                    thongKe.SoNgayQuaHan = soNgayTre;
                     thongKe.TrangThaiThoiHanDuAn = TrangThaiThoiHanHoanThanhTreHan;
                 }
                 else
                 {
-                    thongKe.SoNgayConLai = Math.Abs(doLechNgay);
+                    thongKe.SoNgayConLai = Math.Max(0, (int)Math.Floor((ngayDuKien - thongKe.NgayKetThucThucTeDuAn.Value).TotalDays));
                     thongKe.TrangThaiThoiHanDuAn = TrangThaiThoiHanHoanThanhDungHan;
                 }
 
                 return;
             }
 
-            var soNgayConLai = (ngayDuKien - homNay).Days;
-            if (soNgayConLai < 0)
+            if (now > ngayDuKien)
             {
-                thongKe.SoNgayQuaHan = Math.Abs(soNgayConLai);
+                thongKe.SoNgayQuaHan = TinhSoNgayTre(ngayDuKien, now);
                 thongKe.TrangThaiThoiHanDuAn = TrangThaiThoiHanQuaHan;
                 return;
             }
 
+            var soNgayConLai = Math.Max(0, (int)Math.Floor((ngayDuKien - now).TotalDays));
             thongKe.SoNgayConLai = soNgayConLai;
             thongKe.TrangThaiThoiHanDuAn = soNgayConLai <= SoNgayCanhBaoSapDenHan
                 ? TrangThaiThoiHanSapDenHan
                 : TrangThaiThoiHanChuaDenHan;
+        }
+
+        private static int TinhSoNgayTre(DateTime han, DateTime thucTe)
+        {
+            var soNgay = (thucTe - han).TotalDays;
+            return soNgay > 0 ? Math.Max(1, (int)Math.Ceiling(soNgay)) : 0;
         }
 
         private static TrangThaiThucTeTienDo XacDinhTrangThaiThucTeTienDo(DanhGiaDuAnThongKeViewModel thongKe)

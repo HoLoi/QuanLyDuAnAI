@@ -293,7 +293,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             if (statusCode == HttpStatusCode.UnprocessableEntity)
             {
-                var featureList = "SoNhanVienDuAn, TongSoCongViec, SoCongViecTre, TyLeCongViecTre, ChiPhiDuKien, ChiPhiThucTe, ChenhLechChiPhi, SoLanThayDoiNhanSu, SoLanThayDoiQuanLy, SoNgayTreTienDo";
+                var featureList = "SoNhanVienDuAn, TongSoCongViec, SoCongViecTre, TyLeCongViecTre, ChiPhiDuKien, ChiPhiThucTe, ChenhLechChiPhi, SoLanThayDoiNhanSu, SoLanThayDoiQuanLy, SoNgayTreTienDo, SoDeXuatCongViecChoDuyet, SoDeXuatCongViecBiTuChoi, ThoiGianDuyetCongViecTrungBinh, SoDeXuatNganSachChoDuyet, SoDeXuatNganSachBiTuChoi, ThoiGianDuyetNganSachTrungBinh, SoBaoCaoTienDoChoDuyet, SoBaoCaoTienDoBiTuChoi, SoBaoCaoTienDoYeuCauBoSung, TyLeBaoCaoTienDoBiTuChoi, SoLanCapNhatTienDo, SoNgayChamCapNhatTienDo";
                 errors.Insert(0, $"Schema hiện tại chỉ nhận đầy đủ bộ feature hợp lệ: {featureList}.");
 
                 if (errors.Any(x => x.Contains("LaDuAnTre", StringComparison.OrdinalIgnoreCase) && x.Contains("feature", StringComparison.OrdinalIgnoreCase)))

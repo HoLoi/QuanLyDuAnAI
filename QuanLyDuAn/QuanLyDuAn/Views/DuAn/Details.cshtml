@@ -147,11 +147,11 @@
                     </div>
                     <div class="info-item">
                         <div class="info-label">Ngày bắt đầu</div>
-                        <div class="info-value">@(Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy") ?? "-")</div>
+                        <div class="info-value">@(Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">Ngày kết thúc</div>
-                        <div class="info-value">@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "-")</div>
+                        <div class="info-value">@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
                     </div>
                     <div class="info-item">
                         <div class="info-label">Ngày hoàn thành thực tế</div>
@@ -281,7 +281,16 @@
                                         <div class="preview-item-title">@congViec.TenCongViec</div>
                                         <div class="preview-item-meta">
                                             <span class="badge status-badge">@TrangThai.ToDisplay(congViec.TrangThaiCongViec)</span>
+                                            @if (!string.IsNullOrWhiteSpace(congViec.TinhTrangThoiHan))
+                                            {
+                                                <span class="badge work-deadline-badge @congViec.CssTinhTrangThoiHan">@congViec.TinhTrangThoiHan</span>
+                                            }
                                             <span class="meta-text">@congViec.TenDanhMucCV</span>
+                                            <span class="meta-text">Hạn: @(congViec.NgayKetThucDuKien?.ToString("dd/MM/yyyy HH:mm") ?? "-")</span>
+                                            @if (congViec.NgayKetThucThucTe.HasValue)
+                                            {
+                                                <span class="meta-text">Hoàn tất: @congViec.NgayKetThucThucTe.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                            }
                                         </div>
                                     </li>
                                 }
@@ -351,7 +360,7 @@
                                             <div class="preview-item-title">@thanhVien.HoTenNguoiDung</div>
                                             <div class="preview-item-meta">
                                                 <span class="badge role-badge">@TrangThai.ToDisplayVaiTroTrongDuAn(thanhVien.VaiTroTrongDuAn)</span>
-                                                <span class="meta-text">@((thanhVien.NgayThamGiaDuAn?.ToString("dd/MM/yyyy")) ?? "-")</span>
+                                                <span class="meta-text">@((thanhVien.NgayThamGiaDuAn?.ToString("dd/MM/yyyy HH:mm")) ?? "-")</span>
                                             </div>
                                         </li>
                                     }
@@ -418,7 +427,7 @@
                                 <div class="deadline-card">
                                     <div class="deadline-title">@deadlineGanNhat.TenCongViec</div>
                                     <div class="deadline-meta">
-                                        Hạn: @((deadlineGanNhat.NgayKetThucDuKien?.ToString("dd/MM/yyyy")) ?? "-")
+                                        Hạn: @((deadlineGanNhat.NgayKetThucDuKien?.ToString("dd/MM/yyyy HH:mm")) ?? "-")
                                         <span class="badge status-badge">@TrangThai.ToDisplay(deadlineGanNhat.TrangThaiCongViec)</span>
                                     </div>
                                     <div class="deadline-state @(deadlineGanNhat.SoNgayConLai.HasValue && deadlineGanNhat.SoNgayConLai.Value < 0 ? "over" : "near")">
@@ -558,7 +567,7 @@
                 </div>
 
                 <div class="section-card app-section-card reveal mt-4 reveal-delay-160">
-                    <div class="section-title">Tiến độ công việc</div>
+                    <div class="section-title">Thống kê Công việc</div>
                     @if (workSummary.TongCongViec == 0)
                     {
                         <div class="empty-state empty-state-panel">
@@ -575,32 +584,87 @@
                     }
                     else
                     {
+                        <div class="work-highlight-grid">
+                            <div class="work-highlight total">
+                                <span>Tổng Công việc</span>
+                                <strong>@workSummary.TongCongViec</strong>
+                            </div>
+                            <div class="work-highlight overdue">
+                                <span>Đang quá hạn</span>
+                                <strong>@workSummary.CongViecDangQuaHan</strong>
+                            </div>
+                            <div class="work-highlight on-time">
+                                <span>Hoàn thành đúng hạn</span>
+                                <strong>@workSummary.CongViecHoanThanhDungHan</strong>
+                            </div>
+                            <div class="work-highlight completed-late">
+                                <span>Hoàn thành trễ</span>
+                                <strong>@workSummary.CongViecHoanThanhTre</strong>
+                            </div>
+                        </div>
+
                         <div class="work-progress">
                             <div class="progress">
                                 <div class="progress-bar bg-success progress-bar-dynamic" style="--progress-width: @workSummary.TiLeHoanThanhCap%;"></div>
                             </div>
                             <div class="progress-caption">@((workSummary.TiLeHoanThanh ?? 0).ToString("0"))% công việc đã hoàn thành</div>
                         </div>
-                        <div class="work-grid">
-                            <div class="work-item done">
-                                <span class="work-label"><i class="bi bi-check-circle-fill"></i> Hoàn thành</span>
-                                <span class="work-value">@workSummary.CongViecHoanThanh</span>
+
+                        <div class="work-stat-groups">
+                            <div class="work-stat-group">
+                                <div class="work-group-title">Tình hình hiện tại</div>
+                                <div class="work-grid compact">
+                                    <div class="work-item idle">
+                                        <span class="work-label"><i class="bi bi-hourglass-split"></i> Chưa bắt đầu</span>
+                                        <span class="work-value">@workSummary.CongViecChuaBatDau</span>
+                                    </div>
+                                    <div class="work-item active">
+                                        <span class="work-label"><i class="bi bi-play-circle-fill"></i> Đang thực hiện</span>
+                                        <span class="work-value">@workSummary.CongViecDangThucHien</span>
+                                    </div>
+                                    <div class="work-item blocked">
+                                        <span class="work-label"><i class="bi bi-slash-circle-fill"></i> Bị cản trở</span>
+                                        <span class="work-value">@workSummary.CongViecBiCanTro</span>
+                                    </div>
+                                    <div class="work-item pending">
+                                        <span class="work-label"><i class="bi bi-hourglass-top"></i> Chờ xác nhận</span>
+                                        <span class="work-value">@workSummary.CongViecChoXacNhan</span>
+                                    </div>
+                                    <div class="work-item overdue">
+                                        <span class="work-label"><i class="bi bi-exclamation-triangle-fill"></i> Đang quá hạn</span>
+                                        <span class="work-value">@workSummary.CongViecDangQuaHan</span>
+                                    </div>
+                                    <div class="work-item paused">
+                                        <span class="work-label"><i class="bi bi-pause-circle-fill"></i> Tạm dừng</span>
+                                        <span class="work-value">@workSummary.CongViecTamDung</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="work-item active">
-                                <span class="work-label"><i class="bi bi-play-circle-fill"></i> Đang thực hiện</span>
-                                <span class="work-value">@workSummary.CongViecDangThucHien</span>
-                            </div>
-                            <div class="work-item warn">
-                                <span class="work-label"><i class="bi bi-exclamation-triangle-fill"></i> Trễ hạn</span>
-                                <span class="work-value">@workSummary.CongViecTreHan</span>
-                            </div>
-                            <div class="work-item paused">
-                                <span class="work-label"><i class="bi bi-pause-circle-fill"></i> Tạm dừng</span>
-                                <span class="work-value">@workSummary.CongViecTamDung</span>
-                            </div>
-                            <div class="work-item idle">
-                                <span class="work-label"><i class="bi bi-hourglass-split"></i> Chưa bắt đầu</span>
-                                <span class="work-value">@workSummary.CongViecChuaBatDau</span>
+
+                            <div class="work-stat-group">
+                                <div class="work-group-title">Kết quả theo thời hạn</div>
+                                <div class="work-grid compact">
+                                    <div class="work-item done">
+                                        <span class="work-label"><i class="bi bi-check-circle-fill"></i> Đã hoàn thành</span>
+                                        <span class="work-value">@workSummary.CongViecHoanThanh</span>
+                                    </div>
+                                    <div class="work-item completed-on-time">
+                                        <span class="work-label"><i class="bi bi-check2-circle"></i> Hoàn thành đúng hạn</span>
+                                        <span class="work-value">@workSummary.CongViecHoanThanhDungHan</span>
+                                    </div>
+                                    <div class="work-item completed-late">
+                                        <span class="work-label"><i class="bi bi-exclamation-octagon-fill"></i> Hoàn thành trễ</span>
+                                        <span class="work-value">@workSummary.CongViecHoanThanhTre</span>
+                                    </div>
+                                    <div class="work-item missing">
+                                        <span class="work-label"><i class="bi bi-question-circle"></i> Chưa đủ dữ liệu</span>
+                                        <span class="work-value">@workSummary.CongViecHoanThanhThieuDuLieuNgay</span>
+                                    </div>
+                                </div>
+                                <div class="work-on-time-rate">
+                                    <span>Tỷ lệ hoàn thành đúng hạn</span>
+                                    <strong>@((workSummary.TyLeHoanThanhDungHan ?? 0).ToString("0.#"))%</strong>
+                                </div>
                             </div>
                         </div>
                     }

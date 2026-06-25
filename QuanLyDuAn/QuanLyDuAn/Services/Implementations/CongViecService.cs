@@ -31,6 +31,7 @@ namespace QuanLyDuAn.Services.Implementations
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
             int pageNumber = 1,
             int pageSize = PaginationViewModel.DefaultPageSize,
             bool paginate = true)
@@ -41,6 +42,8 @@ namespace QuanLyDuAn.Services.Implementations
             var projectOptions = await GetProjectOptionsAsync(allowedProjectIds);
             var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgay, denNgay);
             var locTheoNgayResolved = string.IsNullOrWhiteSpace(locTheoNgay) ? "NgayTao" : locTheoNgay.Trim();
+            var locTinhTrangThoiHanResolved = CongViecDeadlineStatus.NormalizeFilter(locTinhTrangThoiHan);
+            var now = DateTime.Now;
 
             var query =
                 from cv in _context.CongViec
@@ -112,6 +115,11 @@ namespace QuanLyDuAn.Services.Implementations
                     : query.Where(x => x.NgayTaoCongViec.HasValue && x.NgayTaoCongViec.Value < denNgayDocQuyen);
             }
 
+            if (!string.IsNullOrWhiteSpace(locTinhTrangThoiHanResolved))
+            {
+                query = ApDungLocTinhTrangThoiHan(query, locTinhTrangThoiHanResolved, now);
+            }
+
             if (isEmployee && !isManager && !isAdmin)
             {
                 var duAnIds = await query
@@ -160,6 +168,7 @@ namespace QuanLyDuAn.Services.Implementations
             await GanCoThePhanCongCongViecAsync(danhSach, currentUserId, isManager, isEmployee, isAdmin);
             await GanCoTheXuLyTrangThaiCongViecAsync(danhSach, currentUserId);
             GanThongTinWorkflowUi(danhSach);
+            GanThongTinThoiHan(danhSach, now);
 
             return new CongViecPageViewModel
             {
@@ -171,7 +180,8 @@ namespace QuanLyDuAn.Services.Implementations
                 TuKhoa = tuKhoa,
                 TuNgay = tuNgayLoc,
                 DenNgay = denNgayLoc,
-                LocTheoNgay = locTheoNgayResolved
+                LocTheoNgay = locTheoNgayResolved,
+                LocTinhTrangThoiHan = locTinhTrangThoiHanResolved
             };
         }
 
@@ -466,6 +476,170 @@ namespace QuanLyDuAn.Services.Implementations
                 return "Công việc đang bị cản trở, cần xử lý để tiếp tục.";
 
             return null;
+        }
+
+        private static IQueryable<CongViecItemViewModel> ApDungLocTinhTrangThoiHan(
+            IQueryable<CongViecItemViewModel> query,
+            string locTinhTrangThoiHan,
+            DateTime now)
+        {
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var trangThaiChoXacNhan = TrangThai.GetCommonStatusVariants(TrangThai.ChoXacNhanHoanThanh);
+            var trangThaiDaHuy = TrangThai.GetCommonStatusVariants(TrangThai.DaHuy);
+
+            return locTinhTrangThoiHan switch
+            {
+                CongViecDeadlineStatus.FilterQuaHan => query.Where(x =>
+                    x.NgayKetThucCVDuKien.HasValue
+                    && x.NgayKetThucCVDuKien.Value < now
+                    && !trangThaiHoanThanh.Contains(x.TrangThaiCongViec)
+                    && !trangThaiChoXacNhan.Contains(x.TrangThaiCongViec)
+                    && !trangThaiDaHuy.Contains(x.TrangThaiCongViec)),
+
+                CongViecDeadlineStatus.FilterChoXacNhanTre => query.Where(x =>
+                    x.NgayKetThucCVDuKien.HasValue
+                    && trangThaiChoXacNhan.Contains(x.TrangThaiCongViec)
+                    && ((x.NgayKetThucCVThucTe.HasValue
+                            && x.NgayKetThucCVThucTe.Value > x.NgayKetThucCVDuKien.Value)
+                        || (!x.NgayKetThucCVThucTe.HasValue
+                            && now > x.NgayKetThucCVDuKien.Value))),
+
+                CongViecDeadlineStatus.FilterHoanThanhTre => query.Where(x =>
+                    x.NgayKetThucCVDuKien.HasValue
+                    && x.NgayKetThucCVThucTe.HasValue
+                    && x.NgayKetThucCVThucTe.Value > x.NgayKetThucCVDuKien.Value
+                    && trangThaiHoanThanh.Contains(x.TrangThaiCongViec)),
+
+                CongViecDeadlineStatus.FilterHoanThanhDungHan => query.Where(x =>
+                    x.NgayKetThucCVDuKien.HasValue
+                    && x.NgayKetThucCVThucTe.HasValue
+                    && x.NgayKetThucCVThucTe.Value <= x.NgayKetThucCVDuKien.Value
+                    && trangThaiHoanThanh.Contains(x.TrangThaiCongViec)),
+
+                CongViecDeadlineStatus.FilterConHan => query.Where(x =>
+                    x.NgayKetThucCVDuKien.HasValue
+                    && x.NgayKetThucCVDuKien.Value >= now
+                    && !trangThaiHoanThanh.Contains(x.TrangThaiCongViec)
+                    && !trangThaiChoXacNhan.Contains(x.TrangThaiCongViec)
+                    && !trangThaiDaHuy.Contains(x.TrangThaiCongViec)),
+
+                _ => query
+            };
+        }
+
+        private static void GanThongTinThoiHan(List<CongViecItemViewModel> danhSach, DateTime now)
+        {
+            foreach (var item in danhSach)
+            {
+                GanThongTinThoiHan(item, now);
+            }
+        }
+
+        private static void GanThongTinThoiHan(CongViecItemViewModel item, DateTime now)
+        {
+            item.IsQuaHan = false;
+            item.IsHoanThanhTre = false;
+            item.IsHoanThanhDungHan = false;
+            item.IsKhongDanhGiaThoiHan = false;
+            item.SoNgayTre = 0;
+
+            var trangThai = TrangThai.ToCode(item.TrangThaiCongViec);
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.DaHuy))
+            {
+                GanTinhTrangThoiHan(item, CongViecDeadlineStatus.KhongDanhGia, "Không đánh giá", "deadline-neutral");
+                item.IsKhongDanhGiaThoiHan = true;
+                return;
+            }
+
+            if (!item.NgayKetThucCVDuKien.HasValue)
+            {
+                GanTinhTrangThoiHan(item, CongViecDeadlineStatus.ChuaXacDinh, "Chưa xác định", "deadline-unknown");
+                return;
+            }
+
+            var ngayDuKien = item.NgayKetThucCVDuKien.Value;
+
+            if (TrangThai.LaHoanThanhCongViec(trangThai))
+            {
+                if (!item.NgayKetThucCVThucTe.HasValue)
+                {
+                    GanTinhTrangThoiHan(item, CongViecDeadlineStatus.ChuaXacDinh, "Chưa xác định ngày hoàn thành", "deadline-unknown");
+                    return;
+                }
+
+                var ngayThucTe = item.NgayKetThucCVThucTe.Value;
+                if (ngayThucTe <= ngayDuKien)
+                {
+                    GanTinhTrangThoiHan(item, CongViecDeadlineStatus.HoanThanhDungHan, "Hoàn thành đúng hạn", "deadline-on-time");
+                    item.IsHoanThanhDungHan = true;
+                    return;
+                }
+
+                item.SoNgayTre = TinhSoNgayTre(ngayDuKien, ngayThucTe);
+                GanTinhTrangThoiHan(item, CongViecDeadlineStatus.HoanThanhTre, $"Hoàn thành trễ {item.SoNgayTre} ngày", "deadline-late");
+                item.IsHoanThanhTre = true;
+                return;
+            }
+
+            if (TrangThai.EqualsValue(trangThai, TrangThai.ChoXacNhanHoanThanh))
+            {
+                if (item.NgayKetThucCVThucTe.HasValue)
+                {
+                    var ngayHoanTat = item.NgayKetThucCVThucTe.Value;
+                    if (ngayHoanTat <= ngayDuKien)
+                    {
+                        GanTinhTrangThoiHan(item, CongViecDeadlineStatus.HoanTatDungHan, "Hoàn tất đúng hạn", "deadline-on-time");
+                        return;
+                    }
+
+                    item.SoNgayTre = TinhSoNgayTre(ngayDuKien, ngayHoanTat);
+                    GanTinhTrangThoiHan(item, CongViecDeadlineStatus.HoanTatTre, $"Hoàn tất trễ {item.SoNgayTre} ngày", "deadline-pending-late");
+                    item.IsQuaHan = true;
+                    return;
+                }
+
+                if (ngayDuKien < now)
+                {
+                    item.SoNgayTre = TinhSoNgayTre(ngayDuKien, now);
+                    GanTinhTrangThoiHan(item, CongViecDeadlineStatus.QuaHan, $"Quá hạn {item.SoNgayTre} ngày", "deadline-late");
+                    item.IsQuaHan = true;
+                    return;
+                }
+
+                GanTinhTrangThoiHan(item, CongViecDeadlineStatus.ConHan, "Còn hạn", "deadline-on-time");
+                return;
+            }
+
+            if (ngayDuKien < now)
+            {
+                item.SoNgayTre = TinhSoNgayTre(ngayDuKien, now);
+                var text = TrangThai.EqualsValue(trangThai, TrangThai.TamDung)
+                    ? $"Quá hạn {item.SoNgayTre} ngày"
+                    : $"Trễ {item.SoNgayTre} ngày";
+                GanTinhTrangThoiHan(item, CongViecDeadlineStatus.QuaHan, text, "deadline-late");
+                item.IsQuaHan = true;
+                return;
+            }
+
+            GanTinhTrangThoiHan(item, CongViecDeadlineStatus.ConHan, "Còn hạn", "deadline-on-time");
+        }
+
+        private static void GanTinhTrangThoiHan(
+            CongViecItemViewModel item,
+            string maTinhTrang,
+            string tinhTrang,
+            string cssClass)
+        {
+            item.MaTinhTrangThoiHan = maTinhTrang;
+            item.TinhTrangThoiHan = tinhTrang;
+            item.CssTinhTrangThoiHan = cssClass;
+        }
+
+        private static int TinhSoNgayTre(DateTime han, DateTime thucTe)
+        {
+            var soNgay = (thucTe - han).TotalDays;
+            return soNgay > 0 ? Math.Max(1, (int)Math.Ceiling(soNgay)) : 0;
         }
 
         private async Task<List<int>> GetAccessibleProjectIdsAsync()

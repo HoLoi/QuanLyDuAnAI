@@ -11,6 +11,7 @@ namespace QuanLyDuAn.Services.Interfaces
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
             int pageNumber = 1,
             int pageSize = 20,
             bool paginate = true);

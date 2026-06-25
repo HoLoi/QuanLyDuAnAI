@@ -327,6 +327,9 @@ namespace QuanLyDuAn.Controllers
                 if (projectId != maDuAn)
                     throw new Exception("Tệp không thuộc dự án hiện tại.");
 
+                if (!await _service.CanAccessAsync(projectId))
+                    return Forbid();
+
                 return PhysicalFile(fullPath, "application/octet-stream", fileName);
             }
             catch (Exception ex)
@@ -693,9 +696,9 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Tên dự án", ValueSelector = row => ((DuAnViewModel)row).TenDuAn },
                     new() { Header = "Loại dự án", ValueSelector = row => ((DuAnViewModel)row).TenLoaiDuAn },
                     new() { Header = "Quản lý", ValueSelector = row => ((DuAnViewModel)row).TenNguoiQuanLy },
-                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDate(((DuAnViewModel)row).NgayBatDauDuAn) },
-                    new() { Header = "Ngày kết thúc", ValueSelector = row => ExportSupport.FormatDate(((DuAnViewModel)row).NgayKetThucDuAn) },
-                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDate(((DuAnViewModel)row).NgayHoanThanhThucTeDuAn) },
+                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDateTime(((DuAnViewModel)row).NgayBatDauDuAn) },
+                    new() { Header = "Ngày kết thúc", ValueSelector = row => ExportSupport.FormatDateTime(((DuAnViewModel)row).NgayKetThucDuAn) },
+                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDateTime(((DuAnViewModel)row).NgayHoanThanhThucTeDuAn) },
                     new() { Header = "Tiến độ", ValueSelector = row => $"{((DuAnViewModel)row).PhanTramHoanThanh}%" },
                     new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((DuAnViewModel)row).TrangThaiDuAn) },
                     new() { Header = "Tình trạng thời hạn", ValueSelector = row => ((DuAnViewModel)row).TinhTrangThoiHan },

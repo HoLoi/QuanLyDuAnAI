@@ -36,13 +36,20 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgay,
             DateTime? denNgay,
             string? locTheoNgay,
+            string? locTinhTrangThoiHan,
+            bool? treHan,
             int pageNumber = 1,
             int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.CongViec.Xem))
                 return Forbid();
 
-            var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay, pageNumber, pageSize);
+            if (treHan == true && string.IsNullOrWhiteSpace(locTinhTrangThoiHan))
+            {
+                locTinhTrangThoiHan = CongViecDeadlineStatus.FilterQuaHan;
+            }
+
+            var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan, pageNumber, pageSize);
             vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             return View(vm);
         }
@@ -55,7 +62,8 @@ namespace QuanLyDuAn.Controllers
             string? tuKhoa,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await CoQuyenXuLyWorkflowCongViecAsync())
                 return Forbid();
@@ -70,7 +78,7 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan });
         }
 
         [HttpPost]
@@ -82,7 +90,8 @@ namespace QuanLyDuAn.Controllers
             string? tuKhoa,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan)
         {
             if (!await CoQuyenXuLyWorkflowCongViecAsync())
                 return Forbid();
@@ -97,7 +106,7 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay });
+            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan });
         }
 
         [HttpGet]
@@ -108,12 +117,20 @@ namespace QuanLyDuAn.Controllers
             string? tuKhoa,
             DateTime? tuNgay,
             DateTime? denNgay,
-            string? locTheoNgay)
+            string? locTheoNgay,
+            string? locTinhTrangThoiHan,
+            bool? treHan)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
                 return Forbid();
 
-            var page = await _service.GetPageAsync(locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay, paginate: false);
+            if (treHan == true && string.IsNullOrWhiteSpace(locTinhTrangThoiHan))
+            {
+                locTinhTrangThoiHan = CongViecDeadlineStatus.FilterQuaHan;
+            }
+
+            var locTinhTrangThoiHanResolved = CongViecDeadlineStatus.NormalizeFilter(locTinhTrangThoiHan);
+            var page = await _service.GetPageAsync(locMaDuAn, locTrangThai, tuKhoa, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHanResolved, paginate: false);
             var rows = page.DanhSach.Cast<object>().ToList();
 
             var exportRequest = new ExportFileRequest
@@ -125,6 +142,7 @@ namespace QuanLyDuAn.Controllers
                     ("Từ khóa", tuKhoa),
                     ("Dự án", locMaDuAn?.ToString()),
                     ("Trạng thái", TrangThai.ToDisplay(locTrangThai)),
+                    ("Tình trạng thời hạn", CongViecDeadlineStatus.ToDisplayFilter(locTinhTrangThoiHanResolved)),
                     ("Lọc theo ngày", ExportSupport.ResolveTextOrDefault(locTheoNgay, "Ngày tạo")),
                     ("Từ ngày", ExportSupport.FormatDate(tuNgay)),
                     ("Đến ngày", ExportSupport.FormatDate(denNgay))),
@@ -137,8 +155,11 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Dự án", ValueSelector = row => ((CongViecItemViewModel)row).TenDuAn },
                     new() { Header = "Danh mục", ValueSelector = row => ((CongViecItemViewModel)row).TenDanhMucCV },
                     new() { Header = "Mức độ", ValueSelector = row => ((CongViecItemViewModel)row).TenMucDo },
-                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDate(((CongViecItemViewModel)row).NgayBatDauCongViec) },
-                    new() { Header = "Hạn kết thúc", ValueSelector = row => ExportSupport.FormatDate(((CongViecItemViewModel)row).NgayKetThucCVDuKien) },
+                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDateTime(((CongViecItemViewModel)row).NgayBatDauCongViec) },
+                    new() { Header = "Hạn kết thúc", ValueSelector = row => ExportSupport.FormatDateTime(((CongViecItemViewModel)row).NgayKetThucCVDuKien) },
+                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDateTime(((CongViecItemViewModel)row).NgayKetThucCVThucTe) },
+                    new() { Header = "Tình trạng thời hạn", ValueSelector = row => ((CongViecItemViewModel)row).TinhTrangThoiHan },
+                    new() { Header = "Số ngày trễ", ValueSelector = row => ((CongViecItemViewModel)row).SoNgayTre.ToString() },
                     new() { Header = "Chi phí đã chi", ValueSelector = row => ExportSupport.FormatCurrency(((CongViecItemViewModel)row).ChiPhiDaChi) },
                     new() { Header = "Trạng thái", ValueSelector = row => ((CongViecItemViewModel)row).TrangThaiHienThi }
                 },

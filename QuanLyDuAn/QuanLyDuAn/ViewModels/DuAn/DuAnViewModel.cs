@@ -27,6 +27,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
         public bool IsKhongDanhGia { get; set; }
         public int SoNgayTre { get; set; }
         public int SoCongViecTre { get; set; }
+        public int SoCongViecVuotHanDuAn { get; set; }
         public string MaTinhTrangThoiHan { get; set; } = string.Empty;
         public string TinhTrangThoiHan { get; set; } = string.Empty;
         public string CssTinhTrangThoiHan { get; set; } = string.Empty;

@@ -1037,11 +1037,12 @@ namespace QuanLyDuAn.Services.Implementations
                 };
             }
 
-            var duAnHoanThanhTre = (TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn)
-                                    || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru))
-                                   && duAn.NgayKetThucDuAn.HasValue
-                                   && duAn.NgayHoanThanhThucTeDuAn.HasValue
-                                   && duAn.NgayHoanThanhThucTeDuAn.Value.Date > duAn.NgayKetThucDuAn.Value.Date;
+            var duAnHoanThanhTre = await LaDuAnHoanThanhTreHopLeAsync(
+                maDuAn,
+                duAn.TrangThaiDuAn,
+                duAn.NgayKetThucDuAn,
+                duAn.NgayHoanThanhThucTeDuAn,
+                cancellationToken);
             if (!duAnHoanThanhTre)
             {
                 return new AiOperationResultViewModel<bool>
@@ -1165,15 +1166,17 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             var laManagerHienTai = roleFlags.IsManager && !roleFlags.IsAdmin && duAn.MaNguoiDung == currentUserId;
-            var homNay = DateTime.Today;
+            var now = DateTime.Now;
             var coNgayKetThuc = duAn.NgayKetThucDuAn.HasValue;
-            var daQuaHan = coNgayKetThuc && homNay > duAn.NgayKetThucDuAn!.Value.Date;
+            var daQuaHan = coNgayKetThuc && now > duAn.NgayKetThucDuAn!.Value;
             var daHoanThanh = TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn);
             var laLuuTru = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru);
-            var hoanThanhTre = (daHoanThanh || laLuuTru)
-                               && duAn.NgayKetThucDuAn.HasValue
-                               && duAn.NgayHoanThanhThucTeDuAn.HasValue
-                               && duAn.NgayHoanThanhThucTeDuAn.Value.Date > duAn.NgayKetThucDuAn.Value.Date;
+            var hoanThanhTre = await LaDuAnHoanThanhTreHopLeAsync(
+                maDuAn,
+                duAn.TrangThaiDuAn,
+                duAn.NgayKetThucDuAn,
+                duAn.NgayHoanThanhThucTeDuAn,
+                cancellationToken);
             var trangThaiTamThoiHopLe = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.DangThucHien)
                                         || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh);
             var tamThoi = !daHoanThanh && !laLuuTru && trangThaiTamThoiHopLe && daQuaHan;
@@ -1276,6 +1279,54 @@ namespace QuanLyDuAn.Services.Implementations
                 .OrderByDescending(x => x.NgayTongHop ?? DateTime.MinValue)
                 .ThenByDescending(x => x.MaData)
                 .FirstOrDefaultAsync(cancellationToken);
+
+        private async Task<bool> LaDuAnHoanThanhTreHopLeAsync(
+            int maDuAn,
+            string? trangThaiDuAn,
+            DateTime? ngayKetThucDuAn,
+            DateTime? ngayHoanThanhThucTeDuAn,
+            CancellationToken cancellationToken)
+        {
+            var daKetThuc = TrangThai.LaHoanThanhCongViec(trangThaiDuAn)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.LuuTru);
+            if (!daKetThuc
+                || !ngayKetThucDuAn.HasValue
+                || !ngayHoanThanhThucTeDuAn.HasValue
+                || ngayHoanThanhThucTeDuAn.Value <= ngayKetThucDuAn.Value)
+            {
+                return false;
+            }
+
+            var trangThaiHoanThanh = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+            var coCongViecTre = await (
+                from cv in _context.CongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                where dm.MaDuAn == maDuAn
+                      && cv.IsDeleted != true
+                      && dm.IsDeleted != true
+                      && cv.NgayKetThucCVDuKien.HasValue
+                      && cv.NgayKetThucCVThucTe.HasValue
+                      && trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                      && cv.NgayKetThucCVThucTe.Value > cv.NgayKetThucCVDuKien.Value
+                select cv.MaCongViec)
+                .AnyAsync(cancellationToken);
+            if (!coCongViecTre)
+            {
+                return false;
+            }
+
+            return await (
+                from cv in _context.CongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                where dm.MaDuAn == maDuAn
+                      && cv.IsDeleted != true
+                      && dm.IsDeleted != true
+                      && cv.NgayKetThucCVThucTe.HasValue
+                      && trangThaiHoanThanh.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                      && cv.NgayKetThucCVThucTe.Value > ngayKetThucDuAn.Value
+                select cv.MaCongViec)
+                .AnyAsync(cancellationToken);
+        }
 
         private static AiPredictPageViewModel TaoInputTuDataset(int maDuAn, AiDataset dataset)
         {

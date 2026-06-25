@@ -533,3 +533,325 @@ Kết quả:
 - Không sửa entity, DbContext hoặc public contract của service interface.
 - Không sửa CSS dùng chung `shared/ui.css` hoặc layout chung.
 - Không thay đổi cơ chế phân trang server-side: filter trước, `CountAsync()` trước `Skip/Take`, materialization sau cùng.
+
+## 22. Phân tích nhận biết Công việc đúng hạn và trễ hạn
+
+Mục này bổ sung phân tích AS-IS theo source hiện tại, chỉ phân biệt dữ liệu thời hạn với trạng thái workflow. Không xem `Trễ hạn`, `Quá hạn`, `Hoàn thành trễ` là `TrangThaiCongViec` vì `Constants/TrangThai.cs` không triển khai các giá trị này như trạng thái Công việc trong danh sách `/CongViec`.
+
+Nguyên tắc cần giữ: `TrangThaiCongViec` là trạng thái nghiệp vụ như `ChuaBatDau`, `DangThucHien`, `BiCanCan`, `ChoXacNhanHoanThanh`, `HoanThanh`, `TamDung`, `DaHuy`. Tình trạng thời hạn là lớp thông tin riêng, ví dụ `Đang thực hiện + Trễ 5 ngày`, `Hoàn thành + Hoàn thành trễ 2 ngày`, `Hoàn thành + Hoàn thành đúng hạn`, `Chờ xác nhận hoàn thành + Quá hạn 1 ngày`. Source hiện tại không tự chuyển trạng thái workflow khi vượt hạn và không tự hoàn thành khi tới ngày kết thúc dự kiến.
+
+### 22.1. Dữ liệu thời gian của Công việc
+
+| Thuộc tính | Ý nghĩa thực tế | Nguồn dữ liệu | Khi nào được gán | Có dùng để xác định trễ không |
+| ---------- | --------------- | ------------- | ---------------- | ----------------------------- |
+| `NgayBatDauCongViec` | Ngày bắt đầu Công việc | `Models/Entities/CongViec.cs`, bảng `CONG_VIEC`; projected trong `CongViecService.GetPageAsync` | Được tạo từ luồng đề xuất/duyệt Công việc hoặc dữ liệu hiện có; màn `/CongViec` chỉ đọc | Không đủ để tính trễ; dùng làm mốc thông tin |
+| `NgayKetThucCVDuKien` | Ngày kết thúc dự kiến, tức hạn Công việc | `CongViec.NgayKetThucCVDuKien`; export gọi là `Hạn kết thúc`; filter `locTheoNgay = HanCongViec` | Được gán khi Công việc được tạo từ đề xuất: `DyetDeXuatCongViecService` set từ `NgayKetThucCVDeXuatDuKien`; danh sách chỉ đọc | Có, là mốc deadline chính của Công việc |
+| `NgayKetThucCVThucTe` | Ngày hoàn thành thực tế theo workflow hiện tại | `CongViec.NgayKetThucCVThucTe`; projected vào `CongViecItemViewModel` | `TrangThaiWorkflowService.DongBoTrangThaiCongViecTheoChiTietAsync` set `DateTime.Now` khi Công việc lên `ChoXacNhanHoanThanh` hoặc hoàn thành; `CongViecService.XacNhanHoanThanhCongViecAsync` chỉ set nếu còn rỗng; `MoLaiCongViecAsync` xóa về `null` | Có thể dùng để so với `NgayKetThucCVDuKien`, nhưng cần ghi rõ ngày này có thể là lúc đủ điều kiện/chờ xác nhận, không hẳn lúc quản lý bấm xác nhận |
+| `TrangThaiCongViec` | Trạng thái workflow của Công việc | `CongViec.TrangThaiCongViec`, normalize bằng `TrangThai.ToCode`, display bằng `TrangThai.ToDisplay` | Được đồng bộ từ Chi tiết công việc trong `TrangThaiWorkflowService`; xác nhận/mở lại trong `CongViecService` | Cần dùng để biết đã hoàn thành hay chưa, nhưng không thay thế tình trạng thời hạn |
+
+Khi tất cả Chi tiết công việc hoàn thành, `TrangThaiWorkflowService.DongBoTrangThaiCongViecTheoChiTietAsync` đưa Công việc lên `ChoXacNhanHoanThanh` và set `NgayKetThucCVThucTe = DateTime.Now` nếu đang rỗng. Khi người có quyền xác nhận, `CongViecService.XacNhanHoanThanhCongViecAsync` đổi `TrangThaiCongViec = HoanThanh` và chỉ set `NgayKetThucCVThucTe` nếu chưa có giá trị. Vì vậy, trong luồng chuẩn, ngày thực tế thường được ghi sớm ở thời điểm lên `ChoXacNhanHoanThanh`, không phải thời điểm xác nhận cuối cùng. Khi mở lại bằng `MoLaiCongViecAsync`, source đặt `TrangThaiCongViec = DangThucHien` và xóa `NgayKetThucCVThucTe = null`.
+
+Kết luận dữ liệu: Công việc có đủ cặp `NgayKetThucCVDuKien` và `NgayKetThucCVThucTe` để xác định hoàn thành đúng hạn hoặc trễ hạn ở mức dữ liệu hiện có. Rủi ro nghiệp vụ là ngày thực tế đang đại diện thời điểm hệ thống ghi nhận đủ điều kiện/chờ xác nhận, không lưu riêng ngày nhân viên hoàn tất và ngày quản lý xác nhận.
+
+### 22.2. Logic Công việc đang quá hạn
+
+Điều kiện nghiệp vụ có thể xác định:
+
+```text
+TrangThaiCongViec chưa hoàn thành
+và NgayKetThucCVDuKien < DateTime.Today
+```
+
+Source hiện tại có tính logic này ở một số module khác, nhưng chưa tính trong danh sách `/CongViec`:
+
+| Nơi | Logic hiện có | Lưu DB hay runtime | Có vào `CongViecItemViewModel` | Có hiển thị ở bảng `/CongViec` |
+| --- | ------------- | ------------------ | ------------------------------ | ------------------------------ |
+| `DashboardService` | `CongViecTreHanQuery`: có hạn, hạn `< DateTime.Now`, trạng thái không thuộc hoàn thành | Runtime query | Không | Không, chỉ dashboard |
+| `DashboardService.LayTopCongViecTreAsync` | Có hạn, hạn `< DateTime.Today`, chưa hoàn thành, tính `SoNgayTre` | Runtime query | Không | Không, chỉ top dashboard |
+| `AiDatasetService` | Nếu chưa hoàn thành thì `homNay > NgayKetThucCVDuKien`; nếu hoàn thành thì so ngày thực tế với dự kiến | Runtime snapshot/dataset | Không | Không, dùng AI dataset |
+| `DanhGiaDuAnService` | Tách `CongViecDangTreHan` và `CongViecHoanThanhTreHan` | Runtime thống kê | Không | Không, ở Đánh giá dự án |
+| `DuAnService` | Đếm `SoCongViecTre` theo Công việc quá hạn hoặc hoàn thành trễ | Runtime, gắn vào ViewModel Dự án | Không | Không, ở danh sách/chi tiết Dự án |
+| `CongViecService.GetPageAsync` | Chỉ filter ngày theo `NgayTao` hoặc `NgayKetThucCVDuKien`; không tính quá hạn | Runtime query danh sách | Không | Không |
+
+Phân tích theo trạng thái:
+
+| Trạng thái | Có thể xác định quá hạn từ dữ liệu hiện có | Source xử lý hiện tại | Ảnh hưởng `TrangThaiCongViec` |
+| ---------- | ------------------------------------------ | --------------------- | ----------------------------- |
+| `ChuaBatDau` nhưng quá hạn | Có, nếu có `NgayKetThucCVDuKien < Today` | Dashboard/AI/DanhGia có thể đếm như chưa hoàn thành; `/CongViec` không hiển thị | Không đổi trạng thái |
+| `DangThucHien` nhưng quá hạn | Có | Dashboard top trễ và AI dataset xử lý; `/CongViec` không có badge trễ | Không đổi trạng thái |
+| `BiCanCan` nhưng quá hạn | Có | Được xem là chưa hoàn thành trong các logic đếm trễ; `/CongViec` chỉ hiển thị badge bị cản trở | Không đổi trạng thái |
+| `ChoXacNhanHoanThanh` nhưng quá hạn | Có nhưng cần thận trọng vì có thể đã có `NgayKetThucCVThucTe` khi lên chờ xác nhận | Dashboard đang chỉ loại `HoanThanh`, nên có thể vẫn đếm chờ xác nhận quá hạn; AI dataset coi chưa hoàn thành nếu `LaHoanThanhCongViec` false | Không đổi trạng thái |
+| `TamDung` nhưng quá hạn | Có theo dữ liệu ngày, nhưng nghiệp vụ có thể cần quyết định có tính tiếp số ngày trễ không | Các logic đếm chưa hoàn thành có thể tính nếu không loại trừ | Không đổi trạng thái |
+| `DaHuy` | Dữ liệu ngày có thể có, nhưng nên không đánh giá thời hạn như công việc còn hiệu lực | `/CongViec` không loại riêng trong ViewModel thời hạn; Dự án helper có mẫu `DaHuy = Không đánh giá` ở cấp Dự án | Không đổi trạng thái |
+
+Hiện không có filter `treHan`, `quaHan`, `hoanThanhTreHan`, `hoanThanhDungHan` trong `CongViecController.Index`, `ICongViecService.GetPageAsync`, `CongViecPageViewModel` hoặc `_Filter.cshtml`. Dashboard có link `href="@Url.Action("Index", "CongViec", new { treHan = true })"`, nhưng `CongViecController.Index` không nhận tham số `treHan`, nên link này không tạo được bộ lọc trễ trong màn Công việc hiện tại.
+
+### 22.3. Logic Công việc hoàn thành đúng hạn hoặc trễ hạn
+
+Điều kiện có thể dùng từ dữ liệu hiện có:
+
+```text
+Hoàn thành đúng hạn: TrangThaiCongViec hoàn thành
+và NgayKetThucCVThucTe <= NgayKetThucCVDuKien
+```
+
+```text
+Hoàn thành trễ: TrangThaiCongViec hoàn thành
+và NgayKetThucCVThucTe > NgayKetThucCVDuKien
+```
+
+| Vấn đề | Kết luận AS-IS |
+| ------ | -------------- |
+| Có thể xác định chính xác không | Có thể xác định ở mức dữ liệu lưu hiện tại nếu cả ngày dự kiến và ngày thực tế đều có. Nếu thiếu một trong hai ngày thì chưa đủ dữ liệu. |
+| Ngày hoàn thành thực tế gán lúc nào | Gán khi workflow đưa Công việc lên `ChoXacNhanHoanThanh` trong `TrangThaiWorkflowService`; khi xác nhận `HoanThanh`, `CongViecService` giữ nguyên nếu đã có. |
+| Chờ quản lý xác nhận có làm sai số ngày không | Có thể làm lệch theo hướng ngày thực tế sớm hơn ngày xác nhận cuối cùng, vì không lưu riêng ngày quản lý xác nhận nếu `NgayKetThucCVThucTe` đã có từ lúc chờ xác nhận. |
+| Dashboard đang dùng gì | Dashboard đếm Công việc đang trễ nếu chưa hoàn thành và hạn đã qua; timeline tháng cũng tính Công việc trễ nếu hoàn thành trễ hoặc chưa hoàn thành trong tháng deadline. |
+| AI dataset đang dùng gì | `AiDatasetService` tính `SoCongViecTre`: hoàn thành thì so `NgayKetThucCVThucTe.Date > NgayKetThucCVDuKien.Date`, chưa hoàn thành thì `homNay > NgayKetThucCVDuKien.Date`. |
+| Bảng Công việc có phân biệt đúng hạn/trễ không | Chưa. `_Table.cshtml` chỉ hiển thị badge workflow và ngày bắt đầu/kết thúc dự kiến, không hiển thị `NgayKetThucCVThucTe`, `Hoàn thành đúng hạn`, `Hoàn thành trễ` hoặc số ngày trễ. |
+
+### 22.4. Các trường hợp cần đối chiếu
+
+| Trường hợp | Source xử lý | Kết quả hiện tại | Có hiển thị | Có đủ dữ liệu |
+| ---------- | ------------ | ---------------- | ----------- | ------------- |
+| Công việc đang thực hiện và chưa đến hạn | `TrangThaiCongViec = DangThucHien`, hạn >= hôm nay | Hiển thị badge `Đang thực hiện`; không có tình trạng `Còn hạn` | Có trạng thái và hạn dự kiến | Có |
+| Công việc đang thực hiện nhưng đã quá hạn | Các module Dashboard/AI có thể tính; `/CongViec` không tính | Vẫn chỉ là `Đang thực hiện` | Không có badge trễ trong bảng | Có nếu có hạn |
+| Công việc chưa bắt đầu nhưng đã quá hạn | Có thể tính bằng hạn và trạng thái chưa hoàn thành | Vẫn chỉ là `Chưa bắt đầu` | Không có badge trễ | Có nếu có hạn |
+| Công việc bị cản trở và đã quá hạn | Có thể tính như chưa hoàn thành quá hạn | Vẫn chỉ là `Bị cản trở` | Badge đỏ là blocker, không phải deadline | Có nếu có hạn |
+| Công việc chờ xác nhận nhưng đã quá hạn | Có thể tính, nhưng cần lưu ý ngày thực tế có thể đã được set khi chờ xác nhận | Vẫn chỉ là `Chờ xác nhận hoàn thành` | Không có số ngày quá hạn | Có nếu có hạn; ý nghĩa ngày thực tế cần thận trọng |
+| Công việc hoàn thành trước hạn | So `NgayKetThucCVThucTe.Date < NgayKetThucCVDuKien.Date` | Có thể xác định trong dữ liệu; danh sách không tách | Không | Có nếu đủ hai ngày |
+| Công việc hoàn thành đúng ngày | So bằng ngày | Có thể xác định; danh sách không tách | Không | Có nếu đủ hai ngày |
+| Công việc hoàn thành trễ | So `NgayKetThucCVThucTe.Date > NgayKetThucCVDuKien.Date` | AI/DanhGia/Dự án có logic; danh sách không tách | Không | Có nếu đủ hai ngày |
+| Công việc được mở lại sau khi hoàn thành | `MoLaiCongViecAsync` đặt `DangThucHien` và xóa `NgayKetThucCVThucTe` | Mất mốc hoàn thành cũ trên entity Công việc | Chỉ thấy `Đang thực hiện` | Không còn đủ dữ liệu hoàn thành cũ nếu không đọc nhật ký |
+| Công việc không có ngày kết thúc dự kiến | Các logic trễ thường bỏ qua | Không xác định đúng/trễ | Bảng để trống ngày kết thúc | Không |
+| Công việc đã hủy | Có trạng thái `DaHuy`; không nên tự tính trễ như công việc hiệu lực nếu chưa có rule | Chỉ hiển thị `Đã hủy` | Không có tình trạng thời hạn | Dữ liệu có thể có nhưng không nên kết luận nếu thiếu rule |
+| Công việc tạm dừng nhưng đã quá hạn | Dữ liệu có thể tính; hiện không có rule dừng đếm ngày trễ | Chỉ hiển thị `Tạm dừng` | Không | Có nếu có hạn, nhưng cần quyết định nghiệp vụ |
+
+### 22.5. Phân tích giao diện Công việc
+
+`Views/CongViec/_Table.cshtml` có hai phần:
+
+| Khu vực | Dữ liệu thời gian hiển thị | Trạng thái hiển thị | Tình trạng thời hạn |
+| ------- | -------------------------- | ------------------- | ------------------- |
+| Bảng desktop | Cột `Mốc thời gian`: `Bắt đầu` = `NgayBatDauCongViec`, `Kết thúc` = `NgayKetThucCVDuKien` | Badge `workflow-badge` từ `TrangThaiHienThi` và `CssTrangThai` | Không có badge phụ, không có số ngày trễ, không hiển thị ngày thực tế |
+| Card mobile | Meta `Bắt đầu`, `Kết thúc dự kiến` | Badge workflow ở header card | Không có badge phụ, không có số ngày trễ, không hiển thị ngày thực tế |
+| Export | `Ngày bắt đầu`, `Hạn kết thúc`, `Trạng thái` | Text trạng thái | Không export ngày thực tế hoặc tình trạng thời hạn |
+
+CSS `wwwroot/css/CongViec/index.css` có màu warning/danger cho workflow pending/blocker và nút nguy hiểm, nhưng không có selector riêng cho `is-late`, `deadline`, `overdue`, `Hoàn thành trễ` trong màn Công việc. Vì vậy người dùng không thể phân biệt trực tiếp `Đang thực hiện - Trễ`, `Chờ xác nhận - Quá hạn`, `Hoàn thành - Hoàn thành trễ` trên bảng hiện tại. Responsive không làm mất thêm thông tin trễ vì thông tin đó vốn chưa được đưa vào ViewModel/UI; mobile vẫn giữ ngày dự kiến và badge workflow.
+
+### 22.6. ViewModel và query
+
+`CongViecItemViewModel` đã có:
+
+- `NgayBatDauCongViec`.
+- `NgayKetThucCVDuKien`.
+- `NgayKetThucCVThucTe`.
+- `TrangThaiCongViec`, `TrangThaiHienThi`, `CssTrangThai`.
+- `SoLuongChiTietCongViec`.
+
+`CongViecItemViewModel` chưa có:
+
+- `IsQuaHan`.
+- `IsHoanThanhTre`.
+- `IsHoanThanhDungHan`.
+- `SoNgayTre`.
+- `TinhTrangThoiHan`.
+- `CssTinhTrangThoiHan`.
+- `SoLuongChiTietCongViecTre`.
+
+`CongViecService.GetPageAsync` hiện giữ query SQL-side cho filter/search/count/sort/pagination, rồi mới enrichment sau `ToListAsync()` cho tên fallback, phân công, số chi tiết, quyền workflow và badge workflow. Nếu bổ sung tình trạng thời hạn sau này:
+
+- Có thể tính sau khi materialize đúng một trang nếu chỉ cần hiển thị badge trên trang hiện tại.
+- Nếu cần lọc/sắp xếp theo quá hạn hoặc tổng số đúng với toàn bộ kết quả, phải đưa điều kiện SQL-translatable vào query trước `CountAsync()` và `Skip/Take`.
+- Không nên dùng `AsEnumerable()` hoặc `ToListAsync()` trước filter/count vì sẽ phá phân trang server-side.
+- Tránh helper C#, `string.Format`, chuỗi nội suy, `StringComparison` hoặc method tùy chỉnh trong `IQueryable`; lỗi EF Core tương tự phần đã sửa trước có thể quay lại.
+- Nếu tính `SoLuongChiTietCongViecTre`, nên batch theo danh sách `MaCongViec` của page như `GanSoLuongChiTietCongViecAsync`, tránh N+1. Tuy nhiên Chi tiết hiện thiếu hạn dự kiến riêng nên số chi tiết trễ chưa xác định chính xác.
+
+### 22.7. Bộ lọc và thống kê
+
+| Nội dung | Hiện trạng |
+| -------- | ---------- |
+| Lọc Công việc quá hạn | Chưa có trong `CongViecController.Index`, `_Filter.cshtml`, `CongViecPageViewModel`, `CongViecService.GetPageAsync` |
+| Lọc Công việc hoàn thành trễ | Chưa có |
+| Lọc Công việc hoàn thành đúng hạn | Chưa có |
+| Sắp xếp Công việc trễ lên đầu | Chưa có; service sort theo `NgayTaoCongViec` giảm dần rồi `MaCongViec` giảm dần |
+| Summary card Công việc trễ | Chưa có ở `/CongViec`; chỉ có tổng, đang thực hiện, chờ xác nhận, hoàn thành, bị cản |
+| Phạm vi summary card | `Views/CongViec/Index.cshtml` tính trên `Model.DanhSach`, tức trang hiện tại sau phân trang, không phải toàn bộ kết quả filter |
+| Dashboard đếm Công việc trễ | Có ở `DashboardService`, runtime query toàn dashboard |
+| Export Công việc trễ | Export `/CongViec/XuatFile` không có cột tình trạng thời hạn hoặc ngày thực tế |
+
+### 22.8. Đối chiếu Dự án -> Công việc -> Chi tiết công việc
+
+| Cấp | Ngày dự kiến | Ngày thực tế | Có thể tính trễ | Nơi đang tính | Có hiển thị ở danh sách |
+| --- | ------------ | ------------ | --------------- | ------------- | ----------------------- |
+| Dự án | `DuAn.NgayKetThucDuAn` | `DuAn.NgayHoanThanhThucTeDuAn` hoặc fallback từ Công việc trong một số thống kê | Có | `DuAnDeadlineStatusHelper`, `DuAnService`, `DashboardService`, `DanhGiaDuAnService`, `AiService` | Có ở module Dự án/Dashboard |
+| Công việc | `CongViec.NgayKetThucCVDuKien` | `CongViec.NgayKetThucCVThucTe` | Có nếu đủ hai ngày; đang quá hạn nếu chưa hoàn thành và hạn < hôm nay | `DashboardService`, `AiDatasetService`, `DanhGiaDuAnService`, `DuAnService` | Chưa hiển thị ở danh sách `/CongViec` |
+| Chi tiết công việc | Không có trường hạn dự kiến riêng | `CtCongViec.NgayKetThucCTCV` | Không xác định chính xác từ dữ liệu hiện tại | Một số thống kê đang đếm theo `NgayKetThucCTCV`, nhưng mốc này là ngày thực tế nên không đủ tin cậy | Chưa hiển thị tình trạng thời hạn ở `/ChiTietCongViec` |
+
+Logic hiện chưa thống nhất hoàn toàn: Dự án có helper riêng, Công việc có logic trễ rải ở Dashboard/AI/DanhGia/Dự án, còn Chi tiết công việc không có deadline riêng nhưng một số thống kê vẫn dùng `NgayKetThucCTCV` để đếm `ChiTietTreHan`. Ở bước chỉnh sửa sau có thể cân nhắc helper/service dùng chung cho tình trạng thời hạn, nhưng không tạo helper trong bước tài liệu này.
+
+### 22.9. Rủi ro cần kiểm tra trước khi chỉnh sửa sau
+
+| Rủi ro | Bằng chứng AS-IS | Hướng ghi nhận |
+| ------ | ---------------- | -------------- |
+| Ngày hoàn thành thực tế Công việc được gán quá sớm | `TrangThaiWorkflowService` set `NgayKetThucCVThucTe` khi lên `ChoXacNhanHoanThanh` | Khi hiển thị hoàn thành trễ cần ghi chú ngày thực tế là ngày hệ thống ghi nhận đủ điều kiện/chờ xác nhận |
+| Chờ xác nhận bị hiểu nhầm là hoàn thành thật | `CongViecService.XacNhanHoanThanhCongViecAsync` mới đổi sang `HoanThanh`; trước đó là `ChoXacNhanHoanThanh` | Tách workflow và tình trạng thời hạn |
+| Mở lại Công việc làm mất ngày hoàn thành cũ | `MoLaiCongViecAsync` set `NgayKetThucCVThucTe = null` | Không thể đánh giá lần hoàn thành cũ từ entity hiện tại |
+| Dùng `DateTime.Now` và `.Date` chưa thống nhất | Dashboard có nơi dùng `DateTime.Now`, nơi dùng `DateTime.Today`; AI dùng `DateTime.Today`; so sánh hoàn thành thường dùng `.Date` | Nên chuẩn hóa nếu triển khai |
+| `DaHuy`/`TamDung` vẫn bị tính như chưa hoàn thành trễ | Một số query chỉ loại hoàn thành | Cần rule nghiệp vụ rõ trước khi filter hiển thị |
+| Summary card chỉ tính trên trang hiện tại | `Index.cshtml` dùng `Model.DanhSach.Count` | Nếu thêm card trễ toàn bộ cần query tổng riêng |
+| Filter trễ sau phân trang làm sai tổng | `GetPageAsync` count trước pagination | Nếu có filter trễ phải đưa vào query trước `CountAsync()` |
+| N+1 khi đếm chi tiết trễ | Hiện số chi tiết được batch theo page | Giữ pattern batch; không query từng dòng |
+| EF Core translate lỗi | Lịch sử đã sửa fallback string interpolation trong `CongViecService` | Không đưa helper/string interpolation/StringComparison vào `IQueryable` |
+
+### 22.10. Kết luận chức năng Công việc
+
+- Công việc có đủ dữ liệu cơ bản để biết hoàn thành đúng hạn hoặc trễ hạn: `NgayKetThucCVDuKien`, `NgayKetThucCVThucTe`, `TrangThaiCongViec`.
+- Logic tính Công việc trễ đã tồn tại rải rác ở `DashboardService`, `AiDatasetService`, `DanhGiaDuAnService`, `DuAnService`, nhưng chưa nằm trong `CongViecService.GetPageAsync` và chưa được đưa vào `CongViecItemViewModel`.
+- Danh sách `/CongViec` hiện thiếu cờ tình trạng thời hạn, số ngày trễ, ngày hoàn thành thực tế hiển thị, filter/sort theo trễ hạn và summary card trễ hạn.
+- Không cần sửa database để nhận biết đúng/trễ cho Công việc, vì cặp ngày dự kiến/thực tế đã có. Có thể cần sửa ViewModel/service/view/CSS nếu bước sau muốn hiển thị.
+- File có khả năng cần sửa ở bước tiếp theo: `CongViecItemViewModel.cs`, `CongViecPageViewModel.cs`, `CongViecService.cs`, `CongViecController.cs`, `Views/CongViec/_Filter.cshtml`, `Views/CongViec/_Table.cshtml`, `Views/CongViec/Index.cshtml`, `wwwroot/css/CongViec/index.css`, và có thể `DashboardService.cs` nếu muốn link dashboard lọc đúng.
+- Ràng buộc không được phá khi chỉnh sửa sau: không biến `Trễ hạn` thành `TrangThaiCongViec`, không tự động đổi workflow theo ngày, không bỏ data scope/permission, không phá server-side pagination, không tạo N+1, không dùng biểu thức EF Core khó dịch, không sửa schema nếu chỉ làm hiển thị Công việc.
+
+## 23. Kết quả triển khai tình trạng thời hạn Công việc
+
+### 23.1. File đã sửa
+
+| File | Nội dung |
+| ---- | -------- |
+| `QuanLyDuAn/QuanLyDuAn/ViewModels/CongViec/CongViecDeadlineStatus.cs` | Thêm mã tình trạng/filter thời hạn trong phạm vi ViewModel Công việc: `ConHan`, `QuaHan`, `HoanTatDungHan`, `HoanTatTre`, `HoanThanhDungHan`, `HoanThanhTre`, `KhongDanhGia`, `ChuaXacDinh` và filter `QuaHan`, `ChoXacNhanTre`, `HoanThanhTre`, `HoanThanhDungHan`, `ConHan`. |
+| `QuanLyDuAn/QuanLyDuAn/ViewModels/CongViec/CongViecItemViewModel.cs` | Bổ sung thuộc tính hiển thị thời hạn: `IsQuaHan`, `IsHoanThanhTre`, `IsHoanThanhDungHan`, `IsKhongDanhGiaThoiHan`, `SoNgayTre`, `MaTinhTrangThoiHan`, `TinhTrangThoiHan`, `CssTinhTrangThoiHan`. |
+| `QuanLyDuAn/QuanLyDuAn/ViewModels/CongViec/CongViecPageViewModel.cs` | Bổ sung `LocTinhTrangThoiHan` để giữ filter trên form, phân trang và export. |
+| `QuanLyDuAn/QuanLyDuAn/Services/Interfaces/ICongViecService.cs` | Mở rộng contract `GetPageAsync` với tham số `locTinhTrangThoiHan`. |
+| `QuanLyDuAn/QuanLyDuAn/Services/Implementations/CongViecService.cs` | Thêm filter thời hạn SQL-translatable trước `CountAsync`; tính badge thời hạn sau `ToListAsync`; giữ nguyên data scope, search, lọc ngày, phân trang và enrichment batch hiện có. |
+| `QuanLyDuAn/QuanLyDuAn/Controllers/CongViecController.cs` | Thêm tham số `locTinhTrangThoiHan`, giữ tương thích link dashboard `treHan=true`, truyền filter vào service và export thêm cột thời hạn. |
+| `QuanLyDuAn/QuanLyDuAn/Views/CongViec/Index.cshtml` | Truyền `LocTinhTrangThoiHan` xuống table và export route values. |
+| `QuanLyDuAn/QuanLyDuAn/Views/CongViec/_Filter.cshtml` | Thêm select `Tình trạng thời hạn` với các lựa chọn: tất cả, đang quá hạn, chờ xác nhận trễ, hoàn thành trễ, hoàn thành đúng hạn, còn hạn. |
+| `QuanLyDuAn/QuanLyDuAn/Views/CongViec/_Table.cshtml` | Hiển thị badge workflow và badge tình trạng thời hạn riêng ở desktop/mobile; thêm ngày `Hoàn tất` khi có `NgayKetThucCVThucTe`; giữ hidden filter trong form xác nhận/mở lại. |
+| `QuanLyDuAn/QuanLyDuAn/wwwroot/css/CongViec/index.css` | Thêm style badge thời hạn trong scope `.cong-viec-page`, chỉnh grid filter để có thêm select thời hạn, giữ responsive desktop/tablet/mobile. |
+| `docs/congviec.md` | Ghi nhận kết quả triển khai, build và phạm vi không đổi. |
+
+Không sửa `docs/ctcongviec.md`, entity, DbContext, migration, SQL schema hoặc dữ liệu.
+
+### 23.2. Logic xác định thời hạn
+
+Logic hiển thị nằm trong `CongViecService.GanThongTinThoiHan(...)`, chạy sau khi query đã `CountAsync`, `OrderBy`, `Skip/Take`, `ToListAsync`. Ngày tham chiếu dùng `DateTime.Today`; mọi so sánh dùng `.Date`.
+
+| Trường hợp | Mã | Hiển thị | Số ngày trễ |
+| ---------- | -- | -------- | ----------- |
+| `DaHuy` | `KhongDanhGia` | `Không đánh giá` | `0` |
+| Không có `NgayKetThucCVDuKien` | `ChuaXacDinh` | `Chưa xác định` | `0` |
+| `HoanThanh` nhưng thiếu `NgayKetThucCVThucTe` | `ChuaXacDinh` | `Chưa xác định ngày hoàn thành` | `0` |
+| `HoanThanh`, thực tế <= dự kiến | `HoanThanhDungHan` | `Hoàn thành đúng hạn` | `0` |
+| `HoanThanh`, thực tế > dự kiến | `HoanThanhTre` | `Hoàn thành trễ X ngày` | Theo chênh lệch thực tế - dự kiến |
+| `ChoXacNhanHoanThanh`, có ngày thực tế <= dự kiến | `HoanTatDungHan` | `Hoàn tất đúng hạn` | `0` |
+| `ChoXacNhanHoanThanh`, có ngày thực tế > dự kiến | `HoanTatTre` | `Hoàn tất trễ X ngày` | Theo chênh lệch thực tế - dự kiến |
+| `ChoXacNhanHoanThanh`, chưa có ngày thực tế, đã qua hạn | `QuaHan` | `Quá hạn X ngày` | Theo hôm nay - dự kiến |
+| `ChuaBatDau`, `DangThucHien`, `BiCanCan` đã qua hạn | `QuaHan` | `Trễ X ngày` | Theo hôm nay - dự kiến |
+| `TamDung` đã qua hạn | `QuaHan` | `Quá hạn X ngày` | Theo hôm nay - dự kiến |
+| Chưa qua hạn | `ConHan` | `Còn hạn` | `0` |
+
+`TrangThaiCongViec` không bị đổi. `Trễ hạn`, `Quá hạn`, `Hoàn thành trễ` chỉ là tình trạng thời hạn trong ViewModel.
+
+### 23.3. Logic cho Chờ xác nhận hoàn thành
+
+`ChoXacNhanHoanThanh` được xử lý riêng trong `CongViecService.GanThongTinThoiHan(...)`:
+
+- Nếu đã có `NgayKetThucCVThucTe`, so ngày thực tế với `NgayKetThucCVDuKien`.
+- Nếu đúng hạn, hiển thị `Hoàn tất đúng hạn`.
+- Nếu trễ, hiển thị `Hoàn tất trễ X ngày`.
+- Nếu chưa có `NgayKetThucCVThucTe`, dùng hạn dự kiến so với `DateTime.Today`; quá hạn thì `Quá hạn X ngày`, chưa quá hạn thì `Còn hạn`.
+
+Dùng chữ `Hoàn tất` để không nhầm với trạng thái workflow `HoanThanh`, vì Công việc vẫn cần bước xác nhận cuối cùng.
+
+### 23.4. Bộ lọc tình trạng thời hạn
+
+`CongViecController.Index` và `XuatFile` nhận `locTinhTrangThoiHan`. Nếu link cũ từ Dashboard gửi `treHan=true` mà chưa có `locTinhTrangThoiHan`, controller ánh xạ sang `QuaHan`.
+
+Filter được áp dụng trong `CongViecService.ApDungLocTinhTrangThoiHan(...)` trước `CountAsync()` và trước phân trang:
+
+| Filter | Điều kiện chính |
+| ------ | --------------- |
+| `QuaHan` | Có hạn, hạn < hôm nay, chưa hoàn thành, không `ChoXacNhanHoanThanh`, không `DaHuy` |
+| `ChoXacNhanTre` | `ChoXacNhanHoanThanh`, có hạn, ngày thực tế trễ hạn hoặc chưa có ngày thực tế nhưng hôm nay đã qua hạn |
+| `HoanThanhTre` | Hoàn thành, có hạn, có ngày thực tế, ngày thực tế > hạn |
+| `HoanThanhDungHan` | Hoàn thành, có hạn, có ngày thực tế, ngày thực tế <= hạn |
+| `ConHan` | Có hạn, hạn >= hôm nay, chưa hoàn thành, không `ChoXacNhanHoanThanh`, không `DaHuy` |
+
+Các điều kiện filter chỉ dùng cột `TrangThaiCongViec`, `NgayKetThucCVDuKien`, `NgayKetThucCVThucTe`, danh sách biến thể trạng thái từ `TrangThai.GetCommonStatusVariants(...)`, `Contains(...)`, so sánh ngày và `.Date`. Không gọi helper C# trong `Where`, không dùng `string.Format`, chuỗi nội suy, `ToString("dd/MM/yyyy")`, `StringComparison` hoặc `TrangThai.ToDisplay` trong query.
+
+### 23.5. Server-side pagination, N+1 và EF Core
+
+- Lọc tình trạng thời hạn chạy trên `IQueryable` trước `CountAsync()`, nên tổng số bản ghi và phân trang khớp điều kiện filter.
+- Service vẫn giữ thứ tự: data scope -> filter/search/ngày/trạng thái/thời hạn -> Employee scope -> `CountAsync()` -> sort -> `Skip/Take` -> `ToListAsync()`.
+- Tình trạng thời hạn hiển thị được tính trên danh sách đã materialize của đúng trang hiện tại, không tạo query riêng theo từng Công việc.
+- Các batch enrichment cũ `GanSoNguoiDuocPhanCongAsync` và `GanSoLuongChiTietCongViecAsync` giữ nguyên, không phát sinh N+1.
+- Không đưa lại fallback chuỗi nội suy vào projection/query EF Core; các fallback tên dự án/danh mục/mức độ vẫn chạy sau materialization như trước.
+
+### 23.6. Giao diện và xuất file
+
+`Views/CongViec/_Table.cshtml` hiển thị:
+
+- Badge trạng thái workflow hiện có.
+- Badge tình trạng thời hạn bên dưới.
+- Cột thời gian dùng nhãn ngắn `Bắt đầu`, `Hạn`, `Hoàn tất`.
+- Ngày `Hạn` được nhấn nhẹ màu đỏ khi Công việc đang quá hạn, chờ xác nhận trễ hoặc hoàn thành trễ.
+- Card mobile có cùng badge thời hạn và ngày hoàn tất khi có.
+
+`CongViecController.XuatFile` bổ sung cột:
+
+- `Ngày hoàn thành thực tế`.
+- `Tình trạng thời hạn`.
+- `Số ngày trễ`.
+
+Export vẫn giữ quyền `Permissions.ThongKe.XuatFile` và giữ các cột cũ.
+
+### 23.7. Kết quả build và kiểm tra
+
+Lệnh đã chạy:
+
+```powershell
+dotnet build
+```
+
+Kết quả: không build được ở root vì thư mục root không chứa project/solution, MSBuild báo `MSB1003`.
+
+Lệnh build đúng project:
+
+```powershell
+dotnet build QuanLyDuAn\QuanLyDuAn\QuanLyDuAn.csproj
+```
+
+Kết quả:
+
+- Build thành công.
+- `0` error.
+- Có `2` warning `CS1998` cũ ở `Services/Implementations/FileTienDoCongViecService.cs`, không thuộc thay đổi Công việc.
+- Lần build đầu bị `NU1301` do sandbox chặn NuGet; sau khi được cấp quyền network cho `dotnet build`, restore/build thành công.
+
+Các trường hợp kiểm tra ở mức source/build:
+
+| Nhóm | Kết quả |
+| ---- | ------- |
+| `DangThucHien`, `ChuaBatDau`, `BiCanCan` quá hạn | Hiển thị `Trễ X ngày` |
+| `TamDung` quá hạn | Hiển thị `Quá hạn X ngày` |
+| `ChoXacNhanHoanThanh` có ngày thực tế đúng hạn/trễ | Hiển thị `Hoàn tất đúng hạn` hoặc `Hoàn tất trễ X ngày` |
+| `ChoXacNhanHoanThanh` chưa có ngày thực tế | Hiển thị `Quá hạn X ngày` hoặc `Còn hạn` theo hạn dự kiến |
+| `HoanThanh` đúng hạn/trễ | Hiển thị `Hoàn thành đúng hạn` hoặc `Hoàn thành trễ X ngày` |
+| `DaHuy` | Hiển thị `Không đánh giá`, không dùng badge đỏ |
+| Thiếu hạn dự kiến | Hiển thị `Chưa xác định` |
+| Hoàn thành thiếu ngày thực tế | Hiển thị `Chưa xác định ngày hoàn thành` |
+| Lọc thời hạn | Áp dụng trước `CountAsync()` và `Skip/Take` |
+| Phân trang/export | Giữ query string/filter mới qua `_Pagination`, workflow forms và export route values |
+
+### 23.8. Phạm vi không thay đổi
+
+- Không sửa database.
+- Không sửa schema.
+- Không tạo hoặc chạy migration.
+- Không sửa entity `CongViec`, `CtCongViec`.
+- Không sửa `QuanLyDuAnDbContext`.
+- Không dùng `AI_DATASET` làm nguồn xác định trễ hạn.
+- Không sửa workflow Công việc, Chi tiết công việc, Dự án, phân công, báo cáo tiến độ hoặc duyệt tiến độ.
+- Không thêm tình trạng thời hạn cho Chi tiết công việc.
+- Không dùng `NgayKetThucCTCV` làm hạn dự kiến.
+- Không cập nhật `docs/ctcongviec.md`.

@@ -49,7 +49,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
             };
         }
 
-        public static void Apply(DuAnViewModel duAn, DateTime today)
+        public static void Apply(DuAnViewModel duAn, DateTime now)
         {
             duAn.IsQuaHan = false;
             duAn.IsHoanThanhTre = false;
@@ -74,7 +74,7 @@ namespace QuanLyDuAn.ViewModels.DuAn
                 return;
             }
 
-            var ngayKetThuc = duAn.NgayKetThucDuAn.Value.Date;
+            var ngayKetThuc = duAn.NgayKetThucDuAn.Value;
             var laTrangThaiDaKetThuc = TrangThai.LaHoanThanhCongViec(duAn.TrangThaiDuAn)
                                       || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.LuuTru);
 
@@ -82,12 +82,19 @@ namespace QuanLyDuAn.ViewModels.DuAn
             {
                 if (duAn.NgayHoanThanhThucTeDuAn.HasValue)
                 {
-                    var ngayHoanThanh = duAn.NgayHoanThanhThucTeDuAn.Value.Date;
+                    var ngayHoanThanh = duAn.NgayHoanThanhThucTeDuAn.Value;
                     if (ngayHoanThanh > ngayKetThuc)
                     {
-                        duAn.IsHoanThanhTre = true;
-                        duAn.SoNgayTre = (ngayHoanThanh - ngayKetThuc).Days;
-                        SetStatus(duAn, StatusHoanThanhTre, $"Hoàn thành trễ {duAn.SoNgayTre} ngày", "is-late");
+                        if (duAn.SoCongViecTre > 0 && duAn.SoCongViecVuotHanDuAn > 0)
+                        {
+                            duAn.IsHoanThanhTre = true;
+                            duAn.SoNgayTre = TinhSoNgayTre(ngayHoanThanh, ngayKetThuc);
+                            SetStatus(duAn, StatusHoanThanhTre, $"Hoàn thành trễ {duAn.SoNgayTre} ngày", "is-late");
+                            return;
+                        }
+
+                        SetStatus(duAn, StatusChuaXacDinh, "Hoàn thành trễ thiếu bằng chứng công việc", "is-unknown");
+                        duAn.IsChuaXacDinh = true;
                         return;
                     }
 
@@ -107,10 +114,10 @@ namespace QuanLyDuAn.ViewModels.DuAn
                 return;
             }
 
-            if (today.Date > ngayKetThuc)
+            if (now > ngayKetThuc)
             {
                 duAn.IsQuaHan = true;
-                duAn.SoNgayTre = (today.Date - ngayKetThuc).Days;
+                duAn.SoNgayTre = TinhSoNgayTre(now, ngayKetThuc);
                 var prefix = TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.TamDung)
                              || TrangThai.EqualsValue(duAn.TrangThaiDuAn, TrangThai.ChoXacNhanHoanThanh)
                     ? "Quá hạn"
@@ -134,6 +141,12 @@ namespace QuanLyDuAn.ViewModels.DuAn
             duAn.CoCongViecTre = true;
             var text = duAn.SoCongViecTre == 1 ? "1 công việc trễ" : $"{duAn.SoCongViecTre} công việc trễ";
             SetStatus(duAn, StatusCongViecTre, text, "is-work-late");
+        }
+
+        private static int TinhSoNgayTre(DateTime thucTe, DateTime keHoach)
+        {
+            var soNgay = (thucTe - keHoach).TotalDays;
+            return soNgay > 0 ? Math.Max(1, (int)Math.Ceiling(soNgay)) : 0;
         }
 
         private static void SetStatus(DuAnViewModel duAn, string code, string text, string css)

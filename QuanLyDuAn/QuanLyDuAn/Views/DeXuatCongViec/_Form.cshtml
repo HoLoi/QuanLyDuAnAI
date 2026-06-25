@@ -55,12 +55,12 @@
             </div>
             <div class="col-md-6">
                 <label asp-for="Form.NgayBatDauCongViecDeXuat" class="form-label">Ngày bắt đầu dự kiến</label>
-                <input asp-for="Form.NgayBatDauCongViecDeXuat" type="date" class="form-control" />
+                <input asp-for="Form.NgayBatDauCongViecDeXuat" type="datetime-local" value="@Model.Form.NgayBatDauCongViecDeXuat?.ToString("yyyy-MM-ddTHH:mm")" class="form-control" />
                 <span asp-validation-for="Form.NgayBatDauCongViecDeXuat" class="text-danger"></span>
             </div>
             <div class="col-md-6">
                 <label asp-for="Form.NgayKetThucCVDeXuatDuKien" class="form-label">Ngày kết thúc dự kiến</label>
-                <input asp-for="Form.NgayKetThucCVDeXuatDuKien" type="date" class="form-control" />
+                <input asp-for="Form.NgayKetThucCVDeXuatDuKien" type="datetime-local" value="@Model.Form.NgayKetThucCVDeXuatDuKien?.ToString("yyyy-MM-ddTHH:mm")" class="form-control" />
                 <span asp-validation-for="Form.NgayKetThucCVDeXuatDuKien" class="text-danger"></span>
             </div>
             <div class="col-12">

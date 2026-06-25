@@ -49,9 +49,9 @@
             <section class="support-section">
                 <div class="support-section-title">Thời hạn dự án</div>
                 <div class="support-grid">
-                    <div class="stat-box"><span>Ngày bắt đầu dự án</span><strong>@(Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</strong></div>
-                    <div class="stat-box"><span>Ngày kết thúc dự kiến</span><strong>@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "Chưa có mốc kết thúc dự kiến")</strong></div>
-                    <div class="stat-box"><span>Ngày hoàn thành tham chiếu</span><strong>@(Model.NgayKetThucThucTeDuAn?.ToString("dd/MM/yyyy") ?? "Chưa hoàn thành")</strong><small>Ưu tiên ngày hoàn thành dự án, nếu chưa có thì tham chiếu công việc cuối cùng.</small></div>
+                    <div class="stat-box"><span>Ngày bắt đầu dự án</span><strong>@(Model.NgayBatDauDuAn?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa cập nhật")</strong></div>
+                    <div class="stat-box"><span>Ngày kết thúc dự kiến</span><strong>@(Model.NgayKetThucDuAn?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có mốc kết thúc dự kiến")</strong></div>
+                    <div class="stat-box"><span>Ngày hoàn thành tham chiếu</span><strong>@(Model.NgayKetThucThucTeDuAn?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa hoàn thành")</strong><small>Ưu tiên ngày hoàn thành dự án, nếu chưa có thì tham chiếu công việc cuối cùng.</small></div>
                     <div class="stat-box @(thoiHanCanhBao ? "stat-warning" : string.Empty)"><span>Trạng thái thời hạn</span><strong>@(string.IsNullOrWhiteSpace(Model.TrangThaiThoiHanDuAn) ? "Chưa có dữ liệu" : Model.TrangThaiThoiHanDuAn)</strong></div>
                     <div class="stat-box"><span>@ngayConLaiLabel</span><strong>@ngayConLaiValue</strong></div>
                     <div class="stat-box @(Model.SoNgayQuaHan.GetValueOrDefault() > 0 ? "stat-warning" : string.Empty)"><span>Số ngày quá hạn</span><strong>@(Model.SoNgayQuaHan.HasValue ? $"{Model.SoNgayQuaHan} ngày" : "Không áp dụng")</strong></div>

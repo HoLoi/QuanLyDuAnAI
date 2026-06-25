@@ -210,8 +210,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>85k8ep5e60</Fingerprint>
-      <Integrity>/LlP9votsDVFF5VNFO8ZjzESkslgeLTjSRMUi38OE+M=</Integrity>
+      <Fingerprint>88gdozg5n1</Fingerprint>
+      <Integrity>mKinSQTsiL7HXch5/sN7V4XN+oyllCw8E3XLBx+8OOc=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\CongViec\index.css'))</OriginalItemSpec>
@@ -570,8 +570,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>ix8oj1sbs3</Fingerprint>
-      <Integrity>yqUS8eCsjzjxNN2epY8ra1QHWiWWMUa7Ndv2MsrF37o=</Integrity>
+      <Fingerprint>eoqx349n2l</Fingerprint>
+      <Integrity>TsjEWSVqdhsGJAhdWU20MTApiC02UGp8m8NE+KyIDus=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\DuAn\details.css'))</OriginalItemSpec>
@@ -2177,6 +2177,24 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\QuanLyDuAn.0tp7zig6ys.bundle.scp.css'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\avatars\avatar_18_20260622201054_f376962e79434f35a2325608d52a8f58.jpg'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>uploads/avatars/avatar_18_20260622201054_f376962e79434f35a2325608d52a8f58.jpg</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>2a4k91tvs0</Fingerprint>
+      <Integrity>VtAV0IXndfO6utEMe65yieynwg4TbfLE+hyUY2/BAEs=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\avatars\avatar_18_20260622201054_f376962e79434f35a2325608d52a8f58.jpg'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\uploads\avatars\avatar_1_20260524190347_3da100e6698c4784b43b26034fc93ca7.jpg'))">
       <SourceType>Package</SourceType>

@@ -171,19 +171,26 @@ public class DashboardService : IDashboardService
             x.NgayHoanThanhThucTe.HasValue
             && (!tuNgayLoc.HasValue || x.NgayHoanThanhThucTe.Value >= tuNgayLoc.Value)
             && (!denNgayDocQuyen.HasValue || x.NgayHoanThanhThucTe.Value < denNgayDocQuyen.Value));
+        var duAnHoanThanhTreHopLe = await LogQueryAsync("DuAnHoanThanhTreHopLe", () => LayMaDuAnHoanThanhTreHopLeAsync(duAnThongKeQuery));
         var duAnHoanThanhDungHan = duAnHoanThanhTimelineRows.Count(x =>
             x.NgayKetThucDuAn.HasValue
             && x.NgayHoanThanhThucTe.HasValue
-            && x.NgayHoanThanhThucTe.Value.Date <= x.NgayKetThucDuAn.Value.Date);
+            && x.NgayHoanThanhThucTe.Value <= x.NgayKetThucDuAn.Value);
         var duAnHoanThanhTreHan = duAnHoanThanhTimelineRows.Count(x =>
             x.NgayKetThucDuAn.HasValue
             && x.NgayHoanThanhThucTe.HasValue
-            && x.NgayHoanThanhThucTe.Value.Date > x.NgayKetThucDuAn.Value.Date);
+            && x.NgayHoanThanhThucTe.Value > x.NgayKetThucDuAn.Value
+            && duAnHoanThanhTreHopLe.Contains(x.MaDuAn));
 
+        var now = DateTime.Now;
+        var completionStatuses = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
         var congViecTreHanQuery = congViecQuery.Where(x =>
             x.NgayKetThucCVDuKien.HasValue
-            && x.NgayKetThucCVDuKien.Value < DateTime.Now
-            && !TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh).Contains(x.TrangThaiCongViec ?? string.Empty));
+            && ((completionStatuses.Contains(x.TrangThaiCongViec ?? string.Empty)
+                 && x.NgayKetThucCVThucTe.HasValue
+                 && x.NgayKetThucCVThucTe.Value > x.NgayKetThucCVDuKien.Value)
+                || (!completionStatuses.Contains(x.TrangThaiCongViec ?? string.Empty)
+                    && x.NgayKetThucCVDuKien.Value < now)));
 
         var congViecTreHan = await LogQueryAsync("CongViecTreHan", () => congViecTreHanQuery.CountAsync());
         var topDuAnTre = await LogQueryAsync("TopDuAnTre", () => LayTopDuAnTreAsync(duAnThongKeQuery));
@@ -584,14 +591,76 @@ public class DashboardService : IDashboardService
             x.NgayHoanThanhThucTeDuAn ?? fallback.GetValueOrDefault(x.MaDuAn))).ToList();
     }
 
+    private async Task<HashSet<int>> LayMaDuAnHoanThanhTreHopLeAsync(IQueryable<DuAn> duAnQuery)
+    {
+        var completionStatuses = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
+        var archivedStatuses = TrangThai.GetCommonStatusVariants(TrangThai.LuuTru);
+
+        var maDuAnTreTheoNgay = await duAnQuery
+            .Where(da => da.NgayKetThucDuAn.HasValue
+                && da.NgayHoanThanhThucTeDuAn.HasValue
+                && da.NgayHoanThanhThucTeDuAn.Value > da.NgayKetThucDuAn.Value
+                && (completionStatuses.Contains(da.TrangThaiDuAn ?? string.Empty)
+                    || archivedStatuses.Contains(da.TrangThaiDuAn ?? string.Empty)))
+            .Select(da => da.MaDuAn)
+            .ToListAsync();
+
+        if (maDuAnTreTheoNgay.Count == 0)
+        {
+            return [];
+        }
+
+        var maDuAnCoCongViecTre = await (
+            from cv in _db.CongViec.AsNoTracking()
+            join dm in _db.DanhMucCongViec.AsNoTracking() on cv.MaDanhMucCV equals dm.MaDanhMucCV
+            where cv.IsDeleted != true
+                  && dm.IsDeleted != true
+                  && maDuAnTreTheoNgay.Contains(dm.MaDuAn)
+                  && cv.NgayKetThucCVDuKien.HasValue
+                  && cv.NgayKetThucCVThucTe.HasValue
+                  && completionStatuses.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                  && cv.NgayKetThucCVThucTe.Value > cv.NgayKetThucCVDuKien.Value
+            select dm.MaDuAn)
+            .Distinct()
+            .ToListAsync();
+
+        var maDuAnCoCongViecVuotHanDuAn = await (
+            from cv in _db.CongViec.AsNoTracking()
+            join dm in _db.DanhMucCongViec.AsNoTracking() on cv.MaDanhMucCV equals dm.MaDanhMucCV
+            join da in _db.DuAn.AsNoTracking() on dm.MaDuAn equals da.MaDuAn
+            where cv.IsDeleted != true
+                  && dm.IsDeleted != true
+                  && da.IsDeleted != true
+                  && maDuAnTreTheoNgay.Contains(dm.MaDuAn)
+                  && da.NgayKetThucDuAn.HasValue
+                  && cv.NgayKetThucCVThucTe.HasValue
+                  && completionStatuses.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                  && cv.NgayKetThucCVThucTe.Value > da.NgayKetThucDuAn.Value
+            select dm.MaDuAn)
+            .Distinct()
+            .ToListAsync();
+
+        return maDuAnCoCongViecTre
+            .Intersect(maDuAnCoCongViecVuotHanDuAn)
+            .ToHashSet();
+    }
+
+    private static int TinhSoNgayTre(DateTime han, DateTime thucTe)
+    {
+        var soNgay = (thucTe - han).TotalDays;
+        return soNgay > 0 ? Math.Max(1, (int)Math.Ceiling(soNgay)) : 0;
+    }
+
     private async Task<List<DashboardDelayedProjectItemViewModel>> LayTopDuAnTreAsync(IQueryable<DuAn> duAnQuery)
     {
-        var today = DateTime.Today;
+        var now = DateTime.Now;
+        var maDuAnHoanThanhTreHopLe = await LayMaDuAnHoanThanhTreHopLeAsync(duAnQuery);
         var rows = await (
             from da in duAnQuery
             join nd in _db.NguoiDung.AsNoTracking() on da.MaNguoiDung equals nd.MaNguoiDung
             select new
             {
+                da.MaDuAn,
                 da.TenDuAn,
                 da.NgayKetThucDuAn,
                 da.NgayHoanThanhThucTeDuAn,
@@ -600,7 +669,7 @@ public class DashboardService : IDashboardService
                 TenQuanLy = nd.HoTenNguoiDung
             })
             .Where(x => x.NgayKetThucDuAn.HasValue
-                && (x.NgayKetThucDuAn.Value < today
+                && (x.NgayKetThucDuAn.Value < now
                     || (x.NgayHoanThanhThucTeDuAn.HasValue && x.NgayHoanThanhThucTeDuAn.Value > x.NgayKetThucDuAn.Value)))
             .OrderBy(x => x.NgayKetThucDuAn)
             .Take(30)
@@ -609,23 +678,30 @@ public class DashboardService : IDashboardService
         return rows
             .Select(x =>
             {
-                var daHoanThanh = TrangThai.LaHoanThanhCongViec(x.TrangThaiDuAn);
+                var daHoanThanh = TrangThai.LaHoanThanhCongViec(x.TrangThaiDuAn)
+                    || TrangThai.EqualsValue(x.TrangThaiDuAn, TrangThai.LuuTru);
+                if (daHoanThanh && !maDuAnHoanThanhTreHopLe.Contains(x.MaDuAn))
+                {
+                    return null;
+                }
+
                 var mocSoSanh = daHoanThanh
-                    ? x.NgayHoanThanhThucTeDuAn?.Date
-                    : today;
+                    ? x.NgayHoanThanhThucTeDuAn
+                    : now;
                 var soNgayTre = x.NgayKetThucDuAn.HasValue && mocSoSanh.HasValue
-                    ? Math.Max(0, (mocSoSanh.Value - x.NgayKetThucDuAn.Value.Date).Days)
+                    ? TinhSoNgayTre(x.NgayKetThucDuAn.Value, mocSoSanh.Value)
                     : 0;
                 return new DashboardDelayedProjectItemViewModel
                 {
-                    TenDuAn = x.TenDuAn ?? "Dự án chưa đặt tên",
-                    TenQuanLy = x.TenQuanLy ?? "Chưa xác định",
+                    TenDuAn = x.TenDuAn ?? "D? ?n ch?a ??t t?n",
+                    TenQuanLy = x.TenQuanLy ?? "Ch?a x?c ??nh",
                     NgayKetThuc = x.NgayKetThucDuAn,
                     SoNgayTre = soNgayTre,
                     PhanTramHoanThanh = x.PhanTramHoanThanh ?? 0
                 };
             })
-            .Where(x => x.SoNgayTre > 0)
+            .Where(x => x != null && x.SoNgayTre > 0)
+            .Select(x => x!)
             .OrderByDescending(x => x.SoNgayTre)
             .ThenBy(x => x.NgayKetThuc)
             .Take(5)
@@ -688,7 +764,7 @@ public class DashboardService : IDashboardService
     private async Task<List<DashboardOverloadedEmployeeItemViewModel>> LayTopNhanSuQuaTaiAsync(List<int> maDuAnDaLoc)
     {
         var completionStatuses = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
-        var today = DateTime.Today;
+        var now = DateTime.Now;
         var workRows = await (
             from pc in _db.PhanCongCongViec.AsNoTracking()
             join cv in _db.CongViec.AsNoTracking() on pc.MaCongViec equals cv.MaCongViec
@@ -702,7 +778,7 @@ public class DashboardService : IDashboardService
             {
                 MaNguoiDung = g.Key,
                 SoCongViec = g.Select(x => x.pc.MaCongViec).Distinct().Count(),
-                CongViecTre = g.Count(x => x.cv.NgayKetThucCVDuKien.HasValue && x.cv.NgayKetThucCVDuKien.Value < today)
+                CongViecTre = g.Count(x => x.cv.NgayKetThucCVDuKien.HasValue && x.cv.NgayKetThucCVDuKien.Value < now)
             })
             .ToListAsync();
 
@@ -755,7 +831,7 @@ public class DashboardService : IDashboardService
     private async Task<List<DashboardDelayedTaskItemViewModel>> LayTopCongViecTreAsync(List<int> maDuAnDaLoc)
     {
         var completionStatuses = TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh);
-        var today = DateTime.Today;
+        var now = DateTime.Now;
         var rows = await (
             from cv in _db.CongViec.AsNoTracking()
             join dm in _db.DanhMucCongViec.AsNoTracking() on cv.MaDanhMucCV equals dm.MaDanhMucCV
@@ -765,14 +841,19 @@ public class DashboardService : IDashboardService
                   && da.IsDeleted != true
                   && maDuAnDaLoc.Contains(dm.MaDuAn)
                   && cv.NgayKetThucCVDuKien.HasValue
-                  && cv.NgayKetThucCVDuKien.Value < today
-                  && !completionStatuses.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                  && ((completionStatuses.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                       && cv.NgayKetThucCVThucTe.HasValue
+                       && cv.NgayKetThucCVThucTe.Value > cv.NgayKetThucCVDuKien.Value)
+                      || (!completionStatuses.Contains(cv.TrangThaiCongViec ?? string.Empty)
+                          && cv.NgayKetThucCVDuKien.Value < now))
             select new
             {
                 cv.MaCongViec,
                 cv.TenCongViec,
                 da.TenDuAn,
-                cv.NgayKetThucCVDuKien
+                cv.NgayKetThucCVDuKien,
+                cv.NgayKetThucCVThucTe,
+                cv.TrangThaiCongViec
             })
             .OrderBy(x => x.NgayKetThucCVDuKien)
             .Take(5)
@@ -805,7 +886,10 @@ public class DashboardService : IDashboardService
                 TenCongViec = x.TenCongViec ?? "Công việc chưa đặt tên",
                 TenDuAn = x.TenDuAn ?? "Dự án chưa đặt tên",
                 NguoiPhuTrach = string.Join(", ", assigneeNames.Where(a => a.MaCongViec == x.MaCongViec).Select(a => a.TenNhanVien).Distinct().Take(3)),
-                SoNgayTre = Math.Max(0, (today - x.NgayKetThucCVDuKien!.Value.Date).Days)
+                SoNgayTre = TinhSoNgayTre(x.NgayKetThucCVDuKien!.Value,
+                    completionStatuses.Contains(x.TrangThaiCongViec ?? string.Empty) && x.NgayKetThucCVThucTe.HasValue
+                        ? x.NgayKetThucCVThucTe.Value
+                        : now)
             })
             .Select(x =>
             {
@@ -891,7 +975,7 @@ public class DashboardService : IDashboardService
                     && x.NgayKetThucCVDuKien.Value >= month
                     && x.NgayKetThucCVDuKien.Value < nextMonth
                     && (!TrangThai.LaHoanThanhCongViec(x.TrangThaiCongViec)
-                        || (x.NgayKetThucCVThucTe.HasValue && x.NgayKetThucCVThucTe.Value.Date > x.NgayKetThucCVDuKien.Value.Date))),
+                        || (x.NgayKetThucCVThucTe.HasValue && x.NgayKetThucCVThucTe.Value > x.NgayKetThucCVDuKien.Value))),
                 ChiPhi = chiPhiRows
                     .Where(x => x.NgayChi.HasValue && x.NgayChi.Value >= month && x.NgayChi.Value < nextMonth)
                     .Sum(x => x.SoTien)

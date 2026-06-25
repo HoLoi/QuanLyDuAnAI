@@ -67,10 +67,10 @@ else
                         <td>@duAn.TenLoaiDuAn</td>
                         <td class="col-date">@duAn.NgayTaoDuAn?.ToString("dd/MM/yyyy HH:mm")</td>
                         <td class="col-date">
-                            @duAn.NgayBatDauDuAn?.ToString("dd/MM/yyyy")
+                            @duAn.NgayBatDauDuAn?.ToString("dd/MM/yyyy HH:mm")
                             -
                             <span class="du-an-end-date @(duAn.IsQuaHan || duAn.IsHoanThanhTre ? "is-late" : string.Empty)">
-                                @(duAn.NgayKetThucDuAn?.ToString("dd/MM/yyyy") ?? "-")
+                                @(duAn.NgayKetThucDuAn?.ToString("dd/MM/yyyy HH:mm") ?? "-")
                                 @if (duAn.IsQuaHan || duAn.IsHoanThanhTre)
                                 {
                                     <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>

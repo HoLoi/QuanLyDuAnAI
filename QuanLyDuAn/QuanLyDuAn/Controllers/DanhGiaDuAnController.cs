@@ -333,7 +333,7 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Trạng thái đánh giá", ValueSelector = row => string.Equals(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase) ? "Chưa đánh giá" : TrangThai.ToDisplay(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia) },
                     new() { Header = "Điểm tổng kết", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).DiemTongKet.ToString("0.##") : "-" },
                     new() { Header = "Xếp loại", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).XepLoai },
-                    new() { Header = "Ngày đánh giá", ValueSelector = row => ExportSupport.FormatDate(((DanhGiaDuAnItemViewModel)row).NgayDanhGia) },
+                    new() { Header = "Ngày đánh giá", ValueSelector = row => ExportSupport.FormatDateTime(((DanhGiaDuAnItemViewModel)row).NgayDanhGia) },
                     new() { Header = "Người đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDanhGia },
                     new() { Header = "Người duyệt", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDuyet ?? string.Empty }
                 },

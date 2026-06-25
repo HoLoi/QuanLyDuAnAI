@@ -64,8 +64,8 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Dự án", ValueSelector = row => ((NganSachItemViewModel)row).TenDuAn },
                     new() { Header = "Version", ValueSelector = row => ((NganSachItemViewModel)row).Version?.ToString() ?? string.Empty },
                     new() { Header = "Số tiền ngân sách", ValueSelector = row => ExportSupport.FormatCurrency(((NganSachItemViewModel)row).SoTienNganSach) },
-                    new() { Header = "Ngày duyệt", ValueSelector = row => ExportSupport.FormatDate(((NganSachItemViewModel)row).NgayDuyetNganSach) },
-                    new() { Header = "Ngày cập nhật", ValueSelector = row => ExportSupport.FormatDate(((NganSachItemViewModel)row).NgayCapNhatNganSach) },
+                    new() { Header = "Ngày duyệt", ValueSelector = row => ExportSupport.FormatDateTime(((NganSachItemViewModel)row).NgayDuyetNganSach) },
+                    new() { Header = "Ngày cập nhật", ValueSelector = row => ExportSupport.FormatDateTime(((NganSachItemViewModel)row).NgayCapNhatNganSach) },
                     new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((NganSachItemViewModel)row).TrangThaiNganSach) },
                     new() { Header = "Người đề xuất", ValueSelector = row => ((NganSachItemViewModel)row).NguoiDungDeXuat },
                     new() { Header = "Người duyệt", ValueSelector = row => ((NganSachItemViewModel)row).NguoiDungDuyet }

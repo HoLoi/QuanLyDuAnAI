@@ -216,7 +216,7 @@
 }
 
 .cong-viec-page .workflow-filter-row-main {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .cong-viec-page .workflow-filter-row-time {
@@ -395,6 +395,55 @@
     white-space: normal;
 }
 
+.cong-viec-page .status-stack,
+.cong-viec-page .task-mobile-status-stack {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.cong-viec-page .deadline-badge {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    border-radius: 999px;
+    padding: 0.2rem 0.56rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.cong-viec-page .deadline-on-time {
+    background: var(--cv-success-soft);
+    color: var(--cv-success);
+}
+
+.cong-viec-page .deadline-late {
+    background: var(--cv-danger-soft);
+    color: var(--cv-danger);
+}
+
+.cong-viec-page .deadline-pending-late {
+    background: var(--cv-warning-soft);
+    color: var(--cv-warning);
+}
+
+.cong-viec-page .deadline-neutral,
+.cong-viec-page .deadline-unknown {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.cong-viec-page .deadline-date-late {
+    color: var(--cv-danger);
+    font-weight: 700;
+}
+
 .workflow-success { background: var(--cv-success-soft); color: var(--cv-success); }
 .workflow-pending { background: var(--cv-warning-soft); color: var(--cv-warning); }
 .workflow-blocked { background: var(--cv-danger-soft); color: var(--cv-danger); }
@@ -536,6 +585,11 @@
     gap: 0.8rem;
 }
 
+.cong-viec-page .task-mobile-status-stack {
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
 .cong-viec-page .task-mobile-id {
     margin: 0;
     color: var(--cv-muted);
@@ -615,7 +669,7 @@
     }
 
     .cong-viec-page .workflow-filter-row-main {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .cong-viec-page .workflow-filter-row-time {
@@ -666,5 +720,14 @@
 
     .cong-viec-page .task-mobile-meta {
         grid-template-columns: 1fr;
+    }
+
+    .cong-viec-page .task-mobile-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .cong-viec-page .task-mobile-status-stack {
+        align-items: flex-start;
     }
 }

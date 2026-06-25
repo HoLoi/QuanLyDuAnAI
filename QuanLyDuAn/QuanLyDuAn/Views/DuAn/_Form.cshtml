@@ -37,13 +37,13 @@
 
         <div class="col-md-3 mb-2">
             <label>Ngày bắt đầu</label>
-            <input asp-for="NgayBatDauDuAn" type="date" class="form-control" required />
+            <input asp-for="NgayBatDauDuAn" type="datetime-local" value="@Model.NgayBatDauDuAn?.ToString("yyyy-MM-ddTHH:mm")" class="form-control" required />
             <span asp-validation-for="NgayBatDauDuAn" class="text-danger"></span>
         </div>
 
         <div class="col-md-3 mb-2">
             <label>Ngày kết thúc</label>
-            <input asp-for="NgayKetThucDuAn" type="date" class="form-control" required />
+            <input asp-for="NgayKetThucDuAn" type="datetime-local" value="@Model.NgayKetThucDuAn?.ToString("yyyy-MM-ddTHH:mm")" class="form-control" required />
             <span asp-validation-for="NgayKetThucDuAn" class="text-danger"></span>
         </div>
 
@@ -191,8 +191,8 @@
                         <input type="hidden" name="Form.MaDuAn" value="@Model.MaDuAn" />
                         <input type="hidden" name="Form.TenDuAn" value="@Model.TenDuAn" />
                         <input type="hidden" name="Form.MaLoaiDuAn" value="@Model.MaLoaiDuAn" />
-                        <input type="hidden" name="Form.NgayBatDauDuAn" value="@Model.NgayBatDauDuAn?.ToString("yyyy-MM-dd")" />
-                        <input type="hidden" name="Form.NgayKetThucDuAn" value="@Model.NgayKetThucDuAn?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="Form.NgayBatDauDuAn" value="@Model.NgayBatDauDuAn?.ToString("yyyy-MM-ddTHH:mm")" />
+                        <input type="hidden" name="Form.NgayKetThucDuAn" value="@Model.NgayKetThucDuAn?.ToString("yyyy-MM-ddTHH:mm")" />
                         <input type="hidden" name="Form.TrangThaiDuAn" value="@TrangThai.LuuTru" />
                         <input type="hidden" name="Form.MoTaDuAn" value="@Model.MoTaDuAn" />
                         <input type="hidden" name="Form.GhiChuDuAn" value="@Model.GhiChuDuAn" />

@@ -101,13 +101,13 @@ def classify_reason_dataset(rows: list[object], allow_missing_delay_flag: bool =
     result.dropped_class_distribution = dropped_distribution
 
     if result.dropped_not_delay > 0:
-        result.warnings.append(f"Đã bỏ {result.dropped_not_delay} dòng không thuộc nhóm LaDuAnTre=1.")
+        result.warnings.append(f"?? b? {result.dropped_not_delay} d?ng kh?ng thu?c nh?m LaDuAnTre=1.")
     if result.dropped_missing_feature > 0:
-        result.warnings.append(f"Đã bỏ {result.dropped_missing_feature} dòng thiếu feature train.")
+        result.warnings.append(f"?? b? {result.dropped_missing_feature} d?ng thi?u feature train.")
     if result.dropped_missing_label > 0:
-        result.warnings.append(f"Đã bỏ {result.dropped_missing_label} dòng thiếu hoặc sai MaDMNguyenNhan.")
+        result.warnings.append(f"?? b? {result.dropped_missing_label} d?ng thi?u ho?c sai MaDMNguyenNhan.")
     if result.accumulating_class_count > 0:
-        result.warnings.append("Một số nguyên nhân đang tiếp tục tích lũy dữ liệu.")
+        result.warnings.append("M?t s? nguy?n nh?n ?ang ti?p t?c t?ch l?y d? li?u.")
 
     return result
 
@@ -117,9 +117,9 @@ def build_blocking_errors(classification: ReasonDatasetClassification) -> list[s
         return []
     errors: list[str] = []
     if classification.used_rows < settings.min_reason_train_rows:
-        errors.append("Chưa đủ 30 dòng hoặc 2 nguyên nhân sau khi lọc các lớp dưới 5 dòng.")
+        errors.append("Ch?a ?? 30 d?ng ho?c 2 nguy?n nh?n sau khi l?c c?c l?p d??i 5 d?ng.")
     if classification.eligible_class_count < settings.min_reason_class_count:
-        errors.append("Chưa đủ 30 dòng hoặc 2 nguyên nhân sau khi lọc các lớp dưới 5 dòng.")
+        errors.append("Ch?a ?? 30 d?ng ho?c 2 nguy?n nh?n sau khi l?c c?c l?p d??i 5 d?ng.")
     return list(dict.fromkeys(errors))
 
 

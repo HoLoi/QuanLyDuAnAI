@@ -20,6 +20,14 @@ namespace QuanLyDuAn.ViewModels.CongViec
         public string TrangThaiHienThi { get; set; } = string.Empty;
         public string CssTrangThai { get; set; } = string.Empty;
         public string? ThongDiepWorkflow { get; set; }
+        public bool IsQuaHan { get; set; }
+        public bool IsHoanThanhTre { get; set; }
+        public bool IsHoanThanhDungHan { get; set; }
+        public bool IsKhongDanhGiaThoiHan { get; set; }
+        public int SoNgayTre { get; set; }
+        public string MaTinhTrangThoiHan { get; set; } = string.Empty;
+        public string TinhTrangThoiHan { get; set; } = string.Empty;
+        public string CssTinhTrangThoiHan { get; set; } = string.Empty;
         public int SoNguoiDuocPhanCong { get; set; }
         public bool DaPhanCong => SoNguoiDuocPhanCong > 0;
         public int SoLuongChiTietCongViec { get; set; }

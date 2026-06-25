@@ -93,6 +93,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             var (congViec, maDuAn) = await GetCongViecVaDuAnAsync(maCongViec);
             var maNguoiDungHienTai = await GetCurrentUserIdAsync();
+            var thoiDiemGiao = DateTime.Now;
 
             KiemTraTrangThaiCongViec(congViec);
 
@@ -100,7 +101,7 @@ namespace QuanLyDuAn.Services.Implementations
             if (!coThePhanCong)
                 throw new Exception("Bạn không có quyền phân công công việc này.");
 
-            await KiemTraNhanVienHopLeAsync(maDuAn, maNhanVien);
+            await KiemTraNhanVienHopLeAsync(maDuAn, maNhanVien, thoiDiemGiao);
 
             var daTonTai = await _context.PhanCongCongViec
                 .AnyAsync(x => x.MaCongViec == maCongViec && x.MaNguoiDung == maNhanVien);
@@ -112,7 +113,7 @@ namespace QuanLyDuAn.Services.Implementations
             {
                 MaCongViec = maCongViec,
                 MaNguoiDung = maNhanVien,
-                NgayGiaoViec = DateTime.Now
+                NgayGiaoViec = thoiDiemGiao
             });
 
             GhiNhatKy(maCongViec, maNhanVien, maNguoiDungHienTai, TrangThai.HanhDongThemPhanCong);
@@ -172,7 +173,7 @@ namespace QuanLyDuAn.Services.Implementations
             }
         }
 
-        private async Task KiemTraNhanVienHopLeAsync(int maDuAn, int maNhanVien)
+        private async Task KiemTraNhanVienHopLeAsync(int maDuAn, int maNhanVien, DateTime thoiDiemGiao)
         {
             var nhanVien = await (
                 from nd in _context.NguoiDung
@@ -190,11 +191,16 @@ namespace QuanLyDuAn.Services.Implementations
             if (nhanVien.LockoutEnd.HasValue && nhanVien.LockoutEnd.Value > DateTime.UtcNow)
                 throw new Exception("Tài khoản của người được phân công đang bị khóa.");
 
-            var thuocDuAn = await _context.NhanVienDuAn
-                .AnyAsync(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNhanVien);
+            var thamGiaDuAn = await _context.NhanVienDuAn
+                .Where(x => x.MaDuAn == maDuAn && x.MaNguoiDung == maNhanVien)
+                .Select(x => new { x.NgayThamGiaDuAn })
+                .FirstOrDefaultAsync();
 
-            if (!thuocDuAn)
+            if (thamGiaDuAn == null)
                 throw new Exception("Nhân viên không thuộc dự án này. Vui lòng thêm nhân viên vào dự án trước.");
+
+            if (thamGiaDuAn.NgayThamGiaDuAn.HasValue && thamGiaDuAn.NgayThamGiaDuAn.Value > thoiDiemGiao)
+                throw new Exception("Nhân viên chưa tham gia dự án tại thời điểm phân công.");
         }
 
         private async Task<int> GetCurrentUserIdAsync()

@@ -402,9 +402,78 @@
     margin-bottom: 1rem;
 }
 
+.work-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    margin-bottom: 0.9rem;
+}
+
+.work-highlight {
+    min-width: 0;
+    padding: 0.75rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(67, 89, 113, 0.12);
+    background: #fff;
+    display: grid;
+    gap: 0.2rem;
+}
+
+.work-highlight span {
+    color: var(--muted);
+    font-size: 0.76rem;
+    line-height: 1.25;
+}
+
+.work-highlight strong {
+    color: #334155;
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.work-highlight.total {
+    border-color: rgba(105, 108, 255, 0.26);
+    background: #f7f8ff;
+}
+
+.work-highlight.overdue {
+    border-color: rgba(198, 49, 49, 0.22);
+    background: #fff5f5;
+}
+
+.work-highlight.completed-late {
+    border-color: rgba(153, 27, 27, 0.24);
+    background: #fff1f1;
+}
+
+.work-highlight.on-time {
+    border-color: rgba(31, 122, 62, 0.24);
+    background: #f0fbf4;
+}
+
+.work-stat-groups {
+    display: grid;
+    gap: 1rem;
+}
+
+.work-stat-group {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.work-group-title {
+    color: #334155;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
 .work-grid {
     display: grid;
     gap: 0.6rem;
+}
+
+.work-grid.compact {
+    gap: 0.45rem;
 }
 
 .work-item {
@@ -423,6 +492,12 @@
 .work-item.warn { border-color: rgba(255, 193, 7, 0.4); }
 .work-item.paused { border-color: rgba(108, 117, 125, 0.3); }
 .work-item.idle { border-color: rgba(99, 102, 241, 0.2); }
+.work-item.blocked { border-color: rgba(184, 91, 0, 0.32); background: #fff8ed; }
+.work-item.pending { border-color: rgba(209, 142, 22, 0.28); background: #fffaf0; }
+.work-item.overdue { border-color: rgba(198, 49, 49, 0.3); background: #fff5f5; }
+.work-item.completed-on-time { border-color: rgba(31, 122, 62, 0.28); background: #f0fbf4; }
+.work-item.completed-late { border-color: rgba(153, 27, 27, 0.32); background: #fff1f1; }
+.work-item.missing { border-color: rgba(101, 117, 138, 0.24); background: #f8fafc; }
 
 .work-label {
     display: inline-flex;
@@ -432,6 +507,26 @@
 
 .work-value {
     font-weight: 700;
+}
+
+.work-on-time-rate {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.78rem;
+    background: #f8f9fc;
+    border: 1px solid var(--line);
+    font-size: 0.84rem;
+}
+
+.work-on-time-rate span {
+    color: var(--muted);
+}
+
+.work-on-time-rate strong {
+    color: #1f7a3e;
 }
 
 .budget-summary {
@@ -990,6 +1085,45 @@
     font-weight: 700;
     border-radius: 999px;
     padding: 0.22rem 0.55rem;
+}
+
+.project-details .work-deadline-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 0.22rem 0.55rem;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.25;
+}
+
+.project-details .work-deadline-badge.is-overdue,
+.project-details .work-deadline-badge.is-completed-late,
+.project-details .work-deadline-badge.is-pending-late {
+    background: #fde8e8;
+    color: #b42318;
+    border: 1px solid rgba(180, 35, 24, 0.24);
+}
+
+.project-details .work-deadline-badge.is-completed-on-time,
+.project-details .work-deadline-badge.is-on-track {
+    background: #e8f7ee;
+    color: #1f7a3e;
+    border: 1px solid rgba(31, 122, 62, 0.22);
+}
+
+.project-details .work-deadline-badge.is-pending,
+.project-details .work-deadline-badge.is-near {
+    background: #fff3cd;
+    color: #9a6700;
+    border: 1px solid rgba(154, 103, 0, 0.22);
+}
+
+.project-details .work-deadline-badge.is-missing,
+.project-details .work-deadline-badge.is-neutral {
+    background: #eef2f7;
+    color: #5f6f82;
+    border: 1px solid rgba(101, 117, 138, 0.22);
 }
 
 .project-details .empty-state-panel {

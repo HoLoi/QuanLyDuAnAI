@@ -23,6 +23,7 @@ namespace QuanLyDuAn.Services.Interfaces
             string? locTinhTrangThoiHan,
             int pageNumber = 1,
             int pageSize = 20);
+        Task<bool> CanAccessAsync(int maDuAn);
         Task<DuAnChiTietViewModel?> GetChiTietAsync(int id);
         Task<DuAnCreateUpdateViewModel?> GetByIdAsync(int id);
         Task<List<LoaiDuAnOptionViewModel>> GetLoaiDuAnOptionsAsync();

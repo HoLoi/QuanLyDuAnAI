@@ -578,3 +578,171 @@ Không thấy rủi ro “vừa tạo tất cả `ChuaBatDau` làm Công việc 
 - Không đổi quy trình xác nhận hoàn thành Công việc.
 - Không đổi trạng thái trong `Constants/TrangThai.cs`.
 - Không đổi workflow AI hoặc database AI.
+
+## 21. Phân tích nhận biết Chi tiết công việc đúng hạn và trễ hạn
+
+Mục này bổ sung phân tích AS-IS theo source hiện tại sau các chỉnh sửa đã ghi ở trên. Chỉ đọc source và tài liệu hóa, không thay đổi source, giao diện, database, migration hoặc workflow.
+
+Nguyên tắc cần giữ: `TrangThaiCTCV` là trạng thái workflow của Chi tiết công việc. `Trễ hạn`, `Quá hạn`, `Hoàn thành đúng hạn`, `Hoàn thành trễ` là tình trạng thời hạn, không phải trạng thái workflow nếu source chưa triển khai như vậy. Cách hiểu đúng phải là `Đang thực hiện + Trễ 5 ngày`, `Hoàn thành + Hoàn thành trễ 2 ngày`, `Hoàn thành + Hoàn thành đúng hạn`, `Chờ xác nhận hoàn thành + Quá hạn 1 ngày`. Không có logic tự chuyển trạng thái khi vượt hạn và không tự hoàn thành khi tới ngày kết thúc.
+
+### 21.1. Xác định ý nghĩa các ngày của Chi tiết công việc
+
+| Thuộc tính | Ý nghĩa thực tế | Nguồn dữ liệu | Khi nào được gán | Là hạn dự kiến hay ngày thực tế |
+| ---------- | --------------- | ------------- | ---------------- | ------------------------------- |
+| `NgayTaoCTCV` | Thời điểm tạo Chi tiết công việc | `CtCongViec.NgayTaoCTCV`, `ChiTietCongViecService.AddAsync` | Gán `DateTime.Now` khi thêm mới | Không phải hạn, không phải ngày hoàn thành |
+| `NgayBatDauCTCV` | Ngày bắt đầu Chi tiết công việc | Form `_Form.cshtml`, inline edit `_Table.cshtml`, `ChiTietCongViecService.AddAsync/UpdateAsync` | Người dùng nhập, service lưu `.Date`; validate không trước ngày bắt đầu Công việc và không sau `CongViec.NgayKetThucCVDuKien` | Ngày bắt đầu, không phải deadline |
+| `NgayKetThucCTCV` | Ngày hoàn thành thực tế theo workflow hiện tại | `CtCongViec.NgayKetThucCTCV`, projected trong `ChiTietCongViecService.GetPageAsync` | `AddAsync` luôn set `null`; `UpdateAsync` giữ nguyên; `TienDoCongViecService.XuLyBaoCaoTienDoAsync` set `DateTime.Now` khi báo cáo được duyệt `DaDuyet` với trạng thái đề xuất hoàn thành, ngược lại set `null` | Ngày hoàn thành thực tế, không phải hạn dự kiến |
+| `TrangThaiCTCV` | Trạng thái workflow Chi tiết công việc | `CtCongViec.TrangThaiCTCV`, `TrangThai.ToCode/ToDisplay` | CRUD tạo mặc định `ChuaBatDau`; cập nhật thật qua báo cáo tiến độ được duyệt | Không phải dữ liệu thời hạn |
+| `ThoiGianCapNhat` | Thời điểm nhân viên gửi báo cáo tiến độ | `TienDoCongViec.ThoiGianCapNhat` | `CapNhatTienDoAsync` set `DateTime.Now` khi tạo báo cáo `ChoDuyet` | Có thể tham khảo thời điểm báo hoàn thành, nhưng source không dùng làm ngày hoàn thành thực tế |
+| `ThoiGianDuyet` | Thời điểm người duyệt xử lý báo cáo | `TienDoCongViec.ThoiGianDuyet` | `XuLyBaoCaoTienDoAsync` set `DateTime.Now` khi duyệt/từ chối/yêu cầu bổ sung | Không phải deadline; gần với thời điểm `NgayKetThucCTCV` được set khi duyệt hoàn thành |
+| `TrangThaiCTCVDeXuat` | Trạng thái Chi tiết do người thực hiện đề xuất | `TienDoCongViec.TrangThaiCTCVDeXuat` | `CapNhatTienDoAsync` lưu trạng thái đề xuất, ban đầu báo cáo ở `ChoDuyet` | Không phải ngày, nhưng cho biết báo cáo có đề xuất hoàn thành hay không |
+
+Không tìm thấy trường `NgayKetThucCTCVDuKien`, `HanCTCV`, `HanChiTietCongViec`, `DeadlineCTCV`, `NgayDuKien` hoặc dữ liệu tương đương trong `CtCongViec`, ViewModel Chi tiết, form tạo/sửa, bảng tiến độ, phân công, `QuanLyDuAnDbContext` hoặc migration hiện hành. Hạn duy nhất có liên quan là `CongViec.NgayKetThucCVDuKien` của Công việc cha; source chỉ dùng hạn này để validate `NgayBatDauCTCV` không sau hạn Công việc cha, không quy định đây là deadline riêng của từng Chi tiết.
+
+Kết luận bắt buộc: `NgayKetThucCTCV` hiện là ngày hoàn thành thực tế, không phải hạn dự kiến.
+
+### 21.2. Khả năng xác định Chi tiết công việc quá hạn
+
+Điều kiện mong muốn:
+
+```text
+Chi tiết chưa hoàn thành
+và hạn dự kiến của Chi tiết < DateTime.Today
+```
+
+Source hiện tại không có hạn dự kiến riêng cho Chi tiết nên không thể xác định chính xác `Chi tiết chưa hoàn thành nhưng đã quá hạn`.
+
+| Khả năng | Source hiện tại | Ưu điểm | Nhược điểm |
+| -------- | --------------- | ------- | ---------- |
+| Dùng hạn riêng của Chi tiết | Không có trường dữ liệu | Chính xác nếu được bổ sung sau này | Hiện không thể làm nếu không thêm dữ liệu/schema hoặc nguồn deadline rõ ràng |
+| Dùng hạn Công việc cha `NgayKetThucCVDuKien` | Có thể join từ `CtCongViec -> CongViec`, nhưng source chưa quy định là hạn Chi tiết | Không cần thêm cột nếu chỉ cảnh báo tạm | Nhiều Chi tiết cùng một Công việc sẽ chung hạn; không phản ánh kế hoạch riêng; có thể đánh dấu sai nếu Chi tiết cần xong sớm hơn hoặc muộn hơn |
+| Dùng `ThoiGianCapNhat` của báo cáo tiến độ | Có trong `TIEN_DO_CONG_VIEC` | Biết thời điểm nhân viên gửi báo cáo | Đây là thời điểm báo cáo, không phải deadline; không đánh giá được chưa hoàn thành quá hạn nếu chưa có deadline |
+| Dùng `NgayKetThucCTCV` | Có trong entity và ViewModel | Có ngày hoàn thành thực tế khi đã hoàn thành | Không áp dụng cho chi tiết chưa hoàn thành; dùng nó làm hạn là sai ý nghĩa |
+| Dùng `NgayBatDauCTCV` cộng một quy ước mặc định | Có ngày bắt đầu | Không cần schema | Source không có quy ước thời lượng, chỉ là ước lượng không có căn cứ |
+
+Một số module thống kê đang có logic chưa đủ tin cậy: `DanhGiaDuAnService` và `DanhGiaNhanVienService` có đếm `ChiTietTreHan` dựa trên `NgayKetThucCTCV < DateTime.Today/Now` và trạng thái chưa hoàn thành. Vì `NgayKetThucCTCV` là ngày hoàn thành thực tế, logic này không thể đại diện chính xác cho Chi tiết quá hạn. Với Chi tiết chưa hoàn thành, `NgayKetThucCTCV` thường `null`, nên không thể biết đã quá hạn hay chưa.
+
+### 21.3. Khả năng xác định Chi tiết hoàn thành đúng hạn hoặc trễ
+
+| Câu hỏi | Kết luận AS-IS |
+| ------- | -------------- |
+| Có ngày hoàn thành thực tế không | Có: `NgayKetThucCTCV`, set khi báo cáo hoàn thành được duyệt |
+| Có ngày kết thúc dự kiến riêng không | Không |
+| Có thể xác định `Hoàn thành đúng hạn` không | Không thể xác định chính xác từ dữ liệu hiện tại |
+| Có thể xác định `Hoàn thành trễ` không | Không thể xác định chính xác từ dữ liệu hiện tại |
+| Thiếu dữ liệu nào | Thiếu deadline/hạn dự kiến riêng của Chi tiết công việc hoặc một rule nghiệp vụ chính thức cho nguồn deadline |
+| Có thể xác định gián tiếp theo Công việc cha không | Có thể ước lượng bằng `CongViec.NgayKetThucCVDuKien`, nhưng source chưa quy định và không phản ánh deadline riêng của từng Chi tiết |
+| Mức kết luận | `Không thể xác định từ dữ liệu hiện tại` nếu yêu cầu chính xác; `Xác định tương đối` nếu sau này chấp nhận dùng hạn Công việc cha làm cảnh báo tạm |
+
+Không được tự giả định `NgayKetThucCTCV` là hạn dự kiến. Nhãn UI hiện tại đã sửa đúng thành `Ngày hoàn thành thực tế` trong `_Table.cshtml` và export `ChiTietCongViecController.XuatFile`.
+
+### 21.4. Ngày hoàn thành thực tế của Chi tiết
+
+| Vấn đề | Kết luận source |
+| ------ | --------------- |
+| Set khi báo cáo `HoanThanh` được duyệt hay khi đề xuất | Chỉ khi báo cáo được xử lý `DaDuyet` trong `TienDoCongViecService.XuLyBaoCaoTienDoAsync`; báo cáo gửi mới chỉ là `ChoDuyet` |
+| CRUD trực tiếp có set ngày hoàn thành không | Sau chỉnh sửa hiện tại, không. `AddAsync` luôn `NgayKetThucCTCV = null`; `UpdateAsync` không gán `NgayKetThucCTCV` |
+| Khi trạng thái thay đổi khỏi hoàn thành | `XuLyBaoCaoTienDoAsync` set `NgayKetThucCTCV = null` nếu trạng thái được duyệt không phải hoàn thành |
+| Có luồng mở lại Chi tiết riêng không | Không thấy method mở lại Chi tiết riêng trong `ChiTietCongViecService`; Chi tiết có thể đổi trạng thái qua báo cáo tiến độ nếu rule không lùi cho phép |
+| Dùng ngày duyệt hay ngày báo cáo của nhân viên | `NgayKetThucCTCV = DateTime.Now` tại thời điểm duyệt, gần với `ThoiGianDuyet`, không dùng `TienDoCongViec.ThoiGianCapNhat` |
+| Người quản lý duyệt chậm có thể làm tăng số ngày trễ không | Có, nếu sau này so ngày hoàn thành thực tế với deadline, ngày thực tế sẽ là ngày duyệt chứ không phải ngày nhân viên gửi báo cáo hoàn thành |
+| Source có lưu thời điểm nhân viên báo hoàn thành không | Có `ThoiGianCapNhat` trên báo cáo tiến độ, nhưng không được dùng làm `NgayKetThucCTCV` và không có trường riêng “ngày nhân viên hoàn tất” |
+
+### 21.5. Các trường hợp cần đối chiếu
+
+| Trường hợp | Trạng thái lưu trong DB | Ngày thực tế có hay không | Có đủ dữ liệu đánh giá đúng/trễ không | Giao diện hiện thể hiện thế nào |
+| ---------- | ----------------------- | ------------------------- | ------------------------------------ | ------------------------------ |
+| Chi tiết chưa bắt đầu | `ChuaBatDau` | Thường không | Không, thiếu hạn dự kiến | Badge `Chưa bắt đầu`, ngày bắt đầu/ngày tạo |
+| Chi tiết đang thực hiện | `DangThucHien` | Không | Không | Badge `Đang thực hiện`, không có badge trễ |
+| Chi tiết bị cản trở | `BiCanCan` | Không | Không | Badge `Bị cản trở`, màu workflow blocker |
+| Chi tiết chờ xác nhận hoàn thành | `ChoXacNhanHoanThanh` nếu báo cáo được duyệt trạng thái này | Không, vì chỉ `HoanThanh` mới set `NgayKetThucCTCV` | Không | Badge `Chờ xác nhận hoàn thành`, không có ngày hoàn thành |
+| Chi tiết hoàn thành | `HoanThanh`/biến thể hoàn thành | Có `NgayKetThucCTCV` | Không, thiếu hạn dự kiến | Badge `Hoàn thành`, hiển thị `Ngày hoàn thành thực tế` |
+| Chi tiết tạm dừng | `TamDung` | Không, hoặc bị xóa nếu chuyển từ hoàn thành sang không hoàn thành | Không | Badge `Tạm dừng` |
+| Chi tiết đã hủy | `DaHuy` | Không, hoặc bị xóa nếu chuyển khỏi hoàn thành | Không nên đánh giá nếu chưa có rule | Badge `Đã hủy` nếu trạng thái có trong dữ liệu |
+| Chi tiết có báo cáo hoàn thành đang chờ duyệt | `TrangThaiCTCV` thật chưa đổi; `TienDoCongViec.TrangThaiTienDo = ChoDuyet`, `TrangThaiCTCVDeXuat = HoanThanh` | Chưa set | Không | Màn tiến độ thể hiện báo cáo chờ duyệt; màn Chi tiết chỉ thấy trạng thái thật hiện tại |
+| Chi tiết có báo cáo hoàn thành được duyệt | `TrangThaiCTCV = HoanThanh` | Có, set `DateTime.Now` khi duyệt | Không đủ để biết đúng/trễ nếu không có deadline | Màn Chi tiết hiển thị Hoàn thành và ngày hoàn thành thực tế |
+| Chi tiết có báo cáo hoàn thành bị từ chối | Trạng thái thật không đổi | Không set mới | Không | Màn tiến độ có lịch sử từ chối; màn Chi tiết không coi đã hoàn thành |
+| Chi tiết không có hạn dự kiến | Tất cả trường hợp hiện tại | Không có deadline | Không | Không hiển thị hạn dự kiến |
+| Chi tiết hoàn thành sau ngày kết thúc Công việc cha | Có thể so `NgayKetThucCTCV` với `CongViec.NgayKetThucCVDuKien` nếu join | Chỉ là đánh giá tương đối theo hạn cha | Không chính xác nếu cần deadline riêng | Màn Chi tiết không hiển thị hạn cha |
+| Chi tiết hoàn thành trước ngày kết thúc Công việc cha | Có thể so tương đối | Chỉ là tham khảo | Không chính xác tuyệt đối | Màn Chi tiết không hiển thị hạn cha |
+
+### 21.6. Phân tích giao diện Chi tiết công việc
+
+| Khu vực | Dữ liệu ngày hiện có | Trạng thái | Tình trạng thời hạn |
+| ------- | -------------------- | ---------- | ------------------- |
+| Desktop `_Table.cshtml` | `Ngày bắt đầu`, `Ngày hoàn thành thực tế`, `Ngày tạo` | Badge workflow | Không có hạn dự kiến, không có `Hoàn thành trễ`, không có số ngày trễ |
+| Mobile `_Table.cshtml` | `Bắt đầu`, `Hoàn thành thực tế`, `Ngày tạo` | Badge workflow ở header card | Không có badge deadline |
+| Form tạo `_Form.cshtml` | Chỉ nhập `NgayBatDauCTCV` | Trạng thái khi tạo chỉ đọc `Chưa bắt đầu` | Không nhập hạn dự kiến |
+| Form sửa inline | Chỉ sửa `NgayBatDauCTCV`, trạng thái chỉ đọc | Không sửa trạng thái từ CRUD | Không sửa/hiển thị hạn dự kiến |
+| Export `ChiTietCongViecController.XuatFile` | `Ngày bắt đầu`, `Ngày hoàn thành thực tế` | Text trạng thái | Không export hạn dự kiến/tình trạng trễ |
+
+Nhãn `Ngày hoàn thành thực tế` đang dùng đúng ý nghĩa cho `NgayKetThucCTCV`. Không thấy CSS riêng cho tình trạng deadline trong `wwwroot/css/ChiTietCongViec/index.css`; các màu warning/danger hiện phục vụ workflow pending/blocker/xóa, không phải quá hạn. Responsive không làm mất thông tin trễ vì thông tin deadline chưa có trong ViewModel/UI.
+
+### 21.7. ViewModel và query
+
+Các ViewModel Chi tiết hiện có:
+
+| ViewModel | Dữ liệu liên quan thời hạn | Nhận xét |
+| --------- | -------------------------- | -------- |
+| `ChiTietCongViecItemViewModel` | `NgayTaoCTCV`, `NgayBatDauCTCV`, `NgayKetThucCTCV`, `TrangThaiCTCV` | Không có hạn dự kiến, cờ trễ, số ngày trễ, tình trạng thời hạn hoặc ngày hạn Công việc cha |
+| `ChiTietCongViecCreateUpdateViewModel` | `NgayBatDauCTCV`, `NgayKetThucCTCV`, `TrangThaiCTCV` | `NgayKetThucCTCV` không được form gửi/sử dụng trong CRUD hiện tại; còn lại để tương thích model |
+| `ChiTietCongViecSummaryViewModel` | Trạng thái Công việc cha, tổng số/hoàn thành/phần trăm | Không có `NgayKetThucCVDuKien` của Công việc cha |
+| `ChiTietCongViecPageViewModel` | Danh sách, summary, form, quyền | Không có filter hoặc summary deadline |
+
+`ChiTietCongViecService.GetPageAsync` hiện:
+
+- Lấy Công việc cha bằng `LayCongViecAsync(maCongViec)`, nhưng summary không project `NgayKetThucCVDuKien`.
+- Query chính chỉ đọc `CtCongViec` theo `MaCongViec` và `IsDeleted != true`.
+- Đếm tổng số và số hoàn thành bằng `TrangThai.GetCommonStatusVariants(TrangThai.HoanThanh)`.
+- Sort theo `NgayTaoCTCV` giảm dần, `MaChiTietCV` giảm dần, rồi phân trang.
+- Project một trang sang `ChiTietCongViecItemViewModel`.
+- Batch đếm phân công theo danh sách `MaChiTietCV`, tránh N+1.
+
+Nếu sau này chỉ muốn hiển thị hạn Công việc cha như cảnh báo tương đối, có thể bổ sung vào summary hoặc từng item mà không cần N+1 vì service đã có `congViec`. Nếu cần lọc/sắp xếp theo tình trạng deadline trên toàn bộ danh sách, phải đưa điều kiện vào query trước `CountAsync()`/`Skip`/`Take`. Nếu cần chính xác cho từng Chi tiết, cần có trường deadline riêng hoặc nguồn dữ liệu chính thức khác; không thể suy ra chắc chắn từ dữ liệu hiện tại.
+
+### 21.8. Quan hệ với báo cáo tiến độ
+
+| Nội dung | Kết luận |
+| -------- | -------- |
+| Báo cáo hoàn thành chờ duyệt có được xem là đã hoàn thành không | Không. `CapNhatTienDoAsync` chỉ tạo `TienDoCongViec` ở `ChoDuyet`, không cập nhật `CtCongViec.TrangThaiCTCV` |
+| Chỉ `DaDuyet` mới cập nhật trạng thái thật | Đúng. `XuLyBaoCaoTienDoAsync` chỉ đổi `CT_CONG_VIEC` khi `trangThaiDich = DaDuyet` |
+| Ngày hoàn thành lấy theo ngày duyệt hay ngày gửi báo cáo | Theo ngày duyệt: `NgayKetThucCTCV = DateTime.Now` trong xử lý duyệt |
+| Duyệt chậm ảnh hưởng thế nào | Nếu sau này dùng `NgayKetThucCTCV` để so deadline, duyệt chậm có thể làm tăng số ngày trễ so với thời điểm nhân viên đã gửi báo cáo hoàn thành |
+| `TIEN_DO_CONG_VIEC` giúp xác định thời điểm báo hoàn thành không | Có thể tham khảo `ThoiGianCapNhat` của báo cáo có `TrangThaiCTCVDeXuat = HoanThanh`, nhưng source hiện không dùng làm ngày hoàn thành thật |
+| Nguồn chính hiện tại | `CtCongViec.TrangThaiCTCV` và `CtCongViec.NgayKetThucCTCV` sau báo cáo được duyệt |
+
+### 21.9. Đối chiếu Dự án -> Công việc -> Chi tiết công việc
+
+| Cấp | Ngày dự kiến | Ngày thực tế | Có thể tính trễ | Nơi đang tính | Có hiển thị ở danh sách |
+| --- | ------------ | ------------ | --------------- | ------------- | ----------------------- |
+| Dự án | `DuAn.NgayKetThucDuAn` | `DuAn.NgayHoanThanhThucTeDuAn` hoặc fallback thống kê | Có | `DuAnDeadlineStatusHelper`, `DuAnService`, `DashboardService`, `DanhGiaDuAnService`, `AiService` | Có ở module Dự án/Dashboard |
+| Công việc | `CongViec.NgayKetThucCVDuKien` | `CongViec.NgayKetThucCVThucTe` | Có nếu đủ hai ngày | `DashboardService`, `AiDatasetService`, `DanhGiaDuAnService`, `DuAnService` | Chưa hiển thị ở danh sách `/CongViec` |
+| Chi tiết công việc | Không có trường hạn dự kiến riêng | `CtCongViec.NgayKetThucCTCV` | Không thể xác định chính xác | `DanhGiaDuAnService`/`DanhGiaNhanVienService` có đếm `ChiTietTreHan` theo `NgayKetThucCTCV`, nhưng không đủ tin cậy vì đây là ngày thực tế | Chưa hiển thị ở danh sách `/ChiTietCongViec` |
+
+Logic hiện chưa thống nhất: Dự án có helper deadline riêng; Công việc có logic đúng/trễ ở Dashboard/AI/DanhGia/Dự án nhưng chưa đưa vào màn Công việc; Chi tiết thiếu hạn dự kiến riêng nên mọi logic trễ ở cấp này chỉ là không đủ dữ liệu hoặc ước lượng. Có thể cân nhắc helper/service dùng chung ở bước sau, nhưng không tạo helper trong nhiệm vụ này.
+
+### 21.10. Rủi ro cần kiểm tra trước khi chỉnh sửa sau
+
+| Rủi ro | Bằng chứng AS-IS | Nhận xét |
+| ------ | ---------------- | -------- |
+| Chi tiết không có hạn dự kiến | Entity, ViewModel, Form, DbContext không có field deadline riêng | Không thể xác định đúng/trễ chính xác |
+| Dùng hạn Công việc cha cho tất cả Chi tiết có thể sai nghiệp vụ | Source chỉ dùng hạn cha để validate ngày bắt đầu không sau hạn Công việc | Nếu dùng sau này nên ghi là cảnh báo tương đối |
+| Ngày hoàn thành thực tế lấy theo ngày duyệt | `TienDoCongViecService.XuLyBaoCaoTienDoAsync` set `NgayKetThucCTCV = DateTime.Now` khi duyệt | Duyệt chậm có thể làm tăng trễ |
+| Báo cáo chờ duyệt bị hiểu nhầm là hoàn thành thật | Báo cáo `ChoDuyet` không đổi `CT_CONG_VIEC` | UI cần tách trạng thái thật và trạng thái đề xuất |
+| Logic trễ Chi tiết trong thống kê đang dùng sai mốc | `DanhGiaDuAnService`/`DanhGiaNhanVienService` đếm `NgayKetThucCTCV < hôm nay` | Cần xem lại nếu phát triển deadline Chi tiết |
+| Query bổ sung số ngày trễ gây N+1 | Hiện service đã batch phân công theo page | Giữ pattern batch hoặc join SQL |
+| Tính sau phân trang nhưng filter trễ không khớp tổng | `GetPageAsync` count trước pagination | Nếu thêm filter deadline cần áp dụng trước count |
+| Summary card chỉ tính trên trang hiện tại | Chi tiết hiện summary tổng/hoàn thành tính từ query trước phân trang, tốt hơn Công việc | Nếu thêm summary deadline cần tính từ query đúng scope |
+| Dùng `DateTime.Now` và `.Date` không thống nhất | Tiến độ dùng `DateTime.Now`; thống kê dùng `DateTime.Today`/`DateTime.Now` | Cần chuẩn hóa khi triển khai |
+| Công việc cha đã hủy/tạm dừng | Service khóa cập nhật nhưng không có rule deadline riêng | Không nên tự tính trễ nếu nghiệp vụ muốn loại khỏi đánh giá |
+| EF Core translate lỗi | Query Chi tiết hiện đơn giản; nguy cơ xuất hiện nếu thêm helper/string interpolation vào `IQueryable` | Chỉ dùng biểu thức SQL-translatable trước `ToListAsync()` |
+
+### 21.11. Kết luận chức năng Chi tiết công việc
+
+- Hiện tại không xác định được chính xác Chi tiết công việc hoàn thành đúng hạn hoặc trễ hạn vì thiếu ngày kết thúc dự kiến/deadline riêng cho Chi tiết.
+- Nhãn phân tích phù hợp cho tình trạng thời hạn của Chi tiết công việc hiện tại là `Chưa đủ dữ liệu xác định`.
+- `NgayKetThucCTCV` là ngày hoàn thành thực tế, được set khi báo cáo tiến độ được duyệt hoàn thành; không phải hạn dự kiến.
+- Việc dùng `CongViec.NgayKetThucCVDuKien` để cảnh báo Chi tiết là khả năng tương đối, không phải logic chính thức trong source hiện tại. Cách này có ưu điểm là không cần thêm dữ liệu nhưng có nguy cơ sai vì mọi Chi tiết cùng Công việc sẽ chung hạn.
+- Nếu muốn xác định chính xác, cần có deadline riêng cho Chi tiết công việc hoặc một nguồn deadline chính thức tương đương. Nếu nguồn đó là cột mới thì bắt buộc sửa database/schema/migration; nếu chỉ dùng hạn Công việc cha thì không sửa database nhưng chỉ là ước lượng.
+- File có khả năng cần sửa ở bước tiếp theo nếu triển khai: `CtCongViec.cs`, `QuanLyDuAnDbContext.cs`, migration nếu thêm field; `ChiTietCongViecCreateUpdateViewModel.cs`, `ChiTietCongViecItemViewModel.cs`, `ChiTietCongViecSummaryViewModel.cs`, `ChiTietCongViecService.cs`, `Views/ChiTietCongViec/_Form.cshtml`, `Views/ChiTietCongViec/_Table.cshtml`, `Views/ChiTietCongViec/Index.cshtml`, `wwwroot/css/ChiTietCongViec/index.css`, `TienDoCongViecService.cs`, `DanhGiaDuAnService.cs`, `DanhGiaNhanVienService.cs` nếu cần thống nhất thống kê.
+- Không được tự chuyển `TrangThaiCTCV` thành `TreHan`/`QuaHan`, không tự động đổi trạng thái khi quá hạn, không coi báo cáo `ChoDuyet` là hoàn thành thật, không dùng `NgayKetThucCTCV` làm deadline.
