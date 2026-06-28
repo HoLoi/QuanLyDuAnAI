@@ -303,6 +303,14 @@
 
 .ai-delay-confirm {
     margin-top: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.ai-delay-confirm .form-select {
+    max-width: 28rem;
 }
 
 .project-details .upload-form {

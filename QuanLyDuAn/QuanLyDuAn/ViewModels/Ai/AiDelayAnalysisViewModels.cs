@@ -51,5 +51,12 @@ namespace QuanLyDuAn.ViewModels.Ai
         public string? NguyenNhanDaXacNhan { get; set; }
         public double? DoTinCayDaXacNhan { get; set; }
         public DateTime? ThoiGianXacNhan { get; set; }
+        public List<AiReasonOptionViewModel> DanhSachNguyenNhan { get; set; } = [];
+    }
+
+    public class AiReasonOptionViewModel
+    {
+        public int MaDMNguyenNhan { get; set; }
+        public string TenNguyenNhan { get; set; } = string.Empty;
     }
 }

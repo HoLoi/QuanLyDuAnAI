@@ -238,12 +238,15 @@
                             <span>Thời gian</span>
                             <strong>@((aiPanel?.ThoiGianPhanTich ?? aiResult.ThoiGianPhanTich)?.ToString("dd/MM/yyyy HH:mm") ?? "-")</strong>
                         </div>
+                        <div class="ai-delay-item">
+                            <span>Nguyên nhân xác nhận</span>
+                            <strong>@(string.IsNullOrWhiteSpace(aiPanel?.NguyenNhanDaXacNhan) ? "Chưa xác nhận" : aiPanel.NguyenNhanDaXacNhan)</strong>
+                        </div>
                     </div>
-                    @if (aiPanel?.CoTheXacNhan == true && aiResult.MaDMNguyenNhanDuDoan.HasValue)
+                    @if (aiPanel?.CoTheXacNhan == true)
                     {
                         <form asp-action="XacNhanNguyenNhanTre" method="post" class="ai-delay-confirm" onsubmit="return confirm('Xác nhận nguyên nhân này?');">
                             <input type="hidden" name="maDuAn" value="@Model.MaDuAn" />
-                            <input type="hidden" name="maDmNguyenNhan" value="@aiResult.MaDMNguyenNhanDuDoan.Value" />
                             <input type="hidden" name="doTinCay" value="@aiResult.DoTinCayKetQua.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                             <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
                             <input type="hidden" name="locMaLoaiDuAn" value="@Model.LocMaLoaiDuAn" />
@@ -252,6 +255,15 @@
                             <input type="hidden" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="locTheoNgay" value="@Model.LocTheoNgay" />
                             <input type="hidden" name="locTinhTrangThoiHan" value="@Model.LocTinhTrangThoiHan" />
+                            <select class="form-select" name="maDmNguyenNhan" required aria-label="Nguyên nhân thực tế">
+                                <option value="">Chọn nguyên nhân</option>
+                                @foreach (var item in aiPanel.DanhSachNguyenNhan)
+                                {
+                                    var selectedReason = aiPanel.MaDMNguyenNhanDaXacNhan
+                                        ?? aiResult.MaDMNguyenNhanDuDoan;
+                                    <option value="@item.MaDMNguyenNhan" selected="@(selectedReason == item.MaDMNguyenNhan ? "selected" : null)">@item.TenNguyenNhan</option>
+                                }
+                            </select>
                             <button type="submit" class="btn-action btn-subtle">Xác nhận nguyên nhân</button>
                         </form>
                     }

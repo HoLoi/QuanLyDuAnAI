@@ -521,6 +521,15 @@ namespace QuanLyDuAn.Services.Implementations
             vm.TenNguyenNhanTheoMa = tenNguyenNhanRows.ToDictionary(
                 x => x.MaDMNguyenNhan,
                 x => string.IsNullOrWhiteSpace(x.TenNguyenNhan) ? $"Nguyên nhân {x.MaDMNguyenNhan}" : x.TenNguyenNhan);
+            vm.DanhSachDuAnTest = await _context.DuAn
+                .Where(x => x.IsDeleted != true && _context.AiDataset.Any(d => d.MaDuAn == x.MaDuAn))
+                .OrderBy(x => x.TenDuAn)
+                .Select(x => new AiDuAnOptionViewModel
+                {
+                    MaDuAn = x.MaDuAn,
+                    TenDuAn = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Dự án {x.MaDuAn}" : x.TenDuAn
+                })
+                .ToListAsync(cancellationToken);
             vm.CoModelLocal = tatCaModel.Count > 0;
             vm.CoTheKiemTraModel = vm.CoModelLocal;
             vm.CoTheKichHoatModel = tatCaModel.Any(x => x.CanActivate);
@@ -700,104 +709,6 @@ namespace QuanLyDuAn.Services.Implementations
             return result;
         }
 
-        public async Task<AiPredictPageViewModel> KhoiTaoTrangPredictAsync(int? maDuAn, CancellationToken cancellationToken = default)
-        {
-            var roleFlags = await GetCurrentUserRoleFlagsAsync(cancellationToken);
-            var currentUserId = await GetCurrentUserIdAsync(cancellationToken);
-            var projectIds = await GetAccessibleProjectIdsAsync(currentUserId, roleFlags, cancellationToken);
-            var gioiHanTheoScopeDuAn = !roleFlags.IsAdmin;
-
-            var projectOptionRows = await _context.DuAn
-                .Where(x => x.IsDeleted != true && (!gioiHanTheoScopeDuAn || projectIds.Contains(x.MaDuAn)))
-                .OrderBy(x => x.TenDuAn)
-                .Select(x => new { x.MaDuAn, x.TenDuAn })
-                .ToListAsync(cancellationToken);
-
-            var vm = new AiPredictPageViewModel
-            {
-                DanhSachDuAn = projectOptionRows
-                    .Select(x => new AiDuAnOptionViewModel
-                    {
-                        MaDuAn = x.MaDuAn,
-                        TenDuAn = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Dự án {x.MaDuAn}" : x.TenDuAn
-                    })
-                    .OrderBy(x => x.TenDuAn)
-                    .ToList()
-            };
-
-            var reasonModelList = await _aiApiService.LayDanhSachModelAsync(ModelTypeNguyenNhan, cancellationToken);
-            if (reasonModelList.ThanhCong && reasonModelList.DuLieu != null)
-            {
-                vm.DanhSachReasonModel = reasonModelList.DuLieu
-                    .Where(x => x.CanLoad)
-                    .Select(x => x.TenFile)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-            }
-            else if (!reasonModelList.ThanhCong)
-            {
-                vm.CanhBao = reasonModelList.ThongBao;
-            }
-
-            var health = await _aiApiService.KiemTraSucKhoeAsync(cancellationToken);
-            if (health.ThanhCong && health.DuLieu != null)
-            {
-                vm.ModelNguyenNhanMacDinh = health.DuLieu.LoadedReasonModel;
-            }
-
-            if (reasonModelList.ThanhCong && reasonModelList.DuLieu != null)
-            {
-                var modelMacDinh = reasonModelList.DuLieu.FirstOrDefault(x =>
-                    string.Equals(x.TenFile, vm.ModelNguyenNhanMacDinh, StringComparison.OrdinalIgnoreCase));
-                vm.DoChinhXacKiemThuModelNguyenNhan = modelMacDinh?.Accuracy;
-            }
-
-            var reasonModelSet = vm.DanhSachReasonModel.ToHashSet(StringComparer.OrdinalIgnoreCase);
-            vm.CoModelNguyenNhanHoatDongHopLe =
-                !string.IsNullOrWhiteSpace(vm.ModelNguyenNhanMacDinh)
-                && reasonModelSet.Contains(vm.ModelNguyenNhanMacDinh.Trim());
-            if (!vm.CoModelNguyenNhanHoatDongHopLe)
-            {
-                vm.ThongBaoModelNguyenNhan = "Chưa có model nguyên nhân hoạt động, hệ thống sẽ fallback theo luật.";
-            }
-
-            if (!maDuAn.HasValue || maDuAn.Value <= 0)
-            {
-                return vm;
-            }
-
-            vm.MaDuAn = maDuAn.Value;
-            var dataset = await _context.AiDataset
-                .Where(x => x.MaDuAn == maDuAn.Value)
-                .OrderByDescending(x => x.NgayTongHop ?? DateTime.MinValue)
-                .ThenByDescending(x => x.MaData)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (dataset == null)
-            {
-                vm.CanhBao = "Chưa có dữ liệu AI_DATASET cho dự án này.";
-                return vm;
-            }
-
-            GanFeatureTuDataset(vm, dataset);
-            vm.LaDuAnTre = dataset.LaDuAnTre;
-            var freshness = await KiemTraCanTongHopLaiDatasetAsync(maDuAn.Value, dataset.NgayTongHop, cancellationToken);
-            if (freshness.CanTongHopLai)
-            {
-                vm.CanhBao = $"AI_DATASET hiện đã cũ (tổng hợp lúc {DinhDangMocThoiGian(dataset.NgayTongHop)}," +
-                            $" dữ liệu nghiệp vụ mới nhất lúc {DinhDangMocThoiGian(freshness.ThoiDiemDuLieuNghiepVuMoiNhat)})." +
-                            " Vui lòng tổng hợp lại dataset trước khi phân tích nguyên nhân trễ.";
-            }
-
-            if (dataset.LaDuAnTre != true)
-            {
-                vm.ThongBaoKhongPhanTich = ThongBaoDuAnKhongTre;
-            }
-
-            await NapKetQuaPhanTichGanNhatAsync(vm, maDuAn.Value, cancellationToken);
-            return vm;
-        }
-
         public async Task<AiProjectDelayAnalysisPanelViewModel> LayPhanTichNguyenNhanDuAnAsync(int maDuAn, CancellationToken cancellationToken = default)
         {
             var panel = new AiProjectDelayAnalysisPanelViewModel
@@ -824,10 +735,31 @@ namespace QuanLyDuAn.Services.Implementations
 
             await NapKetQuaPhanTichGanNhatChoPanelAsync(panel, maDuAn, cancellationToken);
             await NapXacNhanNguyenNhanChoPanelAsync(panel, maDuAn, cancellationToken);
+            panel.DanhSachNguyenNhan = await _context.DmNguyenNhan
+                .OrderBy(x => x.MaDMNguyenNhan)
+                .Select(x => new AiReasonOptionViewModel
+                {
+                    MaDMNguyenNhan = x.MaDMNguyenNhan,
+                    TenNguyenNhan = string.IsNullOrWhiteSpace(x.TenNguyenNhan)
+                        ? $"Nguyên nhân {x.MaDMNguyenNhan}"
+                        : x.TenNguyenNhan
+                })
+                .ToListAsync(cancellationToken);
+
+            var maDatasetMoiNhat = await _context.AiDataset
+                .Where(x => x.MaDuAn == maDuAn && x.LaDuAnTre == true)
+                .OrderByDescending(x => x.NgayTongHop ?? DateTime.MinValue)
+                .ThenByDescending(x => x.MaData)
+                .Select(x => (int?)x.MaData)
+                .FirstOrDefaultAsync(cancellationToken);
+            var coKetQuaChinhThucHienTai = maDatasetMoiNhat.HasValue
+                && await _context.AiKetQua.AnyAsync(
+                    x => x.MaDuAn == maDuAn && x.MaData == maDatasetMoiNhat.Value,
+                    cancellationToken);
             panel.CoTheXacNhan = context.CoQuyenXacNhan
                                  && context.LaManagerHienTai
                                  && context.LaPhanTichChinhThuc
-                                 && panel.KetQua?.MaDMNguyenNhanDuDoan.HasValue == true;
+                                 && coKetQuaChinhThucHienTai;
             return panel;
         }
 
@@ -908,21 +840,6 @@ namespace QuanLyDuAn.Services.Implementations
             }
 
             return result;
-        }
-
-        public async Task<AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>> DuDoanDuAnAsync(AiPredictPageViewModel input, CancellationToken cancellationToken = default)
-        {
-            if (input.MaDuAn <= 0)
-            {
-                return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
-                {
-                    ThanhCong = false,
-                    ThongBao = "Mã dự án không hợp lệ.",
-                    Loi = ["Vui lòng chọn dự án trước khi phân tích."]
-                };
-            }
-
-            return await PhanTichNguyenNhanDuAnAsync(input.MaDuAn, cancellationToken);
         }
 
         public async Task<AiOperationResultViewModel<AiTestReasonResponseViewModel>> TestPredictAsync(AiPredictPageViewModel input, string? modelFile, CancellationToken cancellationToken = default)
@@ -1082,8 +999,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             var coKetQuaChinhThucHopLe = await _context.AiKetQua
                 .AnyAsync(x => x.MaDuAn == maDuAn
-                               && x.MaData == datasetMoiNhat.MaData
-                               && x.MaDMNguyenNhan == maDmNguyenNhanInt,
+                               && x.MaData == datasetMoiNhat.MaData,
                     cancellationToken);
             if (!coKetQuaChinhThucHopLe)
             {
@@ -1236,7 +1152,7 @@ namespace QuanLyDuAn.Services.Implementations
                 return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
                 {
                     ThanhCong = false,
-                    ThongBao = "Bạn không có quyền thực hiện.",
+                    ThongBao = "Bạn không có quyền phân tích dự án này.",
                     Loi = []
                 };
             }
@@ -1246,7 +1162,7 @@ namespace QuanLyDuAn.Services.Implementations
                 return new AiOperationResultViewModel<AiAnalyzeDelayReasonResponseViewModel>
                 {
                     ThanhCong = false,
-                    ThongBao = "Không thuộc phạm vi dự án.",
+                    ThongBao = "Bạn không có quyền phân tích dự án này.",
                     Loi = []
                 };
             }
@@ -1608,48 +1524,6 @@ namespace QuanLyDuAn.Services.Implementations
                 NoiDungPhanTich = BuildStoredNoiDungPhanTich(phanTich)
             });
             await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        private async Task NapKetQuaPhanTichGanNhatAsync(AiPredictPageViewModel vm, int maDuAn, CancellationToken cancellationToken)
-        {
-            var duLieuAi = await (
-                from kq in _context.AiKetQua
-                join dm in _context.DmNguyenNhan on kq.MaDMNguyenNhan equals dm.MaDMNguyenNhan into dmJoin
-                from dm in dmJoin.DefaultIfEmpty()
-                join model in _context.AiModel on kq.MaModel equals model.MaModel into modelJoin
-                from model in modelJoin.DefaultIfEmpty()
-                where kq.MaDuAn == maDuAn
-                orderby kq.ThoiGianDuDoanKetQua descending, kq.MaAiKetQua descending
-                select new
-                {
-                    kq.MaDMNguyenNhan,
-                    TenNguyenNhan = dm != null ? dm.TenNguyenNhan : null,
-                    kq.DoTinCayKetQua,
-                    kq.ReasonSource,
-                    ModelNguyenNhan = model != null ? model.TenModel : null,
-                    kq.CanhBaoNguyenNhan,
-                    kq.NoiDungPhanTich
-                }).FirstOrDefaultAsync(cancellationToken);
-
-            if (duLieuAi == null)
-            {
-                return;
-            }
-
-            var duLieuNoiDung = ParseStoredNoiDungPhanTich(duLieuAi.NoiDungPhanTich);
-
-            vm.KetQuaPhanTich = new AiAnalyzeDelayReasonResponseViewModel
-            {
-                MaDMNguyenNhanDuDoan = duLieuAi.MaDMNguyenNhan,
-                TenNguyenNhanDuDoan = string.IsNullOrWhiteSpace(duLieuAi.TenNguyenNhan) ? null : duLieuAi.TenNguyenNhan,
-                DoTinCayKetQua = ChuanHoaDoTinCay(duLieuAi.DoTinCayKetQua),
-                MucPhuHop = duLieuNoiDung.MucPhuHop,
-                DanhSachNguyenNhanLienQuan = duLieuNoiDung.DanhSachNguyenNhanLienQuan,
-                ReasonSource = string.IsNullOrWhiteSpace(duLieuAi.ReasonSource) ? "RuleFallback" : duLieuAi.ReasonSource,
-                ModelNguyenNhanUsed = duLieuAi.ModelNguyenNhan,
-                CanhBaoNguyenNhan = duLieuAi.CanhBaoNguyenNhan,
-                NoiDungPhanTich = duLieuNoiDung.NoiDungPhanTich
-            };
         }
 
         private static string? BuildStoredNoiDungPhanTich(AiAnalyzeDelayReasonResponseViewModel phanTich)

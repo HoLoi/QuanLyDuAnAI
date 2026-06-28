@@ -272,6 +272,47 @@
             <button type="submit" class="ai-secondary-btn btn-action btn-subtle">Reload model NguyenNhan</button>
         </form>
     </article>
+
+    <article class="ai-panel-card app-section-card">
+        <h2>Thử model nguyên nhân</h2>
+        <form asp-action="TestPredict" method="post" class="ai-form-grid">
+            @Html.AntiForgeryToken()
+            <div>
+                <label class="form-label" for="maDuAnTest">Dự án thử</label>
+                <select id="maDuAnTest" name="maDuAnTest" class="form-select" required>
+                    <option value="">Chọn dự án</option>
+                    @foreach (var item in Model.DanhSachDuAnTest)
+                    {
+                        <option value="@item.MaDuAn" selected="@(Model.MaDuAnTest == item.MaDuAn ? "selected" : null)">@item.TenDuAn</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="modelFileTest">Model</label>
+                <select id="modelFileTest" name="modelFile" class="form-select">
+                    <option value="">Dùng model đang hoạt động</option>
+                    @foreach (var item in Model.LichSuModelNguyenNhan)
+                    {
+                        <option value="@item.TenModel" selected="@(string.Equals(Model.ModelTestDuocChon, item.TenModel, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item.TenModel</option>
+                    }
+                </select>
+            </div>
+            <div class="ai-form-actions">
+                <button type="submit" class="ai-secondary-btn btn-action btn-subtle">Thử model</button>
+            </div>
+        </form>
+        <small class="text-muted">Kết quả thử không ghi vào AI_KET_QUA.</small>
+
+        @if (Model.KetQuaTestPhanTich != null)
+        {
+            <div class="ai-grid ai-grid-4 mt-3">
+                <article class="ai-stat-card"><span class="ai-stat-label">Nguyên nhân gợi ý</span><strong class="ai-stat-value">@Model.KetQuaTestPhanTich.SuggestedReason</strong></article>
+                <article class="ai-stat-card"><span class="ai-stat-label">Độ tin cậy</span><strong class="ai-stat-value">@Model.KetQuaTestPhanTich.Confidence.ToString("P0")</strong></article>
+                <article class="ai-stat-card"><span class="ai-stat-label">Nguồn</span><strong class="ai-stat-value">@(Model.KetQuaTestPhanTich.ReasonSource == "NguyenNhanModel" ? "Mô hình" : "Quy tắc")</strong></article>
+                <article class="ai-stat-card"><span class="ai-stat-label">Model</span><strong class="ai-stat-value">@Model.KetQuaTestPhanTich.ModelUsed</strong></article>
+            </div>
+        }
+    </article>
 </section>
 
 @section Scripts {

@@ -46,7 +46,6 @@
     var canAi = grantedPermissions.Contains(Permissions.AI.Xem);
     var canAiDataset = grantedPermissions.Contains(Permissions.AI.Dataset);
     var canAiTrain = grantedPermissions.Contains(Permissions.AI.Train);
-    var canAiAnalyzeReason = grantedPermissions.Contains(Permissions.AI.PhanTichNguyenNhan);
     var canAiDashboard = grantedPermissions.Contains(Permissions.AI.Dashboard);
 
     // ===== KHÁC =====
@@ -271,7 +270,7 @@
                         </div>
                     }
 
-                    @if (canAi && (canAiDataset || canAiTrain || canAiAnalyzeReason || canAiDashboard))
+                    @if (canAi && (canAiDataset || canAiTrain || canAiDashboard))
                     {
                         <div class="sidebar-section">
                             <div class="sidebar-section-title">AI</div>
@@ -292,13 +291,6 @@
                                 <a asp-controller="Ai" asp-action="Models" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Models") ? "active sidebar-active" : string.Empty)">
                                     <span class="sidebar-menu-icon"><i class="bi bi-diagram-3"></i></span>
                                     <span class="sidebar-menu-text">Model nguyên nhân</span>
-                                </a>
-                            }
-                            @if (canAiAnalyzeReason)
-                            {
-                                <a asp-controller="Ai" asp-action="Predict" class="side-link sidebar-menu-link @(IsActiveRoute("Ai", "Predict") ? "active sidebar-active" : string.Empty)">
-                                    <span class="sidebar-menu-icon"><i class="bi bi-graph-up"></i></span>
-                                    <span class="sidebar-menu-text">Phân tích nguyên nhân trễ</span>
                                 </a>
                             }
                             @if (canAiDashboard)

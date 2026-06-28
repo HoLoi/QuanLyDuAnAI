@@ -1,96 +1,36 @@
-﻿@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnThongKeViewModel
+@model QuanLyDuAn.ViewModels.DanhGiaDuAn.DanhGiaDuAnThongKeViewModel
+
 @{
     var coDuLieuAi = Model.CoDuLieuAi == true;
-    var laDuAnTre = Model.DuAnBiTreTheoAi == true;
-    var tinhTrangAi = "Chưa đủ dữ liệu";
-    if (Model.DuAnBiTreTheoAi == false)
-    {
-        tinhTrangAi = "Không trễ";
-    }
-    else if (laDuAnTre)
-    {
-        var dangQuaHan = Model.SoNgayQuaHan.GetValueOrDefault() > 0
-                         || string.Equals(Model.TrangThaiThoiHanDuAn, "Hoàn thành trễ hạn", StringComparison.OrdinalIgnoreCase)
-                         || string.Equals(Model.TrangThaiThoiHanDuAn, "Quá hạn", StringComparison.OrdinalIgnoreCase);
-        tinhTrangAi = dangQuaHan ? "Trễ hạn" : "Nguy cơ trễ";
-    }
-
-    var goiYAi = Model.DuAnBiTreTheoAi == false
-        ? "Không áp dụng"
-        : (string.IsNullOrWhiteSpace(Model.TenNguyenNhanAiDuDoan) ? "Chưa xác định" : Model.TenNguyenNhanAiDuDoan);
-    var mucPhuHopAi = Model.DuAnBiTreTheoAi == false
-        ? "Không áp dụng"
-        : (string.IsNullOrWhiteSpace(Model.MucPhuHopAi)
-            ? (Model.DoTinCayAi.HasValue
-                ? (Model.DoTinCayAi.Value >= 0.75d ? "Cao" : (Model.DoTinCayAi.Value >= 0.5d ? "Trung bình" : "Thấp"))
-                : "Chưa có")
-            : Model.MucPhuHopAi);
-    var thoiGianPhanTich = Model.DuAnBiTreTheoAi == false
-        ? "Không áp dụng"
-        : (Model.ThoiGianDuDoanAi?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có");
-    var nguyenNhanManagerXacNhan = string.IsNullOrWhiteSpace(Model.TenNguyenNhanManagerXacNhan)
-        ? "Chưa xác nhận"
-        : Model.TenNguyenNhanManagerXacNhan;
-    var textNutPhanTich = coDuLieuAi ? "Phân tích lại AI" : "Phân tích AI";
-    var relatedReasons = (Model.DanhSachNguyenNhanLienQuan ?? [])
-        .Where(x => !string.IsNullOrWhiteSpace(x.TenNguyenNhan))
-        .Take(3)
-        .ToList();
+    var goiYAi = coDuLieuAi && !string.IsNullOrWhiteSpace(Model.TenNguyenNhanAiDuDoan)
+        ? Model.TenNguyenNhanAiDuDoan
+        : "Chưa có kết quả";
+    var mucPhuHop = !string.IsNullOrWhiteSpace(Model.MucPhuHopAi)
+        ? Model.MucPhuHopAi
+        : (Model.DoTinCayAi.HasValue ? Model.DoTinCayAi.Value.ToString("P0") : "Chưa có");
+    var nguon = Model.NguonNguyenNhanAi == "NguyenNhanModel" ? "Mô hình" : "Quy tắc";
+    var daXacNhan = !string.IsNullOrWhiteSpace(Model.TenNguyenNhanManagerXacNhan);
 }
 
-<div class="ai-insight-card card border-0 shadow-sm mb-3" id="aiInsightCard"
-     data-co-du-lieu-ai="@coDuLieuAi.ToString().ToLowerInvariant()"
-     data-la-du-an-tre="@laDuAnTre.ToString().ToLowerInvariant()"
-     data-co-the-phan-tich-ai="@Model.CoThePhanTichAi.ToString().ToLowerInvariant()"
-     data-can-phan-tich-ai="@Model.CanPhanTichAi.ToString().ToLowerInvariant()"
-     data-tu-dong-phan-tich-ai="@Model.TuDongPhanTichAi.ToString().ToLowerInvariant()"
-     data-ly-do-can-phan-tich-ai="@Model.LyDoCanPhanTichAi">
+<div class="ai-insight-card card border-0 shadow-sm mb-3" id="aiInsightCard">
     <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between gap-2 mb-2 align-items-center">
             <h6 class="mb-0">Gợi ý AI</h6>
             <span class="badge badge-reference">Tham khảo</span>
-            @if (Model.CoThePhanTichAi)
-            {
-                <button type="button" class="btn-action btn-subtle js-ai-analyze-btn" id="btnPhanTichAiDuAn">@textNutPhanTich</button>
-            }
         </div>
 
-        <div class="empty-note mb-2 d-none" id="aiInsightLoading">AI đang phân tích dữ liệu dự án...</div>
-        <div class="alert alert-warning py-2 mb-2 d-none" id="aiInsightError">Không kết nối được dịch vụ AI. Vui lòng thử lại.</div>
+        @if (Model.KetQuaAiCoTheDaCu && !string.IsNullOrWhiteSpace(Model.CanhBaoDuLieuAi))
+        {
+            <div class="alert alert-warning py-2 mb-2">@Model.CanhBaoDuLieuAi</div>
+        }
 
-        <div class="empty-note mb-2 @(coDuLieuAi ? "d-none" : string.Empty)" id="aiInsightEmpty">
-            @(string.IsNullOrWhiteSpace(Model.TrangThaiDuLieuAi) ? "Chưa có kết quả phân tích nguyên nhân trễ cho dự án này." : Model.TrangThaiDuLieuAi)
+        <div class="row g-2">
+            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Gợi ý AI</span><strong>@goiYAi</strong></div></div>
+            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Mức phù hợp</span><strong>@mucPhuHop</strong></div></div>
+            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Nguồn</span><strong>@(coDuLieuAi ? nguon : "Chưa có")</strong></div></div>
+            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Thời gian phân tích</span><strong>@(Model.ThoiGianDuDoanAi?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có")</strong></div></div>
+            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Nguyên nhân xác nhận</span><strong>@(daXacNhan ? Model.TenNguyenNhanManagerXacNhan : "Chưa xác nhận")</strong></div></div>
+            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Thời gian xác nhận</span><strong>@(Model.ThoiGianManagerXacNhan?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác nhận")</strong></div></div>
         </div>
-
-        <div class="alert alert-warning py-2 mb-2 @(!Model.KetQuaAiCoTheDaCu || string.IsNullOrWhiteSpace(Model.CanhBaoDuLieuAi) ? "d-none" : string.Empty)" id="aiInsightWarning">
-            @Model.CanhBaoDuLieuAi
-        </div>
-
-        <div class="row g-2" id="aiInsightContent">
-            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Tình trạng AI</span><strong id="aiTinhTrangTienDo">@tinhTrangAi</strong></div></div>
-            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Gợi ý AI</span><strong id="aiNguyenNhan">@goiYAi</strong></div></div>
-            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Mức phù hợp</span><strong id="aiDoTinCay">@mucPhuHopAi</strong></div></div>
-            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Thời gian phân tích</span><strong id="aiThoiGianDuDoan">@thoiGianPhanTich</strong></div></div>
-            <div class="col-lg-4 col-md-6"><div class="stat-box"><span>Nguyên nhân Manager xác nhận</span><strong id="aiNguyenNhanManager">@nguyenNhanManagerXacNhan</strong></div></div>
-        </div>
-
-        <div class="ai-related-wrap @(relatedReasons.Count == 0 ? "d-none" : string.Empty)" id="aiRelatedReasonsWrap">
-            <div class="ai-related-title">Nguyên nhân liên quan</div>
-            <ul class="ai-related-list mb-0" id="aiRelatedReasons">
-                @foreach (var reason in relatedReasons)
-                {
-                    var mucPhuHopText = string.IsNullOrWhiteSpace(reason.MucPhuHop) ? "Chưa có" : reason.MucPhuHop;
-                    <li class="ai-related-item">
-                        <span class="ai-related-name">@reason.TenNguyenNhan</span>
-                        <span class="ai-related-meta">@mucPhuHopText</span>
-                    </li>
-                }
-            </ul>
-        </div>
-
-        <div class="ai-note mb-0 @(Model.DuAnBiTreTheoAi == false ? string.Empty : "d-none")" id="aiKhongTreNote">
-            Dự án chưa được xác định là trễ.
-        </div>
-        <p class="ai-note mb-0">AI chỉ hỗ trợ tham khảo.</p>
     </div>
 </div>

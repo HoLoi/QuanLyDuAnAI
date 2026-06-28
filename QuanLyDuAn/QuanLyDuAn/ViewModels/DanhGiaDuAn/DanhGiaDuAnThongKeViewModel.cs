@@ -1,5 +1,13 @@
 ﻿namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
 {
+    public class DanhGiaDuAnRelatedReasonViewModel
+    {
+        public int? MaDMNguyenNhan { get; set; }
+        public string? TenNguyenNhan { get; set; }
+        public double? Score { get; set; }
+        public string? MucPhuHop { get; set; }
+    }
+
     public class DanhGiaDuAnThongKeViewModel
     {
         public string TenDuAn { get; set; } = string.Empty;
@@ -72,11 +80,6 @@
         public string? TrangThaiDuLieuAi { get; set; }
         public bool KetQuaAiCoTheDaCu { get; set; }
         public string? CanhBaoDuLieuAi { get; set; }
-        public bool CoThePhanTichAi { get; set; }
-        public bool CanPhanTichAi { get; set; }
-        public bool TuDongPhanTichAi { get; set; }
-        public string? LyDoCanPhanTichAi { get; set; }
-
         public DateTime? NgayBatDau
         {
             get => NgayBatDauDuAn;

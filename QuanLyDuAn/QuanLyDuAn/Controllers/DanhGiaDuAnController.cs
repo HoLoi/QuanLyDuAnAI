@@ -94,6 +94,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Luu(
             DanhGiaDuAnFormViewModel form,
             string? returnUrl,
@@ -146,68 +147,6 @@ namespace QuanLyDuAn.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> XacNhanNguyenNhan(
-            int maDuAn,
-            int maDmNguyenNhan,
-            double? doTinCay,
-            string? tuKhoa,
-            string? trangThai,
-            string? returnUrl,
-            DateTime? tuNgayDanhGia,
-            DateTime? denNgayDanhGia)
-        {
-            if (!await _permission.HasPermissionAsync(User, Permissions.AI.XacNhan))
-            {
-                return Forbid();
-            }
-
-            try
-            {
-                await _service.XacNhanNguyenNhanAsync(maDuAn, maDmNguyenNhan, doTinCay);
-                TempData["Success"] = "Đã xác nhận nguyên nhân thực tế.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
-            return RedirectToReturnUrlOrIndex(returnUrl, new { maDuAn, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PhanTichAiDuAn(int maDuAn, CancellationToken cancellationToken)
-        {
-            if (!await _permission.HasPermissionAsync(User, Permissions.AI.PhanTichNguyenNhan))
-            {
-                return Forbid();
-            }
-
-            try
-            {
-                var duLieu = await _service.PhanTichAiDuAnAsync(maDuAn, cancellationToken);
-                return Json(new
-                {
-                    thanhCong = true,
-                    thongBao = "Đã phân tích nguyên nhân trễ cho dự án.",
-                    duLieu
-                });
-            }
-            catch (Exception ex)
-            {
-                var thongBao = CoTheLaLoiKetNoiAi(ex.Message)
-                    ? "Không kết nối được dịch vụ AI. Vui lòng thử lại."
-                    : ex.Message;
-
-                return BadRequest(new
-                {
-                    thanhCong = false,
-                    thongBao
-                });
-            }
-        }
-
-        [HttpPost]
         public async Task<IActionResult> GuiDuyet(
             int maDanhGiaDuAn,
             int? maDuAn,
@@ -236,6 +175,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Duyet(
             int maDanhGiaDuAn,
             int? maDuAn,
@@ -264,6 +204,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> TuChoi(
             int maDanhGiaDuAn,
             string lyDoTuChoi,
@@ -362,21 +303,6 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-        private static bool CoTheLaLoiKetNoiAi(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return false;
-            }
-
-            return message.Contains("không thể kết nối", StringComparison.OrdinalIgnoreCase)
-                   || message.Contains("khong the ket noi", StringComparison.OrdinalIgnoreCase)
-                   || message.Contains("timeout", StringComparison.OrdinalIgnoreCase)
-                   || message.Contains("fastapi", StringComparison.OrdinalIgnoreCase)
-                   || message.Contains("dịch vụ ai", StringComparison.OrdinalIgnoreCase)
-                   || message.Contains("dich vu ai", StringComparison.OrdinalIgnoreCase);
         }
 
         private IActionResult RedirectToReturnUrlOrIndex(string? returnUrl, object fallbackRouteValues)

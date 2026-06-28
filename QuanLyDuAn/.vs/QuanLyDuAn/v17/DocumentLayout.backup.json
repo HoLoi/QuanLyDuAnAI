@@ -7,16 +7,20 @@
       "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl19\\quanlyduanai\\quanlyduan\\quanlyduan\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl19\\quanlyduanai\\quanlyduan\\quanlyduan\\data\\khoitaotaikhoanmacdinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\data\\khoitaotaikhoanmacdinh.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl19\\quanlyduanai\\quanlyduan\\quanlyduan\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl19\\quanlyduanai\\quanlyduan\\quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\constants\\trangthai.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl19\\quanlyduanai\\quanlyduan\\quanlyduan\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl19\\quanlyduanai\\quanlyduan\\quanlyduan\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|solutionrelative:quanlyduan\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{137ED557-10EC-47A7-909D-AF2DC45F3E89}|QuanLyDuAn\\QuanLyDuAn.csproj|e:\\d\\luan van\\dvl19\\quanlyduanai\\quanlyduan\\quanlyduan\\services\\implementations\\nhansuservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -46,7 +50,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -74,20 +78,32 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "TrangThai.cs",
+              "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
+              "RelativeDocumentMoniker": "QuanLyDuAn\\Constants\\TrangThai.cs",
+              "ToolTip": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Constants\\TrangThai.cs",
+              "RelativeToolTip": "QuanLyDuAn\\Constants\\TrangThai.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-26T17:41:04.945Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "appsettings.json",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\appsettings.json",
               "RelativeDocumentMoniker": "QuanLyDuAn\\appsettings.json",
-              "ToolTip": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\appsettings.json",
-              "RelativeToolTip": "QuanLyDuAn\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAhAAAAAAAAAA==",
+              "ToolTip": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\appsettings.json*",
+              "RelativeToolTip": "QuanLyDuAn\\appsettings.json*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2026-06-16T13:02:44.433Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "launchSettings.json",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Properties\\launchSettings.json",
@@ -99,7 +115,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "NhanSuService.cs",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\NhanSuService.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\NhanSuService.cs",
@@ -111,7 +127,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Program.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Program.cs",
@@ -123,19 +139,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "KhoiTaoTaiKhoanMacDinh.cs",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
               "ToolTip": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
               "RelativeToolTip": "QuanLyDuAn\\Data\\KhoiTaoTaiKhoanMacDinh.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAQwBsAAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAMUDAAAAAAAAAAAlwNcDAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-16T15:43:40.521Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "AccountActivationOptions.cs",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\AccountActivationOptions.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\AccountActivationOptions.cs",
@@ -147,7 +163,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "AccountActivationTokenHelper.cs",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\AccountActivationTokenHelper.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\AccountActivationTokenHelper.cs",
@@ -159,7 +175,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "AccountService.cs",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Services\\Implementations\\AccountService.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Services\\Implementations\\AccountService.cs",
@@ -171,7 +187,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "Aspnetusers.cs",
               "DocumentMoniker": "E:\\D\\Luan Van\\dvl19\\QuanLyDuAnAI\\QuanLyDuAn\\QuanLyDuAn\\Models\\Entities\\Aspnetusers.cs",
               "RelativeDocumentMoniker": "QuanLyDuAn\\Models\\Entities\\Aspnetusers.cs",

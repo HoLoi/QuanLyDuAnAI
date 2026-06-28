@@ -76,16 +76,6 @@ namespace QuanLyDuAn.ViewModels.Ai
         public double SoNgayChamCapNhatTienDo { get; set; }
 
         public bool? LaDuAnTre { get; set; }
-        public string? ThongBaoKhongPhanTich { get; set; }
-        public AiAnalyzeDelayReasonResponseViewModel? KetQuaPhanTich { get; set; }
-        public AiTestReasonResponseViewModel? KetQuaTestPhanTich { get; set; }
-        public List<AiDuAnOptionViewModel> DanhSachDuAn { get; set; } = [];
-        public List<string> DanhSachReasonModel { get; set; } = [];
-        public string? ModelNguyenNhanMacDinh { get; set; }
-        public double? DoChinhXacKiemThuModelNguyenNhan { get; set; }
-        public string? ModelTestDuocChon { get; set; }
-        public bool CoModelNguyenNhanHoatDongHopLe { get; set; }
-        public string? ThongBaoModelNguyenNhan { get; set; }
     }
 
     public class AiDuAnOptionViewModel

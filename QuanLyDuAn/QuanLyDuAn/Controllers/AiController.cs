@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using QuanLyDuAn.Constants;
 using QuanLyDuAn.Helpers;
 using QuanLyDuAn.Services.Exporting;
@@ -18,18 +17,15 @@ namespace QuanLyDuAn.Controllers
         private readonly IAiService _aiService;
         private readonly IPermissionHelper _permission;
         private readonly IExportFileService _exportFileService;
-        private readonly ILogger<AiController> _logger;
 
         public AiController(
             IAiService aiService,
             IPermissionHelper permission,
-            IExportFileService exportFileService,
-            ILogger<AiController> logger)
+            IExportFileService exportFileService)
         {
             _aiService = aiService;
             _permission = permission;
             _exportFileService = exportFileService;
-            _logger = logger;
         }
 
         [HttpGet]
@@ -116,8 +112,13 @@ namespace QuanLyDuAn.Controllers
                 return Forbid();
             }
 
-            var vm = await _aiService.KhoiTaoTrangPredictAsync(maDuAn, cancellationToken);
-            return View(vm);
+            if (!maDuAn.HasValue || maDuAn.Value <= 0)
+            {
+                return RedirectToAction("Index", "DuAn");
+            }
+
+            var detailsUrl = Url.Action("Details", "DuAn", new { id = maDuAn.Value });
+            return Redirect($"{detailsUrl}#phan-tich-nguyen-nhan-tre");
         }
 
         [HttpPost]
@@ -129,71 +130,49 @@ namespace QuanLyDuAn.Controllers
                 return Forbid();
             }
 
-            var vm = await _aiService.KhoiTaoTrangPredictAsync(form.MaDuAn > 0 ? form.MaDuAn : null, cancellationToken);
-            GanFeatureNhap(vm, form);
-            vm.ModelTestDuocChon = form.ModelTestDuocChon;
-
             if (form.MaDuAn <= 0)
             {
-                vm.LoiHeThong = "Thiếu mã dự án. Vui lòng chọn dự án trước khi bấm Phân tích nguyên nhân trễ.";
-                return View(vm);
+                TempData["Warning"] = "Dự án không hợp lệ.";
+                return RedirectToAction("Index", "DuAn");
             }
 
-            if (!ModelState.IsValid)
-            {
-                var modelStateErrors = BuildModelStateErrorDetails(ModelState);
-                _logger.LogWarning(
-                    "ModelState invalid khi phan tich nguyen nhan tre. MaDuAn={MaDuAn}. Errors: {Errors}",
-                    form.MaDuAn,
-                    string.Join(" | ", modelStateErrors));
-                vm.LoiHeThong = $"Dữ liệu nhập chưa hợp lệ: {string.Join("; ", modelStateErrors)}";
-                return View(vm);
-            }
-
-            var result = await _aiService.DuDoanDuAnAsync(form, cancellationToken);
+            var result = await _aiService.PhanTichNguyenNhanDuAnAsync(form.MaDuAn, cancellationToken);
             if (!result.ThanhCong)
             {
-                vm.CanhBao = BuildDetailedWarning(result);
-                return View(vm);
+                TempData["Warning"] = BuildDetailedWarning(result);
             }
-
-            if (result.DuLieu?.LaKetQuaTamThoi == true)
+            else
             {
-                vm.KetQuaPhanTich = result.DuLieu;
-                TempData["Success"] = "Đã phân tích.";
-                return View(vm);
+                TempData["Success"] = "Phân tích nguyên nhân trễ thành công.";
             }
 
-            TempData["Success"] = "Đã phân tích.";
-            if (result.Loi.Count > 0)
-            {
-                TempData["Warning"] = string.Join(" ", result.Loi);
-            }
-
-            return RedirectToAction(nameof(Predict), new { maDuAn = form.MaDuAn });
+            var detailsUrl = Url.Action("Details", "DuAn", new { id = form.MaDuAn });
+            return Redirect($"{detailsUrl}#phan-tich-nguyen-nhan-tre");
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TestPredict(AiPredictPageViewModel form, string? modelFile, CancellationToken cancellationToken)
+        public async Task<IActionResult> TestPredict(int maDuAnTest, string? modelFile, CancellationToken cancellationToken)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.AI.PhanTichNguyenNhan))
+            if (!await _permission.HasPermissionAsync(User, Permissions.AI.Train))
             {
                 return Forbid();
             }
 
-            var vm = await _aiService.KhoiTaoTrangPredictAsync(form.MaDuAn > 0 ? form.MaDuAn : null, cancellationToken);
-            GanFeatureNhap(vm, form);
+            var vm = await _aiService.LayTrangModelAsync(modelFile, "NguyenNhan", cancellationToken);
+            vm.MaDuAnTest = maDuAnTest;
             vm.ModelTestDuocChon = string.IsNullOrWhiteSpace(modelFile) ? null : modelFile.Trim();
-
-            var result = await _aiService.TestPredictAsync(form, modelFile, cancellationToken);
+            var result = await _aiService.TestPredictAsync(
+                new AiPredictPageViewModel { MaDuAn = maDuAnTest },
+                modelFile,
+                cancellationToken);
             vm.KetQuaTestPhanTich = result.DuLieu;
             if (!result.ThanhCong)
             {
                 vm.CanhBao = BuildDetailedWarning(result);
             }
 
-            return View("Predict", vm);
+            return View("Models", vm);
         }
 
         [HttpPost]
@@ -215,7 +194,8 @@ namespace QuanLyDuAn.Controllers
                 TempData["Warning"] = BuildDetailedWarning(result);
             }
 
-            return RedirectToAction(nameof(Predict), new { maDuAn });
+            var detailsUrl = Url.Action("Details", "DuAn", new { id = maDuAn });
+            return Redirect($"{detailsUrl}#phan-tich-nguyen-nhan-tre");
         }
 
         [HttpGet]
@@ -363,33 +343,6 @@ namespace QuanLyDuAn.Controllers
             return File(bytes, "application/json", $"metadata-{modelFile}.json");
         }
 
-        private static void GanFeatureNhap(AiPredictPageViewModel vm, AiPredictPageViewModel form)
-        {
-            vm.MaDuAn = form.MaDuAn;
-            vm.SoNhanVienDuAn = form.SoNhanVienDuAn;
-            vm.TongSoCongViec = form.TongSoCongViec;
-            vm.SoCongViecTre = form.SoCongViecTre;
-            vm.TyLeCongViecTre = form.TyLeCongViecTre;
-            vm.ChiPhiDuKien = form.ChiPhiDuKien;
-            vm.ChiPhiThucTe = form.ChiPhiThucTe;
-            vm.ChenhLechChiPhi = form.ChenhLechChiPhi;
-            vm.SoLanThayDoiNhanSu = form.SoLanThayDoiNhanSu;
-            vm.SoLanThayDoiQuanLy = form.SoLanThayDoiQuanLy;
-            vm.SoNgayTreTienDo = form.SoNgayTreTienDo;
-            vm.SoDeXuatCongViecChoDuyet = form.SoDeXuatCongViecChoDuyet;
-            vm.SoDeXuatCongViecBiTuChoi = form.SoDeXuatCongViecBiTuChoi;
-            vm.ThoiGianDuyetCongViecTrungBinh = form.ThoiGianDuyetCongViecTrungBinh;
-            vm.SoDeXuatNganSachChoDuyet = form.SoDeXuatNganSachChoDuyet;
-            vm.SoDeXuatNganSachBiTuChoi = form.SoDeXuatNganSachBiTuChoi;
-            vm.ThoiGianDuyetNganSachTrungBinh = form.ThoiGianDuyetNganSachTrungBinh;
-            vm.SoBaoCaoTienDoChoDuyet = form.SoBaoCaoTienDoChoDuyet;
-            vm.SoBaoCaoTienDoBiTuChoi = form.SoBaoCaoTienDoBiTuChoi;
-            vm.SoBaoCaoTienDoYeuCauBoSung = form.SoBaoCaoTienDoYeuCauBoSung;
-            vm.TyLeBaoCaoTienDoBiTuChoi = form.TyLeBaoCaoTienDoBiTuChoi;
-            vm.SoLanCapNhatTienDo = form.SoLanCapNhatTienDo;
-            vm.SoNgayChamCapNhatTienDo = form.SoNgayChamCapNhatTienDo;
-        }
-
         private static string BuildDetailedWarning<T>(AiOperationResultViewModel<T> result)
         {
             if (result.Loi == null || result.Loi.Count == 0)
@@ -399,24 +352,6 @@ namespace QuanLyDuAn.Controllers
 
             var details = string.Join(Environment.NewLine, result.Loi.Select(x => $"- {x}"));
             return $"{result.ThongBao}{Environment.NewLine}{details}";
-        }
-
-        private static List<string> BuildModelStateErrorDetails(ModelStateDictionary modelState)
-        {
-            return modelState
-                .Where(x => x.Value?.Errors.Count > 0)
-                .SelectMany(x =>
-                {
-                    var field = string.IsNullOrWhiteSpace(x.Key) ? "(tổng quát)" : x.Key;
-                    return x.Value!.Errors.Select(error =>
-                    {
-                        var message = string.IsNullOrWhiteSpace(error.ErrorMessage)
-                            ? "Giá trị không hợp lệ."
-                            : error.ErrorMessage;
-                        return $"{field}: {message}";
-                    });
-                })
-                .ToList();
         }
 
         private static List<object> BuildDashboardExportRows(AiDashboardPageViewModel vm)

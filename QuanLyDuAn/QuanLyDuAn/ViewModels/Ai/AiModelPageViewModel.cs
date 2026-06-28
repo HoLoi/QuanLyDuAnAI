@@ -38,6 +38,10 @@ namespace QuanLyDuAn.ViewModels.Ai
         public double? F1MacroModelActive { get; set; }
         public string? DecisionTreeTextModelActive { get; set; }
         public string? TenModelPhanTich { get; set; }
+        public List<AiDuAnOptionViewModel> DanhSachDuAnTest { get; set; } = [];
+        public int? MaDuAnTest { get; set; }
+        public string? ModelTestDuocChon { get; set; }
+        public AiTestReasonResponseViewModel? KetQuaTestPhanTich { get; set; }
     }
 
     public class AiModelVersionMetricViewModel

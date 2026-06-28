@@ -3458,4 +3458,3 @@ E:\D\Luan Van\dvl19\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\refint\Q
 E:\D\Luan Van\dvl19\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\QuanLyDuAn.pdb
 E:\D\Luan Van\dvl19\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\QuanLyDuAn.genruntimeconfig.cache
 E:\D\Luan Van\dvl19\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\ref\QuanLyDuAn.dll
-E:\D\Luan Van\dvl19\QuanLyDuAnAI\QuanLyDuAn\QuanLyDuAn\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
