@@ -147,7 +147,12 @@ public class DashboardService : IDashboardService
         var totalProjects = maDuAnDaLoc.Count;
         var totalTasks = await LogQueryAsync("TongCongViec", () => congViecQuery.CountAsync());
         var totalEmployees = await LogQueryAsync("TongNhanSu", () => _db.NguoiDung.AsNoTracking().CountAsync(x => x.IsDeleted != true));
-        var totalBudget = await LogQueryAsync("TongNganSach", () => nganSachQuery.SumAsync(x => x.SoTienNganSach ?? 0));
+        var budgetByProject = await LogQueryAsync("NganSachTheoDuAn", () => nganSachQuery
+            .GroupBy(x => x.MaDuAn)
+            .Select(g => new { ProjectId = g.Key, Total = g.Sum(x => x.SoTienNganSach ?? 0) })
+            .ToListAsync());
+        var budgetMap = budgetByProject.ToDictionary(x => x.ProjectId, x => x.Total);
+        var totalBudget = budgetByProject.Sum(x => x.Total);
 
         var expenseByProject = await LogQueryAsync("TongChiPhiTheoDuAn", () => expenseByProjectQuery
             .GroupBy(x => x.MaDuAn)
@@ -155,6 +160,23 @@ public class DashboardService : IDashboardService
             .ToListAsync());
         var expenseMap = expenseByProject.ToDictionary(x => x.ProjectId, x => x.Total);
         var totalExpense = expenseByProject.Sum(x => x.Total);
+        var managerIdsForChart = projectsForChart.Select(x => x.MaNguoiDung).Distinct().ToList();
+        var managerNamesForChart = await LogQueryAsync("QuanLyBieuDoDuAn", () => _db.NguoiDung
+            .AsNoTracking()
+            .Where(x => x.IsDeleted != true && managerIdsForChart.Contains(x.MaNguoiDung))
+            .Select(x => new { x.MaNguoiDung, x.HoTenNguoiDung })
+            .ToListAsync());
+        var managerNameMap = managerNamesForChart.ToDictionary(
+            x => x.MaNguoiDung,
+            x => string.IsNullOrWhiteSpace(x.HoTenNguoiDung) ? "Chưa phân công" : x.HoTenNguoiDung);
+        var projectTrackingRows = projectsForChart.Select(x => new DashboardProjectTrackingItemViewModel
+        {
+            TenDuAn = x.TenDuAn ?? $"Dự án #{x.MaDuAn}",
+            TenQuanLy = managerNameMap.GetValueOrDefault(x.MaNguoiDung, "Chưa phân công"),
+            PhanTramTienDo = x.PhanTramHoanThanh ?? 0,
+            NganSach = budgetMap.GetValueOrDefault(x.MaDuAn),
+            ChiPhi = expenseMap.GetValueOrDefault(x.MaDuAn)
+        }).ToList();
 
         var duAnStatuses = await LogQueryAsync("BieuDoTrangThaiDuAn", () => duAnThongKeQuery.Select(x => x.TrangThaiDuAn).ToListAsync());
         var congViecStatuses = await LogQueryAsync("BieuDoTrangThaiCongViec", () => congViecQuery.Select(x => x.TrangThaiCongViec).ToListAsync());
@@ -238,6 +260,7 @@ public class DashboardService : IDashboardService
             TenDuAn = projectsForChart.Select(x => x.TenDuAn ?? $"Dự án #{x.MaDuAn}").ToList(),
             PhanTramTienDo = projectsForChart.Select(x => x.PhanTramHoanThanh ?? 0).ToList(),
             ChiPhiTheoDuAn = projectsForChart.Select(x => expenseMap.TryGetValue(x.MaDuAn, out var value) ? value : 0).ToList(),
+            DuAnTheoDoi = projectTrackingRows,
 
             DuAnKhoiTao = CountDuAnByStatus(TrangThai.KhoiTao),
             DuAnDangThucHien = CountDuAnByStatus(TrangThai.DangThucHien),
@@ -744,17 +767,30 @@ public class DashboardService : IDashboardService
             .ToList();
 
         var projectIds = topIds.Select(x => x.MaDuAn).ToList();
-        var projectNames = await duAnQuery
-            .Where(x => projectIds.Contains(x.MaDuAn))
-            .Select(x => new { x.MaDuAn, x.TenDuAn })
+        var projectNames = await (
+            from da in duAnQuery
+            join manager in _db.NguoiDung.AsNoTracking().Where(x => x.IsDeleted != true)
+                on da.MaNguoiDung equals manager.MaNguoiDung into managerGroup
+            from manager in managerGroup.DefaultIfEmpty()
+            where projectIds.Contains(da.MaDuAn)
+            select new
+            {
+                da.MaDuAn,
+                da.TenDuAn,
+                TenQuanLy = manager != null ? manager.HoTenNguoiDung : null
+            })
             .ToListAsync();
         var nameMap = projectNames.ToDictionary(
             x => x.MaDuAn,
             x => string.IsNullOrWhiteSpace(x.TenDuAn) ? "Dự án chưa đặt tên" : x.TenDuAn);
+        var managerMap = projectNames.ToDictionary(
+            x => x.MaDuAn,
+            x => string.IsNullOrWhiteSpace(x.TenQuanLy) ? "Chưa phân công" : x.TenQuanLy);
 
         return topIds.Select(x => new DashboardBudgetOverrunItemViewModel
         {
             TenDuAn = nameMap.GetValueOrDefault(x.MaDuAn, "Dự án chưa đặt tên"),
+            TenQuanLy = managerMap.GetValueOrDefault(x.MaDuAn, "Chưa phân công"),
             NganSach = x.NganSach,
             ChiPhi = x.ChiPhi,
             ChenhLech = x.ChenhLech

@@ -121,7 +121,8 @@ namespace QuanLyDuAn.Controllers
             string? locTinhTrangThoiHan,
             bool? treHan)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.CongViec.Xem))
                 return Forbid();
 
             if (treHan == true && string.IsNullOrWhiteSpace(locTinhTrangThoiHan))
@@ -142,26 +143,31 @@ namespace QuanLyDuAn.Controllers
                     ("Từ khóa", tuKhoa),
                     ("Dự án", locMaDuAn?.ToString()),
                     ("Trạng thái", TrangThai.ToDisplay(locTrangThai)),
-                    ("Tình trạng thời hạn", CongViecDeadlineStatus.ToDisplayFilter(locTinhTrangThoiHanResolved)),
-                    ("Lọc theo ngày", ExportSupport.ResolveTextOrDefault(locTheoNgay, "Ngày tạo")),
+                    ("Tình trạng thời hạn", string.IsNullOrWhiteSpace(locTinhTrangThoiHanResolved)
+                        ? "Tất cả"
+                        : CongViecDeadlineStatus.ToDisplayFilter(locTinhTrangThoiHanResolved)),
+                    ("Lọc theo ngày", ExportSupport.ToDisplayFilterValue(locTheoNgay, "Ngày tạo")),
                     ("Từ ngày", ExportSupport.FormatDate(tuNgay)),
                     ("Đến ngày", ExportSupport.FormatDate(denNgay))),
-                FileNamePrefix = "cong-viec",
+                FileNamePrefix = "DanhSachCongViec",
+                SheetName = "CongViec",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã công việc", ValueSelector = row => ((CongViecItemViewModel)row).MaCongViec.ToString() },
-                    new() { Header = "Tên công việc", ValueSelector = row => ((CongViecItemViewModel)row).TenCongViec },
-                    new() { Header = "Dự án", ValueSelector = row => ((CongViecItemViewModel)row).TenDuAn },
-                    new() { Header = "Danh mục", ValueSelector = row => ((CongViecItemViewModel)row).TenDanhMucCV },
-                    new() { Header = "Mức độ", ValueSelector = row => ((CongViecItemViewModel)row).TenMucDo },
-                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDateTime(((CongViecItemViewModel)row).NgayBatDauCongViec) },
-                    new() { Header = "Hạn kết thúc", ValueSelector = row => ExportSupport.FormatDateTime(((CongViecItemViewModel)row).NgayKetThucCVDuKien) },
-                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDateTime(((CongViecItemViewModel)row).NgayKetThucCVThucTe) },
-                    new() { Header = "Tình trạng thời hạn", ValueSelector = row => ((CongViecItemViewModel)row).TinhTrangThoiHan },
-                    new() { Header = "Số ngày trễ", ValueSelector = row => ((CongViecItemViewModel)row).SoNgayTre.ToString() },
-                    new() { Header = "Chi phí đã chi", ValueSelector = row => ExportSupport.FormatCurrency(((CongViecItemViewModel)row).ChiPhiDaChi) },
-                    new() { Header = "Trạng thái", ValueSelector = row => ((CongViecItemViewModel)row).TrangThaiHienThi }
+                    new() { Header = "Tên công việc", ValueSelector = row => ((CongViecItemViewModel)row).TenCongViec, WrapText = true, MinWidth = 20, MaxWidth = 36, PdfRelativeWidth = 1.7f },
+                    new() { Header = "Dự án", ValueSelector = row => ((CongViecItemViewModel)row).TenDuAn, WrapText = true, MinWidth = 18, MaxWidth = 30, PdfRelativeWidth = 1.4f },
+                    new() { Header = "Danh mục", ValueSelector = row => ((CongViecItemViewModel)row).TenDanhMucCV, MinWidth = 14, MaxWidth = 24 },
+                    new() { Header = "Mức độ ưu tiên", ValueSelector = row => ((CongViecItemViewModel)row).TenMucDo, Alignment = ExportColumnAlignment.Center, MinWidth = 12, MaxWidth = 18 },
+                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ((CongViecItemViewModel)row).NgayBatDauCongViec, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Hạn hoàn thành", ValueSelector = row => ((CongViecItemViewModel)row).NgayKetThucCVDuKien, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Hoàn thành thực tế", ValueSelector = row => ((CongViecItemViewModel)row).NgayKetThucCVThucTe, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Tình trạng thời hạn", ValueSelector = row => ((CongViecItemViewModel)row).TinhTrangThoiHan, Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Số ngày trễ", ValueSelector = row => ((CongViecItemViewModel)row).SoNgayTre, NumberFormat = "0", Alignment = ExportColumnAlignment.Right, MinWidth = 10, MaxWidth = 13 },
+                    new() { Header = "Chi phí đã chi", ValueSelector = row => ((CongViecItemViewModel)row).ChiPhiDaChi, NumberFormat = "#,##0 \"VNĐ\"", Alignment = ExportColumnAlignment.Right, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Trạng thái", ValueSelector = row => ((CongViecItemViewModel)row).TrangThaiHienThi, Alignment = ExportColumnAlignment.Center, MinWidth = 14, MaxWidth = 20 },
+                    new() { Header = "Mã công việc", ValueSelector = row => ((CongViecItemViewModel)row).MaCongViec, Alignment = ExportColumnAlignment.Center, MinWidth = 11, MaxWidth = 14, ShowInPdf = false }
                 },
                 Rows = rows
             };

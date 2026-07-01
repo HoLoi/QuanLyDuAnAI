@@ -237,7 +237,8 @@ namespace QuanLyDuAn.Controllers
             int? locMaChucDanh,
             string? locTrangThaiTaiKhoan)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.NhanSu.Xem))
                 return Forbid();
 
             var rows = (await _service.GetAllAsync(tuKhoa, locMaChucDanh, locTrangThaiTaiKhoan))
@@ -253,18 +254,19 @@ namespace QuanLyDuAn.Controllers
                     ("Từ khóa", tuKhoa),
                     ("Mã chức danh", locMaChucDanh?.ToString()),
                     ("Trạng thái tài khoản", TrangThai.ToDisplay(locTrangThaiTaiKhoan))),
-                FileNamePrefix = "nhan-su",
+                FileNamePrefix = "DanhSachNhanSu",
+                SheetName = "NhanSu",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã nhân sự", ValueSelector = row => ((NhanSuViewModel)row).MaNguoiDung.ToString() },
-                    new() { Header = "Họ tên", ValueSelector = row => ((NhanSuViewModel)row).HoTenNguoiDung },
-                    new() { Header = "Chức danh", ValueSelector = row => ((NhanSuViewModel)row).TenChucDanh },
-                    new() { Header = "Số điện thoại", ValueSelector = row => ((NhanSuViewModel)row).SdtNguoiDung ?? string.Empty },
-                    new() { Header = "Ngày sinh", ValueSelector = row => ExportSupport.FormatDate(((NhanSuViewModel)row).NgaySinh) },
-                    new() { Header = "Username", ValueSelector = row => ((NhanSuViewModel)row).UserName ?? string.Empty },
-                    new() { Header = "Email", ValueSelector = row => ((NhanSuViewModel)row).Email ?? string.Empty },
-                    new() { Header = "Trạng thái tài khoản", ValueSelector = row => ((NhanSuViewModel)row).TrangThaiTaiKhoan }
+                    new() { Header = "Họ tên", ValueSelector = row => ((NhanSuViewModel)row).HoTenNguoiDung, MinWidth = 18, MaxWidth = 28 },
+                    new() { Header = "Chức danh", ValueSelector = row => ((NhanSuViewModel)row).TenChucDanh, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Điện thoại", ValueSelector = row => ((NhanSuViewModel)row).SdtNguoiDung, Alignment = ExportColumnAlignment.Center, MinWidth = 13, MaxWidth = 16 },
+                    new() { Header = "Email", ValueSelector = row => ((NhanSuViewModel)row).Email, MinWidth = 22, MaxWidth = 35 },
+                    new() { Header = "Trạng thái tài khoản", ValueSelector = row => ((NhanSuViewModel)row).TrangThaiTaiKhoan, Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Mã nhân sự", ValueSelector = row => ((NhanSuViewModel)row).MaNguoiDung, Alignment = ExportColumnAlignment.Center, MinWidth = 10, MaxWidth = 14, ShowInPdf = false }
                 },
                 Rows = rows
             };

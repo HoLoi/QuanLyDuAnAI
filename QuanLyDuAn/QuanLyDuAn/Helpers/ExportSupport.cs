@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Security.Claims;
+using System.Text;
 
 namespace QuanLyDuAn.Helpers
 {
@@ -44,6 +45,63 @@ namespace QuanLyDuAn.Helpers
         public static string ResolveTextOrDefault(string? value, string fallback = "Tất cả")
         {
             return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+        }
+
+        public static string ToDisplayFilterValue(string? value, string fallback = "Tất cả")
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return fallback;
+            }
+
+            return value.Trim().ToLowerInvariant() switch
+            {
+                "tatca" => "Tất cả",
+                "homnay" => "Hôm nay",
+                "7ngay" => "7 ngày gần đây",
+                "thangnay" => "Tháng này",
+                "quynay" => "Quý này",
+                "namnay" => "Năm nay",
+                "ngaytao" => "Ngày tạo",
+                "ngaybatdau" => "Ngày bắt đầu",
+                "ngayketthuc" => "Ngày kết thúc",
+                "hancongviec" => "Hạn công việc",
+                _ => value.Trim()
+            };
+        }
+
+        public static string NormalizeFileNamePart(string? value, string fallback = "File")
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return fallback;
+            }
+
+            var normalized = value.Normalize(NormalizationForm.FormD);
+            var builder = new StringBuilder(normalized.Length);
+            foreach (var character in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(character) == UnicodeCategory.NonSpacingMark)
+                {
+                    continue;
+                }
+
+                if (character == 'đ' || character == 'Đ')
+                {
+                    builder.Append(character == 'đ' ? 'd' : 'D');
+                }
+                else if (char.IsLetterOrDigit(character) || character is '_' or '-')
+                {
+                    builder.Append(character);
+                }
+                else if (char.IsWhiteSpace(character))
+                {
+                    builder.Append('_');
+                }
+            }
+
+            var result = builder.ToString().Trim('_', '-');
+            return string.IsNullOrWhiteSpace(result) ? fallback : result;
         }
     }
 }

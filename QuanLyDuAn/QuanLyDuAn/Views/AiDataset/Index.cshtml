@@ -96,6 +96,7 @@
                 var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
                 {
                     Action = "XuatFile",
+                    HienThiPdf = false,
                     RouteValues = new Dictionary<string, string?>
                     {
                         ["thieuDataset"] = Model.DangThieuDataset ? "true" : "false"

@@ -125,7 +125,8 @@ namespace QuanLyDuAn.Controllers
         [HttpGet]
         public async Task<IActionResult> XuatFile(string? format, int maCongViec)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.ChiTietCongViec.Xem))
                 return Forbid();
 
             var page = await _service.GetPageAsync(maCongViec, paginate: false);
@@ -139,16 +140,19 @@ namespace QuanLyDuAn.Controllers
                 AppliedFiltersText = ExportSupport.BuildFiltersText(
                     ("Mã công việc", maCongViec.ToString()),
                     ("Tên công việc", page.CongViec.TenCongViec)),
-                FileNamePrefix = "chi-tiet-cong-viec",
+                FileNamePrefix = $"ChiTietCongViec_{maCongViec}",
+                SheetName = "ChiTietCongViec",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã chi tiết", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).MaChiTietCV.ToString() },
-                    new() { Header = "Tên chi tiết", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TenCTCV },
-                    new() { Header = "Nội dung", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).NoiDungChiTietCV },
-                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDate(((ChiTietCongViecItemViewModel)row).NgayBatDauCTCV) },
-                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDate(((ChiTietCongViecItemViewModel)row).NgayKetThucCTCV) },
-                    new() { Header = "Trạng thái", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TrangThaiHienThi }
+                    new() { Header = "Tên chi tiết", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TenCTCV, WrapText = true, MinWidth = 20, MaxWidth = 34, PdfRelativeWidth = 1.5f },
+                    new() { Header = "Nội dung", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).NoiDungChiTietCV, WrapText = true, MinWidth = 28, MaxWidth = 50, PdfRelativeWidth = 2.5f },
+                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).NgayBatDauCTCV, NumberFormat = "dd/MM/yyyy", Alignment = ExportColumnAlignment.Center, MinWidth = 13, MaxWidth = 15 },
+                    new() { Header = "Hoàn thành thực tế", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).NgayKetThucCTCV, NumberFormat = "dd/MM/yyyy", Alignment = ExportColumnAlignment.Center, MinWidth = 15, MaxWidth = 18 },
+                    new() { Header = "Trạng thái", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).TrangThaiHienThi, Alignment = ExportColumnAlignment.Center, MinWidth = 14, MaxWidth = 20 },
+                    new() { Header = "Mã chi tiết", ValueSelector = row => ((ChiTietCongViecItemViewModel)row).MaChiTietCV, Alignment = ExportColumnAlignment.Center, MinWidth = 10, MaxWidth = 13, ShowInPdf = false }
                 },
                 Rows = rows
             };

@@ -43,6 +43,9 @@ namespace QuanLyDuAn.Services.Implementations
 
             var query = from da in _context.DuAn
                         join loai in _context.LoaiDuAn on da.MaLoaiDuAn equals loai.MaLoaiDuAn
+                        join quanLy in _context.NguoiDung.Where(x => x.IsDeleted != true)
+                            on da.MaNguoiDung equals quanLy.MaNguoiDung into quanLyGroup
+                        from quanLy in quanLyGroup.DefaultIfEmpty()
                         where da.IsDeleted != true
                         orderby da.MaDuAn descending
                         select new DuAnViewModel
@@ -51,7 +54,9 @@ namespace QuanLyDuAn.Services.Implementations
                             TenDuAn = da.TenDuAn ?? string.Empty,
                             MoTaDuAn = da.MoTaDuAn,
                             MaNguoiDung = da.MaNguoiDung,
-                            TenNguoiQuanLy = string.Empty,
+                            TenNguoiQuanLy = quanLy != null
+                                ? (quanLy.HoTenNguoiDung ?? "Chưa phân công")
+                                : "Chưa phân công",
                             MaLoaiDuAn = da.MaLoaiDuAn,
                             TenLoaiDuAn = loai.TenLoai ?? string.Empty,
                             NgayTaoDuAn = da.NgayTaoDuAn,
@@ -148,6 +153,9 @@ namespace QuanLyDuAn.Services.Implementations
 
             var query = from da in _context.DuAn
                         join loai in _context.LoaiDuAn on da.MaLoaiDuAn equals loai.MaLoaiDuAn
+                        join quanLy in _context.NguoiDung.Where(x => x.IsDeleted != true)
+                            on da.MaNguoiDung equals quanLy.MaNguoiDung into quanLyGroup
+                        from quanLy in quanLyGroup.DefaultIfEmpty()
                         where da.IsDeleted != true
                         select new DuAnViewModel
                         {
@@ -155,7 +163,9 @@ namespace QuanLyDuAn.Services.Implementations
                             TenDuAn = da.TenDuAn ?? string.Empty,
                             MoTaDuAn = da.MoTaDuAn,
                             MaNguoiDung = da.MaNguoiDung,
-                            TenNguoiQuanLy = string.Empty,
+                            TenNguoiQuanLy = quanLy != null
+                                ? (quanLy.HoTenNguoiDung ?? "Chưa phân công")
+                                : "Chưa phân công",
                             MaLoaiDuAn = da.MaLoaiDuAn,
                             TenLoaiDuAn = loai.TenLoai ?? string.Empty,
                             NgayTaoDuAn = da.NgayTaoDuAn,

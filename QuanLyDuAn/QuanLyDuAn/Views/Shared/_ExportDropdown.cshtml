@@ -26,12 +26,15 @@
                 <span>Xuất Excel</span>
             </a>
         </li>
-        <li>
-            <a class="dropdown-item" asp-action="@Model.Action" asp-all-route-data="routePdf">
-                <i class="bi bi-file-earmark-pdf"></i>
-                <span>Xuất PDF</span>
-            </a>
-        </li>
+        @if (Model.HienThiPdf)
+        {
+            <li>
+                <a class="dropdown-item" asp-action="@Model.Action" asp-all-route-data="routePdf">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    <span>Xuất PDF</span>
+                </a>
+            </li>
+        }
         @if (Model.HienThiCsv)
         {
             <li>

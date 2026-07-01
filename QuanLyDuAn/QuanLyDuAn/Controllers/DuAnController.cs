@@ -668,7 +668,8 @@ namespace QuanLyDuAn.Controllers
             string? locTheoNgay,
             string? locTinhTrangThoiHan)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.DuAn.Xem))
                 return Forbid();
 
             var rows = (await _service.GetAllAsync(tuKhoa, locMaLoaiDuAn, locTrangThaiDuAn, tuNgay, denNgay, locTheoNgay, locTinhTrangThoiHan))
@@ -684,26 +685,31 @@ namespace QuanLyDuAn.Controllers
                     ("Từ khóa", tuKhoa),
                     ("Loại dự án", locMaLoaiDuAn?.ToString()),
                     ("Trạng thái", TrangThai.ToDisplay(locTrangThaiDuAn)),
-                    ("Tình trạng thời hạn", DuAnDeadlineStatusHelper.ToDisplayFilter(locTinhTrangThoiHan)),
-                    ("Lọc theo ngày", ExportSupport.ResolveTextOrDefault(locTheoNgay, "Ngày tạo")),
+                    ("Tình trạng thời hạn", string.IsNullOrWhiteSpace(locTinhTrangThoiHan)
+                        ? "Tất cả"
+                        : DuAnDeadlineStatusHelper.ToDisplayFilter(locTinhTrangThoiHan)),
+                    ("Lọc theo ngày", ExportSupport.ToDisplayFilterValue(locTheoNgay, "Ngày tạo")),
                     ("Từ ngày", ExportSupport.FormatDate(tuNgay)),
                     ("Đến ngày", ExportSupport.FormatDate(denNgay))),
-                FileNamePrefix = "du-an",
+                FileNamePrefix = "DanhSachDuAn",
+                SheetName = "DuAn",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã dự án", ValueSelector = row => ((DuAnViewModel)row).MaDuAn.ToString() },
-                    new() { Header = "Tên dự án", ValueSelector = row => ((DuAnViewModel)row).TenDuAn },
-                    new() { Header = "Loại dự án", ValueSelector = row => ((DuAnViewModel)row).TenLoaiDuAn },
-                    new() { Header = "Quản lý", ValueSelector = row => ((DuAnViewModel)row).TenNguoiQuanLy },
-                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ExportSupport.FormatDateTime(((DuAnViewModel)row).NgayBatDauDuAn) },
-                    new() { Header = "Ngày kết thúc", ValueSelector = row => ExportSupport.FormatDateTime(((DuAnViewModel)row).NgayKetThucDuAn) },
-                    new() { Header = "Ngày hoàn thành thực tế", ValueSelector = row => ExportSupport.FormatDateTime(((DuAnViewModel)row).NgayHoanThanhThucTeDuAn) },
-                    new() { Header = "Tiến độ", ValueSelector = row => $"{((DuAnViewModel)row).PhanTramHoanThanh}%" },
-                    new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((DuAnViewModel)row).TrangThaiDuAn) },
-                    new() { Header = "Tình trạng thời hạn", ValueSelector = row => ((DuAnViewModel)row).TinhTrangThoiHan },
-                    new() { Header = "Số team", ValueSelector = row => ((DuAnViewModel)row).SoLuongTeam.ToString() },
-                    new() { Header = "Số thành viên", ValueSelector = row => ((DuAnViewModel)row).SoLuongThanhVien.ToString() }
+                    new() { Header = "Tên dự án", ValueSelector = row => ((DuAnViewModel)row).TenDuAn, WrapText = true, MinWidth = 20, MaxWidth = 36, PdfRelativeWidth = 1.8f },
+                    new() { Header = "Loại dự án", ValueSelector = row => ((DuAnViewModel)row).TenLoaiDuAn, MinWidth = 14, MaxWidth = 22 },
+                    new() { Header = "Quản lý", ValueSelector = row => ((DuAnViewModel)row).TenNguoiQuanLy, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Ngày bắt đầu", ValueSelector = row => ((DuAnViewModel)row).NgayBatDauDuAn, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Hạn kết thúc", ValueSelector = row => ((DuAnViewModel)row).NgayKetThucDuAn, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Hoàn thành thực tế", ValueSelector = row => ((DuAnViewModel)row).NgayHoanThanhThucTeDuAn, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Tiến độ", ValueSelector = row => ((DuAnViewModel)row).PhanTramHoanThanh, NumberFormat = "0.##\"%\"", Alignment = ExportColumnAlignment.Right, MinWidth = 10, MaxWidth = 12 },
+                    new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((DuAnViewModel)row).TrangThaiDuAn), Alignment = ExportColumnAlignment.Center, MinWidth = 14, MaxWidth = 20 },
+                    new() { Header = "Tình trạng thời hạn", ValueSelector = row => ((DuAnViewModel)row).TinhTrangThoiHan, Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Số team", ValueSelector = row => ((DuAnViewModel)row).SoLuongTeam, Alignment = ExportColumnAlignment.Right, MinWidth = 9, MaxWidth = 11, ShowInPdf = false },
+                    new() { Header = "Số thành viên", ValueSelector = row => ((DuAnViewModel)row).SoLuongThanhVien, Alignment = ExportColumnAlignment.Right, MinWidth = 11, MaxWidth = 14, ShowInPdf = false },
+                    new() { Header = "Mã dự án", ValueSelector = row => ((DuAnViewModel)row).MaDuAn, Alignment = ExportColumnAlignment.Center, MinWidth = 10, MaxWidth = 12, ShowInPdf = false }
                 },
                 Rows = rows
             };

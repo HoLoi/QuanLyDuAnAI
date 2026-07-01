@@ -242,7 +242,8 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgayDanhGia,
             DateTime? denNgayDanhGia)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.DanhGiaDuAn.Xem))
             {
                 return Forbid();
             }
@@ -261,22 +262,25 @@ namespace QuanLyDuAn.Controllers
                     ("Mã dự án", maDuAn?.ToString()),
                     ("Từ ngày đánh giá", ExportSupport.FormatDate(tuNgayDanhGia)),
                     ("Đến ngày đánh giá", ExportSupport.FormatDate(denNgayDanhGia))),
-                FileNamePrefix = "danh-gia-du-an",
+                FileNamePrefix = "DanhGiaDuAn",
+                SheetName = "DanhGiaDuAn",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).MaDanhGiaDuAn.ToString() : "-" },
-                    new() { Header = "Dự án", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenDuAn },
-                    new() { Header = "Người quản lý", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiQuanLy },
-                    new() { Header = "Trạng thái dự án", ValueSelector = row => TrangThai.ToDisplay(((DanhGiaDuAnItemViewModel)row).TrangThaiDuAn) },
-                    new() { Header = "Số công việc", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TongCongViec.ToString() },
-                    new() { Header = "Số công việc trễ", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CongViecTreHan.ToString() },
-                    new() { Header = "Trạng thái đánh giá", ValueSelector = row => string.Equals(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase) ? "Chưa đánh giá" : TrangThai.ToDisplay(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia) },
-                    new() { Header = "Điểm tổng kết", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).DiemTongKet.ToString("0.##") : "-" },
-                    new() { Header = "Xếp loại", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).XepLoai },
-                    new() { Header = "Ngày đánh giá", ValueSelector = row => ExportSupport.FormatDateTime(((DanhGiaDuAnItemViewModel)row).NgayDanhGia) },
-                    new() { Header = "Người đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDanhGia },
-                    new() { Header = "Người duyệt", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDuyet ?? string.Empty }
+                    new() { Header = "Dự án", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenDuAn, WrapText = true, MinWidth = 20, MaxWidth = 34, PdfRelativeWidth = 1.6f },
+                    new() { Header = "Người quản lý", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiQuanLy, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Trạng thái dự án", ValueSelector = row => TrangThai.ToDisplay(((DanhGiaDuAnItemViewModel)row).TrangThaiDuAn), Alignment = ExportColumnAlignment.Center, MinWidth = 15, MaxWidth = 21 },
+                    new() { Header = "Số công việc", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TongCongViec, NumberFormat = "0", Alignment = ExportColumnAlignment.Right, MinWidth = 10, MaxWidth = 13, ShowInPdf = false },
+                    new() { Header = "Số công việc trễ", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CongViecTreHan, NumberFormat = "0", Alignment = ExportColumnAlignment.Right, MinWidth = 12, MaxWidth = 15, ShowInPdf = false },
+                    new() { Header = "Trạng thái đánh giá", ValueSelector = row => string.Equals(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase) ? "Chưa đánh giá" : TrangThai.ToDisplay(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia), Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Điểm tổng kết", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).DiemTongKet : null, NumberFormat = "0.00", Alignment = ExportColumnAlignment.Right, MinWidth = 11, MaxWidth = 14 },
+                    new() { Header = "Xếp loại", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).XepLoai : "Chưa đánh giá", Alignment = ExportColumnAlignment.Center, MinWidth = 12, MaxWidth = 18 },
+                    new() { Header = "Ngày đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).NgayDanhGia, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Người đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDanhGia, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Người duyệt", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDuyet, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Mã đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).MaDanhGiaDuAn : null, Alignment = ExportColumnAlignment.Center, MinWidth = 11, MaxWidth = 14, ShowInPdf = false }
                 },
                 Rows = rows
             };

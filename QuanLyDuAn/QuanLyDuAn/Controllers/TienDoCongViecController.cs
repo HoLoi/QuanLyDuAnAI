@@ -194,7 +194,8 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgayBaoCao,
             DateTime? denNgayBaoCao)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.TienDo.Xem))
                 return Forbid();
 
             var page = await _service.GetPageAsync(locMaDuAn, locMaCongViec, locMaChiTietCv, tuKhoa, tuNgayBaoCao, denNgayBaoCao, paginate: false);
@@ -212,19 +213,22 @@ namespace QuanLyDuAn.Controllers
                     ("Mã chi tiết", locMaChiTietCv?.ToString()),
                     ("Từ ngày báo cáo", ExportSupport.FormatDate(tuNgayBaoCao)),
                     ("Đến ngày báo cáo", ExportSupport.FormatDate(denNgayBaoCao))),
-                FileNamePrefix = "tien-do-cong-viec",
+                FileNamePrefix = "BaoCaoTienDoCongViec",
+                SheetName = "TienDo",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã chi tiết", ValueSelector = row => ((TienDoCongViecItemViewModel)row).MaChiTietCV.ToString() },
-                    new() { Header = "Dự án", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenDuAn },
-                    new() { Header = "Công việc", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenCongViec },
-                    new() { Header = "Chi tiết công việc", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenChiTietCongViec },
-                    new() { Header = "Người thực hiện", ValueSelector = row => ((TienDoCongViecItemViewModel)row).NguoiThucHien },
-                    new() { Header = "Tiến độ hiện tại", ValueSelector = row => $"{((TienDoCongViecItemViewModel)row).PhanTramHienTai}%" },
-                    new() { Header = "Trạng thái", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TrangThaiCTCV },
-                    new() { Header = "Báo cáo gần nhất", ValueSelector = row => ExportSupport.FormatDateTime(((TienDoCongViecItemViewModel)row).ThoiGianBaoCaoGanNhat) },
-                    new() { Header = "Trạng thái duyệt", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TrangThaiDuyetBaoCaoGanNhat ?? string.Empty }
+                    new() { Header = "Dự án", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenDuAn, WrapText = true, MinWidth = 18, MaxWidth = 30, PdfRelativeWidth = 1.4f },
+                    new() { Header = "Công việc", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenCongViec, WrapText = true, MinWidth = 18, MaxWidth = 30, PdfRelativeWidth = 1.4f },
+                    new() { Header = "Chi tiết công việc", ValueSelector = row => ((TienDoCongViecItemViewModel)row).TenChiTietCongViec, WrapText = true, MinWidth = 20, MaxWidth = 34, PdfRelativeWidth = 1.5f },
+                    new() { Header = "Người thực hiện", ValueSelector = row => ((TienDoCongViecItemViewModel)row).NguoiThucHien, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Tiến độ hiện tại", ValueSelector = row => ((TienDoCongViecItemViewModel)row).PhanTramHienTai, NumberFormat = "0.##\"%\"", Alignment = ExportColumnAlignment.Right, MinWidth = 12, MaxWidth = 15 },
+                    new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((TienDoCongViecItemViewModel)row).TrangThaiCTCV), Alignment = ExportColumnAlignment.Center, MinWidth = 14, MaxWidth = 20 },
+                    new() { Header = "Báo cáo gần nhất", ValueSelector = row => ((TienDoCongViecItemViewModel)row).ThoiGianBaoCaoGanNhat, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Trạng thái duyệt", ValueSelector = row => TrangThai.ToDisplay(((TienDoCongViecItemViewModel)row).TrangThaiDuyetBaoCaoGanNhat), Alignment = ExportColumnAlignment.Center, MinWidth = 15, MaxWidth = 22 },
+                    new() { Header = "Mã chi tiết", ValueSelector = row => ((TienDoCongViecItemViewModel)row).MaChiTietCV, Alignment = ExportColumnAlignment.Center, MinWidth = 10, MaxWidth = 13, ShowInPdf = false }
                 },
                 Rows = rows
             };

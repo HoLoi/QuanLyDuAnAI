@@ -42,7 +42,8 @@ namespace QuanLyDuAn.Controllers
         [HttpGet]
         public async Task<IActionResult> XuatFile(string? format, int? locMaDuAn, string? locTrangThai)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.NganSach.Xem))
                 return Forbid();
 
             var page = await _service.GetPageAsync(locMaDuAn, locTrangThai, paginate: false);
@@ -56,19 +57,29 @@ namespace QuanLyDuAn.Controllers
                 AppliedFiltersText = ExportSupport.BuildFiltersText(
                     ("Mã dự án", locMaDuAn?.ToString()),
                     ("Trạng thái", TrangThai.ToDisplay(locTrangThai))),
-                FileNamePrefix = "ngan-sach",
+                FileNamePrefix = "BaoCaoNganSach",
+                SheetName = "NganSach",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã ngân sách", ValueSelector = row => ((NganSachItemViewModel)row).MaNganSach.ToString() },
-                    new() { Header = "Dự án", ValueSelector = row => ((NganSachItemViewModel)row).TenDuAn },
-                    new() { Header = "Version", ValueSelector = row => ((NganSachItemViewModel)row).Version?.ToString() ?? string.Empty },
-                    new() { Header = "Số tiền ngân sách", ValueSelector = row => ExportSupport.FormatCurrency(((NganSachItemViewModel)row).SoTienNganSach) },
-                    new() { Header = "Ngày duyệt", ValueSelector = row => ExportSupport.FormatDateTime(((NganSachItemViewModel)row).NgayDuyetNganSach) },
-                    new() { Header = "Ngày cập nhật", ValueSelector = row => ExportSupport.FormatDateTime(((NganSachItemViewModel)row).NgayCapNhatNganSach) },
-                    new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((NganSachItemViewModel)row).TrangThaiNganSach) },
-                    new() { Header = "Người đề xuất", ValueSelector = row => ((NganSachItemViewModel)row).NguoiDungDeXuat },
-                    new() { Header = "Người duyệt", ValueSelector = row => ((NganSachItemViewModel)row).NguoiDungDuyet }
+                    new() { Header = "Dự án", ValueSelector = row => ((NganSachItemViewModel)row).TenDuAn, WrapText = true, MinWidth = 20, MaxWidth = 34, PdfRelativeWidth = 1.6f },
+                    new() { Header = "Phiên bản", ValueSelector = row => ((NganSachItemViewModel)row).Version, NumberFormat = "0", Alignment = ExportColumnAlignment.Center, MinWidth = 9, MaxWidth = 11 },
+                    new() { Header = "Số tiền ngân sách", ValueSelector = row => ((NganSachItemViewModel)row).SoTienNganSach, NumberFormat = "#,##0 \"VNĐ\"", Alignment = ExportColumnAlignment.Right, MinWidth = 18, MaxWidth = 24 },
+                    new() { Header = "Ngày duyệt", ValueSelector = row => ((NganSachItemViewModel)row).NgayDuyetNganSach, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Ngày cập nhật", ValueSelector = row => ((NganSachItemViewModel)row).NgayCapNhatNganSach, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
+                    new() { Header = "Trạng thái", ValueSelector = row => TrangThai.ToDisplay(((NganSachItemViewModel)row).TrangThaiNganSach), Alignment = ExportColumnAlignment.Center, MinWidth = 14, MaxWidth = 20 },
+                    new() { Header = "Người đề xuất", ValueSelector = row => ((NganSachItemViewModel)row).NguoiDungDeXuat, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Người duyệt", ValueSelector = row => ((NganSachItemViewModel)row).NguoiDungDuyet, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Mã ngân sách", ValueSelector = row => ((NganSachItemViewModel)row).MaNganSach, Alignment = ExportColumnAlignment.Center, MinWidth = 11, MaxWidth = 14, ShowInPdf = false }
+                },
+                Summaries = new List<ExportSummaryDefinition>
+                {
+                    new() { Label = "Tổng ngân sách", Value = page.TongNganSach, NumberFormat = "#,##0 \"VNĐ\"" },
+                    new() { Label = "Ngân sách đang hiệu lực", Value = page.TongNganSachDangHieuLuc, NumberFormat = "#,##0 \"VNĐ\"" },
+                    new() { Label = "Đã sử dụng", Value = page.TongDaSuDung, NumberFormat = "#,##0 \"VNĐ\"" },
+                    new() { Label = "Còn lại", Value = page.TongConLai, NumberFormat = "#,##0 \"VNĐ\"" }
                 },
                 Rows = rows
             };

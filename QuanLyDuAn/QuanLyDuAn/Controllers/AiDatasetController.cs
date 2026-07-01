@@ -101,9 +101,15 @@ namespace QuanLyDuAn.Controllers
         [HttpGet]
         public async Task<IActionResult> XuatFile(string? format, bool thieuDataset = false, CancellationToken cancellationToken = default)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile))
+            if (!await _permission.HasPermissionAsync(User, Permissions.ThongKe.XuatFile)
+                || !await _permission.HasPermissionAsync(User, Permissions.AI.Dataset))
             {
                 return Forbid();
+            }
+
+            if (_exportFileService.ParseFormat(format) == ExportFileFormat.Pdf)
+            {
+                return BadRequest("AI Dataset chỉ hỗ trợ xuất Excel và CSV.");
             }
 
             var rows = await _aiDatasetService.LayDatasetHopLeDeTrainAsync(cancellationToken);
@@ -115,37 +121,40 @@ namespace QuanLyDuAn.Controllers
                 ExportedAt = DateTime.Now,
                 ExportedBy = ExportSupport.ResolveExporterName(User),
                 AppliedFiltersText = ExportSupport.BuildFiltersText(
-                    ("Chỉ hiển thị thiếu dataset", thieuDataset ? "Có" : "Không"),
-                    ("Điều kiện", "LaDuAnTre=1 và có MaDMNguyenNhan")),
-                FileNamePrefix = "ai-dataset",
+                    ("Điều kiện", "Dự án trễ và đã có nguyên nhân xác nhận")),
+                FileNamePrefix = "AIDatasetHopLe",
+                SheetName = "AIDataset",
+                IncludeRowNumber = true,
+                PdfLandscape = true,
+                FreezeColumns = 2,
                 Format = _exportFileService.ParseFormat(format),
                 Columns = new List<ExportColumnDefinition>
                 {
-                    new() { Header = "Mã dự án", ValueSelector = row => ((AiDatasetRowViewModel)row).MaDuAn ?? string.Empty },
-                    new() { Header = "Số nhân viên", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoNhanVienDuAn) },
-                    new() { Header = "Tổng số công việc", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).TongSoCongViec) },
-                    new() { Header = "Số công việc trễ", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoCongViecTre) },
-                    new() { Header = "Tỷ lệ công việc trễ", ValueSelector = row => $"{ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).TyLeCongViecTre)}%" },
-                    new() { Header = "Chi phí dự kiến", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).ChiPhiDuKien) },
-                    new() { Header = "Chi phí thực tế", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).ChiPhiThucTe) },
-                    new() { Header = "Chênh lệch chi phí", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).ChenhLechChiPhi) },
-                    new() { Header = "Số lần thay đổi nhân sự", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoLanThayDoiNhanSu) },
-                    new() { Header = "Số lần thay đổi quản lý", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoLanThayDoiQuanLy) },
-                    new() { Header = "Số ngày trễ", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoNgayTreTienDo) },
-                    new() { Header = "ĐX công việc chờ duyệt", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoDeXuatCongViecChoDuyet) },
-                    new() { Header = "ĐX công việc bị từ chối", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoDeXuatCongViecBiTuChoi) },
-                    new() { Header = "TG duyệt công việc TB (ngày)", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).ThoiGianDuyetCongViecTrungBinh) },
-                    new() { Header = "ĐX ngân sách chờ duyệt", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoDeXuatNganSachChoDuyet) },
-                    new() { Header = "ĐX ngân sách bị từ chối", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoDeXuatNganSachBiTuChoi) },
-                    new() { Header = "TG duyệt ngân sách TB (ngày)", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).ThoiGianDuyetNganSachTrungBinh) },
-                    new() { Header = "BC tiến độ chờ duyệt", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoBaoCaoTienDoChoDuyet) },
-                    new() { Header = "BC tiến độ bị từ chối", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoBaoCaoTienDoBiTuChoi) },
-                    new() { Header = "BC tiến độ yêu cầu bổ sung", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoBaoCaoTienDoYeuCauBoSung) },
-                    new() { Header = "Tỷ lệ BC tiến độ bị từ chối", ValueSelector = row => $"{ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).TyLeBaoCaoTienDoBiTuChoi)}%" },
-                    new() { Header = "Số lần cập nhật tiến độ", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoLanCapNhatTienDo) },
-                    new() { Header = "Số ngày chậm cập nhật tiến độ", ValueSelector = row => ExportSupport.FormatNumber(((AiDatasetRowViewModel)row).SoNgayChamCapNhatTienDo) },
-                    new() { Header = "Là dự án trễ", ValueSelector = row => ((AiDatasetRowViewModel)row).LaDuAnTre == 1 ? "Có" : "Không" },
-                    new() { Header = "Mã nguyên nhân", ValueSelector = row => ((AiDatasetRowViewModel)row).MaDMNguyenNhan?.ToString() ?? string.Empty }
+                    new() { Header = "Mã dự án", ValueSelector = row => ((AiDatasetRowViewModel)row).MaDuAn, Alignment = ExportColumnAlignment.Center, MinWidth = 10, MaxWidth = 13 },
+                    new() { Header = "Số nhân viên", ValueSelector = row => ((AiDatasetRowViewModel)row).SoNhanVienDuAn, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Tổng số công việc", ValueSelector = row => ((AiDatasetRowViewModel)row).TongSoCongViec, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Số công việc trễ", ValueSelector = row => ((AiDatasetRowViewModel)row).SoCongViecTre, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Tỷ lệ công việc trễ", ValueSelector = row => ((AiDatasetRowViewModel)row).TyLeCongViecTre, NumberFormat = "0.##\"%\"", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Chi phí dự kiến", ValueSelector = row => ((AiDatasetRowViewModel)row).ChiPhiDuKien, NumberFormat = "#,##0 \"VNĐ\"", Alignment = ExportColumnAlignment.Right, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Chi phí thực tế", ValueSelector = row => ((AiDatasetRowViewModel)row).ChiPhiThucTe, NumberFormat = "#,##0 \"VNĐ\"", Alignment = ExportColumnAlignment.Right, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Chênh lệch chi phí", ValueSelector = row => ((AiDatasetRowViewModel)row).ChenhLechChiPhi, NumberFormat = "#,##0 \"VNĐ\"", Alignment = ExportColumnAlignment.Right, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Số lần thay đổi nhân sự", ValueSelector = row => ((AiDatasetRowViewModel)row).SoLanThayDoiNhanSu, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Số lần thay đổi quản lý", ValueSelector = row => ((AiDatasetRowViewModel)row).SoLanThayDoiQuanLy, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Số ngày trễ", ValueSelector = row => ((AiDatasetRowViewModel)row).SoNgayTreTienDo, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "ĐX công việc chờ duyệt", ValueSelector = row => ((AiDatasetRowViewModel)row).SoDeXuatCongViecChoDuyet, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "ĐX công việc bị từ chối", ValueSelector = row => ((AiDatasetRowViewModel)row).SoDeXuatCongViecBiTuChoi, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "TG duyệt công việc TB (ngày)", ValueSelector = row => ((AiDatasetRowViewModel)row).ThoiGianDuyetCongViecTrungBinh, NumberFormat = "0.00", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "ĐX ngân sách chờ duyệt", ValueSelector = row => ((AiDatasetRowViewModel)row).SoDeXuatNganSachChoDuyet, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "ĐX ngân sách bị từ chối", ValueSelector = row => ((AiDatasetRowViewModel)row).SoDeXuatNganSachBiTuChoi, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "TG duyệt ngân sách TB (ngày)", ValueSelector = row => ((AiDatasetRowViewModel)row).ThoiGianDuyetNganSachTrungBinh, NumberFormat = "0.00", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "BC tiến độ chờ duyệt", ValueSelector = row => ((AiDatasetRowViewModel)row).SoBaoCaoTienDoChoDuyet, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "BC tiến độ bị từ chối", ValueSelector = row => ((AiDatasetRowViewModel)row).SoBaoCaoTienDoBiTuChoi, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "BC tiến độ yêu cầu bổ sung", ValueSelector = row => ((AiDatasetRowViewModel)row).SoBaoCaoTienDoYeuCauBoSung, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Tỷ lệ BC tiến độ bị từ chối", ValueSelector = row => ((AiDatasetRowViewModel)row).TyLeBaoCaoTienDoBiTuChoi, NumberFormat = "0.##\"%\"", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Số lần cập nhật tiến độ", ValueSelector = row => ((AiDatasetRowViewModel)row).SoLanCapNhatTienDo, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Số ngày chậm cập nhật tiến độ", ValueSelector = row => ((AiDatasetRowViewModel)row).SoNgayChamCapNhatTienDo, NumberFormat = "0.##", Alignment = ExportColumnAlignment.Right },
+                    new() { Header = "Là dự án trễ", ValueSelector = row => ((AiDatasetRowViewModel)row).LaDuAnTre == 1 ? "Có" : "Không", Alignment = ExportColumnAlignment.Center },
+                    new() { Header = "Mã nguyên nhân", ValueSelector = row => ((AiDatasetRowViewModel)row).MaDMNguyenNhan, Alignment = ExportColumnAlignment.Center }
                 },
                 Rows = exportRows
             };

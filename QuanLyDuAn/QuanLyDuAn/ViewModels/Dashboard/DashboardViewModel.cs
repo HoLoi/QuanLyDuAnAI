@@ -25,6 +25,7 @@
         public List<string> TenDuAn { get; set; } = [];
         public List<int> PhanTramTienDo { get; set; } = [];
         public List<decimal> ChiPhiTheoDuAn { get; set; } = [];
+        public List<DashboardProjectTrackingItemViewModel> DuAnTheoDoi { get; set; } = [];
 
         public int DuAnKhoiTao { get; set; }
         public int DuAnDangThucHien { get; set; }
@@ -93,9 +94,20 @@
     public class DashboardBudgetOverrunItemViewModel
     {
         public string TenDuAn { get; set; } = string.Empty;
+        public string TenQuanLy { get; set; } = string.Empty;
         public decimal NganSach { get; set; }
         public decimal ChiPhi { get; set; }
         public decimal ChenhLech { get; set; }
+    }
+
+    public class DashboardProjectTrackingItemViewModel
+    {
+        public string TenDuAn { get; set; } = string.Empty;
+        public string TenQuanLy { get; set; } = string.Empty;
+        public int PhanTramTienDo { get; set; }
+        public decimal NganSach { get; set; }
+        public decimal ChiPhi { get; set; }
+        public decimal ChenhLech => ChiPhi - NganSach;
     }
 
     public class DashboardOverloadedEmployeeItemViewModel

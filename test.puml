@@ -1,0 +1,118 @@
+```plantuml
+@startuml
+skinparam ParticipantPadding 40
+skinparam DefaultFontSize 30
+skinparam SequenceMessageFontSize 30
+skinparam ParticipantFontSize 30
+skinparam ActorFontSize 30
+
+' title sd Quan ly du an
+
+actor ":QuanLyDuAn" as QuanLyDuAn
+boundary ":GiaoDien" as GiaoDien
+participant ":HeThongQuanLyDuAn" as HeThong
+database ":Database" as DB
+
+QuanLyDuAn -> GiaoDien: Mo man hinh quan ly du an
+
+GiaoDien -> HeThong: Gui yeu cau tai danh sach du an (xemDanhSachDuAn)
+
+activate HeThong
+HeThong -> DB: Lay danh sach du an theo quyen
+
+activate DB
+DB --> HeThong: Danh sach du an
+deactivate DB
+
+loop voi moi du an
+    HeThong -> DB: Tinh trang thai va thong ke du an
+    DB --> HeThong: Trang thai va thong ke
+end
+
+HeThong --> GiaoDien: Tra danh sach du an
+GiaoDien --> QuanLyDuAn: Hien thi danh sach du an
+
+alt tao du an moi
+    QuanLyDuAn -> GiaoDien: Nhap thong tin du an moi\n(tenDuAn, maLoaiDuAn, ngayBatDau, ngayKetThuc, moTa)
+    GiaoDien -> HeThong: Gui yeu cau tao du an (taoDuAn)
+    HeThong -> DB: Kiem tra loai du an va ngay bat dau
+    DB --> HeThong: Ket qua kiem tra hop le
+    HeThong -> DB: Luu du an moi
+    HeThong -> DB: Tao phong chat du an
+    HeThong -> DB: Ghi nhat ky tao du an
+    DB --> HeThong: Ket qua luu du an
+    HeThong --> GiaoDien: Tra ket qua tao du an thanh cong
+    GiaoDien --> QuanLyDuAn: Hien thi thong bao tao du an thanh cong
+else cap nhat du an
+    QuanLyDuAn -> GiaoDien: Nhap thong tin cap nhat du an\n(maDuAn, tenDuAn, trangThaiMoi, moTa, lyDo)
+    GiaoDien -> HeThong: Gui yeu cau cap nhat du an (capNhatDuAn)
+    HeThong -> DB: Kiem tra quan ly hien tai va trang thai du an
+    DB --> HeThong: Ket qua cho phep cap nhat
+    alt chuyen trang thai hop le
+        HeThong -> DB: Cap nhat du an
+        DB --> HeThong: Ket qua cap nhat
+        HeThong --> GiaoDien: Tra ket qua cap nhat thanh cong
+        GiaoDien --> QuanLyDuAn: Hien thi thong bao cap nhat thanh cong
+    else chuyen trang thai khong hop le
+        HeThong --> GiaoDien: Tra thong bao khong cho phep chuyen trang thai
+        GiaoDien --> QuanLyDuAn: Hien thi loi chuyen trang thai
+    end
+else xoa du an
+    QuanLyDuAn -> GiaoDien: Chon xoa du an\n(maDuAn)
+    GiaoDien -> HeThong: Gui yeu cau xoa du an (xoaDuAn)
+    HeThong -> DB: Kiem tra du an khoi tao va khong phat sinh du lieu
+    DB --> HeThong: Ket qua cho phep xoa
+    HeThong -> DB: Danh dau xoa du an
+    DB --> HeThong: Ket qua xoa du an
+    HeThong --> GiaoDien: Tra ket qua xoa du an
+    GiaoDien --> QuanLyDuAn: Hien thi thong bao xoa du an thanh cong
+else bat dau du an
+    QuanLyDuAn -> GiaoDien: Chon bat dau du an\n(maDuAn)
+    GiaoDien -> HeThong: Gui yeu cau bat dau du an (batDauDuAn)
+    HeThong -> DB: Kiem tra thanh vien va danh muc cong viec
+    DB --> HeThong: Ket qua du dieu kien bat dau
+    HeThong -> DB: Cap nhat trang thai dang thuc hien
+    DB --> HeThong: Ket qua cap nhat trang thai
+    HeThong --> GiaoDien: Tra ket qua bat dau du an
+    GiaoDien --> QuanLyDuAn: Hien thi thong bao bat dau du an thanh cong
+else yeu cau hoan thanh
+    QuanLyDuAn -> GiaoDien: Chon gui yeu cau hoan thanh\n(maDuAn)
+    GiaoDien -> HeThong: Gui yeu cau hoan thanh du an (yeuCauHoanThanh)
+    HeThong -> DB: Kiem tra dieu kien hoan thanh du an
+    DB --> HeThong: Ket qua du dieu kien gui yeu cau
+    HeThong -> DB: Cap nhat trang thai cho xac nhan hoan thanh
+    DB --> HeThong: Ket qua cap nhat trang thai
+    HeThong --> GiaoDien: Tra ket qua gui yeu cau hoan thanh
+    GiaoDien --> QuanLyDuAn: Hien thi thong bao gui yeu cau thanh cong
+else xac nhan hoan thanh
+    QuanLyDuAn -> GiaoDien: Chon xac nhan hoan thanh du an\n(maDuAn)
+    GiaoDien -> HeThong: Gui yeu cau xac nhan hoan thanh (xacNhanHoanThanh)
+    HeThong -> DB: Kiem tra trang thai cho xac nhan va dieu kien hoan thanh
+    DB --> HeThong: Ket qua du dieu kien xac nhan
+    HeThong -> DB: Cap nhat trang thai hoan thanh
+    DB --> HeThong: Ket qua cap nhat trang thai
+    HeThong --> GiaoDien: Tra ket qua xac nhan hoan thanh
+    GiaoDien --> QuanLyDuAn: Hien thi thong bao hoan thanh du an
+else tam dung du an
+    QuanLyDuAn -> GiaoDien: Nhap ly do tam dung\n(maDuAn, lyDoTamDung)
+    GiaoDien -> HeThong: Gui yeu cau tam dung du an (tamDungDuAn)
+    HeThong -> DB: Kiem tra ly do tam dung
+    DB --> HeThong: Ket qua hop le
+    HeThong -> DB: Cap nhat trang thai tam dung va ghi chu
+    DB --> HeThong: Ket qua cap nhat trang thai
+    HeThong --> GiaoDien: Tra ket qua tam dung du an
+    GiaoDien --> QuanLyDuAn: Hien thi thong bao tam dung du an
+else mo lai du an
+    QuanLyDuAn -> GiaoDien: Nhap ly do mo lai\n(maDuAn, lyDoMoLai)
+    GiaoDien -> HeThong: Gui yeu cau mo lai du an (moLaiDuAn)
+    HeThong -> DB: Kiem tra du an dang hoan thanh va ly do mo lai
+    DB --> HeThong: Ket qua hop le
+    HeThong -> DB: Cap nhat trang thai dang thuc hien va ghi nhat ky
+    DB --> HeThong: Ket qua cap nhat trang thai
+    HeThong --> GiaoDien: Tra ket qua mo lai du an
+    GiaoDien --> QuanLyDuAn: Hien thi thong bao mo lai du an
+end
+
+deactivate HeThong
+@enduml
+```

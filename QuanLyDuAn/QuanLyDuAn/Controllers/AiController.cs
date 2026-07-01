@@ -54,16 +54,21 @@ namespace QuanLyDuAn.Controllers
             var request = new ExportFileRequest
             {
                 ReportTitle = "Báo cáo tổng quan AI",
-                ExportedBy = User?.Identity?.Name,
-                AppliedFiltersText = "Dữ liệu theo phạm vi quyền xem hiện tại.",
-                Format = ParseExportFormat(format),
-                FileNamePrefix = "bao-cao-ai-dashboard",
+                ExportedAt = DateTime.Now,
+                ExportedBy = ExportSupport.ResolveExporterName(User),
+                DataScopeText = "Theo phạm vi dự án được phép xem; AI chỉ hỗ trợ phân tích, không thay thế quyết định nghiệp vụ",
+                Format = _exportFileService.ParseFormat(format),
+                FileNamePrefix = "BaoCaoTongQuanAI",
+                SheetName = "TongQuanAI",
+                PdfLandscape = true,
                 Rows = rows,
                 Columns =
                 [
-                    new ExportColumnDefinition { Header = "Nhóm", ValueSelector = x => ((AiDashboardExportRow)x).Nhom },
-                    new ExportColumnDefinition { Header = "Chỉ tiêu", ValueSelector = x => ((AiDashboardExportRow)x).ChiTieu },
-                    new ExportColumnDefinition { Header = "Giá trị", ValueSelector = x => ((AiDashboardExportRow)x).GiaTri }
+                    new ExportColumnDefinition { Header = "Nhóm", ValueSelector = x => ((AiDashboardExportRow)x).Nhom, MinWidth = 18, MaxWidth = 28 },
+                    new ExportColumnDefinition { Header = "Đối tượng", ValueSelector = x => ((AiDashboardExportRow)x).DoiTuong, MinWidth = 18, MaxWidth = 30 },
+                    new ExportColumnDefinition { Header = "Chỉ tiêu / Nguyên nhân", ValueSelector = x => ((AiDashboardExportRow)x).ChiTieu, WrapText = true, MinWidth = 22, MaxWidth = 38, PdfRelativeWidth = 1.7f },
+                    new ExportColumnDefinition { Header = "Giá trị", ValueSelector = x => ((AiDashboardExportRow)x).GiaTri, NumberFormat = "#,##0.##", Alignment = ExportColumnAlignment.Right },
+                    new ExportColumnDefinition { Header = "Đơn vị", ValueSelector = x => ((AiDashboardExportRow)x).DonVi, Alignment = ExportColumnAlignment.Center }
                 ]
             };
             var exported = _exportFileService.Export(request);
@@ -340,7 +345,11 @@ namespace QuanLyDuAn.Controllers
 
             var json = JsonSerializer.Serialize(result.ChiTietModel, new JsonSerializerOptions { WriteIndented = true });
             var bytes = Encoding.UTF8.GetBytes(json);
-            return File(bytes, "application/json", $"metadata-{modelFile}.json");
+            var safeModelName = ExportSupport.NormalizeFileNamePart(
+                Path.GetFileNameWithoutExtension(modelFile),
+                "Model");
+            var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            return File(bytes, "application/json", $"MetadataModel_{safeModelName}_{timestamp}.json");
         }
 
         private static string BuildDetailedWarning<T>(AiOperationResultViewModel<T> result)
@@ -358,34 +367,29 @@ namespace QuanLyDuAn.Controllers
         {
             var rows = new List<object>
             {
-                new AiDashboardExportRow("Tổng quan", "Tổng lượt phân tích AI", vm.TongLanPhanTichTrongDb.ToString("N0")),
-                new AiDashboardExportRow("Tổng quan", "Tổng xác nhận nguyên nhân", vm.TongXacNhanNguyenNhanTrongDb.ToString("N0")),
-                new AiDashboardExportRow("Tổng quan", "Tỷ lệ xác nhận AI", $"{vm.TyLeXacNhanAi:0.##}%"),
-                new AiDashboardExportRow("Dataset", "Tổng dòng dataset", vm.TongDongDataset.ToString("N0")),
-                new AiDashboardExportRow("Dataset", "Dòng đủ điều kiện train", vm.TongDongDatasetHopLeTrain.ToString("N0")),
-                new AiDashboardExportRow("Dataset", "Dự án trễ chưa xác nhận", vm.SoDuAnTreChuaXacNhan.ToString("N0"))
+                new AiDashboardExportRow("Tổng quan", null, "Tổng lượt phân tích AI", vm.TongLanPhanTichTrongDb),
+                new AiDashboardExportRow("Tổng quan", null, "Tổng xác nhận nguyên nhân", vm.TongXacNhanNguyenNhanTrongDb),
+                new AiDashboardExportRow("Tỷ lệ xác nhận", null, "Tỷ lệ xác nhận AI", vm.TyLeXacNhanAi, "%"),
+                new AiDashboardExportRow("Dataset", null, "Tổng dòng dataset", vm.TongDongDataset),
+                new AiDashboardExportRow("Dataset", null, "Dòng đủ điều kiện train", vm.TongDongDatasetHopLeTrain),
+                new AiDashboardExportRow("Dataset", null, "Dự án trễ chưa xác nhận", vm.SoDuAnTreChuaXacNhan)
             };
 
             rows.AddRange(vm.NguyenNhanPhoBien.Select(x =>
-                (object)new AiDashboardExportRow("Nguyên nhân phổ biến", x.NguyenNhan, $"{x.TyLePhanTram}%")));
+                (object)new AiDashboardExportRow("Nguyên nhân phổ biến", null, x.NguyenNhan, x.TyLePhanTram, "%")));
             rows.AddRange(vm.NguyenNhanTheoQuanLy.Select(x =>
-                (object)new AiDashboardExportRow("Nguyên nhân theo quản lý", $"{x.Nhom} - {x.NguyenNhan}", x.SoLan.ToString("N0"))));
+                (object)new AiDashboardExportRow("Theo quản lý", x.Nhom, x.NguyenNhan, x.SoLan)));
             rows.AddRange(vm.NguyenNhanTheoTeam.Select(x =>
-                (object)new AiDashboardExportRow("Nguyên nhân theo team", $"{x.Nhom} - {x.NguyenNhan}", x.SoLan.ToString("N0"))));
+                (object)new AiDashboardExportRow("Theo team", x.Nhom, x.NguyenNhan, x.SoLan)));
 
             return rows;
         }
 
-        private static ExportFileFormat ParseExportFormat(string? format)
-        {
-            return format?.Trim().ToLowerInvariant() switch
-            {
-                "pdf" => ExportFileFormat.Pdf,
-                "csv" => ExportFileFormat.Csv,
-                _ => ExportFileFormat.Excel
-            };
-        }
-
-        private sealed record AiDashboardExportRow(string Nhom, string ChiTieu, string GiaTri);
+        private sealed record AiDashboardExportRow(
+            string Nhom,
+            string? DoiTuong,
+            string ChiTieu,
+            object? GiaTri,
+            string? DonVi = null);
     }
 }

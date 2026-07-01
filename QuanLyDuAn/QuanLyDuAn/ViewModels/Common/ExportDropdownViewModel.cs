@@ -4,6 +4,7 @@ namespace QuanLyDuAn.ViewModels.Common
     {
         public string Action { get; set; } = "XuatFile";
         public Dictionary<string, string?> RouteValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public bool HienThiPdf { get; set; } = true;
         public bool HienThiCsv { get; set; } = true;
     }
 }
