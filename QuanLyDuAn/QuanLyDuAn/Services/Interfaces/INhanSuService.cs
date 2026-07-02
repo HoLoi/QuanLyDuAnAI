@@ -17,7 +17,7 @@ namespace QuanLyDuAn.Services.Interfaces
         Task<List<VaiTroHeThongOptionViewModel>> GetVaiTroHeThongOptionsAsync();
         Task<string?> SaveAsync(NhanSuCreateUpdateViewModel model, bool laAdminDangThaoTac);
         Task<string?> GuiLaiEmailKichHoatAsync(int id);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(int id, int maNguoiDungDangThaoTac);
         Task LockAccountAsync(int id, int maNguoiDungDangThaoTac);
         Task UnlockAccountAsync(int id);
     }

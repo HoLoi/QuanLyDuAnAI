@@ -1,7 +1,7 @@
-﻿@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
 
 <div class="chat-room-list">
-    <form asp-action="Index" method="get" class="chat-room-search">
+    <form asp-action="Index" method="get" class="chat-room-search" id="chat-room-search-form">
         <input type="text"
                name="tuKhoa"
                value="@Model.TuKhoa"
@@ -13,57 +13,25 @@
         <button type="submit" class="btn btn-sm btn-outline-primary btn-action btn-filter-apply">Lọc</button>
     </form>
 
-    @if (!Model.DanhSachPhong.Any())
-    {
-        <div class="chat-room-empty app-empty-state">Bạn chưa tham gia dự án nào có phòng chat.</div>
-    }
-    else
-    {
-        <div class="chat-room-items">
-            @foreach (var item in Model.DanhSachPhong)
-            {
-                var activeClass = item.DangChon ? "active" : string.Empty;
-
-                <a class="chat-room-item @activeClass"
-                   asp-controller="ChatDuAn"
-                   asp-action="Index"
-                   asp-route-maDuAn="@item.MaDuAn"
-                   asp-route-tuKhoa="@Model.TuKhoa">
-                    <div class="room-card-header">
-                        <div class="room-title">@item.TenDuAn</div>
-                        @if (!string.IsNullOrWhiteSpace(item.TrangThaiDuAn))
-                        {
-                            <span class="room-status">@item.TrangThaiDuAn</span>
-                        }
-                    </div>
-
-                    <div class="room-subtitle">@item.TenPhong</div>
-
-                    <div class="room-latest">
-                        @(string.IsNullOrWhiteSpace(item.TinNhanMoiNhat) ? "Chưa có tin nhắn" : item.TinNhanMoiNhat)
-                    </div>
-
-                    <div class="room-meta">
-                        <span class="meta-pill">
-                            <i class="bi bi-people"></i>
-                            @item.SoThanhVien thành viên
-                        </span>
-
-                        <span class="meta-pill">
-                            <i class="bi bi-chat-dots"></i>
-                            @item.SoTinNhan tin
-                        </span>
-
-                        @if (item.ThoiGianTinNhanMoiNhat.HasValue)
-                        {
-                            <span class="meta-pill">
-                                <i class="bi bi-clock"></i>
-                                @item.ThoiGianTinNhanMoiNhat.Value.ToString("dd/MM/yyyy HH:mm")
-                            </span>
-                        }
-                    </div>
-                </a>
-            }
+    <div class="chat-room-items" id="chat-room-items">
+        @await Html.PartialAsync("_RoomBatch", Model.PhongBatch)
+        @if (!Model.PhongBatch.DanhSachPhong.Any())
+        {
+            <div class="chat-room-empty app-empty-state" id="chat-room-empty">
+                Không có phòng phù hợp.
+            </div>
+        }
+        <div class="chat-room-load">
+            <button type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    id="chat-load-more-rooms"
+                    @if (!Model.PhongBatch.HasMore)
+                    {
+                        <text>hidden</text>
+                    }>
+                Tải thêm phòng
+            </button>
+            <span class="chat-request-status" id="chat-room-status" aria-live="polite"></span>
         </div>
-    }
+    </div>
 </div>

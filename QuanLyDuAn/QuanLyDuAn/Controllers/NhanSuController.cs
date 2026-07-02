@@ -183,8 +183,14 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                await _service.DeleteAsync(maNguoiDung);
-                TempData["Success"] = "Đã xóa nhân sự";
+                var maNguoiDungDangThaoTac = GetCurrentMaNguoiDung();
+                if (!maNguoiDungDangThaoTac.HasValue)
+                {
+                    throw new Exception("Không xác định được tài khoản đang đăng nhập.");
+                }
+
+                await _service.DeleteAsync(maNguoiDung, maNguoiDungDangThaoTac.Value);
+                TempData["Success"] = "Đã xóa nhân sự và vô hiệu hóa tài khoản đăng nhập.";
             }
             catch (Exception ex)
             {

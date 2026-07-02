@@ -9,6 +9,21 @@
     gap: 0.85rem;
 }
 
+.chat-message-batch {
+    display: contents;
+}
+
+#chat-message-items {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.chat-message-load {
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+}
+
 .chat-message-list::-webkit-scrollbar {
     width: 8px;
 }
@@ -34,4 +49,18 @@
 .chat-message-empty-icon {
     font-size: 1.2rem;
     color: #5f63ff;
+}
+
+.chat-new-message-notice {
+    position: sticky;
+    bottom: 0.25rem;
+    z-index: 2;
+    justify-self: center;
+    border: 0;
+    border-radius: 999px;
+    padding: 0.4rem 0.75rem;
+    background: #5f63ff;
+    color: #fff;
+    font-size: 0.78rem;
+    box-shadow: 0 0.35rem 1rem rgba(67, 89, 113, 0.2);
 }

@@ -5,6 +5,8 @@ namespace QuanLyDuAn.ViewModels.ChatDuAn
         public List<ChatDuAnPhongItemViewModel> DanhSachPhong { get; set; } = new();
         public ChatDuAnPhongItemViewModel? PhongDangChon { get; set; }
         public List<ChatDuAnTinNhanItemViewModel> DanhSachTinNhan { get; set; } = new();
+        public ChatDuAnPhongBatchViewModel PhongBatch { get; set; } = new();
+        public ChatDuAnTinNhanBatchViewModel TinNhanBatch { get; set; } = new();
         public ChatDuAnGuiTinNhanViewModel Form { get; set; } = new();
 
         public string? TuKhoa { get; set; }

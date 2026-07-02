@@ -1,0 +1,12 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnTinNhanBatchViewModel
+
+<div class="chat-message-batch"
+     data-room-id="@Model.MaPhongChat"
+     data-has-more="@Model.HasMore.ToString().ToLowerInvariant()"
+     data-cursor-time="@(Model.CursorThoiGianGui?.ToString("O"))"
+     data-cursor-message-id="@Model.CursorMaTinNhan">
+    @foreach (var item in Model.DanhSachTinNhan)
+    {
+        @await Html.PartialAsync("_MessageItem", item)
+    }
+</div>

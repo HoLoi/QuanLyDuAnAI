@@ -10,6 +10,12 @@ namespace QuanLyDuAn.Services.Implementations;
 
 public class PhanQuyenService : IPhanQuyenService
 {
+    private static readonly HashSet<string> LegacyPermissionsKhongCapMoi = new(StringComparer.OrdinalIgnoreCase)
+    {
+        Permissions.ChiPhi.Them,
+        Permissions.ChiPhi.Sua
+    };
+
     private readonly QuanLyDuAnDbContext _db;
     private readonly IPermissionDependencyProvider _permissionDependencyProvider;
 
@@ -103,6 +109,9 @@ public class PhanQuyenService : IPhanQuyenService
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var enrichedPermissions = permissionRows
+            .Where(permission =>
+                string.IsNullOrWhiteSpace(permission.TenDanhMucQuyen)
+                || !LegacyPermissionsKhongCapMoi.Contains(permission.TenDanhMucQuyen))
             .Select(permission =>
             {
                 var permissionName = permission.TenDanhMucQuyen ?? $"Quyen {permission.MaDanhMucQuyen}";
@@ -260,8 +269,15 @@ public class PhanQuyenService : IPhanQuyenService
             .Where(x => x.Asp_Id == selectedRoleId)
             .ToListAsync(cancellationToken);
 
+        var legacyPermissionIds = allPermissions
+            .Where(x => !string.IsNullOrWhiteSpace(x.TenDanhMucQuyen)
+                        && LegacyPermissionsKhongCapMoi.Contains(x.TenDanhMucQuyen))
+            .Select(x => x.MaDanhMucQuyen)
+            .ToHashSet();
+
         var claimToRemove = currentClaims
-            .Where(x => !permissionSet.Contains(x.MaDanhMucQuyen))
+            .Where(x => !permissionSet.Contains(x.MaDanhMucQuyen)
+                        && !legacyPermissionIds.Contains(x.MaDanhMucQuyen))
             .ToList();
 
         if (claimToRemove.Count > 0)

@@ -1,0 +1,11 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPhongBatchViewModel
+
+<div class="chat-room-batch"
+     data-has-more="@Model.HasMore.ToString().ToLowerInvariant()"
+     data-room-count="@Model.SoLuongPhong"
+     data-next-room-id="@Model.NextRoomId">
+    @foreach (var item in Model.DanhSachPhong)
+    {
+        @await Html.PartialAsync("_RoomItem", item)
+    }
+</div>

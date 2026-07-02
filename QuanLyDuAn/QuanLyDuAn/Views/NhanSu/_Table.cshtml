@@ -49,9 +49,11 @@
                         <a asp-action="Sua" asp-route-id="@ns.MaNguoiDung" class="btn-action btn-subtle">Sửa</a>
                     }
 
-                    @if (permissions.Contains(Permissions.NhanSu.Xoa))
+                    @if (permissions.Contains(Permissions.NhanSu.Xoa) && ns.MaNguoiDung != maNguoiDungHienTai)
                     {
-                        <form asp-action="XoaNhanSu" method="post">
+                        <form asp-action="XoaNhanSu"
+                              method="post"
+                              data-confirm-first="Bạn có chắc chắn muốn xóa nhân sự này? Hồ sơ sẽ được xóa khỏi danh sách hoạt động và tài khoản sẽ không thể đăng nhập.">
                             <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
                             <button type="submit" class="btn-action btn-danger-soft">Xóa</button>
                         </form>
@@ -71,7 +73,9 @@
                     }
                     else if (ns.CoTaiKhoan && permissions.Contains(Permissions.NhanSu.Khoa) && !ns.TaiKhoanBiKhoa)
                     {
-                        <form asp-action="KhoaTaiKhoan" method="post">
+                        <form asp-action="KhoaTaiKhoan"
+                              method="post"
+                              data-confirm-first="Bạn có chắc chắn muốn khóa tài khoản này? Người dùng sẽ tạm thời không thể đăng nhập.">
                             <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />
                             <button type="submit" class="btn-action btn-danger-soft">Khóa</button>
                         </form>

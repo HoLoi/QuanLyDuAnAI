@@ -1,9 +1,9 @@
 # KIỂM TRA TỔNG QUÁT NGHIỆP VỤ HỆ THỐNG
 
-> **Trạng thái tài liệu:** AS-IS theo source tại ngày 02/07/2026.  
+> **Trạng thái tài liệu:** AS-IS sau đợt hoàn thiện nghiệp vụ nhân sự/chi phí ngày 02/07/2026.  
 > **Phạm vi:** `QuanLyDuAn/QuanLyDuAn/`, `QuanLyDuAnAIService/`, `README.md` và các tài liệu trong `docs/`.  
 > **Nguyên tắc:** source hiện tại là nguồn sự thật; không suy luận từ tên Controller hoặc tài liệu cũ.  
-> **Phạm vi thay đổi:** chỉ ghi đè tài liệu này; không sửa source, CSDL hoặc migration.
+> **Phạm vi thay đổi đợt hiện tại:** source nghiệp vụ nhân sự/phân quyền liên quan, tài liệu này và README; không sửa CSDL hoặc migration.
 
 ---
 
@@ -121,7 +121,7 @@ Không có `ChiPhiController` và `NhatKyController`; điều này không đồn
 
 | Chức năng | AS-IS | File/hàm |
 |---|---|---|
-| Login | Tra `Aspnetusers`, kiểm khóa, `EmailConfirmed`, hash mật khẩu; tạo role/permission claim và cookie | `AccountService.AuthenticateAsync`, `AccountController.Login` |
+| Login | Tra `Aspnetusers` kèm hồ sơ `NguoiDung`; từ chối hồ sơ thiếu/đã soft-delete; kiểm khóa, `EmailConfirmed`, hash mật khẩu; tạo role/permission claim và cookie | `AccountService.AuthenticateAsync`, `AccountController.Login` |
 | Logout | POST, `[Authorize]`, có anti-forgery | `AccountController.Logout` |
 | Kích hoạt | Token riêng trong `AspNetUserTokens`; hết hạn theo `AccountActivation:TokenLifetimeHours`; đặt mật khẩu và xác nhận email | `AccountService.TaoFormKichHoatAsync`, `KichHoatTaiKhoanAsync` |
 | Gửi lại kích hoạt | Cooldown cấu hình mặc định 60 giây, transaction `Serializable`, hoàn tác token mới nếu SMTP lỗi | `NhanSuService.GuiLaiEmailKichHoatAsync` |
@@ -137,21 +137,21 @@ Không có `ChiPhiController` và `NhatKyController`; điều này không đồn
 - `AuthenticateAsync` đọc `LockoutEnd` nhưng không tăng `AccessFailedCount` và không tự đặt lockout khi sai mật khẩu.
 - Không đăng ký `CookieAuthenticationEvents.OnValidatePrincipal`; `SecurityStamp` có được đổi khi khóa/reset nhưng không được so sánh mỗi request.
 - Permission/role được nạp vào cookie lúc login. `PhanQuyenService.GetGrantedPermissionNamesAsync` chỉ đọc `ClaimsPrincipal`; không truy vấn claim role từ DB mỗi request.
-- Login không join/kiểm `NguoiDung.IsDeleted`. Đây là khác biệt quan trọng với tài liệu cũ.
+- Login join `NguoiDung` theo `MaNguoiDung` và từ chối nếu hồ sơ không tồn tại hoặc `IsDeleted=true`.
 
 ### 3.3 Xóa và khóa nhân sự
 
 | Kiểm tra | Xóa | Khóa |
 |---|---|---|
 | Permission Controller | `NhanSu.Xoa` | `NhanSu.Khoa` |
-| UI | Nút đúng permission; nút khóa ẩn với chính mình | `_Table.cshtml` |
-| Tự thao tác | Backend xóa **không** nhận ID người thao tác | Backend chặn `id == currentUserId` |
-| Admin cuối cùng | Không kiểm khi xóa | Đếm trong transaction `Serializable`, chặn còn ≤1 Admin active |
+| UI | Nút xóa dùng `NhanSu.Xoa`; nút xóa/khóa đều ẩn với chính mình; thông báo xác nhận phân biệt rõ | `_Table.cshtml` |
+| Tự thao tác | Backend nhận ID người thao tác và chặn trong transaction | Backend chặn `id == currentUserId` |
+| Admin cuối cùng | Đếm trong transaction `Serializable`, chặn còn ≤1 Admin active | Đếm trong transaction `Serializable`, chặn còn ≤1 Admin active |
 | Giới hạn Admin | Tối đa 3 khi tạo/đổi role | `NhanSuService.MaxAdminCount=3` |
 | Đang quản lý dự án/leader/team/dự án | Chặn xóa | Chặn quản lý dự án/leader; task chưa hoàn thành chỉ log cảnh báo |
-| Kiểu xóa | `NguoiDung.IsDeleted=true`; không xóa `Aspnetusers`, role/claim | `LockoutEnd=UtcNow+100 năm`, đổi `SecurityStamp` |
+| Kiểu xóa | `NguoiDung.IsDeleted=true`, ghi `DeletedAt/DeletedBy`; khóa Identity 100 năm và đổi `SecurityStamp`; không xóa `Aspnetusers`, role/claim | Không xóa hồ sơ; `LockoutEnd=UtcNow+100 năm`, đổi `SecurityStamp`; có thể mở khóa |
 
-Kết luận: chống tự khóa và khóa Admin cuối cùng đã có cả backend. Chống tự xóa/xóa Admin cuối cùng chưa có; tài khoản Identity của hồ sơ soft-delete vẫn tồn tại.
+Kết luận: khóa là tạm thời và có thể mở lại; xóa là soft-delete hồ sơ, không xuất hiện trong danh sách hoạt động và không thể phục hồi bằng action mở khóa. Cả hai luồng đều chặn tự thao tác và Admin hoạt động cuối cùng tại backend.
 
 ---
 
@@ -171,7 +171,7 @@ Kết luận: chống tự khóa và khóa Admin cuối cùng đã có cả back
 | Role | Số permission seed tối thiểu | Nhóm chính |
 |---|---:|---|
 | Admin | 32 | Nhân sự, phân quyền, chức danh, team, duyệt đổi QL, thống kê, nhật ký, xem chat, duyệt đánh giá, AI dataset/train/dashboard |
-| Manager | 47 | Dự án, staffing, danh mục/công việc, duyệt, ngân sách/chi phí, chat, đánh giá, AI phân tích/xác nhận |
+| Manager | 45 | Dự án, staffing, danh mục/công việc, duyệt, xem ngân sách/chi phí, chat, đánh giá, AI phân tích/xác nhận |
 | Employee | 22 | Xem dự án/công việc, đề xuất, chi tiết/phân công theo scope, cập nhật tiến độ, chat, thống kê, xem đánh giá |
 
 Sau seed, `DamBaoRoleKhongCoQuyenAsync` còn loại các permission bị cấm theo `PermissionDependencyProvider.GetDeniedPermissionsForRole`. Do đó bảng trên là danh sách đầu vào tối thiểu, không phải lời khẳng định mọi claim luôn còn lại nếu rule denied thay đổi.
@@ -182,9 +182,9 @@ Sau seed, `DamBaoRoleKhongCoQuyenAsync` còn loại các permission bị cấm t
 |---|---|
 | Dùng trực tiếp ở Controller | Hầu hết nhóm: Thống kê, Nhân sự, Phân quyền, Chức danh, Team, Dự án, Công việc, Tiến độ, Đề xuất/Duyệt, Ngân sách, Đánh giá, Chat, AI |
 | Dùng gián tiếp ở View/service | `ChiPhi.Xem` (Dashboard và `DuAn/Details`); `NhatKy.Xem` (layout/tab hoạt động); `DuyetDeXuatCongViec.Duyet`, `TienDo.Duyet` còn điều khiển workflow xác nhận/mở lại |
-| Chưa có action thực thi tương ứng | `ChiPhi.Them`, `ChiPhi.Sua` chỉ xuất hiện trong seed/permission definition |
-| Tương thích cũ | `AI.DuDoan` alias, không tạo giá trị claim mới |
-| Dư thừa đã chứng minh | Chưa đủ cơ sở gọi permission nào “dư thừa”; `ChiPhi.Them/Sua` là điểm nghiệp vụ cần thống nhất |
+| Permission tương thích cũ | `ChiPhi.Them`, `ChiPhi.Sua`: giữ constant/danh mục và claim đã có nhưng không seed mới cho role, không hiển thị để cấp mới, không bị xóa khi lưu role |
+| Tương thích cũ khác | `AI.DuDoan` alias, không tạo giá trị claim mới |
+| Nghiệp vụ cuối cùng | `ChiPhi.Xem` tiếp tục dùng; chi phí chỉ sinh từ đề xuất công việc được Manager duyệt, không có CRUD trực tiếp |
 
 Dashboard không trỏ tới `ChiPhiController`: các khối chi phí/ngân sách trỏ về module `NganSach`/chi tiết dự án. Vì vậy kết luận cũ “link chết vì không có Controller cùng tên” bị loại.
 
@@ -213,7 +213,7 @@ AS-IS nhất quán: Admin có claim xem để tương thích/menu nhưng **khôn
 
 | Thao tác | View | Controller | Service: role/scope/trạng thái | Gọi URL trực tiếp |
 |---|---|---|---|---|
-| Xóa nhân sự | `NhanSu.Xoa` | `NhanSu.Xoa` | Ràng buộc dự án/team/phân công | Bị kiểm permission và constraint; còn KT-05 |
+| Xóa nhân sự | `NhanSu.Xoa`, ẩn với chính mình | `NhanSu.Xoa` | Serializable; chặn self/Admin cuối; ràng buộc dự án/team/phân công; soft-delete + khóa Identity | Bị kiểm đầy đủ |
 | Khóa/mở khóa | `NhanSu.Khoa/MoKhoa` | Cùng permission | Chặn tự khóa, Admin cuối, manager/leader | Bị kiểm |
 | Xóa dự án | `DuAn.Xoa` | `DuAn.Xoa` | Manager/scope và ràng buộc dữ liệu | Bị kiểm |
 | Tạm dừng/mở lại/xác nhận hoàn thành | `DuAn.Sua` hoặc cờ workflow | Controller + permission | `DuAnService.CheckManagerPermissionAsync`, trạng thái nguồn | Bị kiểm |
@@ -453,7 +453,9 @@ Kết luận kiến trúc AI phù hợp vai trò hỗ trợ, không tự thay đ
 
 ## 11. Danh sách phát hiện chuẩn hóa
 
-### KT-01: Hồ sơ nhân sự đã soft-delete vẫn có thể đăng nhập bằng Identity account
+### KT-01: Hồ sơ nhân sự đã soft-delete vẫn có thể đăng nhập bằng Identity account — Đã khắc phục
+
+* **Trạng thái:** Đã khắc phục trong source ngày 02/07/2026.
 
 * **Loại phát hiện:** A
 * **Mức độ:** Cao
@@ -464,11 +466,11 @@ Kết luận kiến trúc AI phù hợp vai trò hỗ trợ, không tự thay đ
 * **Luồng nghiệp vụ:** Xóa nhân sự → chỉ đặt `NguoiDung.IsDeleted` → Identity account/role còn nguyên → login chỉ truy vấn `Aspnetusers`.
 * **Bằng chứng source:** `DeleteAsync` không khóa/xóa `Aspnetusers`; `AuthenticateAsync` không join `NguoiDung` và không kiểm `IsDeleted`.
 * **Cách tái hiện:** Tạo nhân sự active không còn ràng buộc dự án/team; xóa; đăng xuất; đăng nhập lại bằng credential cũ.
-* **Kết quả hiện tại:** Authentication có thể thành công và phát cookie claim cũ.
+* **Kết quả hiện tại:** `AuthenticateAsync` bắt buộc join hồ sơ còn hoạt động; luồng xóa đồng thời khóa Identity, đổi `SecurityStamp`.
 * **Kết quả mong đợi:** Hồ sơ đã xóa không được xác thực.
 * **Ảnh hưởng:** Tài khoản bị “xóa” vẫn truy cập endpoint theo claim/scope còn hiệu lực.
 * **Nguyên nhân:** Soft delete hồ sơ tách rời lifecycle Identity.
-* **Hướng xử lý đề xuất:** Khi xóa phải vô hiệu hóa Identity và `AuthenticateAsync` phải kiểm hồ sơ active; thống nhất cleanup role/claim.
+* **Hướng xử lý đề xuất:** Đã thực hiện; role/claim cũ được giữ để bảo toàn lịch sử.
 * **Có cần sửa CSDL không:** Không.
 
 ### KT-02: 55 POST không được server kiểm anti-forgery
@@ -525,7 +527,9 @@ Kết luận kiến trúc AI phù hợp vai trò hỗ trợ, không tự thay đ
 * **Hướng xử lý đề xuất:** Thêm rate limiting và cập nhật lockout atomically, tránh lộ tồn tại tài khoản.
 * **Có cần sửa CSDL không:** Không.
 
-### KT-05: Xóa nhân sự không chặn tự xóa hoặc xóa Admin cuối cùng
+### KT-05: Xóa nhân sự không chặn tự xóa hoặc xóa Admin cuối cùng — Đã khắc phục
+
+* **Trạng thái:** Đã khắc phục trong source ngày 02/07/2026.
 
 * **Loại phát hiện:** A
 * **Mức độ:** Cao
@@ -536,11 +540,11 @@ Kết luận kiến trúc AI phù hợp vai trò hỗ trợ, không tự thay đ
 * **Luồng nghiệp vụ:** User có `NhanSu.Xoa` POST ID chính mình/Admin cuối → service chỉ kiểm quan hệ dự án/team/task → soft-delete.
 * **Bằng chứng source:** Không truyền current user vào `DeleteAsync`; không đếm Admin trong đường xóa. Các chặn tương ứng chỉ có ở `LockAccountAsync`.
 * **Cách tái hiện:** Dùng Admin cuối không còn quan hệ nghiệp vụ, POST xóa chính hồ sơ đó.
-* **Kết quả hiện tại:** Điều kiện backend cho phép tới `IsDeleted=true`.
+* **Kết quả hiện tại:** `DeleteAsync(id, currentUserId)` chạy trong transaction `Serializable`, tải lại hồ sơ, chặn self/Admin active cuối, giữ constraint cũ, soft-delete và khóa Identity trong cùng commit.
 * **Kết quả mong đợi:** Chặn tự xóa và đảm bảo còn ít nhất một Admin active.
 * **Ảnh hưởng:** Mất tài khoản quản trị khả dụng; kết hợp KT-01 tạo trạng thái “đã xóa nhưng vẫn login”.
 * **Nguyên nhân:** Rule khóa không được áp cho rule xóa.
-* **Hướng xử lý đề xuất:** Dùng transaction `Serializable`, current user ID và kiểm Admin active giống luồng khóa.
+* **Hướng xử lý đề xuất:** Đã thực hiện và tái sử dụng helper đếm Admin active cho cả khóa/xóa.
 * **Có cần sửa CSDL không:** Không.
 
 ### KT-06: Cookie không tự thu hồi khi khóa, xóa hoặc đổi permission/role
@@ -633,7 +637,9 @@ Kết luận kiến trúc AI phù hợp vai trò hỗ trợ, không tự thay đ
 * **Hướng xử lý đề xuất:** Prefix/quote an toàn cho ô text nguy hiểm và test cả CSV/Excel.
 * **Có cần sửa CSDL không:** Không.
 
-### KT-11: Cần thống nhất phạm vi nghiệp vụ Chi phí độc lập
+### KT-11: Cần thống nhất phạm vi nghiệp vụ Chi phí độc lập — Đã thống nhất
+
+* **Trạng thái:** Đã thống nhất trong source/tài liệu ngày 02/07/2026.
 
 * **Loại phát hiện:** C
 * **Mức độ:** Thấp
@@ -644,14 +650,16 @@ Kết luận kiến trúc AI phù hợp vai trò hỗ trợ, không tự thay đ
 * **Luồng nghiệp vụ:** Duyệt đề xuất công việc sinh `ChiPhi`; UI chỉ xem tổng hợp/gián tiếp.
 * **Bằng chứng source:** Không `ChiPhiController`; `ChiPhi.Xem` được dùng gián tiếp; `Them/Sua` chưa có action.
 * **Cách tái hiện:** Đăng nhập Manager và theo các link tài chính.
-* **Kết quả hiện tại:** Chi phí là dữ liệu sinh từ workflow, không phải CRUD độc lập.
-* **Kết quả mong đợi:** Cần chủ sản phẩm xác nhận đây là thiết kế cuối hay cần module riêng.
+* **Kết quả hiện tại:** Chi phí là dữ liệu sinh từ workflow, không phải CRUD độc lập. `ChiPhi.Them/Sua` không còn được seed cho role hoặc hiển thị để cấp mới nhưng claim cũ được bảo toàn.
+* **Kết quả mong đợi:** Giữ thiết kế hiện tại.
 * **Ảnh hưởng:** Permission `Them/Sua` gây kỳ vọng không khớp UI.
 * **Nguyên nhân:** Permission model rộng hơn implementation.
-* **Hướng xử lý đề xuất:** Giữ workflow gián tiếp hoặc đặc tả module riêng; không tự thêm Controller.
+* **Hướng xử lý đề xuất:** Đã chọn workflow gián tiếp; không tạo Controller/View CRUD.
 * **Có cần sửa CSDL không:** Không.
 
-### KT-12: Cần thống nhất có cần màn hình nhật ký độc lập
+### KT-12: Cần thống nhất có cần màn hình nhật ký độc lập — Đã thống nhất, không sửa source
+
+* **Trạng thái:** Giữ nguyên thiết kế hiện tại.
 
 * **Loại phát hiện:** C
 * **Mức độ:** Giao diện
@@ -663,20 +671,27 @@ Kết luận kiến trúc AI phù hợp vai trò hỗ trợ, không tự thay đ
 * **Bằng chứng source:** Permission đang dùng; không có `NhatKyController`/màn hình tổng hợp.
 * **Cách tái hiện:** Mở chi tiết dự án với/không có `NhatKy.Xem`.
 * **Kết quả hiện tại:** Nhật ký theo ngữ cảnh dự án.
-* **Kết quả mong đợi:** Cần thống nhất có cần tra cứu toàn hệ thống hay tab hiện tại đã đủ.
+* **Kết quả mong đợi:** Nhật ký là dữ liệu truy vết theo ngữ cảnh từng dự án; tab hiện tại là giao diện chính thức.
 * **Ảnh hưởng:** Khả năng truy vết liên dự án hạn chế, không phải lỗi phân quyền.
 * **Nguyên nhân:** Thiết kế contextual audit.
-* **Hướng xử lý đề xuất:** Đặc tả nhu cầu trước khi thay đổi.
+* **Hướng xử lý đề xuất:** Không tạo Controller, menu hoặc màn hình nhật ký riêng.
 * **Có cần sửa CSDL không:** Không.
 
 ### 11.1 Tổng hợp phát hiện
 
-| Loại | Cao | Trung bình | Thấp | Giao diện | Tổng |
-|---|---:|---:|---:|---:|---:|
-| A | 6 | 1 | 1 | 0 | 8 |
-| B | 0 | 2 | 0 | 0 | 2 |
-| C | 0 | 0 | 1 | 1 | 2 |
-| **Tổng** | **6** | **3** | **2** | **1** | **12** |
+| Trạng thái | Loại A | Loại B | Loại C | Tổng |
+|---|---:|---:|---:|---:|
+| Đã khắc phục/thống nhất | 2 | 0 | 2 | 4 |
+| Còn mở | 6 | 2 | 0 | 8 |
+| **Tổng phát hiện được lưu vết** | **8** | **2** | **2** | **12** |
+
+| Mức độ của phát hiện còn mở | Số lượng |
+|---|---:|
+| Nghiêm trọng | 0 |
+| Cao | 4 |
+| Trung bình | 3 |
+| Thấp | 1 |
+| Giao diện | 0 |
 
 Không có phát hiện mức **Nghiêm trọng** sau khi chuẩn hóa: static file được hạ từ Nghiêm trọng xuống Cao vì tên lưu là GUID và View không công khai URL tĩnh, dù bypass authorization vẫn được source chứng minh.
 
@@ -699,12 +714,12 @@ Không có phát hiện mức **Nghiêm trọng** sau khi chuẩn hóa: static f
 
 Chỉ các lỗi loại A mức Cao:
 
-1. KT-01 — hồ sơ xóa vẫn có thể login.
-2. KT-02 — 55 POST thiếu anti-forgery.
-3. KT-03 — static URL bypass quyền file.
-4. KT-04 — login không có failed-attempt lockout/rate limit.
-5. KT-05 — xóa không chặn self/Admin cuối.
-6. KT-06 — session/claim không bị thu hồi.
+1. KT-02 — 55 POST thiếu anti-forgery.
+2. KT-03 — static URL bypass quyền file.
+3. KT-04 — login không có failed-attempt lockout/rate limit.
+4. KT-06 — session/claim không bị thu hồi.
+
+KT-01 và KT-05 đã được khắc phục trong đợt này.
 
 ### 12.3 Rủi ro cần kiểm thử
 
@@ -713,10 +728,10 @@ Chỉ các lỗi loại A mức Cao:
 
 Ngoài ra nên runtime test SMTP delivery/rollback token, reverse proxy `/uploads`, dung lượng upload và export dataset lớn; source review không thay thế các kiểm thử này.
 
-### 12.4 Điểm cần thống nhất nghiệp vụ
+### 12.4 Điểm nghiệp vụ đã thống nhất
 
-- KT-11 — chi phí chỉ sinh/quản lý gián tiếp hay cần module độc lập.
-- KT-12 — nhật ký theo tab dự án hay cần màn hình tổng hợp.
+- KT-11 — chi phí chỉ được sinh từ đề xuất công việc đã duyệt; chỉ giữ quyền xem, không có CRUD độc lập.
+- KT-12 — nhật ký tiếp tục hiển thị theo tab trong chi tiết dự án, không có module độc lập.
 - Admin chat **không còn là điểm mơ hồ trong source**: service hiện chủ đích chặn Admin. Nếu sản phẩm muốn Admin đọc chat, đó là yêu cầu thay đổi nghiệp vụ mới.
 
 ### 12.5 Nội dung không cần sửa chỉ vì khác mẫu kiến trúc
@@ -734,14 +749,14 @@ Ngoài ra nên runtime test SMTP delivery/rollback token, reverse proxy `/upload
 
 ### Ưu tiên 1 – lỗi đã xác nhận
 
-1. KT-01: Chặn authentication cho hồ sơ soft-delete.
-2. KT-06: Thu hồi/validate session sau khóa, xóa, đổi role/permission.
-3. KT-05: Chặn tự xóa và xóa Admin cuối.
-4. KT-02: Bảo vệ anti-forgery cho 55 POST.
-5. KT-03: Loại đường static đối với file private.
-6. KT-04: Bổ sung rate limit/failed-attempt lockout.
-7. KT-07: Validation upload dự án.
-8. KT-08: Compensating file–DB.
+1. KT-06: Thu hồi/validate session sau đổi role/permission.
+2. KT-02: Bảo vệ anti-forgery cho 55 POST.
+3. KT-03: Loại đường static đối với file private.
+4. KT-04: Bổ sung rate limit/failed-attempt lockout.
+5. KT-07: Validation upload dự án.
+6. KT-08: Compensating file–DB.
+
+Đã hoàn thành: KT-01 và KT-05.
 
 ### Ưu tiên 2 – cần test trước khi sửa
 
@@ -749,10 +764,10 @@ Ngoài ra nên runtime test SMTP delivery/rollback token, reverse proxy `/upload
 2. KT-10: Test CSV/Excel formula.
 3. Test deploy thực tế của `/uploads`, SMTP, export lớn và cleanup file.
 
-### Ưu tiên 3 – thống nhất nghiệp vụ
+### Ưu tiên 3 – nghiệp vụ đã thống nhất
 
-1. KT-11: Module/quyền Chi phí.
-2. KT-12: Màn hình Nhật ký.
+1. KT-11: Giữ chi phí theo workflow duyệt, không CRUD trực tiếp.
+2. KT-12: Giữ nhật ký trong chi tiết dự án.
 3. Nếu thay đổi chủ đích hiện tại: quyền Admin đọc chat.
 
 ### Ưu tiên 4 – cải thiện chất lượng
@@ -829,8 +844,8 @@ Nguồn: `QuanLyDuAn/QuanLyDuAn/Constants/Permissions.cs`. Số thứ tự liên
 | 59 | `DuyetNganSach.Duyet` | `DuyetNganSach.Duyet` | Controller/View |
 | 60 | `NganSach.Xem` | `NganSach.Xem` | Controller/View |
 | 61 | `ChiPhi.Xem` | `ChiPhi.Xem` | Dùng gián tiếp Dashboard/Details |
-| 62 | `ChiPhi.Them` | `ChiPhi.Them` | Seed/definition, chưa có action |
-| 63 | `ChiPhi.Sua` | `ChiPhi.Sua` | Seed/definition, chưa có action |
+| 62 | `ChiPhi.Them` | `ChiPhi.Them` | Tương thích cũ; ẩn khỏi cấp mới, không seed role |
+| 63 | `ChiPhi.Sua` | `ChiPhi.Sua` | Tương thích cũ; ẩn khỏi cấp mới, không seed role |
 | 64 | `AI.Xem` | `AI.Xem` | Layout/permission cha |
 | 65 | `AI.Dataset` | `AI.Dataset` | `AiDatasetController` |
 | 66 | `AI.Train` | `AI.Train` | `AiController` |
@@ -869,19 +884,21 @@ Kiểm tra số học: 81 dòng constant = 80 giá trị unique + 1 alias.
 | Action POST | 87 | `[HttpPost]` |
 | POST thay đổi dữ liệu/trạng thái | 84 | Gồm DB, cookie/session, email hoặc model; loại 3 validation-only |
 | POST được bảo vệ anti-forgery | 32 | Filter tại action; global = 0 |
-| Vấn đề loại A | 8 | KT-01…KT-08 |
-| Vấn đề loại B | 2 | KT-09…KT-10 |
-| Vấn đề loại C | 2 | KT-11…KT-12 |
+| Tổng phát hiện lưu vết | 12 | 4 đã xử lý/thống nhất, 8 còn mở |
+| Vấn đề loại A còn mở | 6 | KT-02, KT-03, KT-04, KT-06, KT-07, KT-08 |
+| Vấn đề loại B còn mở | 2 | KT-09…KT-10 |
+| Vấn đề loại C còn mở | 0 | KT-11…KT-12 đã thống nhất |
 | Nghiêm trọng | 0 | |
-| Cao | 6 | KT-01…KT-06 |
+| Cao | 4 | KT-02, KT-03, KT-04, KT-06 |
 | Trung bình | 3 | KT-07, KT-09, KT-10 |
-| Thấp | 2 | KT-08, KT-11 |
-| Giao diện | 1 | KT-12 |
+| Thấp | 1 | KT-08 |
+| Giao diện | 0 | |
 
 Đối chiếu:
 
-- Loại A/B/C: 8 + 2 + 2 = **12 vấn đề**.
-- Mức độ: 0 + 6 + 3 + 2 + 1 = **12 vấn đề**.
+- Phát hiện còn mở theo loại: 6 + 2 + 0 = **8 vấn đề**.
+- Phát hiện còn mở theo mức độ: 0 + 4 + 3 + 1 + 0 = **8 vấn đề**.
+- Tổng lưu vết: 8 còn mở + 4 đã xử lý/thống nhất = **12 phát hiện**.
 - Hai bảng tại 11.1 và 15 cho cùng kết quả.
 
-**Xác nhận phạm vi:** Chỉ `docs/kiemtratongquat.md` được cập nhật. Không chỉnh sửa source code, View, Controller, Service, JavaScript, CSS, FastAPI, CSDL hoặc migration.
+**Xác nhận phạm vi:** Đợt hoàn thiện chỉ sửa source nhân sự/phân quyền cần thiết, `README.md` và tài liệu này. Không sửa JavaScript, CSS, FastAPI, CSDL hoặc migration.

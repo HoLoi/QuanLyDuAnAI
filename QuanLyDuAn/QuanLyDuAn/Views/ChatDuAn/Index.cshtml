@@ -1,4 +1,5 @@
 @model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = "Chat dự án";
@@ -15,43 +16,31 @@
     <link rel="stylesheet" href="~/css/ChatDuAn/empty-state.css" asp-append-version="true" />
 }
 
-<div class="chat-du-an-page app-page">
-    @if (!string.IsNullOrWhiteSpace(Model.ThongBaoTrangThai) && !Model.DanhSachPhong.Any())
-    {
-        @await Html.PartialAsync("_EmptyState", Model)
-    }
-    else
-    {
-        <div class="chat-layout">
-            <aside class="chat-sidebar app-section-card">
-                @await Html.PartialAsync("_RoomList", Model)
-            </aside>
+<div class="chat-du-an-page app-page"
+     id="chat-du-an-app"
+     data-room-url="@Url.Action("Phong", "ChatDuAn")"
+     data-room-batch-url="@Url.Action("PhongBatch", "ChatDuAn")"
+     data-older-messages-url="@Url.Action("TinNhanCu", "ChatDuAn")"
+     data-new-messages-url="@Url.Action("TinNhanMoi", "ChatDuAn")"
+     data-chat-hub-url="@Url.Content("~/hubs/chat-du-an")"
+     data-current-user-id="@User.FindFirstValue("MaNguoiDung")"
+     data-room-empty-text="Không có phòng phù hợp."
+     data-send-url="@Url.Action("GuiTinNhan", "ChatDuAn")">
+    <div class="chat-realtime-status" id="chat-realtime-status" aria-live="polite">Đang kết nối...</div>
+    <div class="chat-layout">
+        <aside class="chat-sidebar app-section-card">
+            @await Html.PartialAsync("_RoomList", Model)
+        </aside>
 
-            <section class="chat-main app-section-card">
-                @if (Model.PhongDangChon == null)
-                {
-                    @await Html.PartialAsync("_EmptyState", Model)
-                }
-                else
-                {
-                    @await Html.PartialAsync("_ChatHeader", Model)
-                    @await Html.PartialAsync("_MessageList", Model)
-                    @await Html.PartialAsync("_MessageForm", Model)
-                }
-            </section>
-        </div>
-    }
+        <section class="chat-main app-section-card" id="chat-main">
+            @await Html.PartialAsync("_ChatContent", Model)
+        </section>
+    </div>
 </div>
 
 @section Scripts
 {
-    <script>
-        (function () {
-            var messageList = document.getElementById('chat-message-list');
-            if (messageList) {
-                messageList.scrollTop = messageList.scrollHeight;
-            }
-        })();
-    </script>
+    <script src="~/lib/microsoft/signalr/signalr.min.js" asp-append-version="true"></script>
+    <script src="~/js/ChatDuAn/chat.js" asp-append-version="true"></script>
 }
 

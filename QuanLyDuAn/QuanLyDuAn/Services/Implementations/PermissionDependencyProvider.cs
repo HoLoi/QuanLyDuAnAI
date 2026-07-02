@@ -232,8 +232,6 @@ public class PermissionDependencyProvider : IPermissionDependencyProvider
         Add(definitions, "TaiChinh", "Tài chính", 4, "DuyetNganSach", "Duyệt ngân sách", 2, Permissions.DuyetNganSach.Duyet, "Duyệt", Permissions.DuyetNganSach.Xem, 2);
         Add(definitions, "TaiChinh", "Tài chính", 4, "NganSach", "Ngân sách", 3, Permissions.NganSach.Xem, "Xem", null, 1);
         Add(definitions, "TaiChinh", "Tài chính", 4, "ChiPhi", "Chi phí", 4, Permissions.ChiPhi.Xem, "Xem", null, 1);
-        Add(definitions, "TaiChinh", "Tài chính", 4, "ChiPhi", "Chi phí", 4, Permissions.ChiPhi.Them, "Thêm", Permissions.ChiPhi.Xem, 2);
-        Add(definitions, "TaiChinh", "Tài chính", 4, "ChiPhi", "Chi phí", 4, Permissions.ChiPhi.Sua, "Sửa", Permissions.ChiPhi.Xem, 3);
 
         Add(definitions, "DanhGia", "Đánh giá", 5, "DanhGiaDuAn", "Đánh giá dự án", 1, Permissions.DanhGiaDuAn.Xem, "Xem", null, 1);
         Add(definitions, "DanhGia", "Đánh giá", 5, "DanhGiaDuAn", "Đánh giá dự án", 1, Permissions.DanhGiaDuAn.DanhGia, "Đánh giá", Permissions.DanhGiaDuAn.Xem, 2);

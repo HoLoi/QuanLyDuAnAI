@@ -10,7 +10,7 @@
 <div class="chat-message-form">
     @if (canShowForm)
     {
-        <form asp-action="GuiTinNhan" method="post" class="chat-message-form-inner">
+        <form asp-action="GuiTinNhan" method="post" class="chat-message-form-inner" id="chat-message-form">
             <input type="hidden" name="MaPhongChat" value="@Model.PhongDangChon!.MaPhongChat" />
             <input type="hidden" name="MaDuAn" value="@Model.PhongDangChon!.MaDuAn" />
             <input type="hidden" name="maDuAn" value="@Model.PhongDangChon!.MaDuAn" />
@@ -24,6 +24,7 @@
                           class="message-input form-control"></textarea>
                 <button type="submit" class="btn btn-primary message-submit btn-action btn-confirm">Gửi</button>
             </div>
+            <div class="chat-request-status" id="chat-send-status" aria-live="polite"></div>
         </form>
     }
     else

@@ -662,22 +662,63 @@ namespace QuanLyDuAn.Services.Implementations
             return null;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id, int maNguoiDungDangThaoTac)
         {
-            var entity = await _context.NguoiDung
-                .FirstOrDefaultAsync(x => x.MaNguoiDung == id && x.IsDeleted != true);
-
-            if (entity == null)
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
             {
-                throw new Exception("Không tìm thấy nhân sự.");
+                var entity = await _context.NguoiDung
+                    .FirstOrDefaultAsync(x => x.MaNguoiDung == id && x.IsDeleted != true);
+
+                if (entity == null)
+                {
+                    throw new Exception("Không tìm thấy nhân sự.");
+                }
+
+                if (entity.MaNguoiDung == maNguoiDungDangThaoTac)
+                {
+                    throw new Exception("Bạn không thể tự xóa tài khoản của chính mình.");
+                }
+
+                var account = await _context.Aspnetusers
+                    .FirstOrDefaultAsync(x => x.MaNguoiDung == id && x.Id == entity.Id);
+
+                if (account != null
+                    && await IsAdminAccountAsync(account.Id)
+                    && IsAccountActive(account)
+                    && await CountActiveAdminUsersAsync() <= 1)
+                {
+                    throw new Exception("Không thể xóa quản trị viên hoạt động cuối cùng của hệ thống.");
+                }
+
+                await KiemTraRangBuocXoaAsync(id);
+
+                var now = DateTime.UtcNow;
+                entity.IsDeleted = true;
+                entity.DeletedAt = now;
+                entity.DeletedBy = maNguoiDungDangThaoTac;
+
+                if (account != null)
+                {
+                    account.LockoutEnabled = true;
+                    account.LockoutEnd = now.AddYears(100);
+                    account.SecurityStamp = Guid.NewGuid().ToString("N");
+                    account.AccessFailedCount = 0;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation(
+                    "Nhan su {MaNguoiDung} da bi xoa mem va vo hieu hoa dang nhap boi {NguoiThucHien}.",
+                    id,
+                    maNguoiDungDangThaoTac);
             }
-
-            await KiemTraRangBuocXoaAsync(id);
-
-            entity.IsDeleted = true;
-            entity.DeletedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         private async Task KiemTraRangBuocXoaAsync(int maNguoiDung)
@@ -775,33 +816,9 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Không tìm thấy tài khoản hệ thống.");
             }
 
-            var targetIsAdmin = await (
-                from userRole in _context.Aspnetuserroles.AsNoTracking()
-                join role in _context.Aspnetroles.AsNoTracking() on userRole.Id equals role.Id
-                where userRole.Asp_Id == account.Id
-                      && (role.NormalizedName == "ADMIN" || role.Name!.ToUpper() == "ADMIN")
-                select userRole.Asp_Id
-            ).AnyAsync();
-
-            var now = DateTime.UtcNow;
-            var targetIsActive = account.EmailConfirmed
-                && (!account.LockoutEnd.HasValue || account.LockoutEnd.Value <= now);
-
-            if (targetIsAdmin && targetIsActive)
+            if (await IsAdminAccountAsync(account.Id) && IsAccountActive(account))
             {
-                var activeAdminCount = await (
-                    from userRole in _context.Aspnetuserroles.AsNoTracking()
-                    join role in _context.Aspnetroles.AsNoTracking() on userRole.Id equals role.Id
-                    join adminAccount in _context.Aspnetusers.AsNoTracking() on userRole.Asp_Id equals adminAccount.Id
-                    join profile in _context.NguoiDung.AsNoTracking() on adminAccount.MaNguoiDung equals profile.MaNguoiDung
-                    where (role.NormalizedName == "ADMIN" || role.Name!.ToUpper() == "ADMIN")
-                          && profile.IsDeleted != true
-                          && adminAccount.EmailConfirmed
-                          && (!adminAccount.LockoutEnd.HasValue || adminAccount.LockoutEnd.Value <= now)
-                    select adminAccount.Id
-                ).Distinct().CountAsync();
-
-                if (activeAdminCount <= 1)
+                if (await CountActiveAdminUsersAsync() <= 1)
                 {
                     throw new Exception("Không thể khóa Admin cuối cùng đang hoạt động của hệ thống.");
                 }
@@ -813,6 +830,39 @@ namespace QuanLyDuAn.Services.Implementations
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+        }
+
+        private async Task<bool> IsAdminAccountAsync(string accountId)
+        {
+            return await (
+                from userRole in _context.Aspnetuserroles.AsNoTracking()
+                join role in _context.Aspnetroles.AsNoTracking() on userRole.Id equals role.Id
+                where userRole.Asp_Id == accountId
+                      && ((role.NormalizedName ?? role.Name) ?? string.Empty).ToUpper() == "ADMIN"
+                select userRole.Asp_Id
+            ).AnyAsync();
+        }
+
+        private async Task<int> CountActiveAdminUsersAsync()
+        {
+            var now = DateTime.UtcNow;
+            return await (
+                from userRole in _context.Aspnetuserroles.AsNoTracking()
+                join role in _context.Aspnetroles.AsNoTracking() on userRole.Id equals role.Id
+                join account in _context.Aspnetusers.AsNoTracking() on userRole.Asp_Id equals account.Id
+                join profile in _context.NguoiDung.AsNoTracking() on account.MaNguoiDung equals profile.MaNguoiDung
+                where ((role.NormalizedName ?? role.Name) ?? string.Empty).ToUpper() == "ADMIN"
+                      && profile.IsDeleted != true
+                      && account.EmailConfirmed
+                      && (!account.LockoutEnd.HasValue || account.LockoutEnd.Value <= now)
+                select account.Id
+            ).Distinct().CountAsync();
+        }
+
+        private static bool IsAccountActive(Aspnetusers account)
+        {
+            return account.EmailConfirmed
+                   && (!account.LockoutEnd.HasValue || account.LockoutEnd.Value <= DateTime.UtcNow);
         }
 
         private async Task KiemTraRangBuocKhoaAsync(int maNguoiDung)

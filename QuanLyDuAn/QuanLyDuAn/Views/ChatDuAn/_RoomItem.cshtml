@@ -1,0 +1,42 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPhongItemViewModel
+
+@{
+    var activeClass = Model.DangChon ? "active" : string.Empty;
+}
+
+<a class="chat-room-item @activeClass"
+   href="@Url.Action("Index", "ChatDuAn", new { maDuAn = Model.MaDuAn })"
+   data-room-id="@Model.MaPhongChat"
+   data-project-id="@Model.MaDuAn">
+    <div class="room-card-header">
+        <div class="room-title">@Model.TenDuAn</div>
+        @if (!string.IsNullOrWhiteSpace(Model.TrangThaiDuAn))
+        {
+            <span class="room-status">@Model.TrangThaiDuAn</span>
+        }
+    </div>
+
+    <div class="room-subtitle">@Model.TenPhong</div>
+
+    <div class="room-latest">
+        @(string.IsNullOrWhiteSpace(Model.TinNhanMoiNhat) ? "Chưa có tin nhắn" : Model.TinNhanMoiNhat)
+    </div>
+
+    <div class="room-meta">
+        <span class="meta-pill" data-room-message-count="@Model.SoTinNhan">
+            <i class="bi bi-people"></i>
+            @Model.SoThanhVien thành viên
+        </span>
+        <span class="meta-pill">
+            <i class="bi bi-chat-dots"></i>
+            @Model.SoTinNhan tin
+        </span>
+        @if (Model.ThoiGianTinNhanMoiNhat.HasValue)
+        {
+            <span class="meta-pill" data-room-message-time>
+                <i class="bi bi-clock"></i>
+                @Model.ThoiGianTinNhanMoiNhat.Value.ToString("dd/MM/yyyy HH:mm")
+            </span>
+        }
+    </div>
+</a>

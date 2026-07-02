@@ -58,6 +58,7 @@ wwwroot\css\YeuCauDoiQuanLy\index.css
 wwwroot\favicon.ico
 wwwroot\js\ai\charts.js
 wwwroot\js\approval\index.js
+wwwroot\js\ChatDuAn\chat.js
 wwwroot\js\layout\sidebar.js
 wwwroot\js\phanquyen\index.js
 wwwroot\js\site.js
@@ -118,6 +119,7 @@ wwwroot\lib\jquery-validation\LICENSE.md
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
 wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
 wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+wwwroot\lib\microsoft\signalr\signalr.min.js
 wwwroot\uploads\avatars\avatar_1_20260524190347_3da100e6698c4784b43b26034fc93ca7.jpg
 wwwroot\uploads\avatars\avatar_18_20260622201054_f376962e79434f35a2325608d52a8f58.jpg
 wwwroot\uploads\duan\2\2f7f4153823742128c08326eef7055ba.pdf

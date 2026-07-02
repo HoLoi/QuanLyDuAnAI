@@ -1,0 +1,14 @@
+@model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
+
+<div class="chat-content" data-active-room-id="@Model.MaPhongChatDangChon">
+    @if (Model.PhongDangChon == null)
+    {
+        @await Html.PartialAsync("_EmptyState", Model)
+    }
+    else
+    {
+        @await Html.PartialAsync("_ChatHeader", Model)
+        @await Html.PartialAsync("_MessageList", Model)
+        @await Html.PartialAsync("_MessageForm", Model)
+    }
+</div>

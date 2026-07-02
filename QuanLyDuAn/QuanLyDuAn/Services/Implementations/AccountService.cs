@@ -35,17 +35,25 @@ public class AccountService : IAccountService
     {
         var normalizedUserName = userName.Trim().ToUpperInvariant();
 
-        var account = await _dbContext.Aspnetusers
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x =>
-                x.NormalizedUserName == normalizedUserName
-                || x.UserName == userName.Trim());
+        var loginData = await (
+                from loginAccount in _dbContext.Aspnetusers.AsNoTracking()
+                join profile in _dbContext.NguoiDung.AsNoTracking()
+                    on loginAccount.MaNguoiDung equals profile.MaNguoiDung
+                where loginAccount.NormalizedUserName == normalizedUserName
+                      || loginAccount.UserName == userName.Trim()
+                select new
+                {
+                    Account = loginAccount,
+                    ProfileIsDeleted = profile.IsDeleted
+                })
+            .FirstOrDefaultAsync();
 
-        if (account is null)
+        if (loginData is null || loginData.ProfileIsDeleted == true)
         {
-            throw new Exception("Tên đăng nhập hoặc mật khẩu không đúng.");
+            throw new Exception("Tên đăng nhập hoặc mật khẩu không đúng, hoặc tài khoản không khả dụng.");
         }
 
+        var account = loginData.Account;
         var taiKhoanBiKhoa = account.LockoutEnabled
                            && account.LockoutEnd.HasValue
                            && account.LockoutEnd.Value > DateTime.UtcNow;

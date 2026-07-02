@@ -4,6 +4,17 @@
     overflow: hidden;
 }
 
+.chat-realtime-status {
+    min-height: 1.35rem;
+    padding: 0 0.25rem 0.25rem;
+    color: #667085;
+    font-size: 0.78rem;
+}
+
+.chat-realtime-status.is-error {
+    color: #b42318;
+}
+
 .chat-layout {
     display: grid;
     grid-template-columns: 340px minmax(0, 1fr);
@@ -29,8 +40,36 @@
 
 .chat-main {
     display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.chat-content {
+    min-height: 0;
+    height: 100%;
+    display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     overflow: hidden;
+}
+
+.chat-content > .chat-empty-state {
+    grid-row: 1 / -1;
+}
+
+.chat-main.is-loading {
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.chat-request-status {
+    display: block;
+    min-height: 1.2em;
+    color: #6b7280;
+    font-size: 0.78rem;
+}
+
+.chat-request-status.is-error {
+    color: #b42318;
 }
 
 @media (max-width: 992px) {

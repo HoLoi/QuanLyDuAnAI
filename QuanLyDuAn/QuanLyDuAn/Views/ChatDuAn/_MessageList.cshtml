@@ -1,18 +1,23 @@
 @model QuanLyDuAn.ViewModels.ChatDuAn.ChatDuAnPageViewModel
 
 <div class="chat-message-list" id="chat-message-list">
+    <div class="chat-message-load">
+        <button type="button"
+                class="btn btn-sm btn-outline-primary"
+                id="chat-load-older-messages"
+                hidden="@(!Model.TinNhanBatch.HasMore)">
+            Tải tin nhắn cũ hơn
+        </button>
+        <span class="chat-request-status" id="chat-message-status" aria-live="polite"></span>
+    </div>
     @if (!Model.DanhSachTinNhan.Any())
     {
-        <div class="chat-message-empty">
+        <div class="chat-message-empty" id="chat-message-empty">
             <div class="chat-message-empty-icon"><i class="bi bi-chat-dots"></i></div>
             <div>Chưa có tin nhắn nào trong phòng này.</div>
         </div>
     }
-    else
-    {
-        foreach (var item in Model.DanhSachTinNhan)
-        {
-            @await Html.PartialAsync("_MessageItem", item)
-        }
-    }
+    <div id="chat-message-items">
+        @await Html.PartialAsync("_MessageBatch", Model.TinNhanBatch)
+    </div>
 </div>

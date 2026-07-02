@@ -84,8 +84,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>m7vy0yi4aa</Fingerprint>
-      <Integrity>grrsDiZAlcpHBihOnCrVU2qeKi2SDkLldJr7CZtRSxc=</Integrity>
+      <Fingerprint>5vaqig167p</Fingerprint>
+      <Integrity>gdtJvm0vGWhaB5jPg0jIwvltJ3QDK8gNlmn4UdzN6xw=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\index.css'))</OriginalItemSpec>
@@ -138,8 +138,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>j09dxitaay</Fingerprint>
-      <Integrity>HfjDvlAgvJOLfzA4TBc0X5ZrE9f5dbXZm9aep3YQ/08=</Integrity>
+      <Fingerprint>8xb9trl2sg</Fingerprint>
+      <Integrity>ZAJuJLtEfR7Wsth+HY1of0+EywkT4LwUXJY2RDFMsuc=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\message-list.css'))</OriginalItemSpec>
@@ -156,8 +156,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>g5b8uo5haa</Fingerprint>
-      <Integrity>dLiVgl0mqfIUhAs3BvkqRMmrRRIQWUKSkKjv8q6a+yw=</Integrity>
+      <Fingerprint>w0mm4a10oy</Fingerprint>
+      <Integrity>ABXgoMMhsKtdqOCArzh0OPcxdr2zNd3TCFSgAWCfUeU=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\room-list.css'))</OriginalItemSpec>
@@ -1079,6 +1079,24 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\approval\index.js'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\ChatDuAn\chat.js'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>js/ChatDuAn/chat.js</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>vilj7vgpnc</Fingerprint>
+      <Integrity>t3aHQnahwDVkuL0REC4jrclaF61Mbs7q4MiabwE7o7I=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\ChatDuAn\chat.js'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\layout\sidebar.js'))">
       <SourceType>Package</SourceType>
@@ -2159,6 +2177,24 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\lib\jquery\LICENSE.txt'))</OriginalItemSpec>
+    </StaticWebAsset>
+    <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\lib\microsoft\signalr\signalr.min.js'))">
+      <SourceType>Package</SourceType>
+      <SourceId>QuanLyDuAn</SourceId>
+      <ContentRoot>$(MSBuildThisFileDirectory)..\staticwebassets\</ContentRoot>
+      <BasePath>_content/QuanLyDuAn</BasePath>
+      <RelativePath>lib/microsoft/signalr/signalr.min.js</RelativePath>
+      <AssetKind>All</AssetKind>
+      <AssetMode>All</AssetMode>
+      <AssetRole>Primary</AssetRole>
+      <RelatedAsset></RelatedAsset>
+      <AssetTraitName></AssetTraitName>
+      <AssetTraitValue></AssetTraitValue>
+      <Fingerprint>87p4xtea33</Fingerprint>
+      <Integrity>lA122L4UfOFD8QYGV1QI1YL+ziLh8J4ZFlXzrzbHeP0=</Integrity>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\lib\microsoft\signalr\signalr.min.js'))</OriginalItemSpec>
     </StaticWebAsset>
     <StaticWebAsset Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\QuanLyDuAn.0tp7zig6ys.bundle.scp.css'))">
       <SourceType>Package</SourceType>

@@ -51,6 +51,17 @@
     scrollbar-gutter: stable;
 }
 
+.chat-room-batch {
+    display: contents;
+}
+
+.chat-room-load {
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0 0.5rem;
+}
+
 .chat-room-items::-webkit-scrollbar {
     width: 7px;
 }

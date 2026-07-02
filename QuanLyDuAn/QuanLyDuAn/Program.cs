@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using QuanLyDuAn.Data;
+using QuanLyDuAn.Hubs;
 using QuanLyDuAn.Services;
 using QuanLyDuAn.Services.Implementations;
 using QuanLyDuAn.Services.Interfaces;
@@ -32,6 +33,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 builder.Services.Configure<AiApiOptions>(builder.Configuration.GetSection(AiApiOptions.SectionName));
 builder.Services
@@ -110,5 +112,7 @@ using (var scope = app.Services.CreateScope())
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Dashboard}/{action=Index}/{id?}");
+
+app.MapHub<ChatDuAnHub>("/hubs/chat-du-an");
 
 app.Run();

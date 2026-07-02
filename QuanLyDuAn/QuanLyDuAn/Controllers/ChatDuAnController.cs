@@ -50,6 +50,7 @@ namespace QuanLyDuAn.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> GuiTinNhan(ChatDuAnGuiTinNhanViewModel form, int? maDuAn, string? tuKhoa)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.Chat.Gui))
@@ -59,32 +60,22 @@ namespace QuanLyDuAn.Controllers
 
             if (!ModelState.IsValid)
             {
-                TempData["Error"] = string.Join(" ", ModelState.Values
+                var message = string.Join(" ", ModelState.Values
                     .SelectMany(x => x.Errors)
                     .Select(x => x.ErrorMessage)
                     .Where(x => !string.IsNullOrWhiteSpace(x)));
-
-                return RedirectToAction(nameof(Index), new
-                {
-                    maDuAn = maDuAn ?? form.MaDuAn,
-                    tuKhoa
-                });
+                return BadRequest(new { message });
             }
 
             try
             {
-                await _service.GuiTinNhanAsync(form);
+                var tinNhan = await _service.GuiTinNhanAsync(form);
+                return PartialView("_MessageItem", tinNhan);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
+                return BadRequest(new { message = ex.Message });
             }
-
-            return RedirectToAction(nameof(Index), new
-            {
-                maDuAn = maDuAn ?? form.MaDuAn,
-                tuKhoa
-            });
         }
 
         [HttpGet]
@@ -97,17 +88,108 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                var dsTinNhan = await _service.GetTinNhanAsync(maPhongChat);
-                return PartialView("_MessageList", new ChatDuAnPageViewModel
-                {
-                    DanhSachTinNhan = dsTinNhan,
-                    MaPhongChatDangChon = maPhongChat
-                });
+                var batch = await _service.GetTinNhanBatchAsync(maPhongChat);
+                return PartialView("_MessageBatch", batch);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = ex.Message;
-                return PartialView("_MessageList", new ChatDuAnPageViewModel());
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Phong(int maPhongChat)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.Chat.Xem))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                var vm = await _service.GetPhongContentAsync(maPhongChat);
+                vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
+                return PartialView("_ChatContent", vm);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PhongBatch(
+            string? tuKhoa,
+            int? lastRoomId,
+            int pageSize = 20)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.Chat.Xem))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                var batch = await _service.GetPhongChatBatchAsync(
+                    tuKhoa,
+                    lastRoomId,
+                    pageSize);
+                return PartialView("_RoomBatch", batch);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TinNhanCu(
+            int maPhongChat,
+            DateTime cursorThoiGianGui,
+            int cursorMaTinNhan,
+            int pageSize = 30)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.Chat.Xem))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                var batch = await _service.GetTinNhanBatchAsync(
+                    maPhongChat,
+                    cursorThoiGianGui,
+                    cursorMaTinNhan,
+                    pageSize);
+                return PartialView("_MessageBatch", batch);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TinNhanMoi(
+            int maPhongChat,
+            int afterMessageId,
+            int pageSize = 50)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.Chat.Xem))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                return Json(await _service.GetTinNhanMoiAsync(
+                    maPhongChat,
+                    afterMessageId,
+                    pageSize));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
     }

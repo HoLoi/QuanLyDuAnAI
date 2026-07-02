@@ -7,7 +7,7 @@
         : Model.HoTenNguoiDung.Trim().Substring(0, 1).ToUpperInvariant();
 }
 
-<div class="@rowClass">
+<div class="@rowClass" data-message-id="@Model.MaTinNhan">
     <div class="message-avatar">
         @if (!string.IsNullOrWhiteSpace(Model.AnhDaiDien))
         {

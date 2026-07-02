@@ -31,9 +31,10 @@ Source hiện tại triển khai các nhóm chức năng sau:
 - Quản lý danh mục công việc, công việc, chi tiết công việc và phân công ở cả hai cấp.
 - Gửi, duyệt, yêu cầu bổ sung hoặc từ chối báo cáo tiến độ; quản lý tệp minh chứng.
 - Đề xuất, hủy, duyệt hoặc từ chối công việc và ngân sách.
-- Theo dõi ngân sách, phiên bản ngân sách, chi phí và nhật ký liên quan.
+- Theo dõi ngân sách, phiên bản ngân sách và chi phí. Chi phí chỉ được hệ thống ghi nhận từ đề xuất công việc đã được Manager duyệt, không có CRUD chi phí trực tiếp.
 - Đánh giá dự án và đánh giá nhân viên theo quy trình nháp–duyệt.
 - Phòng chat theo dự án, đồng bộ thành viên và lưu lịch sử tin nhắn.
+- Nhật ký là dữ liệu truy vết hiển thị theo ngữ cảnh trong chi tiết từng dự án với quyền `NhatKy.Xem`, không phải module quản lý độc lập.
 - Dashboard, thống kê, phân trang và xuất PDF/CSV/Excel.
 - Tổng hợp và kiểm tra chất lượng `AI_DATASET`.
 - Huấn luyện, kiểm tra, so sánh, kích hoạt, reload và quản lý model cục bộ.

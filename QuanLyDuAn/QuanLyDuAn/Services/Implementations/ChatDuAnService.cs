@@ -10,17 +10,26 @@ namespace QuanLyDuAn.Services.Implementations
 {
     public class ChatDuAnService : IChatDuAnService
     {
-        private const int GioiHanTinNhan = 200;
+        private const int SoPhongTaiBanDau = 20;
+        private const int SoPhongToiDaMoiLanTai = 50;
+        private const int SoTinNhanTaiBanDau = 30;
+        private const int SoTinNhanToiDaMoiLanTai = 50;
         private const int DoDaiTinNhanToiDa = 2000;
 
         private readonly QuanLyDuAnDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IChatRealtimePublisher _realtimePublisher;
+        private readonly ILogger<ChatDuAnService> _logger;
         public ChatDuAnService(
             QuanLyDuAnDbContext context,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IChatRealtimePublisher realtimePublisher,
+            ILogger<ChatDuAnService> logger)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
+            _realtimePublisher = realtimePublisher;
+            _logger = logger;
         }
 
         public async Task<int> DamBaoPhongChatDuAnAsync(int maDuAn)
@@ -153,47 +162,34 @@ namespace QuanLyDuAn.Services.Implementations
             var roleFlags = await GetCurrentUserRoleFlagsAsync();
             KiemTraKhongChoAdminChatDuAn(roleFlags);
 
-            var dsMaDuAnTheoScope = await LayDanhSachMaDuAnTheoScopeAsync(currentUserId);
-            if (dsMaDuAnTheoScope.Count == 0)
-            {
-                return new ChatDuAnPageViewModel
-                {
-                    TuKhoa = tuKhoa,
-                    ThongBaoTrangThai = "Bạn chưa tham gia dự án nào có phòng chat."
-                };
-            }
+            var phongBatch = await GetPhongChatBatchNoAuthAsync(
+                currentUserId,
+                tuKhoa,
+                null,
+                SoPhongTaiBanDau);
 
-            var danhSachPhong = await GetPhongChatDuocThamGiaAsync(tuKhoa);
-            if (danhSachPhong.Count == 0)
-            {
-                return new ChatDuAnPageViewModel
-                {
-                    TuKhoa = tuKhoa,
-                    ThongBaoTrangThai = "Bạn chưa tham gia dự án nào có phòng chat."
-                };
-            }
-
-            ChatDuAnPhongItemViewModel? phongDangChon;
-
+            ChatDuAnPhongItemViewModel? phongDangChon = null;
             if (maDuAn.HasValue)
             {
-                var coQuyen = await CoQuyenVaoDuAnAsync(maDuAn.Value, currentUserId);
-                if (!coQuyen)
+                if (!await CoQuyenVaoDuAnAsync(maDuAn.Value, currentUserId))
                 {
                     throw new Exception("Bạn không có quyền truy cập phòng chat của dự án này.");
                 }
 
-                phongDangChon = danhSachPhong.FirstOrDefault(x => x.MaDuAn == maDuAn.Value);
+                phongDangChon = phongBatch.DanhSachPhong.FirstOrDefault(x => x.MaDuAn == maDuAn.Value);
                 if (phongDangChon == null)
                 {
-                    var maPhong = await DamBaoPhongChatDuAnAsync(maDuAn.Value);
-                    danhSachPhong = await GetPhongChatDuocThamGiaAsync(tuKhoa);
-                    phongDangChon = danhSachPhong.FirstOrDefault(x => x.MaPhongChat == maPhong);
+                    phongDangChon = await GetPhongItemTheoDuAnAsync(maDuAn.Value);
+                    if (phongDangChon == null)
+                    {
+                        var maPhong = await DamBaoPhongChatDuAnAsync(maDuAn.Value);
+                        phongDangChon = await GetPhongItemTheoMaPhongAsync(maPhong);
+                    }
                 }
             }
             else
             {
-                phongDangChon = danhSachPhong.First();
+                phongDangChon = phongBatch.DanhSachPhong.FirstOrDefault();
             }
 
             if (phongDangChon == null)
@@ -201,38 +197,63 @@ namespace QuanLyDuAn.Services.Implementations
                 return new ChatDuAnPageViewModel
                 {
                     TuKhoa = tuKhoa,
-                    DanhSachPhong = danhSachPhong,
+                    PhongBatch = phongBatch,
+                    DanhSachPhong = phongBatch.DanhSachPhong,
                     ThongBaoTrangThai = "Bạn chưa tham gia dự án nào có phòng chat."
                 };
             }
 
-            var danhSachTinNhan = await GetTinNhanAsync(phongDangChon.MaPhongChat);
-
-            foreach (var phong in danhSachPhong)
+            foreach (var phong in phongBatch.DanhSachPhong)
             {
                 phong.DangChon = phong.MaPhongChat == phongDangChon.MaPhongChat;
             }
 
+            var tinNhanBatch = await GetTinNhanBatchNoAuthAsync(
+                phongDangChon.MaPhongChat,
+                currentUserId,
+                null,
+                null,
+                SoTinNhanTaiBanDau);
             var coTheGui = await CoTheGuiTinNhanAsync(phongDangChon.MaPhongChat, currentUserId, roleFlags);
 
-            return new ChatDuAnPageViewModel
-            {
-                DanhSachPhong = danhSachPhong,
-                PhongDangChon = phongDangChon,
-                DanhSachTinNhan = danhSachTinNhan,
-                TuKhoa = tuKhoa,
-                MaDuAnDangChon = phongDangChon.MaDuAn,
-                MaPhongChatDangChon = phongDangChon.MaPhongChat,
-                CoTheGuiTinNhan = coTheGui,
-                Form = new ChatDuAnGuiTinNhanViewModel
-                {
-                    MaDuAn = phongDangChon.MaDuAn,
-                    MaPhongChat = phongDangChon.MaPhongChat
-                }
-            };
+            return TaoPageViewModel(phongDangChon, phongBatch, tinNhanBatch, tuKhoa, coTheGui);
         }
 
-        public async Task GuiTinNhanAsync(ChatDuAnGuiTinNhanViewModel form)
+        public async Task<ChatDuAnPageViewModel> GetPhongContentAsync(int maPhongChat)
+        {
+            KiemTraQuyenChat(Permissions.Chat.Xem);
+
+            var currentUserId = await GetCurrentUserIdAsync();
+            var roleFlags = await GetCurrentUserRoleFlagsAsync();
+            KiemTraKhongChoAdminChatDuAn(roleFlags);
+
+            var phong = await GetPhongItemTheoMaPhongAsync(maPhongChat);
+            if (phong == null || !await CoQuyenVaoPhongChatAsync(maPhongChat, currentUserId))
+            {
+                throw new Exception("Bạn không có quyền xem phòng chat này.");
+            }
+
+            if (!await LaThanhVienPhongChatAsync(maPhongChat, currentUserId))
+            {
+                throw new Exception("Bạn không còn là thành viên của phòng chat này.");
+            }
+
+            var tinNhanBatch = await GetTinNhanBatchNoAuthAsync(
+                maPhongChat,
+                currentUserId,
+                null,
+                null,
+                SoTinNhanTaiBanDau);
+            var coTheGui = await CoTheGuiTinNhanAsync(maPhongChat, currentUserId, roleFlags);
+            var phongBatch = new ChatDuAnPhongBatchViewModel
+            {
+                DanhSachPhong = new List<ChatDuAnPhongItemViewModel> { phong }
+            };
+
+            return TaoPageViewModel(phong, phongBatch, tinNhanBatch, null, coTheGui);
+        }
+
+        public async Task<ChatDuAnTinNhanItemViewModel> GuiTinNhanAsync(ChatDuAnGuiTinNhanViewModel form)
         {
             KiemTraQuyenChat(Permissions.Chat.Gui);
 
@@ -266,6 +287,7 @@ namespace QuanLyDuAn.Services.Implementations
                 {
                     pc.MaPhongChat,
                     pc.MaDuAn,
+                    da.TenDuAn,
                     da.TrangThaiDuAn
                 }).FirstOrDefaultAsync();
 
@@ -294,19 +316,74 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Bạn không còn thuộc phạm vi dự án để gửi tin nhắn.");
             }
 
-            _context.TinNhan.Add(new TinNhan
+            var tinNhanMoi = new TinNhan
             {
                 MaPhongChat = thongTinPhong.MaPhongChat,
                 MaNguoiDung = currentUserId,
                 NoiDungTinNhan = noiDung,
                 ThoiGianGui = DateTime.Now,
                 IsDeleted = false
-            });
+            };
 
+            _context.TinNhan.Add(tinNhanMoi);
             await _context.SaveChangesAsync();
+
+            var nguoiGui = await _context.NguoiDung
+                .AsNoTracking()
+                .Where(x => x.MaNguoiDung == currentUserId && x.IsDeleted != true)
+                .Select(x => new
+                {
+                    x.HoTenNguoiDung,
+                    x.AnhDaiDien
+                })
+                .FirstOrDefaultAsync();
+
+            var realtimeMessage = new ChatRealtimeMessageDto
+            {
+                MaTinNhan = tinNhanMoi.MaTinNhan,
+                MaPhongChat = tinNhanMoi.MaPhongChat,
+                MaDuAn = thongTinPhong.MaDuAn,
+                MaNguoiDung = currentUserId,
+                TenNguoiGui = nguoiGui?.HoTenNguoiDung ?? $"Nhân viên {currentUserId}",
+                AvatarUrl = nguoiGui?.AnhDaiDien,
+                NoiDungTinNhan = noiDung,
+                ThoiGianGui = tinNhanMoi.ThoiGianGui ?? DateTime.Now,
+                TenDuAn = thongTinPhong.TenDuAn ?? $"Dự án {thongTinPhong.MaDuAn}"
+            };
+
+            try
+            {
+                var recipientIds = await LayIdentityUserIdNhanRealtimeAsync(
+                    thongTinPhong.MaPhongChat,
+                    thongTinPhong.MaDuAn);
+                await _realtimePublisher.PublishMessageCreatedAsync(recipientIds, realtimeMessage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Chuẩn bị phát realtime thất bại cho tin {MessageId}, phòng {RoomId}. Tin đã được lưu.",
+                    tinNhanMoi.MaTinNhan,
+                    tinNhanMoi.MaPhongChat);
+            }
+
+            return new ChatDuAnTinNhanItemViewModel
+            {
+                MaTinNhan = tinNhanMoi.MaTinNhan,
+                MaPhongChat = tinNhanMoi.MaPhongChat,
+                MaNguoiDung = currentUserId,
+                HoTenNguoiDung = nguoiGui?.HoTenNguoiDung ?? $"Nhân viên {currentUserId}",
+                AnhDaiDien = nguoiGui?.AnhDaiDien,
+                NoiDungTinNhan = noiDung,
+                ThoiGianGui = tinNhanMoi.ThoiGianGui,
+                LaTinNhanCuaToi = true
+            };
         }
 
-        public async Task<List<ChatDuAnPhongItemViewModel>> GetPhongChatDuocThamGiaAsync(string? tuKhoa)
+        public async Task<ChatDuAnTinNhanMoiBatchViewModel> GetTinNhanMoiAsync(
+            int maPhongChat,
+            int afterMessageId,
+            int pageSize = SoTinNhanToiDaMoiLanTai)
         {
             KiemTraQuyenChat(Permissions.Chat.Xem);
 
@@ -314,20 +391,130 @@ namespace QuanLyDuAn.Services.Implementations
             var roleFlags = await GetCurrentUserRoleFlagsAsync();
             KiemTraKhongChoAdminChatDuAn(roleFlags);
 
+            if (maPhongChat <= 0 || afterMessageId < 0)
+            {
+                throw new Exception("Tham số đồng bộ tin nhắn không hợp lệ.");
+            }
+
+            pageSize = Math.Clamp(pageSize, 1, SoTinNhanToiDaMoiLanTai);
+            var room = await _context.PhongChat
+                .AsNoTracking()
+                .Where(x => x.MaPhongChat == maPhongChat && x.IsDeleted != true)
+                .Select(x => new { x.MaPhongChat, x.MaDuAn })
+                .FirstOrDefaultAsync();
+
+            if (room == null
+                || !await CoQuyenVaoDuAnAsync(room.MaDuAn, currentUserId)
+                || !await LaThanhVienPhongChatAsync(maPhongChat, currentUserId))
+            {
+                throw new Exception("Bạn không có quyền đồng bộ tin nhắn của phòng chat này.");
+            }
+
+            var rows = await (
+                from tn in _context.TinNhan.AsNoTracking()
+                join nd in _context.NguoiDung.AsNoTracking() on tn.MaNguoiDung equals nd.MaNguoiDung
+                from da in _context.DuAn.AsNoTracking()
+                where tn.MaPhongChat == maPhongChat
+                      && da.MaDuAn == room.MaDuAn
+                      && tn.MaTinNhan > afterMessageId
+                      && tn.IsDeleted != true
+                      && nd.IsDeleted != true
+                      && da.IsDeleted != true
+                orderby tn.MaTinNhan
+                select new ChatRealtimeMessageDto
+                {
+                    MaTinNhan = tn.MaTinNhan,
+                    MaPhongChat = tn.MaPhongChat,
+                    MaDuAn = da.MaDuAn,
+                    MaNguoiDung = tn.MaNguoiDung,
+                    TenNguoiGui = nd.HoTenNguoiDung ?? $"Nhân viên {tn.MaNguoiDung}",
+                    AvatarUrl = nd.AnhDaiDien,
+                    NoiDungTinNhan = tn.NoiDungTinNhan ?? string.Empty,
+                    ThoiGianGui = tn.ThoiGianGui ?? DateTime.MinValue,
+                    TenDuAn = da.TenDuAn ?? $"Dự án {da.MaDuAn}"
+                })
+                .Take(pageSize + 1)
+                .ToListAsync();
+
+            var hasMore = rows.Count > pageSize;
+            if (hasMore)
+            {
+                rows.RemoveAt(rows.Count - 1);
+            }
+
+            return new ChatDuAnTinNhanMoiBatchViewModel
+            {
+                DanhSachTinNhan = rows,
+                HasMore = hasMore
+            };
+        }
+
+        public async Task<List<ChatDuAnPhongItemViewModel>> GetPhongChatDuocThamGiaAsync(string? tuKhoa)
+        {
+            var batch = await GetPhongChatBatchAsync(tuKhoa, pageSize: SoPhongToiDaMoiLanTai);
+            return batch.DanhSachPhong;
+        }
+
+        public async Task<ChatDuAnPhongBatchViewModel> GetPhongChatBatchAsync(
+            string? tuKhoa,
+            int? lastRoomId = null,
+            int pageSize = SoPhongTaiBanDau)
+        {
+            KiemTraQuyenChat(Permissions.Chat.Xem);
+
+            var currentUserId = await GetCurrentUserIdAsync();
+            var roleFlags = await GetCurrentUserRoleFlagsAsync();
+            KiemTraKhongChoAdminChatDuAn(roleFlags);
+
+            return await GetPhongChatBatchNoAuthAsync(
+                currentUserId,
+                tuKhoa,
+                lastRoomId,
+                pageSize);
+        }
+
+        public async Task<List<ChatDuAnTinNhanItemViewModel>> GetTinNhanAsync(int maPhongChat)
+        {
+            var batch = await GetTinNhanBatchAsync(maPhongChat, pageSize: SoTinNhanToiDaMoiLanTai);
+            return batch.DanhSachTinNhan;
+        }
+
+        public async Task<ChatDuAnTinNhanBatchViewModel> GetTinNhanBatchAsync(
+            int maPhongChat,
+            DateTime? cursorThoiGianGui = null,
+            int? cursorMaTinNhan = null,
+            int pageSize = SoTinNhanTaiBanDau)
+        {
+            KiemTraQuyenChat(Permissions.Chat.Xem);
+
+            var currentUserId = await GetCurrentUserIdAsync();
+            var roleFlags = await GetCurrentUserRoleFlagsAsync();
+            KiemTraKhongChoAdminChatDuAn(roleFlags);
+
+            return await GetTinNhanBatchNoAuthAsync(
+                maPhongChat,
+                currentUserId,
+                cursorThoiGianGui,
+                cursorMaTinNhan,
+                pageSize);
+        }
+
+        private async Task<ChatDuAnPhongBatchViewModel> GetPhongChatBatchNoAuthAsync(
+            int currentUserId,
+            string? tuKhoa,
+            int? lastRoomId,
+            int pageSize)
+        {
+            pageSize = Math.Clamp(pageSize, 1, SoPhongToiDaMoiLanTai);
             var dsMaDuAn = await LayDanhSachMaDuAnTheoScopeAsync(currentUserId);
             if (dsMaDuAn.Count == 0)
             {
-                return new List<ChatDuAnPhongItemViewModel>();
-            }
-
-            foreach (var maDuAn in dsMaDuAn)
-            {
-                await DamBaoPhongChatDuAnAsync(maDuAn);
+                return new ChatDuAnPhongBatchViewModel { TuKhoa = tuKhoa };
             }
 
             var query =
-                from pc in _context.PhongChat
-                join da in _context.DuAn on pc.MaDuAn equals da.MaDuAn
+                from pc in _context.PhongChat.AsNoTracking()
+                join da in _context.DuAn.AsNoTracking() on pc.MaDuAn equals da.MaDuAn
                 where pc.IsDeleted != true
                       && da.IsDeleted != true
                       && dsMaDuAn.Contains(da.MaDuAn)
@@ -337,7 +524,23 @@ namespace QuanLyDuAn.Services.Implementations
                     pc.MaDuAn,
                     pc.TenPhong,
                     da.TenDuAn,
-                    da.TrangThaiDuAn
+                    da.TrangThaiDuAn,
+                    TinNhanMoiNhat = _context.TinNhan
+                        .Where(tn => tn.MaPhongChat == pc.MaPhongChat && tn.IsDeleted != true)
+                        .OrderByDescending(tn => tn.ThoiGianGui ?? DateTime.MinValue)
+                        .ThenByDescending(tn => tn.MaTinNhan)
+                        .Select(tn => tn.NoiDungTinNhan)
+                        .FirstOrDefault(),
+                    ThoiGianTinNhanMoiNhat = _context.TinNhan
+                        .Where(tn => tn.MaPhongChat == pc.MaPhongChat && tn.IsDeleted != true)
+                        .OrderByDescending(tn => tn.ThoiGianGui ?? DateTime.MinValue)
+                        .ThenByDescending(tn => tn.MaTinNhan)
+                        .Select(tn => tn.ThoiGianGui)
+                        .FirstOrDefault(),
+                    SoThanhVien = _context.ThanhVienPhongChat
+                        .Count(tv => tv.MaPhongChat == pc.MaPhongChat),
+                    SoTinNhan = _context.TinNhan
+                        .Count(tn => tn.MaPhongChat == pc.MaPhongChat && tn.IsDeleted != true)
                 };
 
             if (!string.IsNullOrWhiteSpace(tuKhoa))
@@ -348,128 +551,240 @@ namespace QuanLyDuAn.Services.Implementations
                     || (x.TenDuAn ?? string.Empty).ToLower().Contains(keyword));
             }
 
-            var roomRows = await query
-                .OrderBy(x => x.TenDuAn)
-                .ThenBy(x => x.MaPhongChat)
-                .ToListAsync();
-
-            if (roomRows.Count == 0)
+            if (lastRoomId.HasValue)
             {
-                return new List<ChatDuAnPhongItemViewModel>();
+                query = query.Where(x => x.MaPhongChat < lastRoomId.Value);
             }
 
-            var roomIds = roomRows.Select(x => x.MaPhongChat).Distinct().ToList();
-
-            var soThanhVienByPhong = await _context.ThanhVienPhongChat
-                .Where(x => roomIds.Contains(x.MaPhongChat))
-                .GroupBy(x => x.MaPhongChat)
-                .Select(x => new
-                {
-                    MaPhongChat = x.Key,
-                    SoLuong = x.Select(v => v.MaNguoiDung).Distinct().Count()
-                }).ToDictionaryAsync(x => x.MaPhongChat, x => x.SoLuong);
-
-            var soTinNhanByPhong = await _context.TinNhan
-                .Where(x => roomIds.Contains(x.MaPhongChat) && x.IsDeleted != true)
-                .GroupBy(x => x.MaPhongChat)
-                .Select(x => new
-                {
-                    MaPhongChat = x.Key,
-                    SoLuong = x.Count()
-                }).ToDictionaryAsync(x => x.MaPhongChat, x => x.SoLuong);
-
-            var tinMoiNhatRows = await _context.TinNhan
-                .Where(x => roomIds.Contains(x.MaPhongChat) && x.IsDeleted != true)
-                .OrderByDescending(x => x.ThoiGianGui ?? DateTime.MinValue)
-                .ThenByDescending(x => x.MaTinNhan)
-                .Select(x => new
-                {
-                    x.MaPhongChat,
-                    x.NoiDungTinNhan,
-                    x.ThoiGianGui
-                })
+            var rows = await query
+                .OrderByDescending(x => x.MaPhongChat)
+                .Take(pageSize + 1)
                 .ToListAsync();
 
-            var tinMoiNhatByPhong = tinMoiNhatRows
-                .GroupBy(x => x.MaPhongChat)
-                .ToDictionary(x => x.Key, x => x.First());
-
-            return roomRows.Select(x =>
+            var hasMore = rows.Count > pageSize;
+            if (hasMore)
             {
-                tinMoiNhatByPhong.TryGetValue(x.MaPhongChat, out var tinMoiNhat);
-                soThanhVienByPhong.TryGetValue(x.MaPhongChat, out var soThanhVien);
-                soTinNhanByPhong.TryGetValue(x.MaPhongChat, out var soTinNhan);
+                rows.RemoveAt(rows.Count - 1);
+            }
 
-                return new ChatDuAnPhongItemViewModel
-                {
-                    MaPhongChat = x.MaPhongChat,
-                    MaDuAn = x.MaDuAn,
-                    TenPhong = string.IsNullOrWhiteSpace(x.TenPhong) ? $"Chat - {x.TenDuAn}" : x.TenPhong!,
-                    TenDuAn = x.TenDuAn ?? $"Dự án {x.MaDuAn}",
-                    TrangThaiDuAn = TrangThai.ToDisplay(x.TrangThaiDuAn),
-                    SoThanhVien = soThanhVien,
-                    SoTinNhan = soTinNhan,
-                    TinNhanMoiNhat = tinMoiNhat?.NoiDungTinNhan,
-                    ThoiGianTinNhanMoiNhat = tinMoiNhat?.ThoiGianGui
-                };
+            var items = rows.Select(x => new ChatDuAnPhongItemViewModel
+            {
+                MaPhongChat = x.MaPhongChat,
+                MaDuAn = x.MaDuAn,
+                TenPhong = string.IsNullOrWhiteSpace(x.TenPhong) ? $"Chat - {x.TenDuAn}" : x.TenPhong!,
+                TenDuAn = x.TenDuAn ?? $"Dự án {x.MaDuAn}",
+                TrangThaiDuAn = TrangThai.ToDisplay(x.TrangThaiDuAn),
+                SoThanhVien = x.SoThanhVien,
+                SoTinNhan = x.SoTinNhan,
+                TinNhanMoiNhat = x.TinNhanMoiNhat,
+                ThoiGianTinNhanMoiNhat = x.ThoiGianTinNhanMoiNhat
             }).ToList();
+
+            var last = items.LastOrDefault();
+            return new ChatDuAnPhongBatchViewModel
+            {
+                DanhSachPhong = items,
+                HasMore = hasMore,
+                NextRoomId = last?.MaPhongChat,
+                TuKhoa = tuKhoa
+            };
         }
 
-        public async Task<List<ChatDuAnTinNhanItemViewModel>> GetTinNhanAsync(int maPhongChat)
+        private async Task<ChatDuAnTinNhanBatchViewModel> GetTinNhanBatchNoAuthAsync(
+            int maPhongChat,
+            int currentUserId,
+            DateTime? cursorThoiGianGui,
+            int? cursorMaTinNhan,
+            int pageSize)
         {
-            KiemTraQuyenChat(Permissions.Chat.Xem);
-
-            var currentUserId = await GetCurrentUserIdAsync();
-            var roleFlags = await GetCurrentUserRoleFlagsAsync();
-            KiemTraKhongChoAdminChatDuAn(roleFlags);
-
             if (maPhongChat <= 0)
             {
                 throw new Exception("Phòng chat không hợp lệ.");
             }
 
-            var roomInfo = await _context.PhongChat
-                .Where(x => x.MaPhongChat == maPhongChat && x.IsDeleted != true)
-                .Select(x => new
-                {
-                    x.MaPhongChat,
-                    x.MaDuAn
-                }).FirstOrDefaultAsync();
+            pageSize = Math.Clamp(pageSize, 1, SoTinNhanToiDaMoiLanTai);
 
-            if (roomInfo == null)
+            var roomExists = await _context.PhongChat
+                .AsNoTracking()
+                .AnyAsync(x => x.MaPhongChat == maPhongChat && x.IsDeleted != true);
+            if (!roomExists)
             {
                 throw new Exception("Không tìm thấy phòng chat.");
             }
 
-            var coQuyen = await CoQuyenVaoPhongChatAsync(maPhongChat, currentUserId);
-            if (!coQuyen)
+            if (!await CoQuyenVaoPhongChatAsync(maPhongChat, currentUserId))
             {
                 throw new Exception("Bạn không có quyền xem phòng chat này.");
             }
 
-            await DongBoThanhVienPhongChatAsync(roomInfo.MaDuAn);
+            if (!await LaThanhVienPhongChatAsync(maPhongChat, currentUserId))
+            {
+                throw new Exception("Bạn không còn là thành viên của phòng chat này.");
+            }
 
-            var tinNhan = await (
-                from tn in _context.TinNhan
-                join nd in _context.NguoiDung on tn.MaNguoiDung equals nd.MaNguoiDung
+            var query =
+                from tn in _context.TinNhan.AsNoTracking()
+                join nd in _context.NguoiDung.AsNoTracking() on tn.MaNguoiDung equals nd.MaNguoiDung
                 where tn.MaPhongChat == maPhongChat
                       && tn.IsDeleted != true
                       && nd.IsDeleted != true
-                orderby (tn.ThoiGianGui ?? DateTime.MinValue) descending, tn.MaTinNhan descending
-                select new ChatDuAnTinNhanItemViewModel
+                select new
                 {
-                    MaTinNhan = tn.MaTinNhan,
-                    MaPhongChat = tn.MaPhongChat,
-                    MaNguoiDung = tn.MaNguoiDung,
-                    HoTenNguoiDung = nd.HoTenNguoiDung ?? $"Nhân viên {nd.MaNguoiDung}",
-                    AnhDaiDien = nd.AnhDaiDien,
-                    NoiDungTinNhan = tn.NoiDungTinNhan ?? string.Empty,
-                    ThoiGianGui = tn.ThoiGianGui,
-                    LaTinNhanCuaToi = tn.MaNguoiDung == currentUserId
-                }).Take(GioiHanTinNhan).ToListAsync();
+                    TinNhan = tn,
+                    nd.HoTenNguoiDung,
+                    nd.AnhDaiDien
+                };
 
-            tinNhan.Reverse();
-            return tinNhan;
+            if (cursorMaTinNhan.HasValue)
+            {
+                if (!cursorThoiGianGui.HasValue)
+                {
+                    throw new Exception("Cursor tin nhắn không hợp lệ.");
+                }
+
+                var cursorTime = cursorThoiGianGui.Value;
+                var cursorMessageId = cursorMaTinNhan.Value;
+                query = query.Where(x =>
+                    (x.TinNhan.ThoiGianGui ?? DateTime.MinValue) < cursorTime
+                    || ((x.TinNhan.ThoiGianGui ?? DateTime.MinValue) == cursorTime
+                        && x.TinNhan.MaTinNhan < cursorMessageId));
+            }
+
+            var rows = await query
+                .OrderByDescending(x => x.TinNhan.ThoiGianGui ?? DateTime.MinValue)
+                .ThenByDescending(x => x.TinNhan.MaTinNhan)
+                .Take(pageSize + 1)
+                .Select(x => new
+                {
+                    MaTinNhan = x.TinNhan.MaTinNhan,
+                    MaPhongChat = x.TinNhan.MaPhongChat,
+                    MaNguoiDung = x.TinNhan.MaNguoiDung,
+                    x.HoTenNguoiDung,
+                    AnhDaiDien = x.AnhDaiDien,
+                    NoiDungTinNhan = x.TinNhan.NoiDungTinNhan ?? string.Empty,
+                    ThoiGianGui = x.TinNhan.ThoiGianGui
+                })
+                .ToListAsync();
+
+            var hasMore = rows.Count > pageSize;
+            if (hasMore)
+            {
+                rows.RemoveAt(rows.Count - 1);
+            }
+
+            var items = rows.Select(x => new ChatDuAnTinNhanItemViewModel
+            {
+                MaTinNhan = x.MaTinNhan,
+                MaPhongChat = x.MaPhongChat,
+                MaNguoiDung = x.MaNguoiDung,
+                HoTenNguoiDung = x.HoTenNguoiDung ?? $"Nhân viên {x.MaNguoiDung}",
+                AnhDaiDien = x.AnhDaiDien,
+                NoiDungTinNhan = x.NoiDungTinNhan,
+                ThoiGianGui = x.ThoiGianGui,
+                LaTinNhanCuaToi = x.MaNguoiDung == currentUserId
+            }).ToList();
+            items.Reverse();
+            var oldest = items.FirstOrDefault();
+
+            return new ChatDuAnTinNhanBatchViewModel
+            {
+                MaPhongChat = maPhongChat,
+                DanhSachTinNhan = items,
+                HasMore = hasMore,
+                CursorThoiGianGui = oldest?.ThoiGianGui ?? (oldest == null ? null : DateTime.MinValue),
+                CursorMaTinNhan = oldest?.MaTinNhan
+            };
+        }
+
+        private async Task<ChatDuAnPhongItemViewModel?> GetPhongItemTheoDuAnAsync(int maDuAn)
+        {
+            var maPhongChat = await _context.PhongChat
+                .AsNoTracking()
+                .Where(x => x.MaDuAn == maDuAn && x.IsDeleted != true)
+                .OrderBy(x => x.MaPhongChat)
+                .Select(x => (int?)x.MaPhongChat)
+                .FirstOrDefaultAsync();
+
+            return maPhongChat.HasValue
+                ? await GetPhongItemTheoMaPhongAsync(maPhongChat.Value)
+                : null;
+        }
+
+        private async Task<ChatDuAnPhongItemViewModel?> GetPhongItemTheoMaPhongAsync(int maPhongChat)
+        {
+            var row = await (
+                from pc in _context.PhongChat.AsNoTracking()
+                join da in _context.DuAn.AsNoTracking() on pc.MaDuAn equals da.MaDuAn
+                where pc.MaPhongChat == maPhongChat
+                      && pc.IsDeleted != true
+                      && da.IsDeleted != true
+                select new
+                {
+                    pc.MaPhongChat,
+                    pc.MaDuAn,
+                    pc.TenPhong,
+                    da.TenDuAn,
+                    da.TrangThaiDuAn,
+                    SoThanhVien = _context.ThanhVienPhongChat.Count(tv => tv.MaPhongChat == pc.MaPhongChat),
+                    SoTinNhan = _context.TinNhan.Count(tn => tn.MaPhongChat == pc.MaPhongChat && tn.IsDeleted != true),
+                    TinNhanMoiNhat = _context.TinNhan
+                        .Where(tn => tn.MaPhongChat == pc.MaPhongChat && tn.IsDeleted != true)
+                        .OrderByDescending(tn => tn.ThoiGianGui ?? DateTime.MinValue)
+                        .ThenByDescending(tn => tn.MaTinNhan)
+                        .Select(tn => tn.NoiDungTinNhan)
+                        .FirstOrDefault(),
+                    ThoiGianTinNhanMoiNhat = _context.TinNhan
+                        .Where(tn => tn.MaPhongChat == pc.MaPhongChat && tn.IsDeleted != true)
+                        .OrderByDescending(tn => tn.ThoiGianGui ?? DateTime.MinValue)
+                        .ThenByDescending(tn => tn.MaTinNhan)
+                        .Select(tn => tn.ThoiGianGui)
+                        .FirstOrDefault()
+                }).FirstOrDefaultAsync();
+
+            if (row == null)
+            {
+                return null;
+            }
+
+            return new ChatDuAnPhongItemViewModel
+            {
+                MaPhongChat = row.MaPhongChat,
+                MaDuAn = row.MaDuAn,
+                TenPhong = string.IsNullOrWhiteSpace(row.TenPhong) ? $"Chat - {row.TenDuAn}" : row.TenPhong!,
+                TenDuAn = row.TenDuAn ?? $"Dự án {row.MaDuAn}",
+                TrangThaiDuAn = TrangThai.ToDisplay(row.TrangThaiDuAn),
+                SoThanhVien = row.SoThanhVien,
+                SoTinNhan = row.SoTinNhan,
+                TinNhanMoiNhat = row.TinNhanMoiNhat,
+                ThoiGianTinNhanMoiNhat = row.ThoiGianTinNhanMoiNhat
+            };
+        }
+
+        private static ChatDuAnPageViewModel TaoPageViewModel(
+            ChatDuAnPhongItemViewModel phong,
+            ChatDuAnPhongBatchViewModel phongBatch,
+            ChatDuAnTinNhanBatchViewModel tinNhanBatch,
+            string? tuKhoa,
+            bool coTheGui)
+        {
+            phong.DangChon = true;
+            return new ChatDuAnPageViewModel
+            {
+                DanhSachPhong = phongBatch.DanhSachPhong,
+                PhongBatch = phongBatch,
+                PhongDangChon = phong,
+                DanhSachTinNhan = tinNhanBatch.DanhSachTinNhan,
+                TinNhanBatch = tinNhanBatch,
+                TuKhoa = tuKhoa,
+                MaDuAnDangChon = phong.MaDuAn,
+                MaPhongChatDangChon = phong.MaPhongChat,
+                CoTheGuiTinNhan = coTheGui,
+                Form = new ChatDuAnGuiTinNhanViewModel
+                {
+                    MaDuAn = phong.MaDuAn,
+                    MaPhongChat = phong.MaPhongChat
+                }
+            };
         }
 
         private async Task<int> DamBaoPhongChatNoiBoAsync(DuAn duAn)
@@ -748,6 +1063,49 @@ namespace QuanLyDuAn.Services.Implementations
                       && ((role.NormalizedName ?? role.Name) ?? string.Empty).ToUpper() == "ADMIN"
                 select nd.MaNguoiDung
             ).AnyAsync();
+        }
+
+        private async Task<List<string>> LayIdentityUserIdNhanRealtimeAsync(
+            int maPhongChat,
+            int maDuAn)
+        {
+            var recipients = await (
+                from tv in _context.ThanhVienPhongChat.AsNoTracking()
+                join nd in _context.NguoiDung.AsNoTracking() on tv.MaNguoiDung equals nd.MaNguoiDung
+                join asp in _context.Aspnetusers.AsNoTracking() on nd.MaNguoiDung equals asp.MaNguoiDung
+                where tv.MaPhongChat == maPhongChat
+                      && nd.IsDeleted != true
+                      && (asp.LockoutEnabled == false
+                          || !asp.LockoutEnd.HasValue
+                          || asp.LockoutEnd.Value <= DateTime.UtcNow)
+                      && (_context.DuAn.Any(da =>
+                              da.MaDuAn == maDuAn
+                              && da.IsDeleted != true
+                              && da.MaNguoiDung == nd.MaNguoiDung)
+                          || _context.NhanVienDuAn.Any(nv =>
+                              nv.MaDuAn == maDuAn
+                              && nv.MaNguoiDung == nd.MaNguoiDung))
+                      && !_context.Aspnetuserroles.Any(ur =>
+                          ur.Asp_Id == asp.Id
+                          && _context.Aspnetroles.Any(role =>
+                              role.Id == ur.Id
+                              && ((role.NormalizedName ?? role.Name) ?? string.Empty).ToUpper() == "ADMIN"))
+                      && (_context.Aspnetuserclaims.Any(uc =>
+                              uc.Asp_Id == asp.Id
+                              && uc.ClaimValue == Permissions.Chat.Xem)
+                          || _context.Aspnetuserroles.Any(ur =>
+                              ur.Asp_Id == asp.Id
+                              && _context.Aspnetroleclaims.Any(rc =>
+                                  rc.Asp_Id == ur.Id
+                                  && (rc.ClaimValue == Permissions.Chat.Xem
+                                      || _context.DanhMucQuyen.Any(q =>
+                                          q.MaDanhMucQuyen == rc.MaDanhMucQuyen
+                                          && q.TenDanhMucQuyen == Permissions.Chat.Xem)))))
+                select asp.Id)
+                .Distinct()
+                .ToListAsync();
+
+            return recipients;
         }
 
         private async Task<bool> CoTheGuiTinNhanAsync(int maPhongChat, int currentUserId, (bool IsAdmin, bool IsManager, bool IsEmployee) roleFlags)

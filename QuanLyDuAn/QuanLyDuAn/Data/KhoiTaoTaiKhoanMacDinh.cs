@@ -172,8 +172,6 @@ public static class KhoiTaoTaiKhoanMacDinh
 
             // Chi phí
             Permissions.ChiPhi.Xem,
-            Permissions.ChiPhi.Them,
-            Permissions.ChiPhi.Sua,
 
             // Chat
             Permissions.Chat.Xem,

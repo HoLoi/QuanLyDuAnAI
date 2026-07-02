@@ -153,7 +153,9 @@
         public static class ChiPhi
         {
             public const string Xem = "ChiPhi.Xem";
+            // Permission tương thích dữ liệu cũ; chi phí chỉ được sinh từ workflow duyệt đề xuất công việc.
             public const string Them = "ChiPhi.Them";
+            // Không cấp mới hoặc hiển thị để chọn trên màn hình phân quyền.
             public const string Sua = "ChiPhi.Sua";
         }
 

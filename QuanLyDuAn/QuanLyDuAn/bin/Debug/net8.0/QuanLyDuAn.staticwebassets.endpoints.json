@@ -413,6 +413,51 @@
       ]
     },
     {
+      "Route": "css/ChatDuAn/index.5vaqig167p.css",
+      "AssetFile": "css/ChatDuAn/index.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1521"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gdtJvm0vGWhaB5jPg0jIwvltJ3QDK8gNlmn4UdzN6xw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Jul 2026 12:46:18 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "5vaqig167p"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-gdtJvm0vGWhaB5jPg0jIwvltJ3QDK8gNlmn4UdzN6xw="
+        },
+        {
+          "Name": "label",
+          "Value": "css/ChatDuAn/index.css"
+        }
+      ]
+    },
+    {
       "Route": "css/ChatDuAn/index.css",
       "AssetFile": "css/ChatDuAn/index.css",
       "Selectors": [],
@@ -427,7 +472,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "899"
+          "Value": "1521"
         },
         {
           "Name": "Content-Type",
@@ -435,62 +480,17 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"grrsDiZAlcpHBihOnCrVU2qeKi2SDkLldJr7CZtRSxc=\""
+          "Value": "\"gdtJvm0vGWhaB5jPg0jIwvltJ3QDK8gNlmn4UdzN6xw=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 09 Jun 2026 09:43:15 GMT"
+          "Value": "Thu, 02 Jul 2026 12:46:18 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-grrsDiZAlcpHBihOnCrVU2qeKi2SDkLldJr7CZtRSxc="
-        }
-      ]
-    },
-    {
-      "Route": "css/ChatDuAn/index.m7vy0yi4aa.css",
-      "AssetFile": "css/ChatDuAn/index.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "899"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"grrsDiZAlcpHBihOnCrVU2qeKi2SDkLldJr7CZtRSxc=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Tue, 09 Jun 2026 09:43:15 GMT"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "m7vy0yi4aa"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-grrsDiZAlcpHBihOnCrVU2qeKi2SDkLldJr7CZtRSxc="
-        },
-        {
-          "Name": "label",
-          "Value": "css/ChatDuAn/index.css"
+          "Value": "sha256-gdtJvm0vGWhaB5jPg0jIwvltJ3QDK8gNlmn4UdzN6xw="
         }
       ]
     },
@@ -659,6 +659,51 @@
       ]
     },
     {
+      "Route": "css/ChatDuAn/message-list.8xb9trl2sg.css",
+      "AssetFile": "css/ChatDuAn/message-list.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1290"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ZAJuJLtEfR7Wsth+HY1of0+EywkT4LwUXJY2RDFMsuc=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Jul 2026 12:46:20 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "8xb9trl2sg"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ZAJuJLtEfR7Wsth+HY1of0+EywkT4LwUXJY2RDFMsuc="
+        },
+        {
+          "Name": "label",
+          "Value": "css/ChatDuAn/message-list.css"
+        }
+      ]
+    },
+    {
       "Route": "css/ChatDuAn/message-list.css",
       "AssetFile": "css/ChatDuAn/message-list.css",
       "Selectors": [],
@@ -673,7 +718,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "786"
+          "Value": "1290"
         },
         {
           "Name": "Content-Type",
@@ -681,62 +726,17 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"HfjDvlAgvJOLfzA4TBc0X5ZrE9f5dbXZm9aep3YQ/08=\""
+          "Value": "\"ZAJuJLtEfR7Wsth+HY1of0+EywkT4LwUXJY2RDFMsuc=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 09 Jun 2026 09:43:57 GMT"
+          "Value": "Thu, 02 Jul 2026 12:46:20 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-HfjDvlAgvJOLfzA4TBc0X5ZrE9f5dbXZm9aep3YQ/08="
-        }
-      ]
-    },
-    {
-      "Route": "css/ChatDuAn/message-list.j09dxitaay.css",
-      "AssetFile": "css/ChatDuAn/message-list.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "786"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"HfjDvlAgvJOLfzA4TBc0X5ZrE9f5dbXZm9aep3YQ/08=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Tue, 09 Jun 2026 09:43:57 GMT"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "j09dxitaay"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-HfjDvlAgvJOLfzA4TBc0X5ZrE9f5dbXZm9aep3YQ/08="
-        },
-        {
-          "Name": "label",
-          "Value": "css/ChatDuAn/message-list.css"
+          "Value": "sha256-ZAJuJLtEfR7Wsth+HY1of0+EywkT4LwUXJY2RDFMsuc="
         }
       ]
     },
@@ -755,7 +755,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "6188"
+          "Value": "6348"
         },
         {
           "Name": "Content-Type",
@@ -763,22 +763,22 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"dLiVgl0mqfIUhAs3BvkqRMmrRRIQWUKSkKjv8q6a+yw=\""
+          "Value": "\"ABXgoMMhsKtdqOCArzh0OPcxdr2zNd3TCFSgAWCfUeU=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 09 Jun 2026 10:19:45 GMT"
+          "Value": "Thu, 02 Jul 2026 11:07:24 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-dLiVgl0mqfIUhAs3BvkqRMmrRRIQWUKSkKjv8q6a+yw="
+          "Value": "sha256-ABXgoMMhsKtdqOCArzh0OPcxdr2zNd3TCFSgAWCfUeU="
         }
       ]
     },
     {
-      "Route": "css/ChatDuAn/room-list.g5b8uo5haa.css",
+      "Route": "css/ChatDuAn/room-list.w0mm4a10oy.css",
       "AssetFile": "css/ChatDuAn/room-list.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -792,7 +792,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "6188"
+          "Value": "6348"
         },
         {
           "Name": "Content-Type",
@@ -800,21 +800,21 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"dLiVgl0mqfIUhAs3BvkqRMmrRRIQWUKSkKjv8q6a+yw=\""
+          "Value": "\"ABXgoMMhsKtdqOCArzh0OPcxdr2zNd3TCFSgAWCfUeU=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Tue, 09 Jun 2026 10:19:45 GMT"
+          "Value": "Thu, 02 Jul 2026 11:07:24 GMT"
         }
       ],
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "g5b8uo5haa"
+          "Value": "w0mm4a10oy"
         },
         {
           "Name": "integrity",
-          "Value": "sha256-dLiVgl0mqfIUhAs3BvkqRMmrRRIQWUKSkKjv8q6a+yw="
+          "Value": "sha256-ABXgoMMhsKtdqOCArzh0OPcxdr2zNd3TCFSgAWCfUeU="
         },
         {
           "Name": "label",
@@ -4837,6 +4837,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-Jtxf9L+5ITKRc1gIRl4VbUpGkRNfOBXjYTdhJD4facM="
+        }
+      ]
+    },
+    {
+      "Route": "js/ChatDuAn/chat.js",
+      "AssetFile": "js/ChatDuAn/chat.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "26108"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"t3aHQnahwDVkuL0REC4jrclaF61Mbs7q4MiabwE7o7I=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Jul 2026 12:48:00 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-t3aHQnahwDVkuL0REC4jrclaF61Mbs7q4MiabwE7o7I="
+        }
+      ]
+    },
+    {
+      "Route": "js/ChatDuAn/chat.vilj7vgpnc.js",
+      "AssetFile": "js/ChatDuAn/chat.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "26108"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"t3aHQnahwDVkuL0REC4jrclaF61Mbs7q4MiabwE7o7I=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Jul 2026 12:48:00 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vilj7vgpnc"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-t3aHQnahwDVkuL0REC4jrclaF61Mbs7q4MiabwE7o7I="
+        },
+        {
+          "Name": "label",
+          "Value": "js/ChatDuAn/chat.js"
         }
       ]
     },
@@ -9921,6 +10003,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-OZVI+w57FGwS9boYCZpH1ZSpcP7pYhLu4KtIUvPlZ4I="
+        }
+      ]
+    },
+    {
+      "Route": "lib/microsoft/signalr/signalr.min.87p4xtea33.js",
+      "AssetFile": "lib/microsoft/signalr/signalr.min.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "47648"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"lA122L4UfOFD8QYGV1QI1YL+ziLh8J4ZFlXzrzbHeP0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 18:42:56 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "87p4xtea33"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-lA122L4UfOFD8QYGV1QI1YL+ziLh8J4ZFlXzrzbHeP0="
+        },
+        {
+          "Name": "label",
+          "Value": "lib/microsoft/signalr/signalr.min.js"
+        }
+      ]
+    },
+    {
+      "Route": "lib/microsoft/signalr/signalr.min.js",
+      "AssetFile": "lib/microsoft/signalr/signalr.min.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "47648"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"lA122L4UfOFD8QYGV1QI1YL+ziLh8J4ZFlXzrzbHeP0=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 18:42:56 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-lA122L4UfOFD8QYGV1QI1YL+ziLh8J4ZFlXzrzbHeP0="
         }
       ]
     },
