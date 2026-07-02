@@ -748,8 +748,15 @@ namespace QuanLyDuAn.Services.Implementations
             }
         }
 
-        public async Task LockAccountAsync(int id)
+        public async Task LockAccountAsync(int id, int maNguoiDungDangThaoTac)
         {
+            if (id == maNguoiDungDangThaoTac)
+            {
+                throw new Exception("Bạn không thể tự khóa tài khoản đang đăng nhập.");
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
             await KiemTraRangBuocKhoaAsync(id);
 
             var userId = await _context.NguoiDung
@@ -768,10 +775,44 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Không tìm thấy tài khoản hệ thống.");
             }
 
+            var targetIsAdmin = await (
+                from userRole in _context.Aspnetuserroles.AsNoTracking()
+                join role in _context.Aspnetroles.AsNoTracking() on userRole.Id equals role.Id
+                where userRole.Asp_Id == account.Id
+                      && (role.NormalizedName == "ADMIN" || role.Name!.ToUpper() == "ADMIN")
+                select userRole.Asp_Id
+            ).AnyAsync();
+
+            var now = DateTime.UtcNow;
+            var targetIsActive = account.EmailConfirmed
+                && (!account.LockoutEnd.HasValue || account.LockoutEnd.Value <= now);
+
+            if (targetIsAdmin && targetIsActive)
+            {
+                var activeAdminCount = await (
+                    from userRole in _context.Aspnetuserroles.AsNoTracking()
+                    join role in _context.Aspnetroles.AsNoTracking() on userRole.Id equals role.Id
+                    join adminAccount in _context.Aspnetusers.AsNoTracking() on userRole.Asp_Id equals adminAccount.Id
+                    join profile in _context.NguoiDung.AsNoTracking() on adminAccount.MaNguoiDung equals profile.MaNguoiDung
+                    where (role.NormalizedName == "ADMIN" || role.Name!.ToUpper() == "ADMIN")
+                          && profile.IsDeleted != true
+                          && adminAccount.EmailConfirmed
+                          && (!adminAccount.LockoutEnd.HasValue || adminAccount.LockoutEnd.Value <= now)
+                    select adminAccount.Id
+                ).Distinct().CountAsync();
+
+                if (activeAdminCount <= 1)
+                {
+                    throw new Exception("Không thể khóa Admin cuối cùng đang hoạt động của hệ thống.");
+                }
+            }
+
             account.LockoutEnabled = true;
             account.LockoutEnd = DateTime.UtcNow.AddYears(100);
+            account.SecurityStamp = Guid.NewGuid().ToString("N");
 
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
         }
 
         private async Task KiemTraRangBuocKhoaAsync(int maNguoiDung)

@@ -3,7 +3,7 @@
 
 @{
     var permissions = ViewBag.Permissions as HashSet<string> ?? new();
-    
+    var maNguoiDungHienTai = ViewBag.MaNguoiDungHienTai as int?;
 }
 
 <table class="table workflow-table mt-3 app-data-table">
@@ -65,7 +65,11 @@
                         </form>
                     }
 
-                    @if (ns.CoTaiKhoan && permissions.Contains(Permissions.NhanSu.Khoa) && !ns.TaiKhoanBiKhoa)
+                    @if (ns.MaNguoiDung == maNguoiDungHienTai)
+                    {
+                        <span class="workflow-badge workflow-idle">Tài khoản hiện tại</span>
+                    }
+                    else if (ns.CoTaiKhoan && permissions.Contains(Permissions.NhanSu.Khoa) && !ns.TaiKhoanBiKhoa)
                     {
                         <form asp-action="KhoaTaiKhoan" method="post">
                             <input type="hidden" name="maNguoiDung" value="@ns.MaNguoiDung" />

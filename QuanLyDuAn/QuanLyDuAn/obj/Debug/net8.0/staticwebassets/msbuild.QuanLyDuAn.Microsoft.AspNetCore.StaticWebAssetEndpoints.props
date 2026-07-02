@@ -12,17 +12,17 @@
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-Ly6oHFFdmAt7PoxcZ4JdnS1qjNlQUxhnZoczAzaUL9c="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"4860"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022Ly6oHFFdmAt7PoxcZ4JdnS1qjNlQUxhnZoczAzaUL9c=\u0022"},{"Name":"Last-Modified","Value":"Sun, 24 May 2026 11:37:22 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/QuanLyDuAn/css/AI/index.46qub2domt.css">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\AI\index.css'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"46qub2domt"},{"Name":"integrity","Value":"sha256-/OLY9G4Rym1xbzCI60a5waaoEdNg1unFL\u002BQ8nuO0aEQ="},{"Name":"label","Value":"_content/QuanLyDuAn/css/AI/index.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"8388"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022/OLY9G4Rym1xbzCI60a5waaoEdNg1unFL\u002BQ8nuO0aEQ=\u0022"},{"Name":"Last-Modified","Value":"Thu, 28 May 2026 07:02:13 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/QuanLyDuAn/css/AI/index.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\AI\index.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-/OLY9G4Rym1xbzCI60a5waaoEdNg1unFL\u002BQ8nuO0aEQ="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"8388"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022/OLY9G4Rym1xbzCI60a5waaoEdNg1unFL\u002BQ8nuO0aEQ=\u0022"},{"Name":"Last-Modified","Value":"Thu, 28 May 2026 07:02:13 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-5BDygHbUrgRhilSGvve8SIZAB5j7iPjyKtZqiI2Zfyk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"8733"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u00225BDygHbUrgRhilSGvve8SIZAB5j7iPjyKtZqiI2Zfyk=\u0022"},{"Name":"Last-Modified","Value":"Thu, 02 Jul 2026 05:21:21 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/QuanLyDuAn/css/AI/index.gdcljrqkc3.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\AI\index.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"gdcljrqkc3"},{"Name":"integrity","Value":"sha256-5BDygHbUrgRhilSGvve8SIZAB5j7iPjyKtZqiI2Zfyk="},{"Name":"label","Value":"_content/QuanLyDuAn/css/AI/index.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"8733"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u00225BDygHbUrgRhilSGvve8SIZAB5j7iPjyKtZqiI2Zfyk=\u0022"},{"Name":"Last-Modified","Value":"Thu, 02 Jul 2026 05:21:21 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/QuanLyDuAn/css/ChatDuAn/chat-header.8ifojw1yh3.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\ChatDuAn\chat-header.css'))</AssetFile>

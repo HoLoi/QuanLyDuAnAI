@@ -12,6 +12,7 @@ namespace QuanLyDuAn.ViewModels.NhanSu
         public string? TuKhoa { get; set; }
         public int? LocMaChucDanh { get; set; }
         public string? LocTrangThaiTaiKhoan { get; set; }
+        public int? MaNguoiDungHienTai { get; set; }
         public HashSet<string> Permissions { get; set; } = new();
     }
 }

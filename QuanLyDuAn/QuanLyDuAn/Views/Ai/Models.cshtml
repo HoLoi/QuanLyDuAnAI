@@ -305,12 +305,37 @@
 
         @if (Model.KetQuaTestPhanTich != null)
         {
-            <div class="ai-grid ai-grid-4 mt-3">
+            var testResult = Model.KetQuaTestPhanTich;
+            var isRuleFallback = string.Equals(testResult.ReasonSource, "RuleFallback", StringComparison.OrdinalIgnoreCase);
+            var isValidConfidence = double.IsFinite(testResult.Confidence)
+                && testResult.Confidence >= 0d
+                && testResult.Confidence <= 1d;
+            var confidenceLevel = !isValidConfidence
+                ? "Không xác định"
+                : testResult.Confidence < 0.60d
+                    ? "Thấp"
+                    : testResult.Confidence < 0.80d
+                        ? "Trung bình"
+                        : "Cao";
+
+            <div class="ai-grid ai-grid-4 ai-test-result-grid mt-3">
                 <article class="ai-stat-card"><span class="ai-stat-label">Nguyên nhân gợi ý</span><strong class="ai-stat-value">@Model.KetQuaTestPhanTich.SuggestedReason</strong></article>
-                <article class="ai-stat-card"><span class="ai-stat-label">Độ tin cậy</span><strong class="ai-stat-value">@Model.KetQuaTestPhanTich.Confidence.ToString("P0")</strong></article>
+                <article class="ai-stat-card">
+                    <span class="ai-stat-label">Mức độ tin cậy</span>
+                    <strong class="ai-stat-value">@(isRuleFallback ? "Theo quy tắc" : confidenceLevel)</strong>
+                    @* @if (isRuleFallback)
+                    {
+                        <small class="ai-stat-note">Không áp dụng confidence cho kết quả theo quy tắc.</small>
+                    }
+                    else if (isValidConfidence)
+                    {
+                        <small class="ai-stat-note">Xác suất của kết quả trên mẫu hiện tại: @testResult.Confidence.ToString("P0")</small>
+                    } *@
+                </article>
                 <article class="ai-stat-card"><span class="ai-stat-label">Nguồn</span><strong class="ai-stat-value">@(Model.KetQuaTestPhanTich.ReasonSource == "NguyenNhanModel" ? "Mô hình" : "Quy tắc")</strong></article>
-                <article class="ai-stat-card"><span class="ai-stat-label">Model</span><strong class="ai-stat-value">@Model.KetQuaTestPhanTich.ModelUsed</strong></article>
+                <article class="ai-stat-card"><span class="ai-stat-label">Model</span><strong class="ai-stat-value ai-model-file-value" title="@testResult.ModelUsed">@testResult.ModelUsed</strong></article>
             </div>
+            <small class="ai-confidence-explanation">Mức độ tin cậy phản ánh độ chắc chắn của kết quả đối với dự án đang thử, không phải độ chính xác tổng thể của model.</small>
         }
     </article>
 </section>

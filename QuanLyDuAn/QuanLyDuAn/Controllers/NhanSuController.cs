@@ -53,6 +53,7 @@ namespace QuanLyDuAn.Controllers
                 TuKhoa = tuKhoa,
                 LocMaChucDanh = locMaChucDanh,
                 LocTrangThaiTaiKhoan = locTrangThaiTaiKhoan,
+                MaNguoiDungHienTai = GetCurrentMaNguoiDung(),
                 Permissions = permissions
             };
 
@@ -80,6 +81,7 @@ namespace QuanLyDuAn.Controllers
                 Form = form,
                 DanhSachChucDanh = await _service.GetChucDanhOptionsAsync(),
                 DanhSachVaiTroHeThong = await _service.GetVaiTroHeThongOptionsAsync(),
+                MaNguoiDungHienTai = GetCurrentMaNguoiDung(),
                 Permissions = permissions
             };
 
@@ -103,6 +105,7 @@ namespace QuanLyDuAn.Controllers
                 vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaChucDanh, vm.LocTrangThaiTaiKhoan);
                 vm.DanhSachChucDanh = await _service.GetChucDanhOptionsAsync();
                 vm.DanhSachVaiTroHeThong = await _service.GetVaiTroHeThongOptionsAsync();
+                vm.MaNguoiDungHienTai = GetCurrentMaNguoiDung();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
             }
@@ -138,6 +141,7 @@ namespace QuanLyDuAn.Controllers
                 vm.DanhSach = await _service.GetAllAsync(vm.TuKhoa, vm.LocMaChucDanh, vm.LocTrangThaiTaiKhoan);
                 vm.DanhSachChucDanh = await _service.GetChucDanhOptionsAsync();
                 vm.DanhSachVaiTroHeThong = await _service.GetVaiTroHeThongOptionsAsync();
+                vm.MaNguoiDungHienTai = GetCurrentMaNguoiDung();
                 vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
                 return View("Index", vm);
             }
@@ -199,7 +203,13 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                await _service.LockAccountAsync(maNguoiDung);
+                var maNguoiDungDangThaoTac = GetCurrentMaNguoiDung();
+                if (!maNguoiDungDangThaoTac.HasValue)
+                {
+                    throw new Exception("Không xác định được tài khoản đang đăng nhập.");
+                }
+
+                await _service.LockAccountAsync(maNguoiDung, maNguoiDungDangThaoTac.Value);
                 TempData["Success"] = "Đã khóa tài khoản nhân sự";
             }
             catch (Exception ex)
@@ -273,6 +283,14 @@ namespace QuanLyDuAn.Controllers
 
             var result = _exportFileService.Export(exportRequest);
             return File(result.Content, result.ContentType, result.FileName);
+        }
+
+        private int? GetCurrentMaNguoiDung()
+        {
+            var claimValue = User.FindFirst("MaNguoiDung")?.Value;
+            return int.TryParse(claimValue, out var maNguoiDung) && maNguoiDung > 0
+                ? maNguoiDung
+                : null;
         }
     }
 }

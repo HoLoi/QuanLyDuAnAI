@@ -319,7 +319,7 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const labels = @Html.Raw(JsonSerializer.Serialize(Model.TenDuAn ?? new List<string>()));
+        const fullProjectLabels = @Html.Raw(JsonSerializer.Serialize(Model.TenDuAn ?? new List<string>()));
         const progressData = @Html.Raw(JsonSerializer.Serialize(Model.PhanTramTienDo ?? new List<int>()));
         const costData = @Html.Raw(JsonSerializer.Serialize(Model.ChiPhiTheoDuAn ?? new List<decimal>()));
         const projectStatusLabels = @Html.Raw(JsonSerializer.Serialize(Model.TrangThaiDuAnChart.Select(x => x.Label).ToList()));
@@ -333,6 +333,54 @@
         const timelineDelayedTasks = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.CongViecTre).ToList()));
         const timelineExpenses = @Html.Raw(JsonSerializer.Serialize(Model.ThongKeTheoThang.Select(x => x.ChiPhi).ToList()));
         const palette = ["#5067d8", "#21a6c9", "#34a66f", "#f0ae3d", "#d95f59", "#8a7be5"];
+        const projectLabelMaxLength = 24;
+
+        const normalizeProjectLabel = value => {
+            const text = typeof value === "string" ? value.trim() : "";
+            return text || "Dự án chưa đặt tên";
+        };
+
+        const shortenProjectLabel = value => {
+            const text = normalizeProjectLabel(value);
+            const characters = Array.from(text);
+            if (characters.length <= projectLabelMaxLength) {
+                return text;
+            }
+
+            const separator = " - ";
+            const separatorIndex = text.indexOf(separator);
+            if (separatorIndex > 0) {
+                const projectCode = text.slice(0, separatorIndex).trim();
+                const description = text.slice(separatorIndex + separator.length).trim();
+                const prefix = `${projectCode}${separator}`;
+                const availableDescriptionLength = projectLabelMaxLength - Array.from(prefix).length - 1;
+                if (description && availableDescriptionLength > 0) {
+                    return `${prefix}${Array.from(description).slice(0, availableDescriptionLength).join("").trimEnd()}…`;
+                }
+            }
+
+            return `${characters.slice(0, projectLabelMaxLength - 1).join("").trimEnd()}…`;
+        };
+
+        const axisProjectLabels = fullProjectLabels.map(shortenProjectLabel);
+        const projectXAxis = {
+            ticks: {
+                autoSkip: true,
+                maxRotation: 0,
+                minRotation: 0,
+                padding: 6
+            }
+        };
+        const projectTooltip = {
+            callbacks: {
+                title: items => {
+                    const dataIndex = items?.[0]?.dataIndex;
+                    return Number.isInteger(dataIndex)
+                        ? normalizeProjectLabel(fullProjectLabels[dataIndex])
+                        : "";
+                }
+            }
+        };
 
         const render = (id, config) => {
             const canvas = document.getElementById(id);
@@ -340,11 +388,11 @@
             new Chart(canvas, config);
         };
 
-        if (labels.length > 0 && progressData.length > 0) {
-            render("progressChart", { type: "bar", data: { labels, datasets: [{ label: "% hoàn thành", data: progressData, backgroundColor: "#5067d8", borderRadius: 6, maxBarThickness: 30 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } } });
+        if (axisProjectLabels.length > 0 && progressData.length > 0) {
+            render("progressChart", { type: "bar", data: { labels: axisProjectLabels, datasets: [{ label: "% hoàn thành", data: progressData, backgroundColor: "#5067d8", borderRadius: 6, maxBarThickness: 30 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: projectTooltip }, scales: { x: projectXAxis, y: { beginAtZero: true, max: 100 } } } });
         }
-        if (labels.length > 0 && costData.length > 0) {
-            render("costChart", { type: "bar", data: { labels, datasets: [{ label: "Chi phí", data: costData, backgroundColor: "#21a6c9", borderRadius: 6, maxBarThickness: 30 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
+        if (axisProjectLabels.length > 0 && costData.length > 0) {
+            render("costChart", { type: "bar", data: { labels: axisProjectLabels, datasets: [{ label: "Chi phí", data: costData, backgroundColor: "#21a6c9", borderRadius: 6, maxBarThickness: 30 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: projectTooltip }, scales: { x: projectXAxis, y: { beginAtZero: true } } } });
         }
         if (projectStatusLabels.length > 0) {
             render("projectStatusChart", { type: "doughnut", data: { labels: projectStatusLabels, datasets: [{ data: projectStatusValues, backgroundColor: palette }] }, options: { responsive: true, maintainAspectRatio: false } });
