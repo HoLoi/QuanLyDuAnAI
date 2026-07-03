@@ -28,6 +28,7 @@
 
         public bool CoTheDanhGia { get; set; }
         public bool CoTheSua { get; set; }
+        public bool CoTheXacNhan { get; set; }
         public bool CoTheGuiDuyet { get; set; }
         public bool CoTheDuyet { get; set; }
         public bool CoTheTuChoi { get; set; }

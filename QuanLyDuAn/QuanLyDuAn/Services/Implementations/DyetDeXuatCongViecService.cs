@@ -24,11 +24,19 @@ namespace QuanLyDuAn.Services.Implementations
         public async Task<DuyetDeXuatCongViecPageViewModel> GetPageAsync(
             int? locMaDuAn,
             string? locTrangThai,
+            int? locMaNguoiDungDeXuat,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            string? tuKhoa,
             int pageNumber = 1,
             int pageSize = PaginationViewModel.DefaultPageSize,
             bool paginate = true)
         {
             var currentUserId = await GetCurrentUserIdAsync();
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgay, denNgay);
+            var tuKhoaLoc = string.IsNullOrWhiteSpace(tuKhoa) ? null : tuKhoa.Trim();
+            var danhSachDuAn = await GetManagedProjectOptionsAsync(currentUserId);
+            var danhSachNguoiDeXuat = await GetRequesterOptionsAsync(currentUserId);
 
             var query =
                 from dx in _context.DeXuatCongViec
@@ -68,6 +76,11 @@ namespace QuanLyDuAn.Services.Implementations
                 query = query.Where(x => x.MaDuAn == locMaDuAn.Value);
             }
 
+            if (locMaNguoiDungDeXuat.HasValue)
+            {
+                query = query.Where(x => x.MaNguoiDungDeXuat == locMaNguoiDungDeXuat.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(locTrangThai))
             {
                 var filterValues = TrangThai.GetCommonStatusVariants(locTrangThai);
@@ -75,6 +88,31 @@ namespace QuanLyDuAn.Services.Implementations
                 {
                     query = query.Where(x => filterValues.Contains(x.TrangThaiCongViecDeXuat));
                 }
+            }
+
+            if (tuNgayLoc.HasValue)
+            {
+                query = query.Where(x =>
+                    x.NgayDeXuatCongViec.HasValue &&
+                    x.NgayDeXuatCongViec.Value >= tuNgayLoc.Value);
+            }
+
+            if (denNgayLoc.HasValue)
+            {
+                var denNgayDocQuyen = denNgayLoc.Value.AddDays(1);
+                query = query.Where(x =>
+                    x.NgayDeXuatCongViec.HasValue &&
+                    x.NgayDeXuatCongViec.Value < denNgayDocQuyen);
+            }
+
+            if (!string.IsNullOrWhiteSpace(tuKhoaLoc))
+            {
+                var keyword = tuKhoaLoc.ToLower();
+                query = query.Where(x =>
+                    x.TenCongViecDeXuat.ToLower().Contains(keyword) ||
+                    x.MoTaCongViecDeXuat.ToLower().Contains(keyword) ||
+                    x.TenDuAn.ToLower().Contains(keyword) ||
+                    x.NguoiDungDeXuat.ToLower().Contains(keyword));
             }
 
             var totalItems = await query.CountAsync();
@@ -93,10 +131,66 @@ namespace QuanLyDuAn.Services.Implementations
             return new DuyetDeXuatCongViecPageViewModel
             {
                 DanhSach = await danhSachQuery.ToListAsync(),
+                DanhSachDuAn = danhSachDuAn,
+                DanhSachNguoiDeXuat = danhSachNguoiDeXuat,
                 Pagination = pagination,
                 LocMaDuAn = locMaDuAn,
-                LocTrangThai = locTrangThai
+                LocTrangThai = locTrangThai,
+                LocMaNguoiDungDeXuat = locMaNguoiDungDeXuat,
+                TuNgay = tuNgayLoc,
+                DenNgay = denNgayLoc,
+                TuKhoa = tuKhoaLoc
             };
+        }
+
+        private async Task<List<DuyetDeXuatCongViecSelectOptionViewModel>> GetManagedProjectOptionsAsync(int currentUserId)
+        {
+            var rawOptions = await _context.DuAn
+                .Where(x => x.IsDeleted != true && x.MaNguoiDung == currentUserId)
+                .OrderBy(x => x.TenDuAn)
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    x.TenDuAn
+                })
+                .ToListAsync();
+
+            return rawOptions
+                .Select(x => new DuyetDeXuatCongViecSelectOptionViewModel
+                {
+                    Value = x.MaDuAn,
+                    Text = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Dự án {x.MaDuAn}" : x.TenDuAn
+                })
+                .OrderBy(x => x.Text)
+                .ToList();
+        }
+
+        private async Task<List<DuyetDeXuatCongViecSelectOptionViewModel>> GetRequesterOptionsAsync(int currentUserId)
+        {
+            var rawOptions = await (
+                from dx in _context.DeXuatCongViec
+                join da in _context.DuAn on dx.MaDuAn equals da.MaDuAn
+                join nd in _context.NguoiDung on dx.MaNguoiDungDeXuat equals nd.MaNguoiDung
+                where dx.IsDeleted != true
+                      && da.IsDeleted != true
+                      && da.MaNguoiDung == currentUserId
+                      && nd.IsDeleted != true
+                select new
+                {
+                    nd.MaNguoiDung,
+                    nd.HoTenNguoiDung
+                })
+                .Distinct()
+                .ToListAsync();
+
+            return rawOptions
+                .Select(x => new DuyetDeXuatCongViecSelectOptionViewModel
+                {
+                    Value = x.MaNguoiDung,
+                    Text = string.IsNullOrWhiteSpace(x.HoTenNguoiDung) ? $"Người dùng {x.MaNguoiDung}" : x.HoTenNguoiDung
+                })
+                .OrderBy(x => x.Text)
+                .ToList();
         }
 
         public async Task ApproveAsync(int maDeXuatCv)
@@ -288,6 +382,19 @@ namespace QuanLyDuAn.Services.Implementations
         private static bool IsPending(string? status)
         {
             return TrangThai.EqualsValue(status, TrangThai.ChoDuyet);
+        }
+
+        private static (DateTime? TuNgay, DateTime? DenNgay) ChuanHoaKhoangNgay(DateTime? tuNgay, DateTime? denNgay)
+        {
+            var tu = tuNgay?.Date;
+            var den = denNgay?.Date;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
         }
 
         private async Task EnsureIsProjectManagerAsync(int maNguoiDung, int maDuAn)

@@ -147,7 +147,7 @@ namespace QuanLyDuAn.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> GuiDuyet(
+        public async Task<IActionResult> XacNhan(
             int maDanhGiaDuAn,
             int? maDuAn,
             string? tuKhoa,
@@ -163,8 +163,8 @@ namespace QuanLyDuAn.Controllers
 
             try
             {
-                await _service.GuiDuyetAsync(maDanhGiaDuAn);
-                TempData["Success"] = "Đã gửi duyệt đánh giá dự án.";
+                await _service.XacNhanAsync(maDanhGiaDuAn);
+                TempData["Success"] = "Đã xác nhận đánh giá dự án.";
             }
             catch (Exception ex)
             {
@@ -176,7 +176,7 @@ namespace QuanLyDuAn.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Duyet(
+        public IActionResult GuiDuyet(
             int maDanhGiaDuAn,
             int? maDuAn,
             string? tuKhoa,
@@ -185,27 +185,28 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgayDanhGia,
             DateTime? denNgayDanhGia)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.DanhGiaDuAn.Duyet))
-            {
-                return Forbid();
-            }
-
-            try
-            {
-                await _service.DuyetAsync(maDanhGiaDuAn);
-                TempData["Success"] = "Đã duyệt đánh giá dự án.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
+            TempData["Error"] = "Luồng gửi duyệt đã được thay bằng xác nhận đánh giá.";
             return RedirectToReturnUrlOrIndex(returnUrl, new { maDuAn, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TuChoi(
+        public IActionResult Duyet(
+            int maDanhGiaDuAn,
+            int? maDuAn,
+            string? tuKhoa,
+            string? trangThai,
+            string? returnUrl,
+            DateTime? tuNgayDanhGia,
+            DateTime? denNgayDanhGia)
+        {
+            TempData["Error"] = "Luồng duyệt bởi Admin đã được thay bằng xác nhận đánh giá của Manager.";
+            return RedirectToReturnUrlOrIndex(returnUrl, new { maDuAn, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult TuChoi(
             int maDanhGiaDuAn,
             string lyDoTuChoi,
             int? maDuAn,
@@ -215,21 +216,7 @@ namespace QuanLyDuAn.Controllers
             DateTime? tuNgayDanhGia,
             DateTime? denNgayDanhGia)
         {
-            if (!await _permission.HasPermissionAsync(User, Permissions.DanhGiaDuAn.Duyet))
-            {
-                return Forbid();
-            }
-
-            try
-            {
-                await _service.TuChoiAsync(maDanhGiaDuAn, lyDoTuChoi);
-                TempData["Success"] = "Đã từ chối đánh giá dự án.";
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
+            TempData["Error"] = "Luồng từ chối bởi Admin đã được thay bằng xác nhận đánh giá của Manager.";
             return RedirectToReturnUrlOrIndex(returnUrl, new { maDuAn, tuKhoa, trangThai, tuNgayDanhGia, denNgayDanhGia });
         }
 
@@ -274,12 +261,12 @@ namespace QuanLyDuAn.Controllers
                     new() { Header = "Trạng thái dự án", ValueSelector = row => TrangThai.ToDisplay(((DanhGiaDuAnItemViewModel)row).TrangThaiDuAn), Alignment = ExportColumnAlignment.Center, MinWidth = 15, MaxWidth = 21 },
                     new() { Header = "Số công việc", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TongCongViec, NumberFormat = "0", Alignment = ExportColumnAlignment.Right, MinWidth = 10, MaxWidth = 13, ShowInPdf = false },
                     new() { Header = "Số công việc trễ", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CongViecTreHan, NumberFormat = "0", Alignment = ExportColumnAlignment.Right, MinWidth = 12, MaxWidth = 15, ShowInPdf = false },
-                    new() { Header = "Trạng thái đánh giá", ValueSelector = row => string.Equals(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase) ? "Chưa đánh giá" : TrangThai.ToDisplay(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia), Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 22 },
+                    new() { Header = "Trạng thái đánh giá", ValueSelector = row => ToDisplayTrangThaiDanhGia(((DanhGiaDuAnItemViewModel)row).TrangThaiDanhGia), Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 22 },
                     new() { Header = "Điểm tổng kết", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).DiemTongKet : null, NumberFormat = "0.00", Alignment = ExportColumnAlignment.Right, MinWidth = 11, MaxWidth = 14 },
                     new() { Header = "Xếp loại", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).XepLoai : "Chưa đánh giá", Alignment = ExportColumnAlignment.Center, MinWidth = 12, MaxWidth = 18 },
                     new() { Header = "Ngày đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).NgayDanhGia, NumberFormat = "dd/MM/yyyy HH:mm", Alignment = ExportColumnAlignment.Center, MinWidth = 16, MaxWidth = 19 },
                     new() { Header = "Người đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDanhGia, MinWidth = 16, MaxWidth = 24 },
-                    new() { Header = "Người duyệt", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDuyet, MinWidth = 16, MaxWidth = 24 },
+                    new() { Header = "Người xác nhận", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).TenNguoiDuyet, MinWidth = 16, MaxWidth = 24 },
                     new() { Header = "Mã đánh giá", ValueSelector = row => ((DanhGiaDuAnItemViewModel)row).CoDanhGia ? ((DanhGiaDuAnItemViewModel)row).MaDanhGiaDuAn : null, Alignment = ExportColumnAlignment.Center, MinWidth = 11, MaxWidth = 14, ShowInPdf = false }
                 },
                 Rows = rows
@@ -317,6 +304,16 @@ namespace QuanLyDuAn.Controllers
             }
 
             return RedirectToAction(nameof(Index), fallbackRouteValues);
+        }
+
+        private static string ToDisplayTrangThaiDanhGia(string? trangThai)
+        {
+            if (string.Equals(trangThai, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase)) return "Chưa đánh giá";
+            if (string.Equals(trangThai, TrangThai.Nhap, StringComparison.OrdinalIgnoreCase)) return "Nháp";
+            if (string.Equals(trangThai, TrangThai.DaDuyet, StringComparison.OrdinalIgnoreCase)) return "Đã xác nhận";
+            if (string.Equals(trangThai, TrangThai.ChoDuyet, StringComparison.OrdinalIgnoreCase)) return "Chờ xác nhận cũ";
+            if (string.Equals(trangThai, TrangThai.TuChoi, StringComparison.OrdinalIgnoreCase)) return "Từ chối cũ";
+            return trangThai ?? string.Empty;
         }
     }
 }

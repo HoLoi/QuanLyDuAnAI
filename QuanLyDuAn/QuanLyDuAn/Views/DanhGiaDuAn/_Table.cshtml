@@ -92,9 +92,9 @@
                                 <span class="text-muted small">Chờ dự án hoàn thành/lưu trữ.</span>
                             }
 
-                            @if (item.CoDanhGia && item.CoTheGuiDuyet)
+                            @if (item.CoDanhGia && item.CoTheXacNhan)
                             {
-                                <form asp-action="GuiDuyet" method="post">
+                                <form asp-action="XacNhan" method="post">
                                     <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
                                     <input type="hidden" name="maDuAn" value="@item.MaDuAn" />
                                     <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
@@ -102,34 +102,7 @@
                                     <input type="hidden" name="returnUrl" value="@currentUrl" />
                                     <input type="hidden" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" />
-                                    <button type="submit" class="btn-action btn-confirm">Gửi duyệt</button>
-                                </form>
-                            }
-                            @if (item.CoDanhGia && item.CoTheDuyet)
-                            {
-                                <form asp-action="Duyet" method="post">
-                                    <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
-                                    <input type="hidden" name="maDuAn" value="@item.MaDuAn" />
-                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
-                                    <input type="hidden" name="trangThai" value="@Model.TrangThai" />
-                                    <input type="hidden" name="returnUrl" value="@currentUrl" />
-                                    <input type="hidden" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" />
-                                    <input type="hidden" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" />
-                                    <button type="submit" class="btn-action btn-confirm">Duyệt</button>
-                                </form>
-                            }
-                            @if (item.CoDanhGia && item.CoTheTuChoi)
-                            {
-                                <form asp-action="TuChoi" method="post" class="d-flex gap-1 dgda-reject-form">
-                                    <input type="hidden" name="maDanhGiaDuAn" value="@item.MaDanhGiaDuAn" />
-                                    <input type="hidden" name="maDuAn" value="@item.MaDuAn" />
-                                    <input type="hidden" name="tuKhoa" value="@Model.TuKhoa" />
-                                    <input type="hidden" name="trangThai" value="@Model.TrangThai" />
-                                    <input type="hidden" name="returnUrl" value="@currentUrl" />
-                                    <input type="hidden" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" />
-                                    <input type="hidden" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" />
-                                    <input type="text" name="lyDoTuChoi" class="form-control" placeholder="Lý do" required />
-                                    <button type="submit" class="btn-action btn-danger-soft">Từ chối</button>
+                                    <button type="submit" class="btn-action btn-confirm">Xác nhận đánh giá</button>
                                 </form>
                             }
                         </div>

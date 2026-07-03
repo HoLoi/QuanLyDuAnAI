@@ -23,6 +23,9 @@
             <div class="col-md-4"><div class="mini-stat"><span>Dự án</span><strong>@Model.TenDuAn</strong></div></div>
             <div class="col-md-4"><div class="mini-stat"><span>Trạng thái</span><strong>@await Html.PartialAsync("_TrangThaiDanhGiaBadge", Model.TrangThaiDanhGia)</strong></div></div>
             <div class="col-md-4"><div class="mini-stat"><span>Điểm tổng</span><strong>@Model.DiemTongKet.ToString("0.0") - @Model.XepLoai</strong></div></div>
+            <div class="col-md-4"><div class="mini-stat"><span>Người đánh giá</span><strong>@Model.TenNguoiDanhGia</strong></div></div>
+            <div class="col-md-4"><div class="mini-stat"><span>Người xác nhận</span><strong>@(string.IsNullOrWhiteSpace(Model.TenNguoiDuyet) ? "Chưa xác nhận" : Model.TenNguoiDuyet)</strong></div></div>
+            <div class="col-md-4"><div class="mini-stat"><span>Ngày xác nhận</span><strong>@(Model.NgayDuyet?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa xác nhận")</strong></div></div>
         </div>
 
         @await Html.PartialAsync("_ProjectStats", Model.ThongKe)

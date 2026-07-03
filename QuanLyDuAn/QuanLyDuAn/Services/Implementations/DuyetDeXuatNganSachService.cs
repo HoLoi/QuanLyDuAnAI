@@ -28,11 +28,22 @@ namespace QuanLyDuAn.Services.Implementations
         public async Task<DuyetDeXuatNganSachPageViewModel> GetPageAsync(
             int? locMaDuAn,
             string? locTrangThai,
+            int? locMaNguoiDungDeXuat,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            decimal? tuSoTien,
+            decimal? denSoTien,
+            string? tuKhoa,
             int pageNumber = 1,
             int pageSize = PaginationViewModel.DefaultPageSize,
             bool paginate = true)
         {
             var currentUserId = await GetCurrentUserIdAsync();
+            var (tuNgayLoc, denNgayLoc) = ChuanHoaKhoangNgay(tuNgay, denNgay);
+            var (tuSoTienLoc, denSoTienLoc) = ChuanHoaKhoangTien(tuSoTien, denSoTien);
+            var tuKhoaLoc = string.IsNullOrWhiteSpace(tuKhoa) ? null : tuKhoa.Trim();
+            var danhSachDuAn = await GetManagedProjectOptionsAsync(currentUserId);
+            var danhSachNguoiDeXuat = await GetRequesterOptionsAsync(currentUserId);
 
             var query =
                 from dx in _context.DeXuatNganSach
@@ -64,6 +75,11 @@ namespace QuanLyDuAn.Services.Implementations
                 query = query.Where(x => x.MaDuAn == locMaDuAn.Value);
             }
 
+            if (locMaNguoiDungDeXuat.HasValue)
+            {
+                query = query.Where(x => x.MaNguoiDungDeXuat == locMaNguoiDungDeXuat.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(locTrangThai))
             {
                 var filterValues = TrangThai.GetCommonStatusVariants(locTrangThai);
@@ -71,6 +87,44 @@ namespace QuanLyDuAn.Services.Implementations
                 {
                     query = query.Where(x => filterValues.Contains(x.TrangThaiDeXuat));
                 }
+            }
+
+            if (tuNgayLoc.HasValue)
+            {
+                query = query.Where(x =>
+                    x.NgayDeXuat.HasValue &&
+                    x.NgayDeXuat.Value >= tuNgayLoc.Value);
+            }
+
+            if (denNgayLoc.HasValue)
+            {
+                var denNgayDocQuyen = denNgayLoc.Value.AddDays(1);
+                query = query.Where(x =>
+                    x.NgayDeXuat.HasValue &&
+                    x.NgayDeXuat.Value < denNgayDocQuyen);
+            }
+
+            if (tuSoTienLoc.HasValue)
+            {
+                query = query.Where(x =>
+                    x.NganSachDeXuat.HasValue &&
+                    x.NganSachDeXuat.Value >= tuSoTienLoc.Value);
+            }
+
+            if (denSoTienLoc.HasValue)
+            {
+                query = query.Where(x =>
+                    x.NganSachDeXuat.HasValue &&
+                    x.NganSachDeXuat.Value <= denSoTienLoc.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(tuKhoaLoc))
+            {
+                var keyword = tuKhoaLoc.ToLower();
+                query = query.Where(x =>
+                    x.LyDoDeXuat.ToLower().Contains(keyword) ||
+                    x.TenDuAn.ToLower().Contains(keyword) ||
+                    x.NguoiDungDeXuat.ToLower().Contains(keyword));
             }
 
             var totalItems = await query.CountAsync();
@@ -89,10 +143,68 @@ namespace QuanLyDuAn.Services.Implementations
             return new DuyetDeXuatNganSachPageViewModel
             {
                 DanhSach = await danhSachQuery.ToListAsync(),
+                DanhSachDuAn = danhSachDuAn,
+                DanhSachNguoiDeXuat = danhSachNguoiDeXuat,
                 Pagination = pagination,
                 LocMaDuAn = locMaDuAn,
-                LocTrangThai = locTrangThai
+                LocTrangThai = locTrangThai,
+                LocMaNguoiDungDeXuat = locMaNguoiDungDeXuat,
+                TuNgay = tuNgayLoc,
+                DenNgay = denNgayLoc,
+                TuSoTien = tuSoTienLoc,
+                DenSoTien = denSoTienLoc,
+                TuKhoa = tuKhoaLoc
             };
+        }
+
+        private async Task<List<DuyetDeXuatNganSachSelectOptionViewModel>> GetManagedProjectOptionsAsync(int currentUserId)
+        {
+            var rawOptions = await _context.DuAn
+                .Where(x => x.IsDeleted != true && x.MaNguoiDung == currentUserId)
+                .OrderBy(x => x.TenDuAn)
+                .Select(x => new
+                {
+                    x.MaDuAn,
+                    x.TenDuAn
+                })
+                .ToListAsync();
+
+            return rawOptions
+                .Select(x => new DuyetDeXuatNganSachSelectOptionViewModel
+                {
+                    Value = x.MaDuAn,
+                    Text = string.IsNullOrWhiteSpace(x.TenDuAn) ? $"Dự án {x.MaDuAn}" : x.TenDuAn
+                })
+                .OrderBy(x => x.Text)
+                .ToList();
+        }
+
+        private async Task<List<DuyetDeXuatNganSachSelectOptionViewModel>> GetRequesterOptionsAsync(int currentUserId)
+        {
+            var rawOptions = await (
+                from dx in _context.DeXuatNganSach
+                join da in _context.DuAn on dx.MaDuAn equals da.MaDuAn
+                join nd in _context.NguoiDung on dx.MaNguoiDungDeXuat equals nd.MaNguoiDung
+                where dx.IsDeleted != true
+                      && da.IsDeleted != true
+                      && da.MaNguoiDung == currentUserId
+                      && nd.IsDeleted != true
+                select new
+                {
+                    nd.MaNguoiDung,
+                    nd.HoTenNguoiDung
+                })
+                .Distinct()
+                .ToListAsync();
+
+            return rawOptions
+                .Select(x => new DuyetDeXuatNganSachSelectOptionViewModel
+                {
+                    Value = x.MaNguoiDung,
+                    Text = string.IsNullOrWhiteSpace(x.HoTenNguoiDung) ? $"Người dùng {x.MaNguoiDung}" : x.HoTenNguoiDung
+                })
+                .OrderBy(x => x.Text)
+                .ToList();
         }
 
         public async Task ApproveAsync(int maDeXuatNs)
@@ -273,6 +385,32 @@ namespace QuanLyDuAn.Services.Implementations
         private static bool IsPending(string? status)
         {
             return TrangThai.EqualsValue(status, TrangThai.ChoDuyet);
+        }
+
+        private static (DateTime? TuNgay, DateTime? DenNgay) ChuanHoaKhoangNgay(DateTime? tuNgay, DateTime? denNgay)
+        {
+            var tu = tuNgay?.Date;
+            var den = denNgay?.Date;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
+        }
+
+        private static (decimal? TuSoTien, decimal? DenSoTien) ChuanHoaKhoangTien(decimal? tuSoTien, decimal? denSoTien)
+        {
+            var tu = tuSoTien.HasValue && tuSoTien.Value >= 0 ? tuSoTien : null;
+            var den = denSoTien.HasValue && denSoTien.Value >= 0 ? denSoTien : null;
+
+            if (tu.HasValue && den.HasValue && tu.Value > den.Value)
+            {
+                (tu, den) = (den, tu);
+            }
+
+            return (tu, den);
         }
 
         private async Task EnsureIsProjectManagerAsync(int maNguoiDung, int maDuAn)

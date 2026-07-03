@@ -4,9 +4,13 @@
     var canTacNghiep = Model.Permissions.Contains(Permissions.DanhGiaNhanVien.DanhGia)
                        || Model.Permissions.Contains(Permissions.DanhGiaNhanVien.Sua);
     var tuModuleDuAn = string.Equals(Model.Nguon, "du-an", StringComparison.OrdinalIgnoreCase);
-    var thongBao = canTacNghiep
-        ? "Không có nhân viên phù hợp với bộ lọc hiện tại."
-        : "Bạn chưa có quyền tạo hoặc sửa đánh giá nhân viên.";
+    var thongBao = !string.IsNullOrWhiteSpace(Model.ThongBaoRong)
+        ? Model.ThongBaoRong
+        : canTacNghiep
+            ? (Model.MaDuAn.HasValue
+                ? "Dự án này chưa có nhân viên có phân công hoặc tiến độ để đánh giá."
+                : "Vui lòng chọn dự án để đánh giá nhân viên.")
+            : "Bạn chưa có quyền tạo hoặc sửa đánh giá nhân viên.";
 }
 
 <div class="empty-box">

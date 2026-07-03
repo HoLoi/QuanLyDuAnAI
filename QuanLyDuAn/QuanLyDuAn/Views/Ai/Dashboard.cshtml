@@ -7,7 +7,8 @@
     ViewData["Title"] = "Tổng quan AI";
     var serviceStatus = string.IsNullOrWhiteSpace(Model.Health?.ServiceStatus) ? "Không xác định" : Model.Health!.ServiceStatus;
     var reasonLabels = Model.NguyenNhanPhoBien.Select(x => x.NguyenNhan).ToList();
-    var reasonValues = Model.NguyenNhanPhoBien.Select(x => x.TyLePhanTram).ToList();
+    var reasonValues = Model.NguyenNhanPhoBien.Select(x => x.SoLan).ToList();
+    var reasonPercents = Model.NguyenNhanPhoBien.Select(x => x.TyLePhanTram).ToList();
     var modelLabels = Model.LichSuModelNguyenNhan.Select(x => x.CreatedAt == DateTime.MinValue ? x.TenModel : $"{x.CreatedAt:dd/MM HH:mm}").ToList();
     var modelAccuracy = Model.LichSuModelNguyenNhan.Select(x => Math.Round((x.Accuracy ?? 0d) * 100d, 2)).ToList();
     var timelineLabels = Model.LuotPhanTichTheoThang.Select(x => x.Label).ToList();
@@ -64,13 +65,13 @@
         <article class="ai-stat-card"><span class="ai-stat-label">Tổng model nguyên nhân</span><strong class="ai-stat-value">@Model.TongModelTrongDb</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Tổng lượt phân tích AI</span><strong class="ai-stat-value">@Model.TongLanPhanTichTrongDb</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Tổng xác nhận nguyên nhân</span><strong class="ai-stat-value">@Model.TongXacNhanNguyenNhanTrongDb</strong></article>
-        <article class="ai-stat-card"><span class="ai-stat-label">Tỷ lệ xác nhận AI</span><strong class="ai-stat-value">@Model.TyLeXacNhanAi.ToString("0.##")%</strong><small class="ai-stat-note">Xác nhận nguyên nhân so với lượt phân tích.</small></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Tỷ lệ xác nhận AI</span><strong class="ai-stat-value">@Model.TyLeXacNhanAi.ToString("0.##")%</strong><small class="ai-stat-note">Dự án trễ đã xác nhận nguyên nhân / tổng dự án trễ.</small></article>
     </div>
 
     <h2 class="ai-section-title">Dataset</h2>
     <div class="ai-grid ai-grid-4">
-        <article class="ai-stat-card"><span class="ai-stat-label">Tổng dòng dataset</span><strong class="ai-stat-value">@Model.TongDongDataset</strong></article>
-        <article class="ai-stat-card"><span class="ai-stat-label">Dòng đủ điều kiện train</span><strong class="ai-stat-value">@Model.TongDongDatasetHopLeTrain</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Số dự án có dataset mới nhất</span><strong class="ai-stat-value">@Model.TongDongDataset</strong></article>
+        <article class="ai-stat-card"><span class="ai-stat-label">Dòng đủ feature và label</span><strong class="ai-stat-value">@Model.TongDongDatasetHopLeTrain</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Dự án trễ đã xác nhận</span><strong class="ai-stat-value">@Model.SoDuAnTreDaXacNhan</strong></article>
         <article class="ai-stat-card"><span class="ai-stat-label">Dự án trễ chưa xác nhận</span><strong class="ai-stat-value">@Model.SoDuAnTreChuaXacNhan</strong></article>
     </div>
@@ -185,15 +186,16 @@
 
             const reasonLabels = @Html.Raw(JsonSerializer.Serialize(reasonLabels));
             const reasonValues = @Html.Raw(JsonSerializer.Serialize(reasonValues));
+            const reasonPercents = @Html.Raw(JsonSerializer.Serialize(reasonPercents));
             const timelineLabels = @Html.Raw(JsonSerializer.Serialize(timelineLabels));
             const timelineAnalysis = @Html.Raw(JsonSerializer.Serialize(timelineAnalysis));
             const timelineConfirm = @Html.Raw(JsonSerializer.Serialize(timelineConfirm));
 
             if (reasonLabels.length > 0) {
-                renderChart('reasonDistributionDashboardChart', { type: 'pie', data: { labels: reasonLabels, datasets: [{ data: reasonValues, backgroundColor: ['#2f7fd2', '#3aa675', '#7a8df5', '#f2b84a', '#7bc4c9', '#91c27d'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+                renderChart('reasonDistributionDashboardChart', { type: 'pie', data: { labels: reasonLabels, datasets: [{ data: reasonValues, backgroundColor: ['#2f7fd2', '#3aa675', '#7a8df5', '#f2b84a', '#7bc4c9', '#91c27d'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function (context) { const label = context.label || ''; const value = context.parsed || 0; const percent = reasonPercents[context.dataIndex] ?? 0; return label + ': ' + value + ' lần (' + percent + '%)'; } } } } } });
             }
 
-            renderChart('datasetTrainStateChart', { type: 'bar', data: { labels: ['Đủ điều kiện train', 'Chưa đủ điều kiện train'], datasets: [{ label: 'Số dòng', data: [@Model.TongDongDatasetHopLeTrain, Math.max(@Model.TongDongDataset - @Model.TongDongDatasetHopLeTrain, 0)], backgroundColor: ['#3aa675', '#c7d6eb'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            renderChart('datasetTrainStateChart', { type: 'bar', data: { labels: ['Đủ feature và label', 'Chưa đủ feature hoặc label'], datasets: [{ label: 'Số dòng', data: [@Model.TongDongDatasetHopLeTrain, Math.max(@Model.TongDongDataset - @Model.TongDongDatasetHopLeTrain, 0)], backgroundColor: ['#3aa675', '#c7d6eb'] }] }, options: { responsive: true, maintainAspectRatio: false } });
 
             if (timelineLabels.length > 0) {
                 renderChart('aiAnalysisTimelineChart', { type: 'line', data: { labels: timelineLabels, datasets: [

@@ -38,3 +38,4 @@
 {"time": "2026-06-23T13:50:44.777776Z", "endpoint": "/model/train", "eventType": "train", "success": true, "modelName": "decision_tree_reason_20260623_135044.joblib", "durationMs": 144, "error": null, "extra": {"soLuongDuLieu": 67, "doChinhXac": 0.8571}}
 {"time": "2026-06-24T13:14:11.912430Z", "endpoint": "/analyze/delay-reason", "eventType": "analyze", "success": true, "modelName": "decision_tree_reason_20260623_135044.joblib", "durationMs": 67, "error": null, "extra": {}}
 {"time": "2026-06-28T14:00:40.323395Z", "endpoint": "/model/train", "eventType": "train", "success": true, "modelName": "decision_tree_reason_20260628_140040.joblib", "durationMs": 332, "error": null, "extra": {"soLuongDuLieu": 520, "doChinhXac": 0.9231}}
+{"time": "2026-07-03T17:01:51.945313Z", "endpoint": "/analyze/delay-reason", "eventType": "analyze", "success": true, "modelName": "decision_tree_reason_20260628_140040.joblib", "durationMs": 267, "error": null, "extra": {}}

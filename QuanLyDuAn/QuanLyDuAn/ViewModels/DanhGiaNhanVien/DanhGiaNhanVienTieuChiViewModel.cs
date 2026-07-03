@@ -14,7 +14,8 @@ namespace QuanLyDuAn.ViewModels.DanhGiaNhanVien
         public int? MaCongViec { get; set; }
         public string? TenCongViec { get; set; }
 
-        [Range(1, 10)]
+        [Required(ErrorMessage = "Vui lòng nhập điểm đánh giá.")]
+        [Range(1, 10, ErrorMessage = "Điểm đánh giá phải nằm trong khoảng từ 1 đến 10.")]
         public int DiemDanhGiaNV { get; set; }
 
         [StringLength(500)]

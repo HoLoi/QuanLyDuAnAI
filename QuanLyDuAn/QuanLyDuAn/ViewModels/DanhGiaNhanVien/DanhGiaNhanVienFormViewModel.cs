@@ -26,6 +26,7 @@ namespace QuanLyDuAn.ViewModels.DanhGiaNhanVien
         public int SoFileMinhChung { get; set; }
         public double DiemTrungBinhTienDo { get; set; }
 
+        [MinLength(1, ErrorMessage = "Vui lòng nhập ít nhất một tiêu chí đánh giá.")]
         public List<DanhGiaNhanVienTieuChiViewModel> TieuChi { get; set; } = new();
 
         [StringLength(500)]

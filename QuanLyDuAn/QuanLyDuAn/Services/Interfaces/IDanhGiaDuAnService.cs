@@ -15,6 +15,7 @@ namespace QuanLyDuAn.Services.Interfaces
             bool paginate = true);
         Task<DanhGiaDuAnFormViewModel> GetFormAsync(int maDuAn);
         Task LuuDanhGiaAsync(DanhGiaDuAnFormViewModel form);
+        Task XacNhanAsync(int maDanhGiaDuAn);
         Task GuiDuyetAsync(int maDanhGiaDuAn);
         Task DuyetAsync(int maDanhGiaDuAn);
         Task TuChoiAsync(int maDanhGiaDuAn, string lyDoTuChoi);

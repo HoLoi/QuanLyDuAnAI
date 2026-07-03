@@ -122,6 +122,26 @@ namespace QuanLyDuAn.Controllers
             return RedirectToAction(nameof(Index), new { maCongViec });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MoLai(int maCongViec, int maChiTietCv, string lyDo, int pageNumber = 1, int pageSize = 20)
+        {
+            if (!await _permission.HasPermissionAsync(User, Permissions.ChiTietCongViec.Sua))
+                return Forbid();
+
+            try
+            {
+                await _service.MoLaiChiTietCongViecAsync(maCongViec, maChiTietCv, lyDo);
+                TempData["Success"] = "Đã mở lại chi tiết công việc.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index), new { maCongViec, pageNumber, pageSize });
+        }
+
         [HttpGet]
         public async Task<IActionResult> XuatFile(string? format, int maCongViec)
         {

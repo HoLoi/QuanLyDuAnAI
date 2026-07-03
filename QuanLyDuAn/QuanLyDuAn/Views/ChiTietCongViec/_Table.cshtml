@@ -60,6 +60,7 @@ else
                 @foreach (var item in Model.DanhSach)
                 {
                     var collapseId = $"edit-{item.MaChiTietCV}";
+                    var reopenCollapseId = $"reopen-{item.MaChiTietCV}";
                     <tr>
                         <td>@item.TenCTCV</td>
                         <td>@item.NoiDungChiTietCV</td>
@@ -92,6 +93,13 @@ else
                                     Sửa
                                 </button>
                             }
+                            @if (canEdit && item.CoTheMoLai)
+                            {
+                                <button type="button" class="btn btn-action btn-subtle" data-bs-toggle="collapse" data-bs-target="#@reopenCollapseId" aria-expanded="false">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                    Mở lại
+                                </button>
+                            }
                             @if (canDelete)
                             {
                                 <form asp-action="Xoa" method="post">
@@ -103,8 +111,44 @@ else
                                     </button>
                                 </form>
                             }
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    @if (canEdit && item.CoTheMoLai)
+                    {
+                        <tr class="collapse-row">
+                            <td colspan="8" class="p-0 border-0">
+                                <div class="collapse" id="@reopenCollapseId">
+                                    <form asp-action="MoLai" method="post" class="edit-inline-form">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="maCongViec" value="@Model.CongViec.MaCongViec" />
+                                        <input type="hidden" name="maChiTietCv" value="@item.MaChiTietCV" />
+                                        <input type="hidden" name="pageNumber" value="@Model.Pagination.PageNumber" />
+                                        <input type="hidden" name="pageSize" value="@Model.Pagination.PageSize" />
+
+                                        <div class="form-field">
+                                            <label>Trạng thái hiện tại</label>
+                                            <div>
+                                                <span class="workflow-badge @item.CssTrangThai">
+                                                    <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                                                    @item.TrangThaiHienThi
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="form-field form-field--wide">
+                                            <label>Lý do mở lại</label>
+                                            <input type="text" class="form-control" name="lyDo" maxlength="255" required placeholder="Nhập lý do mở lại chi tiết công việc" />
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="submit" class="btn btn-form-primary btn-sm" onclick="return confirm('Xác nhận mở lại chi tiết công việc này?');">
+                                                <i class="bi bi-arrow-clockwise"></i>
+                                                Mở lại
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                     @if (canEdit)
                     {
                         <tr class="collapse-row">
@@ -156,6 +200,7 @@ else
         @foreach (var item in Model.DanhSach)
         {
             var mobileEditId = $"edit-mobile-{item.MaChiTietCV}";
+            var mobileReopenId = $"reopen-mobile-{item.MaChiTietCV}";
             <article class="chi-tiet-mobile-card">
                 <div class="mobile-head">
                     <div>
@@ -192,6 +237,13 @@ else
                             Sửa
                         </button>
                     }
+                    @if (canEdit && item.CoTheMoLai)
+                    {
+                        <button type="button" class="btn btn-action btn-subtle" data-bs-toggle="collapse" data-bs-target="#@mobileReopenId" aria-expanded="false">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            Mở lại
+                        </button>
+                    }
                     @if (canDelete)
                     {
                         <form asp-action="Xoa" method="post" class="w-100">
@@ -204,6 +256,37 @@ else
                         </form>
                     }
                 </div>
+
+                @if (canEdit && item.CoTheMoLai)
+                {
+                    <div class="collapse" id="@mobileReopenId">
+                        <form asp-action="MoLai" method="post" class="edit-inline-form edit-inline-form--mobile">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="maCongViec" value="@Model.CongViec.MaCongViec" />
+                            <input type="hidden" name="maChiTietCv" value="@item.MaChiTietCV" />
+                            <input type="hidden" name="pageNumber" value="@Model.Pagination.PageNumber" />
+                            <input type="hidden" name="pageSize" value="@Model.Pagination.PageSize" />
+
+                            <div class="form-field">
+                                <label>Trạng thái hiện tại</label>
+                                <div>
+                                    <span class="workflow-badge @item.CssTrangThai">
+                                        <i class="bi @GetStatusIcon(item.CssTrangThai)"></i>
+                                        @item.TrangThaiHienThi
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label>Lý do mở lại</label>
+                                <input type="text" class="form-control" name="lyDo" maxlength="255" required placeholder="Nhập lý do mở lại chi tiết công việc" />
+                            </div>
+                            <button type="submit" class="btn btn-form-primary btn-sm w-100" onclick="return confirm('Xác nhận mở lại chi tiết công việc này?');">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                Mở lại
+                            </button>
+                        </form>
+                    </div>
+                }
 
                 @if (canEdit)
                 {

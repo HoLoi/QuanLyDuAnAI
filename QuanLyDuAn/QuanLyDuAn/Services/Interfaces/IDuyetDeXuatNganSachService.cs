@@ -7,6 +7,12 @@ namespace QuanLyDuAn.Services.Interfaces
         Task<DuyetDeXuatNganSachPageViewModel> GetPageAsync(
             int? locMaDuAn,
             string? locTrangThai,
+            int? locMaNguoiDungDeXuat,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            decimal? tuSoTien,
+            decimal? denSoTien,
+            string? tuKhoa,
             int pageNumber = 1,
             int pageSize = 20,
             bool paginate = true);

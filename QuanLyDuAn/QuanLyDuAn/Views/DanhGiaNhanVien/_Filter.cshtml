@@ -1,54 +1,68 @@
 ﻿@model QuanLyDuAn.ViewModels.DanhGiaNhanVien.DanhGiaNhanVienPageViewModel
 
+@{
+    var daChonDuAn = Model.MaDuAn.HasValue;
+}
+
 <form asp-action="Index" method="get" class="dgnv-filter" id="dgnv-filter">
     <input type="hidden" name="nguon" value="@Model.Nguon" />
     <div class="dgnv-filter-grid dgnv-filter-grid-main">
-        <div class="dgnv-filter-field dgnv-filter-field-wide">
-            <label class="form-label">Từ khóa</label>
-            <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên dự án, tên nhân viên..." />
-        </div>
+        @if (daChonDuAn)
+        {
+            <div class="dgnv-filter-field dgnv-filter-field-wide">
+                <label class="form-label">Từ khóa</label>
+                <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tên dự án, tên nhân viên..." />
+            </div>
+        }
         <div class="dgnv-filter-field">
             <label class="form-label">Dự án</label>
             <select name="maDuAn" class="form-select">
-                <option value="">Tất cả</option>
+                <option value="">Chọn dự án</option>
                 @foreach (var duAn in Model.DanhSachDuAn)
                 {
                     <option value="@duAn.MaDuAn" selected="@(Model.MaDuAn == duAn.MaDuAn)">@duAn.TenDuAn</option>
                 }
             </select>
         </div>
-        <div class="dgnv-filter-field">
-            <label class="form-label">Nhân viên</label>
-            <select name="maNhanVien" class="form-select">
-                <option value="">Tất cả</option>
-                @foreach (var nv in Model.DanhSachNhanVien)
-                {
-                    <option value="@nv.MaNhanVien" selected="@(Model.MaNhanVien == nv.MaNhanVien)">@nv.TenNhanVien</option>
-                }
-            </select>
-        </div>
-        <div class="dgnv-filter-field">
-            <label class="form-label">Trạng thái đánh giá</label>
-            <select name="trangThai" class="form-select">
-                <option value="">Tất cả</option>
-                <option value="ChuaDanhGia" selected="@(string.Equals(Model.TrangThai, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase))">Chưa đánh giá</option>
-                <option value="Nhap" selected="@(string.Equals(Model.TrangThai, "Nhap", StringComparison.OrdinalIgnoreCase))">Nháp</option>
-                <option value="ChoDuyet" selected="@(string.Equals(Model.TrangThai, "ChoDuyet", StringComparison.OrdinalIgnoreCase))">Chờ duyệt</option>
-                <option value="DaDuyet" selected="@(string.Equals(Model.TrangThai, "DaDuyet", StringComparison.OrdinalIgnoreCase))">Đã duyệt</option>
-                <option value="TuChoi" selected="@(string.Equals(Model.TrangThai, "TuChoi", StringComparison.OrdinalIgnoreCase))">Từ chối</option>
-            </select>
-        </div>
+        @if (daChonDuAn)
+        {
+            <div class="dgnv-filter-field">
+                <label class="form-label">Nhân viên có tham gia công việc</label>
+                <select name="maNhanVien" class="form-select">
+                    <option value="">Tất cả nhân viên có tham gia công việc</option>
+                    @foreach (var nv in Model.DanhSachNhanVien)
+                    {
+                        <option value="@nv.MaNhanVien" selected="@(Model.MaNhanVien == nv.MaNhanVien)">@nv.TenNhanVien</option>
+                    }
+                </select>
+                @* <div class="form-text">Chỉ hiển thị nhân viên thuộc dự án và có phân công hoặc tiến độ.</div> *@
+            </div>
+            <div class="dgnv-filter-field">
+                <label class="form-label">Trạng thái đánh giá</label>
+                <select name="trangThai" class="form-select">
+                    <option value="">Tất cả</option>
+                    <option value="ChuaDanhGia" selected="@(string.Equals(Model.TrangThai, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase))">Chưa đánh giá</option>
+                    <option value="Nhap" selected="@(string.Equals(Model.TrangThai, "Nhap", StringComparison.OrdinalIgnoreCase))">Nháp</option>
+                    <option value="ChoDuyet" selected="@(string.Equals(Model.TrangThai, "ChoDuyet", StringComparison.OrdinalIgnoreCase))">Chờ duyệt</option>
+                    <option value="DaDuyet" selected="@(string.Equals(Model.TrangThai, "DaDuyet", StringComparison.OrdinalIgnoreCase))">Đã duyệt</option>
+                    <option value="TuChoi" selected="@(string.Equals(Model.TrangThai, "TuChoi", StringComparison.OrdinalIgnoreCase))">Từ chối</option>
+                </select>
+            </div>
+        }
     </div>
 
     <div class="dgnv-filter-grid dgnv-filter-grid-time">
-        <div class="dgnv-filter-field dgnv-filter-field-date">
-            <label class="form-label">Từ ngày đánh giá</label>
-            <input type="date" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" class="form-control" />
-        </div>
-        <div class="dgnv-filter-field dgnv-filter-field-date">
-            <label class="form-label">Đến ngày đánh giá</label>
-            <input type="date" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" class="form-control" />
-        </div>
+        @if (daChonDuAn)
+        {
+            <div class="dgnv-filter-field dgnv-filter-field-date">
+                <label class="form-label">Từ ngày đánh giá</label>
+                <input type="date" name="tuNgayDanhGia" value="@Model.TuNgayDanhGia?.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div class="dgnv-filter-field dgnv-filter-field-date">
+                <label class="form-label">Đến ngày đánh giá</label>
+                <input type="date" name="denNgayDanhGia" value="@Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+        }
         <div class="dgnv-filter-actions">
             <button type="submit" class="btn-filter-apply">Lọc dữ liệu</button>
             <a asp-action="Index"

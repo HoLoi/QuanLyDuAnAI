@@ -26,19 +26,46 @@ namespace QuanLyDuAn.Controllers
         public async Task<IActionResult> Index(
             int? locMaDuAn,
             string? locTrangThai,
+            int? locMaNguoiDungDeXuat,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            decimal? tuSoTien,
+            decimal? denSoTien,
+            string? tuKhoa,
             int pageNumber = 1,
             int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuyetNganSach.Xem))
                 return Forbid();
 
-            var vm = await _service.GetPageAsync(locMaDuAn, locTrangThai, pageNumber, pageSize);
+            var vm = await _service.GetPageAsync(
+                locMaDuAn,
+                locTrangThai,
+                locMaNguoiDungDeXuat,
+                tuNgay,
+                denNgay,
+                tuSoTien,
+                denSoTien,
+                tuKhoa,
+                pageNumber,
+                pageSize);
             vm.Permissions = await _phanQuyenService.GetGrantedPermissionNamesAsync(User);
             return View(vm);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Duyet(int maDeXuatNs, int? locMaDuAn, string? locTrangThai)
+        public async Task<IActionResult> Duyet(
+            int maDeXuatNs,
+            int? locMaDuAn,
+            string? locTrangThai,
+            int? locMaNguoiDungDeXuat,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            decimal? tuSoTien,
+            decimal? denSoTien,
+            string? tuKhoa,
+            int pageNumber = 1,
+            int pageSize = 20)
         {
             if (!await _permission.HasPermissionAsync(User, Permissions.DuyetNganSach.Duyet))
                 return Forbid();
@@ -53,7 +80,19 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai });
+            return RedirectToAction(nameof(Index), new
+            {
+                locMaDuAn,
+                locTrangThai,
+                locMaNguoiDungDeXuat,
+                tuNgay,
+                denNgay,
+                tuSoTien,
+                denSoTien,
+                tuKhoa,
+                pageNumber,
+                pageSize
+            });
         }
 
         [HttpPost]
@@ -61,6 +100,12 @@ namespace QuanLyDuAn.Controllers
             int maDeXuatNs,
             int? locMaDuAn,
             string? locTrangThai,
+            int? locMaNguoiDungDeXuat,
+            DateTime? tuNgay,
+            DateTime? denNgay,
+            decimal? tuSoTien,
+            decimal? denSoTien,
+            string? tuKhoa,
             int pageNumber = 1,
             int pageSize = 20)
         {
@@ -77,7 +122,19 @@ namespace QuanLyDuAn.Controllers
                 TempData["Error"] = ex.Message;
             }
 
-            return RedirectToAction(nameof(Index), new { locMaDuAn, locTrangThai, pageNumber, pageSize });
+            return RedirectToAction(nameof(Index), new
+            {
+                locMaDuAn,
+                locTrangThai,
+                locMaNguoiDungDeXuat,
+                tuNgay,
+                denNgay,
+                tuSoTien,
+                denSoTien,
+                tuKhoa,
+                pageNumber,
+                pageSize
+            });
         }
     }
 }

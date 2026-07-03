@@ -369,14 +369,14 @@ namespace QuanLyDuAn.Controllers
             {
                 new AiDashboardExportRow("Tổng quan", null, "Tổng lượt phân tích AI", vm.TongLanPhanTichTrongDb),
                 new AiDashboardExportRow("Tổng quan", null, "Tổng xác nhận nguyên nhân", vm.TongXacNhanNguyenNhanTrongDb),
-                new AiDashboardExportRow("Tỷ lệ xác nhận", null, "Tỷ lệ xác nhận AI", vm.TyLeXacNhanAi, "%"),
-                new AiDashboardExportRow("Dataset", null, "Tổng dòng dataset", vm.TongDongDataset),
-                new AiDashboardExportRow("Dataset", null, "Dòng đủ điều kiện train", vm.TongDongDatasetHopLeTrain),
+                new AiDashboardExportRow("Tỷ lệ xác nhận", "Dự án trễ đã xác nhận nguyên nhân / tổng dự án trễ", "Tỷ lệ xác nhận AI", vm.TyLeXacNhanAi, "%"),
+                new AiDashboardExportRow("Dataset", null, "Số dự án có dataset mới nhất", vm.TongDongDataset),
+                new AiDashboardExportRow("Dataset", null, "Dòng đủ feature và label", vm.TongDongDatasetHopLeTrain),
                 new AiDashboardExportRow("Dataset", null, "Dự án trễ chưa xác nhận", vm.SoDuAnTreChuaXacNhan)
             };
 
             rows.AddRange(vm.NguyenNhanPhoBien.Select(x =>
-                (object)new AiDashboardExportRow("Nguyên nhân phổ biến", null, x.NguyenNhan, x.TyLePhanTram, "%")));
+                (object)new AiDashboardExportRow("Nguyên nhân phổ biến", $"{x.TyLePhanTram:0.##}%", x.NguyenNhan, x.SoLan, "lần")));
             rows.AddRange(vm.NguyenNhanTheoQuanLy.Select(x =>
                 (object)new AiDashboardExportRow("Theo quản lý", x.Nhom, x.NguyenNhan, x.SoLan)));
             rows.AddRange(vm.NguyenNhanTheoTeam.Select(x =>

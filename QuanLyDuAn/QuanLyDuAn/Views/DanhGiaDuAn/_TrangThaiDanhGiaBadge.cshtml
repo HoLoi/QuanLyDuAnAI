@@ -11,8 +11,8 @@
     var text = Model;
     if (string.Equals(Model, "ChuaDanhGia", StringComparison.OrdinalIgnoreCase)) { text = "Chưa đánh giá"; }
     if (string.Equals(Model, "Nhap", StringComparison.OrdinalIgnoreCase)) { text = "Nháp"; }
-    else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Chờ duyệt"; }
-    else if (string.Equals(Model, "DaDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Đã duyệt"; }
-    else if (string.Equals(Model, "TuChoi", StringComparison.OrdinalIgnoreCase)) { text = "Từ chối"; }
+    else if (string.Equals(Model, "ChoDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Chờ xác nhận cũ"; }
+    else if (string.Equals(Model, "DaDuyet", StringComparison.OrdinalIgnoreCase)) { text = "Đã xác nhận"; }
+    else if (string.Equals(Model, "TuChoi", StringComparison.OrdinalIgnoreCase)) { text = "Từ chối cũ"; }
 }
 <span class="@css">@text</span>

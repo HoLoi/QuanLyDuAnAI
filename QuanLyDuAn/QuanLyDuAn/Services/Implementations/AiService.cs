@@ -125,9 +125,6 @@ namespace QuanLyDuAn.Services.Implementations
             vm.TongModelTrongDb = await aiModelQuery.CountAsync(cancellationToken);
             vm.TongLanPhanTichTrongDb = await aiKetQuaQuery.CountAsync(cancellationToken);
             vm.TongXacNhanNguyenNhanTrongDb = await aiNguyenNhanQuery.CountAsync(cancellationToken);
-            vm.TyLeXacNhanAi = vm.TongLanPhanTichTrongDb > 0
-                ? Math.Round((double)vm.TongXacNhanNguyenNhanTrongDb * 100d / vm.TongLanPhanTichTrongDb, 2)
-                : 0d;
             vm.LuotPhanTichTheoThang = await LayLuotPhanTichAiTheoThangAsync(
                 aiKetQuaQuery,
                 aiNguyenNhanQuery,
@@ -140,7 +137,10 @@ namespace QuanLyDuAn.Services.Implementations
             vm.TongDongDataset = latestDatasetByProject.Count;
             vm.SoDuAnDuocXacDinhTre = latestDatasetByProject.Count(x => x.LaDuAnTre == true);
             vm.SoDuAnTreChuaXacNhan = latestDatasetByProject.Count(x => x.LaDuAnTre == true && !x.MaDMNguyenNhan.HasValue);
-            vm.SoDuAnTreDaXacNhan = Math.Max(0, vm.SoDuAnDuocXacDinhTre - vm.SoDuAnTreChuaXacNhan);
+            vm.SoDuAnTreDaXacNhan = latestDatasetByProject.Count(x => x.LaDuAnTre == true && x.MaDMNguyenNhan.HasValue);
+            vm.TyLeXacNhanAi = vm.SoDuAnDuocXacDinhTre > 0
+                ? Math.Clamp(Math.Round((double)vm.SoDuAnTreDaXacNhan * 100d / vm.SoDuAnDuocXacDinhTre, 2), 0d, 100d)
+                : 0d;
             vm.TongDongDatasetHopLeTrain = latestDatasetByProject.Count(x =>
                 x.LaDuAnTre == true
                 && x.MaDMNguyenNhan.HasValue
@@ -232,8 +232,19 @@ namespace QuanLyDuAn.Services.Implementations
             vm.NguyenNhanPhoBien = phanBoNguyenNhan.Take(5).Select(x => new NguyenNhanThongKeItemViewModel
             {
                 NguyenNhan = tenNguyenNhanMap.TryGetValue(x.MaDm, out var ten) ? ten : $"Nguyên nhân {x.MaDm}",
-                TyLePhanTram = tongSoLan > 0 ? (int)Math.Round((double)x.SoLan * 100d / tongSoLan, MidpointRounding.AwayFromZero) : 0
+                SoLan = x.SoLan,
+                TyLePhanTram = tongSoLan > 0 ? Math.Round((double)x.SoLan * 100d / tongSoLan, 2) : 0d
             }).ToList();
+            var soLanConLai = phanBoNguyenNhan.Skip(5).Sum(x => x.SoLan);
+            if (soLanConLai > 0)
+            {
+                vm.NguyenNhanPhoBien.Add(new NguyenNhanThongKeItemViewModel
+                {
+                    NguyenNhan = "Khác",
+                    SoLan = soLanConLai,
+                    TyLePhanTram = tongSoLan > 0 ? Math.Round((double)soLanConLai * 100d / tongSoLan, 2) : 0d
+                });
+            }
             vm.NguyenNhanTheoQuanLy = await LayNguyenNhanTheoQuanLyAsync(
                 aiNguyenNhanQuery,
                 projectIds,

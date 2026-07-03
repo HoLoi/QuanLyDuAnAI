@@ -61,6 +61,7 @@
         </div>
 
         <form asp-action="Luu" method="post" class="vstack gap-2">
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
             <input type="hidden" asp-for="MaDanhGiaDuAn" />
             <input type="hidden" asp-for="MaDuAn" />
             <input type="hidden" name="tuKhoa" value="@tuKhoa" />
@@ -79,7 +80,8 @@
                     <div class="row g-2">
                         <div class="col-md-2">
                             <label class="form-label">Điểm (1-10)</label>
-                            <input asp-for="TieuChi[i].DiemDanhGiaDA" class="form-control" min="1" max="10" />
+                            <input asp-for="TieuChi[i].DiemDanhGiaDA" class="form-control" type="number" min="1" max="10" step="1" required />
+                            <span asp-validation-for="TieuChi[i].DiemDanhGiaDA" class="text-danger small"></span>
                         </div>
                         <div class="col-md-10">
                             <label class="form-label">Nhận xét</label>
@@ -97,18 +99,22 @@
             <div class="d-flex flex-wrap gap-2">
                 @if (Model.CoTheLuu)
                 {
-                    <button type="submit" class="btn-action btn-confirm">Lưu đánh giá</button>
+                    <button type="submit" class="btn-action btn-confirm">Lưu nháp</button>
                 }
-                @if (Model.CoTheGuiDuyet && Model.MaDanhGiaDuAn.HasValue)
+                @if (Model.CoTheXacNhan && Model.MaDanhGiaDuAn.HasValue)
                 {
                     <button type="submit"
                             class="btn-action btn-subtle"
-                            formaction="@Url.Action("GuiDuyet", "DanhGiaDuAn")"
+                            formaction="@Url.Action("XacNhan", "DanhGiaDuAn")"
                             formmethod="post"
                             name="maDanhGiaDuAn"
                             value="@Model.MaDanhGiaDuAn">
-                        Gửi duyệt
+                        Xác nhận đánh giá
                     </button>
+                }
+                @if (Model.CoTheLuu && !Model.MaDanhGiaDuAn.HasValue)
+                {
+                    <span class="text-muted small align-self-center">Vui lòng lưu nháp trước khi xác nhận đánh giá.</span>
                 }
             </div>
         </form>

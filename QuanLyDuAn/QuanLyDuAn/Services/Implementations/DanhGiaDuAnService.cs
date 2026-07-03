@@ -92,7 +92,7 @@ namespace QuanLyDuAn.Services.Implementations
             var currentUserId = await GetCurrentUserIdAsync();
             var roleFlags = await GetCurrentUserRoleFlagsAsync();
 
-            if (!roleFlags.IsManager)
+            if (!roleFlags.IsManager && !roleFlags.IsAdmin)
             {
                 return new DanhGiaDuAnPageViewModel
                 {
@@ -283,7 +283,7 @@ namespace QuanLyDuAn.Services.Implementations
             var items = duAnRows.Select(x =>
             {
                 thongKeCongViec.TryGetValue(x.MaDuAn, out var tk);
-                var duDieuKienDanhGia = ChoPhepGuiDuyetTheoTrangThaiDuAn(x.TrangThaiDuAn);
+                var duDieuKienDanhGia = ChoPhepXacNhanTheoTrangThaiDuAn(x.TrangThaiDuAn);
                 var coTheDanhGia = roleFlags.IsManager && x.MaNguoiQuanLy == currentUserId && duDieuKienDanhGia;
                 var timelineThongKe = new DanhGiaDuAnThongKeViewModel
                 {
@@ -326,8 +326,7 @@ namespace QuanLyDuAn.Services.Implementations
                 var trangThaiCode = ChuanHoaTrangThaiDanhGia(dg.TrangThaiDanhGiaDA);
                 var diemTong = dg.DiemTongDanhGiaDA ?? 0;
                 var coTheSua = CoQuyenSuaDanhGiaDuAn(roleFlags, currentUserId, dg.MaNguoiDung, x.MaNguoiQuanLy, trangThaiCode);
-                var coTheGuiDuyet = coTheSua && duDieuKienDanhGia;
-                var coTheDuyet = CoQuyenDuyetDanhGiaDuAn(roleFlags, trangThaiCode);
+                var coTheXacNhan = CoQuyenXacNhanDanhGiaDuAn(roleFlags, currentUserId, dg.MaNguoiDung, x.MaNguoiQuanLy, trangThaiCode) && duDieuKienDanhGia;
 
                 return new DanhGiaDuAnItemViewModel
                 {
@@ -356,9 +355,10 @@ namespace QuanLyDuAn.Services.Implementations
                     LyDoTuChoi = dg.LyDoTuChoi,
                     CoTheDanhGia = coTheDanhGia,
                     CoTheSua = coTheSua && duDieuKienDanhGia,
-                    CoTheGuiDuyet = coTheGuiDuyet,
-                    CoTheDuyet = coTheDuyet,
-                    CoTheTuChoi = coTheDuyet
+                    CoTheXacNhan = coTheXacNhan,
+                    CoTheGuiDuyet = false,
+                    CoTheDuyet = false,
+                    CoTheTuChoi = false
                 };
             }).ToList();
 
@@ -437,7 +437,7 @@ namespace QuanLyDuAn.Services.Implementations
 
             var diemTong = TinhDiemTongKet(danhSachTieuChi.Select(x => x.DiemDanhGiaDA));
             var trangThaiDanhGia = ChuanHoaTrangThaiDanhGia(danhGia?.TrangThaiDanhGiaDA);
-            var biKhoa = LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.DaDuyet) || LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.ChoDuyet);
+            var biKhoa = !LaTrangThaiDanhGia(trangThaiDanhGia, TrangThaiNhap);
             var thongKe = await XayDungThongKeDuAnAsync(maDuAn);
             return new DanhGiaDuAnFormViewModel
             {
@@ -477,7 +477,8 @@ namespace QuanLyDuAn.Services.Implementations
                 XepLoai = TinhXepLoai(diemTong),
                 TrangThaiDanhGia = trangThaiDanhGia,
                 CoTheLuu = !biKhoa,
-                CoTheGuiDuyet = !biKhoa && ChoPhepGuiDuyetTheoTrangThaiDuAn(duAn.TrangThaiDuAn),
+                CoTheXacNhan = danhGia != null && !biKhoa && ChoPhepXacNhanTheoTrangThaiDuAn(duAn.TrangThaiDuAn),
+                CoTheGuiDuyet = false,
                 CoTheDuyet = false,
                 CoTheTuChoi = false,
                 ThongKe = thongKe
@@ -594,7 +595,7 @@ namespace QuanLyDuAn.Services.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task GuiDuyetAsync(int maDanhGiaDuAn)
+        public async Task XacNhanAsync(int maDanhGiaDuAn)
         {
             KiemTraQuyenTheoClaim(Permissions.DanhGiaDuAn.DanhGia, Permissions.DanhGiaDuAn.Sua);
 
@@ -618,107 +619,58 @@ namespace QuanLyDuAn.Services.Implementations
 
             if (!roleFlags.IsManager || duAn.MaNguoiDung != currentUserId || entity.MaNguoiDung != currentUserId)
             {
-                throw new Exception("Ban khong co quyen gui duyet danh gia du an nay.");
+                throw new Exception("Ban khong co quyen xac nhan danh gia du an nay.");
             }
 
             var trangThaiDanhGia = ChuanHoaTrangThaiDanhGia(entity.TrangThaiDanhGiaDA);
-            if (!LaTrangThaiDanhGia(trangThaiDanhGia, TrangThaiNhap) && !LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.TuChoi))
+            if (!LaTrangThaiDanhGia(trangThaiDanhGia, TrangThaiNhap))
             {
-                throw new Exception("Chi ban danh gia nhap hoac tu choi moi duoc gui duyet.");
+                throw new Exception("Chi ban danh gia nhap moi duoc xac nhan.");
             }
 
-            if (!ChoPhepGuiDuyetTheoTrangThaiDuAn(duAn.TrangThaiDuAn))
+            if (!ChoPhepXacNhanTheoTrangThaiDuAn(duAn.TrangThaiDuAn))
             {
-                throw new Exception("Chi du an da hoan thanh hoac cho xac nhan hoan thanh moi duoc gui duyet danh gia.");
+                throw new Exception("Chi du an da hoan thanh hoac cho xac nhan hoan thanh moi duoc xac nhan danh gia.");
             }
 
-            var soTieuChi = await _context.CtDanhGiaDuAn
-                .CountAsync(x => x.MaDanhGiaDuAn == maDanhGiaDuAn && x.IsDeleted != true);
+            var diemDaLuu = await _context.CtDanhGiaDuAn
+                .Where(x => x.MaDanhGiaDuAn == maDanhGiaDuAn && x.IsDeleted != true)
+                .Select(x => x.DiemDanhGiaDA)
+                .ToListAsync();
 
-            if (soTieuChi <= 0)
+            if (diemDaLuu.Count <= 0)
             {
                 throw new Exception("Danh gia du an chua co chi tiet tieu chi.");
             }
 
-            entity.TrangThaiDanhGiaDA = TrangThai.ChoDuyet;
-            entity.MaNguoiDungDuyet = null;
-            entity.NgayDuyetDanhGiaDA = null;
-            entity.LyDoTuChoiDanhGiaDA = null;
-            entity.NgayDanhGiaDA = DateTime.Now;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DuyetAsync(int maDanhGiaDuAn)
-        {
-            KiemTraQuyenTheoClaim(Permissions.DanhGiaDuAn.Duyet);
-
-            var currentUserId = await GetCurrentUserIdAsync();
-            var roleFlags = await GetCurrentUserRoleFlagsAsync();
-            if (!roleFlags.IsAdmin)
+            if (CoDiemKhongHopLe(diemDaLuu))
             {
-                throw new Exception("Chi Admin duoc phep duyet danh gia du an.");
-            }
-
-            var entity = await _context.DanhGiaDuAn
-                .FirstOrDefaultAsync(x => x.MaDanhGiaDuAn == maDanhGiaDuAn && x.IsDeleted != true);
-            if (entity == null)
-            {
-                throw new Exception("Khong tim thay ban danh gia du an.");
-            }
-
-            var trangThaiDanhGia = ChuanHoaTrangThaiDanhGia(entity.TrangThaiDanhGiaDA);
-            if (!LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.ChoDuyet))
-            {
-                throw new Exception("Chi ban danh gia dang cho duyet moi duoc phe duyet.");
+                throw new Exception("Không thể xác nhận vì có điểm đánh giá không hợp lệ. Vui lòng chỉnh điểm trong khoảng từ 1 đến 10.");
             }
 
             entity.TrangThaiDanhGiaDA = TrangThai.DaDuyet;
             entity.MaNguoiDungDuyet = currentUserId;
             entity.NgayDuyetDanhGiaDA = DateTime.Now;
             entity.LyDoTuChoiDanhGiaDA = null;
+            entity.NgayDanhGiaDA = DateTime.Now;
             await _context.SaveChangesAsync();
+        }
+
+        public Task GuiDuyetAsync(int maDanhGiaDuAn)
+        {
+            throw new Exception("Luong gui duyet da duoc thay bang xac nhan danh gia.");
+        }
+
+        public async Task DuyetAsync(int maDanhGiaDuAn)
+        {
+            await Task.CompletedTask;
+            throw new Exception("Luong duyet boi Admin da duoc thay bang xac nhan danh gia cua Manager.");
         }
 
         public async Task TuChoiAsync(int maDanhGiaDuAn, string lyDoTuChoi)
         {
-            KiemTraQuyenTheoClaim(Permissions.DanhGiaDuAn.Duyet);
-
-            var currentUserId = await GetCurrentUserIdAsync();
-            var roleFlags = await GetCurrentUserRoleFlagsAsync();
-            if (!roleFlags.IsAdmin)
-            {
-                throw new Exception("Chi Admin duoc phep tu choi danh gia du an.");
-            }
-
-            if (string.IsNullOrWhiteSpace(lyDoTuChoi))
-            {
-                throw new Exception("Vui long nhap ly do tu choi.");
-            }
-
-            var lyDo = lyDoTuChoi.Trim();
-            if (lyDo.Length > DoDaiNhanXetToiDa)
-            {
-                throw new Exception($"Ly do tu choi toi da {DoDaiNhanXetToiDa} ky tu.");
-            }
-
-            var entity = await _context.DanhGiaDuAn
-                .FirstOrDefaultAsync(x => x.MaDanhGiaDuAn == maDanhGiaDuAn && x.IsDeleted != true);
-            if (entity == null)
-            {
-                throw new Exception("Khong tim thay ban danh gia du an.");
-            }
-
-            var trangThaiDanhGia = ChuanHoaTrangThaiDanhGia(entity.TrangThaiDanhGiaDA);
-            if (!LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.ChoDuyet))
-            {
-                throw new Exception("Chi ban danh gia dang cho duyet moi duoc tu choi.");
-            }
-
-            entity.TrangThaiDanhGiaDA = TrangThai.TuChoi;
-            entity.MaNguoiDungDuyet = currentUserId;
-            entity.NgayDuyetDanhGiaDA = DateTime.Now;
-            entity.LyDoTuChoiDanhGiaDA = lyDo;
-            await _context.SaveChangesAsync();
+            await Task.CompletedTask;
+            throw new Exception("Luong tu choi boi Admin da duoc thay bang xac nhan danh gia cua Manager.");
         }
 
         public async Task<DanhGiaDuAnChiTietViewModel> GetChiTietAsync(int maDanhGiaDuAn)
@@ -833,14 +785,16 @@ namespace QuanLyDuAn.Services.Implementations
 
         private async Task<List<DanhGiaDuAnDuAnOptionViewModel>> LayDanhSachDuAnTheoScopeAsync(int currentUserId, (bool IsAdmin, bool IsManager, bool IsEmployee) roleFlags)
         {
-            if (!roleFlags.IsManager)
+            if (!roleFlags.IsManager && !roleFlags.IsAdmin)
             {
                 return new List<DanhGiaDuAnDuAnOptionViewModel>();
             }
 
-            IQueryable<DuAn> query = _context.DuAn.Where(x =>
-                x.IsDeleted != true
-                && x.MaNguoiDung == currentUserId);
+            IQueryable<DuAn> query = _context.DuAn.Where(x => x.IsDeleted != true);
+            if (!roleFlags.IsAdmin)
+            {
+                query = query.Where(x => x.MaNguoiDung == currentUserId);
+            }
 
             var rows = await query
                 .OrderBy(x => x.TenDuAn)
@@ -1837,7 +1791,7 @@ namespace QuanLyDuAn.Services.Implementations
             return Math.Round(Math.Clamp(giaTri, 0d, 1d), 4);
         }
 
-        private static bool ChoPhepGuiDuyetTheoTrangThaiDuAn(string? trangThaiDuAn)
+        private static bool ChoPhepXacNhanTheoTrangThaiDuAn(string? trangThaiDuAn)
         {
             return TrangThai.EqualsValue(trangThaiDuAn, TrangThai.HoanThanh)
                    || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.ChoXacNhanHoanThanh)
@@ -1884,7 +1838,7 @@ namespace QuanLyDuAn.Services.Implementations
             {
                 if (item.Diem < DiemToiThieu || item.Diem > DiemToiDa)
                 {
-                    throw new Exception("Diem tung tieu chi phai nam trong khoang 1 den 10.");
+                    throw new Exception("Điểm đánh giá phải nằm trong khoảng từ 1 đến 10.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(item.NhanXet) && item.NhanXet.Trim().Length > DoDaiNhanXetToiDa)
@@ -1929,6 +1883,11 @@ namespace QuanLyDuAn.Services.Implementations
             return string.Equals(TrangThai.Normalize(value), TrangThai.Normalize(expected), StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool CoDiemKhongHopLe(IEnumerable<int?> diemTieuChi)
+        {
+            return diemTieuChi.Any(x => !x.HasValue || x.Value < DiemToiThieu || x.Value > DiemToiDa);
+        }
+
         private static double TinhDiemTongKet(IEnumerable<int> diemTieuChi)
         {
             var ds = diemTieuChi.ToList();
@@ -1971,13 +1930,21 @@ namespace QuanLyDuAn.Services.Implementations
                 return false;
             }
 
-            return LaTrangThaiDanhGia(trangThaiDanhGia, TrangThaiNhap)
-                   || LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.TuChoi);
+            return LaTrangThaiDanhGia(trangThaiDanhGia, TrangThaiNhap);
         }
 
-        private static bool CoQuyenDuyetDanhGiaDuAn((bool IsAdmin, bool IsManager, bool IsEmployee) roleFlags, string trangThaiDanhGia)
+        private static bool CoQuyenXacNhanDanhGiaDuAn(
+            (bool IsAdmin, bool IsManager, bool IsEmployee) roleFlags,
+            int currentUserId,
+            int maNguoiDanhGia,
+            int maNguoiQuanLy,
+            string trangThaiDanhGia)
         {
-            return roleFlags.IsAdmin && LaTrangThaiDanhGia(trangThaiDanhGia, TrangThai.ChoDuyet);
+            return !roleFlags.IsAdmin
+                   && roleFlags.IsManager
+                   && currentUserId == maNguoiDanhGia
+                   && currentUserId == maNguoiQuanLy
+                   && LaTrangThaiDanhGia(trangThaiDanhGia, TrangThaiNhap);
         }
 
         private async Task<bool> CoQuyenXemDanhGiaDuAnAsync(

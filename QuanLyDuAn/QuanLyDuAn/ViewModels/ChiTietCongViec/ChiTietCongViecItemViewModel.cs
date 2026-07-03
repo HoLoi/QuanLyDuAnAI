@@ -16,5 +16,6 @@
         public int SoNguoiDuocPhanCong { get; set; }
         public bool DaPhanCong => SoNguoiDuocPhanCong > 0;
         public bool CoThePhanCongChiTietCongViec { get; set; }
+        public bool CoTheMoLai { get; set; }
     }
 }

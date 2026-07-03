@@ -37,6 +37,7 @@ namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
         public int? MaDmNguyenNhanAiDuDoan { get; set; }
         public int? MaDmNguyenNhanManagerXacNhan { get; set; }
         public DateTime? ThoiGianManagerXacNhan { get; set; }
+        [MinLength(1, ErrorMessage = "Vui lòng nhập ít nhất một tiêu chí đánh giá.")]
         public List<DanhGiaDuAnTieuChiViewModel> TieuChi { get; set; } = new();
 
         [StringLength(500)]
@@ -47,6 +48,7 @@ namespace QuanLyDuAn.ViewModels.DanhGiaDuAn
         public string TrangThaiDanhGia { get; set; } = string.Empty;
 
         public bool CoTheLuu { get; set; }
+        public bool CoTheXacNhan { get; set; }
         public bool CoTheGuiDuyet { get; set; }
         public bool CoTheDuyet { get; set; }
         public bool CoTheTuChoi { get; set; }

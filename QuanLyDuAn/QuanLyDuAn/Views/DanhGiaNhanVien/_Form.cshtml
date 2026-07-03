@@ -41,6 +41,7 @@
         </div>
 
         <form asp-action="Luu" method="post" class="vstack gap-2 mt-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
             <input type="hidden" asp-for="MaDanhGiaNhanVien" />
             <input type="hidden" asp-for="MaDuAn" />
             <input type="hidden" asp-for="MaNhanVien" />
@@ -62,7 +63,8 @@
                     <div class="row g-2">
                         <div class="col-md-2">
                             <label class="form-label">Điểm (1-10)</label>
-                            <input asp-for="TieuChi[i].DiemDanhGiaNV" class="form-control" min="1" max="10" />
+                            <input asp-for="TieuChi[i].DiemDanhGiaNV" class="form-control" type="number" min="1" max="10" step="1" required />
+                            <span asp-validation-for="TieuChi[i].DiemDanhGiaNV" class="text-danger small"></span>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Mã công việc (tùy chọn)</label>

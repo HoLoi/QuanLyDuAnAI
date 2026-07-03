@@ -38,7 +38,7 @@
                                  ?? Model.DanhSachDuAn.Find(x => x.MaDuAn == Model.MaDuAn)?.TenDuAn;
             var tuModuleDuAn = string.Equals(Model.Nguon, "du-an", StringComparison.OrdinalIgnoreCase);
             <div class="d-flex flex-wrap gap-2 align-items-center mt-2">
-                @if (canTacNghiep)
+                @if (canTacNghiep && daChonDuAn)
                 {
                     <a href="#dgnv-danh-sach" class="btn-action btn-confirm">Đến danh sách đánh giá</a>
                 }
@@ -55,7 +55,10 @@
 
         @await Html.PartialAsync("_Filter", Model)
 
-        @await Html.PartialAsync("_SummaryCards", Model)
+        @if (Model.MaDuAn.HasValue || Model.Form != null)
+        {
+            @await Html.PartialAsync("_SummaryCards", Model)
+        }
 
         @if (Model.Form != null)
         {
@@ -64,39 +67,46 @@
 
         @if (Model.Form == null)
         {
-            <div class="table-card-header dgnv-list-header" id="dgnv-danh-sach">
-                <div class="table-card-header-content">
-                    <h6 class="mb-1">Danh sách nhân viên có thể đánh giá</h6>
-                    <p class="text-muted mb-0">Danh sách theo bộ lọc hiện tại.</p>
-                </div>
-                @if (canExport)
-                {
-                    var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
-                    {
-                        Action = "XuatFile",
-                        RouteValues = new Dictionary<string, string?>
-                        {
-                            ["maDuAn"] = Model.MaDuAn?.ToString(),
-                            ["maNhanVien"] = Model.MaNhanVien?.ToString(),
-                            ["tuKhoa"] = Model.TuKhoa,
-                            ["trangThai"] = Model.TrangThai,
-                            ["nguon"] = Model.Nguon,
-                            ["tuNgayDanhGia"] = Model.TuNgayDanhGia?.ToString("yyyy-MM-dd"),
-                            ["denNgayDanhGia"] = Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")
-                        }
-                    };
-                    <partial name="_ExportDropdown" model="exportVm" />
-                }
-            </div>
-
-            @if (Model.DanhSach.Any())
+            @if (!Model.MaDuAn.HasValue)
             {
-                @await Html.PartialAsync("_Table", Model)
-                <partial name="_Pagination" model="Model.Pagination" />
+                @await Html.PartialAsync("_EmptyState", Model)
             }
             else
             {
-                @await Html.PartialAsync("_EmptyState", Model)
+                <div class="table-card-header dgnv-list-header" id="dgnv-danh-sach">
+                    <div class="table-card-header-content">
+                        <h6 class="mb-1">Danh sách nhân viên có thể đánh giá</h6>
+                        <p class="text-muted mb-0">Danh sách theo dự án đã chọn.</p>
+                    </div>
+                    @if (canExport)
+                    {
+                        var exportVm = new QuanLyDuAn.ViewModels.Common.ExportDropdownViewModel
+                        {
+                            Action = "XuatFile",
+                            RouteValues = new Dictionary<string, string?>
+                            {
+                                ["maDuAn"] = Model.MaDuAn?.ToString(),
+                                ["maNhanVien"] = Model.MaNhanVien?.ToString(),
+                                ["tuKhoa"] = Model.TuKhoa,
+                                ["trangThai"] = Model.TrangThai,
+                                ["nguon"] = Model.Nguon,
+                                ["tuNgayDanhGia"] = Model.TuNgayDanhGia?.ToString("yyyy-MM-dd"),
+                                ["denNgayDanhGia"] = Model.DenNgayDanhGia?.ToString("yyyy-MM-dd")
+                            }
+                        };
+                        <partial name="_ExportDropdown" model="exportVm" />
+                    }
+                </div>
+
+                @if (Model.DanhSach.Any())
+                {
+                    @await Html.PartialAsync("_Table", Model)
+                    <partial name="_Pagination" model="Model.Pagination" />
+                }
+                else
+                {
+                    @await Html.PartialAsync("_EmptyState", Model)
+                }
             }
         }
     </div>

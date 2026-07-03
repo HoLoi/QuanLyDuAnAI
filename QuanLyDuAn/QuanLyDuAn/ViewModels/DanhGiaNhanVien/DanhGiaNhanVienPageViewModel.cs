@@ -27,6 +27,8 @@ namespace QuanLyDuAn.ViewModels.DanhGiaNhanVien
 
         public string? Nguon { get; set; }
         public string? TenDuAnDangLoc { get; set; }
+        public bool CanChonDuAnTruoc { get; set; }
+        public string? ThongBaoRong { get; set; }
 
         public HashSet<string> Permissions { get; set; } = new();
     }

@@ -63,6 +63,26 @@ namespace QuanLyDuAn.Services.Implementations
 
             var danhSachDuAn = await LayDanhSachDuAnTheoScopeAsync(currentUserId, roleFlags, leaderProjectIds);
             var duAnTheoScope = danhSachDuAn.Select(x => x.MaDuAn).ToHashSet();
+            if (!maDuAn.HasValue)
+            {
+                return new DanhGiaNhanVienPageViewModel
+                {
+                    MaDuAn = null,
+                    MaNhanVien = null,
+                    TuKhoa = tuKhoa,
+                    TrangThai = trangThai,
+                    TuNgayDanhGia = tuNgayLoc,
+                    DenNgayDanhGia = denNgayLoc,
+                    DanhSachDuAn = danhSachDuAn,
+                    DanhSachNhanVien = new List<DanhGiaNhanVienNhanVienOptionViewModel>(),
+                    DanhSach = new List<DanhGiaNhanVienItemViewModel>(),
+                    TongSo = 0,
+                    Pagination = PaginationViewModel.Create(pageNumber, pageSize, 0),
+                    CanChonDuAnTruoc = true,
+                    ThongBaoRong = "Vui lòng chọn dự án để đánh giá nhân viên."
+                };
+            }
+
             if (duAnTheoScope.Count == 0)
             {
                 return new DanhGiaNhanVienPageViewModel
@@ -73,7 +93,52 @@ namespace QuanLyDuAn.Services.Implementations
                     TrangThai = trangThai,
                     TuNgayDanhGia = tuNgayLoc,
                     DenNgayDanhGia = denNgayLoc,
-                    DanhSachDuAn = danhSachDuAn
+                    DanhSachDuAn = danhSachDuAn,
+                    DanhSachNhanVien = new List<DanhGiaNhanVienNhanVienOptionViewModel>(),
+                    DanhSach = new List<DanhGiaNhanVienItemViewModel>(),
+                    TongSo = 0,
+                    Pagination = PaginationViewModel.Create(pageNumber, pageSize, 0),
+                    ThongBaoRong = "Không tìm thấy nhân viên phù hợp với điều kiện lọc."
+                };
+            }
+
+            if (!duAnTheoScope.Contains(maDuAn.Value))
+            {
+                return new DanhGiaNhanVienPageViewModel
+                {
+                    MaDuAn = maDuAn,
+                    MaNhanVien = maNhanVien,
+                    TuKhoa = tuKhoa,
+                    TrangThai = trangThai,
+                    TuNgayDanhGia = tuNgayLoc,
+                    DenNgayDanhGia = denNgayLoc,
+                    DanhSachDuAn = danhSachDuAn,
+                    DanhSachNhanVien = new List<DanhGiaNhanVienNhanVienOptionViewModel>(),
+                    DanhSach = new List<DanhGiaNhanVienItemViewModel>(),
+                    TongSo = 0,
+                    Pagination = PaginationViewModel.Create(pageNumber, pageSize, 0),
+                    ThongBaoRong = "Không tìm thấy nhân viên phù hợp với điều kiện lọc."
+                };
+            }
+
+            var nhanVienThamGiaThucTe = await LayMaNhanVienThamGiaThucTeAsync(maDuAn.Value);
+            if (nhanVienThamGiaThucTe.Count == 0)
+            {
+                return new DanhGiaNhanVienPageViewModel
+                {
+                    MaDuAn = maDuAn,
+                    MaNhanVien = maNhanVien,
+                    TuKhoa = tuKhoa,
+                    TrangThai = trangThai,
+                    TuNgayDanhGia = tuNgayLoc,
+                    DenNgayDanhGia = denNgayLoc,
+                    DanhSachDuAn = danhSachDuAn,
+                    DanhSachNhanVien = new List<DanhGiaNhanVienNhanVienOptionViewModel>(),
+                    DanhSach = new List<DanhGiaNhanVienItemViewModel>(),
+                    TongSo = 0,
+                    Pagination = PaginationViewModel.Create(pageNumber, pageSize, 0),
+                    TenDuAnDangLoc = danhSachDuAn.FirstOrDefault(x => x.MaDuAn == maDuAn.Value)?.TenDuAn,
+                    ThongBaoRong = "Dự án này chưa có nhân viên có phân công hoặc tiến độ để đánh giá."
                 };
             }
 
@@ -84,6 +149,8 @@ namespace QuanLyDuAn.Services.Implementations
                 where da.IsDeleted != true
                       && nd.IsDeleted != true
                       && duAnTheoScope.Contains(nvda.MaDuAn)
+                      && nvda.MaDuAn == maDuAn.Value
+                      && nhanVienThamGiaThucTe.Contains(nvda.MaNguoiDung)
                 select new
                 {
                     nvda.MaDuAn,
@@ -108,11 +175,6 @@ namespace QuanLyDuAn.Services.Implementations
             else
             {
                 query = query.Where(x => false);
-            }
-
-            if (maDuAn.HasValue)
-            {
-                query = query.Where(x => x.MaDuAn == maDuAn.Value);
             }
 
             if (maNhanVien.HasValue)
@@ -339,6 +401,9 @@ namespace QuanLyDuAn.Services.Implementations
                 TenDuAnDangLoc = maDuAn.HasValue
                     ? danhSachDuAn.FirstOrDefault(x => x.MaDuAn == maDuAn.Value)?.TenDuAn
                     : null,
+                ThongBaoRong = totalItems == 0 && !maNhanVien.HasValue && string.IsNullOrWhiteSpace(tuKhoa) && string.IsNullOrWhiteSpace(trangThai) && !tuNgayLoc.HasValue && !denNgayLoc.HasValue
+                    ? "Dự án này chưa có nhân viên có phân công hoặc tiến độ để đánh giá."
+                    : "Không tìm thấy nhân viên phù hợp với điều kiện lọc.",
                 Pagination = pagination
             };
         }
@@ -379,6 +444,12 @@ namespace QuanLyDuAn.Services.Implementations
             if (thanhVien == null)
             {
                 throw new Exception("Nhan vien khong thuoc du an.");
+            }
+
+            var nhanVienThamGiaThucTe = await LayMaNhanVienThamGiaThucTeAsync(maDuAn);
+            if (!nhanVienThamGiaThucTe.Contains(maNhanVien))
+            {
+                throw new Exception("Nhân viên này chưa có phân công hoặc tiến độ trong dự án nên chưa thể đánh giá.");
             }
 
             var leaderTeamIds = await LayDanhSachTeamLeaderAsync(currentUserId);
@@ -508,11 +579,23 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Khong tim thay du an.");
             }
 
-            var thanhVienHopLe = await _context.NhanVienDuAn
-                .AnyAsync(x => x.MaDuAn == form.MaDuAn && x.MaNguoiDung == form.MaNhanVien);
+            var thanhVienHopLe = await (
+                from nvda in _context.NhanVienDuAn
+                join nd in _context.NguoiDung on nvda.MaNguoiDung equals nd.MaNguoiDung
+                where nvda.MaDuAn == form.MaDuAn
+                      && nvda.MaNguoiDung == form.MaNhanVien
+                      && nd.IsDeleted != true
+                select nvda.MaNguoiDung
+            ).AnyAsync();
             if (!thanhVienHopLe)
             {
                 throw new Exception("Nhan vien khong thuoc du an.");
+            }
+
+            var nhanVienThamGiaThucTe = await LayMaNhanVienThamGiaThucTeAsync(form.MaDuAn);
+            if (!nhanVienThamGiaThucTe.Contains(form.MaNhanVien))
+            {
+                throw new Exception("Nhân viên này chưa có phân công hoặc tiến độ trong dự án nên chưa thể đánh giá.");
             }
 
             var leaderTeamIds = await LayDanhSachTeamLeaderAsync(currentUserId);
@@ -540,7 +623,7 @@ namespace QuanLyDuAn.Services.Implementations
             {
                 if (item.DiemDanhGiaNV < DiemToiThieu || item.DiemDanhGiaNV > DiemToiDa)
                 {
-                    throw new Exception("Diem tung tieu chi phai nam trong khoang 1 den 10.");
+                    throw new Exception("Điểm đánh giá phải nằm trong khoảng từ 1 đến 10.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(item.NoiDungDanhGiaNhanVien) && item.NoiDungDanhGiaNhanVien.Trim().Length > DoDaiNhanXetToiDa)
@@ -680,12 +763,9 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Chi ban danh gia nhap hoac tu choi moi duoc gui duyet.");
             }
 
-            var soChiTiet = await _context.CtDanhGiaNhanVien
-                .CountAsync(x => x.MaDanhGiaNhanVien == maDanhGiaNhanVien && x.IsDeleted != true);
-            if (soChiTiet <= 0)
-            {
-                throw new Exception("Danh gia nhan vien chua co chi tiet tieu chi.");
-            }
+            await KiemTraDiemDaLuuDanhGiaNhanVienAsync(
+                maDanhGiaNhanVien,
+                "Không thể gửi duyệt vì có điểm đánh giá không hợp lệ. Vui lòng chỉnh điểm trong khoảng từ 1 đến 10.");
 
             entity.TrangThaiDanhGiaNV = TrangThai.ChoDuyet;
             entity.MaNguoiDungDuyet = null;
@@ -727,6 +807,10 @@ namespace QuanLyDuAn.Services.Implementations
             {
                 throw new Exception("Chi ban danh gia dang cho duyet moi duoc phe duyet.");
             }
+
+            await KiemTraDiemDaLuuDanhGiaNhanVienAsync(
+                maDanhGiaNhanVien,
+                "Không thể duyệt vì có điểm đánh giá không hợp lệ. Vui lòng chỉnh điểm trong khoảng từ 1 đến 10.");
 
             entity.TrangThaiDanhGiaNV = TrangThai.DaDuyet;
             entity.MaNguoiDungDuyet = currentUserId;
@@ -1092,6 +1176,51 @@ namespace QuanLyDuAn.Services.Implementations
             }).ToList();
         }
 
+        private async Task<HashSet<int>> LayMaNhanVienThamGiaThucTeAsync(int maDuAn)
+        {
+            var tuPhanCongCongViec = await (
+                from pc in _context.PhanCongCongViec
+                join cv in _context.CongViec on pc.MaCongViec equals cv.MaCongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                where pc.MaNguoiDung > 0
+                      && dm.MaDuAn == maDuAn
+                      && dm.IsDeleted != true
+                      && cv.IsDeleted != true
+                select pc.MaNguoiDung
+            ).Distinct().ToListAsync();
+
+            var tuPhanCongChiTiet = await (
+                from pc in _context.PhanCongCtCongViec
+                join ct in _context.CtCongViec on pc.MaChiTietCV equals ct.MaChiTietCV
+                join cv in _context.CongViec on ct.MaCongViec equals cv.MaCongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                where pc.MaNguoiDung > 0
+                      && dm.MaDuAn == maDuAn
+                      && dm.IsDeleted != true
+                      && cv.IsDeleted != true
+                      && ct.IsDeleted != true
+                select pc.MaNguoiDung
+            ).Distinct().ToListAsync();
+
+            var tuTienDo = await (
+                from td in _context.TienDoCongViec
+                join ct in _context.CtCongViec on td.MaChiTietCV equals ct.MaChiTietCV
+                join cv in _context.CongViec on ct.MaCongViec equals cv.MaCongViec
+                join dm in _context.DanhMucCongViec on cv.MaDanhMucCV equals dm.MaDanhMucCV
+                where td.MaNguoiDung > 0
+                      && dm.MaDuAn == maDuAn
+                      && dm.IsDeleted != true
+                      && cv.IsDeleted != true
+                      && ct.IsDeleted != true
+                select td.MaNguoiDung
+            ).Distinct().ToListAsync();
+
+            return tuPhanCongCongViec
+                .Concat(tuPhanCongChiTiet)
+                .Concat(tuTienDo)
+                .ToHashSet();
+        }
+
         private async Task<List<DanhGiaNhanVienNhanVienOptionViewModel>> LayDanhSachNhanVienTheoScopeAsync(
             int currentUserId,
             (bool IsAdmin, bool IsManager, bool IsEmployee) roleFlags,
@@ -1099,7 +1228,18 @@ namespace QuanLyDuAn.Services.Implementations
             List<int> leaderProjectIds,
             List<int> leaderTeamIds)
         {
+            if (!maDuAn.HasValue)
+            {
+                return new List<DanhGiaNhanVienNhanVienOptionViewModel>();
+            }
+
             if (roleFlags.IsAdmin)
+            {
+                return new List<DanhGiaNhanVienNhanVienOptionViewModel>();
+            }
+
+            var nhanVienThamGiaThucTe = await LayMaNhanVienThamGiaThucTeAsync(maDuAn.Value);
+            if (nhanVienThamGiaThucTe.Count == 0)
             {
                 return new List<DanhGiaNhanVienNhanVienOptionViewModel>();
             }
@@ -1107,18 +1247,16 @@ namespace QuanLyDuAn.Services.Implementations
             var query =
                 from nvda in _context.NhanVienDuAn
                 join nd in _context.NguoiDung on nvda.MaNguoiDung equals nd.MaNguoiDung
-                where nd.IsDeleted != true
+                where nvda.MaDuAn == maDuAn.Value
+                      && nvda.MaNguoiDung != currentUserId
+                      && nhanVienThamGiaThucTe.Contains(nvda.MaNguoiDung)
+                      && nd.IsDeleted != true
                 select new
                 {
                     nvda.MaDuAn,
                     nvda.MaNguoiDung,
                     nd.HoTenNguoiDung
                 };
-
-            if (maDuAn.HasValue)
-            {
-                query = query.Where(x => x.MaDuAn == maDuAn.Value);
-            }
 
             if (roleFlags.IsManager)
             {
@@ -1329,6 +1467,24 @@ namespace QuanLyDuAn.Services.Implementations
         private static bool LaTrangThaiDanhGia(string? value, string expected)
         {
             return string.Equals(TrangThai.Normalize(value), TrangThai.Normalize(expected), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private async Task KiemTraDiemDaLuuDanhGiaNhanVienAsync(int maDanhGiaNhanVien, string thongBaoDiemKhongHopLe)
+        {
+            var diemDaLuu = await _context.CtDanhGiaNhanVien
+                .Where(x => x.MaDanhGiaNhanVien == maDanhGiaNhanVien && x.IsDeleted != true)
+                .Select(x => x.DiemDanhGiaNV)
+                .ToListAsync();
+
+            if (diemDaLuu.Count <= 0)
+            {
+                throw new Exception("Danh gia nhan vien chua co chi tiet tieu chi.");
+            }
+
+            if (diemDaLuu.Any(x => !x.HasValue || x.Value < DiemToiThieu || x.Value > DiemToiDa))
+            {
+                throw new Exception(thongBaoDiemKhongHopLe);
+            }
         }
 
         private static double TinhDiemTongKet(IEnumerable<int> diemTieuChi)

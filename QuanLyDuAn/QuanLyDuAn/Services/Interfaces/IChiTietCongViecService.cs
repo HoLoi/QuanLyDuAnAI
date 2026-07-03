@@ -8,5 +8,6 @@ namespace QuanLyDuAn.Services.Interfaces
         Task AddAsync(ChiTietCongViecCreateUpdateViewModel model);
         Task UpdateAsync(ChiTietCongViecCreateUpdateViewModel model);
         Task RemoveAsync(int maCongViec, int maChiTietCv);
+        Task MoLaiChiTietCongViecAsync(int maCongViec, int maChiTietCv, string lyDo);
     }
 }

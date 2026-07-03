@@ -46,15 +46,21 @@ namespace QuanLyDuAn.Controllers
             {
                 var principal = await _accountService.AuthenticateAsync(model.TenDangNhap, model.MatKhau);
 
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = model.GhiNhoDangNhap,
+                    AllowRefresh = true
+                };
+
+                if (model.GhiNhoDangNhap)
+                {
+                    authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7);
+                }
+
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     principal,
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = model.GhiNhoDangNhap,
-                        AllowRefresh = true,
-                        ExpiresUtc = model.GhiNhoDangNhap ? DateTimeOffset.UtcNow.AddDays(7) : DateTimeOffset.UtcNow.AddHours(8)
-                    });
+                    authProperties);
             }
             catch (Exception ex)
             {

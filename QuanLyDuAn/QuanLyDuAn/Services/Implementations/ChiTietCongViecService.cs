@@ -31,6 +31,7 @@ namespace QuanLyDuAn.Services.Implementations
             var coTheCapNhat = await CoTheCapNhatAsync(congViec)
                                && !BiKhoaCapNhatTheoTrangThaiCongViec(congViec.TrangThaiCongViec);
             var coThePhanCongChiTietCongViec = await CoThePhanCongChiTietCongViecAsync(congViec);
+            var coTheMoLaiTheoCapTren = coTheCapNhat && await CapTrenChoPhepMoLaiChiTietAsync(congViec);
 
             var query = _context.CtCongViec
                 .Where(x => x.MaCongViec == maCongViec && x.IsDeleted != true);
@@ -66,7 +67,10 @@ namespace QuanLyDuAn.Services.Implementations
                     NgayBatDauCTCV = x.NgayBatDauCTCV,
                     NgayKetThucCTCV = x.NgayKetThucCTCV,
                     TrangThaiCTCV = x.TrangThaiCTCV ?? TrangThai.ChuaBatDau,
-                    CoThePhanCongChiTietCongViec = coThePhanCongChiTietCongViec
+                    CoThePhanCongChiTietCongViec = coThePhanCongChiTietCongViec,
+                    CoTheMoLai = coTheMoLaiTheoCapTren
+                        && (TrangThai.EqualsValue(x.TrangThaiCTCV, TrangThai.BiCanCan)
+                            || TrangThai.EqualsValue(x.TrangThaiCTCV, TrangThai.TamDung))
                 })
                 .ToListAsync();
 
@@ -258,6 +262,79 @@ namespace QuanLyDuAn.Services.Implementations
             }
         }
 
+        public async Task MoLaiChiTietCongViecAsync(int maCongViec, int maChiTietCv, string lyDo)
+        {
+            if (string.IsNullOrWhiteSpace(lyDo))
+                throw new Exception("Vui lòng nhập lý do mở lại chi tiết công việc.");
+
+            var lyDoMoLai = lyDo.Trim();
+            if (lyDoMoLai.Length > 255)
+                throw new Exception("Lý do mở lại tối đa 255 ký tự.");
+
+            var congViec = await LayCongViecAsync(maCongViec);
+            await KiemTraQuyenCapNhatAsync(congViec);
+            KiemTraTrangThaiCongViecChoMoLaiChiTiet(congViec);
+            var currentUserId = await GetCurrentUserIdAsync();
+            var (maDuAn, trangThaiDuAn) = await LayThongTinDuAnTheoCongViecAsync(congViec);
+
+            KiemTraTrangThaiDuAnChoMoLaiChiTiet(trangThaiDuAn);
+
+            var chiTiet = await _context.CtCongViec
+                .FirstOrDefaultAsync(x =>
+                    x.MaChiTietCV == maChiTietCv &&
+                    x.MaCongViec == maCongViec &&
+                    x.IsDeleted != true);
+
+            if (chiTiet == null)
+                throw new Exception("Không tìm thấy chi tiết công việc cần mở lại.");
+
+            var trangThaiCu = TrangThai.ToCode(chiTiet.TrangThaiCTCV);
+            if (TrangThai.LaHoanThanhCongViec(trangThaiCu))
+                throw new Exception("Chi tiết công việc đã hoàn thành. Vui lòng mở lại công việc hoặc xử lý theo quy trình hoàn thành.");
+
+            if (TrangThai.EqualsValue(trangThaiCu, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(trangThaiCu, TrangThai.LuuTru))
+            {
+                throw new Exception("Chi tiết công việc đã đóng, không thể mở lại.");
+            }
+
+            if (!TrangThai.EqualsValue(trangThaiCu, TrangThai.BiCanCan)
+                && !TrangThai.EqualsValue(trangThaiCu, TrangThai.TamDung))
+            {
+                throw new Exception("Chỉ có thể mở lại chi tiết công việc đang bị cản trở hoặc tạm dừng.");
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                chiTiet.TrangThaiCTCV = TrangThai.DangThucHien;
+                chiTiet.NgayKetThucCTCV = null;
+
+                _context.NhatKyQuanLyDuAn.Add(new NhatKyQuanLyDuAn
+                {
+                    MaDuAn = maDuAn,
+                    MaNguoiDung = currentUserId,
+                    NkHanhDongQLDA = RutGonNhatKy(
+                        $"Mở lại chi tiết công việc #{chiTiet.MaChiTietCV} ({LayTenChiTietCongViec(chiTiet)}) từ trạng thái {TrangThai.ToDisplay(trangThaiCu)} sang {TrangThai.ToDisplay(TrangThai.DangThucHien)}. Người thực hiện #{currentUserId}. Lý do: {lyDoMoLai}"),
+                    NkThoiGianQLDA = DateTime.Now
+                });
+
+                await _context.SaveChangesAsync();
+
+                await _trangThaiWorkflowService.DongBoChuoiTrangThaiTuCongViecAsync(
+                    maCongViec,
+                    currentUserId,
+                    "Mở lại chi tiết công việc");
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
         private static void KiemTraDuLieuDauVao(ChiTietCongViecCreateUpdateViewModel form, CongViec congViec)
         {
             if (form.MaCongViec <= 0)
@@ -330,6 +407,40 @@ namespace QuanLyDuAn.Services.Implementations
                 throw new Exception("Không tìm thấy dự án của công việc.");
 
             return maDuAn;
+        }
+
+        private async Task<(int MaDuAn, string? TrangThaiDuAn)> LayThongTinDuAnTheoCongViecAsync(CongViec congViec)
+        {
+            var duAn = await (
+                from dm in _context.DanhMucCongViec
+                join da in _context.DuAn on dm.MaDuAn equals da.MaDuAn
+                where dm.MaDanhMucCV == congViec.MaDanhMucCV
+                      && dm.IsDeleted != true
+                      && da.IsDeleted != true
+                select new { da.MaDuAn, da.TrangThaiDuAn }
+            ).FirstOrDefaultAsync();
+
+            if (duAn == null)
+                throw new Exception("Không tìm thấy dự án của công việc.");
+
+            return (duAn.MaDuAn, duAn.TrangThaiDuAn);
+        }
+
+        private async Task<bool> CapTrenChoPhepMoLaiChiTietAsync(CongViec congViec)
+        {
+            if (TrangThai.LaHoanThanhCongViec(congViec.TrangThaiCongViec)
+                || TrangThai.EqualsValue(congViec.TrangThaiCongViec, TrangThai.TamDung)
+                || TrangThai.EqualsValue(congViec.TrangThaiCongViec, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(congViec.TrangThaiCongViec, TrangThai.LuuTru))
+            {
+                return false;
+            }
+
+            var (_, trangThaiDuAn) = await LayThongTinDuAnTheoCongViecAsync(congViec);
+            return !TrangThai.LaHoanThanhCongViec(trangThaiDuAn)
+                   && !TrangThai.EqualsValue(trangThaiDuAn, TrangThai.TamDung)
+                   && !TrangThai.EqualsValue(trangThaiDuAn, TrangThai.DaHuy)
+                   && !TrangThai.EqualsValue(trangThaiDuAn, TrangThai.LuuTru);
         }
 
         private async Task KiemTraQuyenCapNhatAsync(CongViec congViec)
@@ -520,6 +631,53 @@ namespace QuanLyDuAn.Services.Implementations
             {
                 throw new Exception("Công việc đang tạm dừng hoặc đã hủy, không thể cập nhật chi tiết.");
             }
+        }
+
+        private static void KiemTraTrangThaiCongViecChoMoLaiChiTiet(CongViec congViec)
+        {
+            var trangThaiCongViec = TrangThai.ToCode(congViec.TrangThaiCongViec);
+            if (TrangThai.LaHoanThanhCongViec(trangThaiCongViec))
+            {
+                throw new Exception("Công việc đã hoàn thành. Vui lòng mở lại công việc trước khi mở lại chi tiết.");
+            }
+
+            if (TrangThai.EqualsValue(trangThaiCongViec, TrangThai.TamDung)
+                || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(trangThaiCongViec, TrangThai.LuuTru))
+            {
+                throw new Exception("Công việc đang tạm dừng hoặc đã đóng, không thể mở lại chi tiết.");
+            }
+        }
+
+        private static void KiemTraTrangThaiDuAnChoMoLaiChiTiet(string? trangThaiDuAn)
+        {
+            if (TrangThai.LaHoanThanhCongViec(trangThaiDuAn)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.DaHuy)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.LuuTru)
+                || TrangThai.EqualsValue(trangThaiDuAn, TrangThai.TamDung))
+            {
+                throw new Exception("Dự án đã hoàn thành, tạm dừng hoặc đã đóng, không thể mở lại chi tiết công việc.");
+            }
+        }
+
+        private static string LayTenChiTietCongViec(CtCongViec chiTiet)
+        {
+            if (!string.IsNullOrWhiteSpace(chiTiet.TenCTCV))
+                return chiTiet.TenCTCV.Trim();
+
+            if (!string.IsNullOrWhiteSpace(chiTiet.NoiDungChiTietCV))
+                return chiTiet.NoiDungChiTietCV.Trim();
+
+            return "Không có tên";
+        }
+
+        private static string RutGonNhatKy(string noiDung)
+        {
+            const int maxLength = 255;
+            if (noiDung.Length <= maxLength)
+                return noiDung;
+
+            return noiDung[..maxLength].TrimEnd();
         }
 
         private static bool BiKhoaCapNhatTheoTrangThaiCongViec(string? trangThaiCongViec)

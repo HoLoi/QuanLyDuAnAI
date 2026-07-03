@@ -3,13 +3,29 @@
 
 <div class="duyet-de-xuat-ngan-sach-section-head approval-section-head">
     <h2 class="duyet-de-xuat-ngan-sach-section-title approval-section-title">Bộ lọc danh sách</h2>
-    <p class="duyet-de-xuat-ngan-sach-section-note approval-section-note">Lọc theo dự án và trạng thái để kiểm soát các đề xuất ngân sách cần xử lý.</p>
+    <p class="duyet-de-xuat-ngan-sach-section-note approval-section-note">Lọc theo dự án, người đề xuất, trạng thái, ngày gửi, số tiền và từ khóa để kiểm soát các đề xuất ngân sách cần xử lý.</p>
 </div>
 
 <form asp-action="Index" method="get" class="duyet-de-xuat-ngan-sach-filter-form app-filter">
     <div class="app-filter-field">
-        <label for="locMaDuAn" class="form-label">Mã dự án</label>
-        <input id="locMaDuAn" type="number" name="locMaDuAn" value="@Model.LocMaDuAn" class="form-control" placeholder="Nhập mã dự án" />
+        <label for="locMaDuAn" class="form-label">Dự án</label>
+        <select id="locMaDuAn" name="locMaDuAn" class="form-select">
+            <option value="">Tất cả dự án</option>
+            @foreach (var duAn in Model.DanhSachDuAn)
+            {
+                <option value="@duAn.Value" selected="@(Model.LocMaDuAn == duAn.Value)">@duAn.Text</option>
+            }
+        </select>
+    </div>
+    <div class="app-filter-field">
+        <label for="locMaNguoiDungDeXuat" class="form-label">Người đề xuất</label>
+        <select id="locMaNguoiDungDeXuat" name="locMaNguoiDungDeXuat" class="form-select">
+            <option value="">Tất cả người đề xuất</option>
+            @foreach (var nguoiDeXuat in Model.DanhSachNguoiDeXuat)
+            {
+                <option value="@nguoiDeXuat.Value" selected="@(Model.LocMaNguoiDungDeXuat == nguoiDeXuat.Value)">@nguoiDeXuat.Text</option>
+            }
+        </select>
     </div>
     <div class="app-filter-field">
         <label for="locTrangThai" class="form-label">Trạng thái đề xuất</label>
@@ -21,8 +37,28 @@
             <option value="@TrangThai.DaHuy" selected="@(TrangThai.EqualsValue(Model.LocTrangThai, TrangThai.DaHuy))">@TrangThai.DaHuyHienThi</option>
         </select>
     </div>
+    <div class="app-filter-field">
+        <label for="tuNgay" class="form-label">Từ ngày</label>
+        <input id="tuNgay" type="date" name="tuNgay" value="@Model.TuNgay?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="app-filter-field">
+        <label for="denNgay" class="form-label">Đến ngày</label>
+        <input id="denNgay" type="date" name="denNgay" value="@Model.DenNgay?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="app-filter-field">
+        <label for="tuSoTien" class="form-label">Từ số tiền</label>
+        <input id="tuSoTien" type="number" name="tuSoTien" min="0" step="1000" value="@Model.TuSoTien" class="form-control" />
+    </div>
+    <div class="app-filter-field">
+        <label for="denSoTien" class="form-label">Đến số tiền</label>
+        <input id="denSoTien" type="number" name="denSoTien" min="0" step="1000" value="@Model.DenSoTien" class="form-control" />
+    </div>
+    <div class="app-filter-field">
+        <label for="tuKhoa" class="form-label">Từ khóa</label>
+        <input id="tuKhoa" type="search" name="tuKhoa" value="@Model.TuKhoa" class="form-control" placeholder="Tìm theo lý do, dự án, người đề xuất..." />
+    </div>
     <div class="duyet-de-xuat-ngan-sach-filter-actions">
-        <button class="duyet-de-xuat-ngan-sach-filter-btn-primary btn-action btn-filter-apply approval-action-btn" type="submit">Lọc dữ liệu</button>
+        <button class="duyet-de-xuat-ngan-sach-filter-btn-primary btn-action btn-filter-apply approval-action-btn" type="submit">Lọc</button>
         <a asp-action="Index" class="duyet-de-xuat-ngan-sach-filter-btn-secondary btn-action btn-filter-reset approval-action-btn">Làm mới</a>
     </div>
 </form>
